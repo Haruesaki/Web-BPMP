@@ -35,8 +35,13 @@ const menuItems = [
   'Pengaduan',
 ]
 
-const buildingImage =
-  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1700&q=80'
+const dropDownItems = ['Profil', 'Reformasi Birokrasi', 'Dok. Kinerja', 'Pelayanan', 'Program', 'Pengaduan']
+
+import mainLogo from './assets/source/Logo.png'
+import sectionLanding from './assets/source/section-landing.png'
+import Lenis from 'lenis'
+
+const buildingImage = sectionLanding
 
 function App() {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -70,33 +75,45 @@ function App() {
     return () => window.removeEventListener('resize', moveIndicator)
   }, [moveIndicator])
 
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    })
+
+    function raf(time) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+
+    requestAnimationFrame(raf)
+
+    return () => {
+      lenis.destroy()
+    }
+  }, [])
+
   return (
     <div className="site-shell">
       {/* Header Bar */}
       <header className="top-header">
         <div className="top-header-inner">
           <a className="brand" href="#beranda" aria-label="BPMP Lampung">
-            <span className="brand-emblem" aria-hidden="true">
-              <svg viewBox="0 0 100 100" className="brand-logo-svg">
-                <path d="M50 15 L85 35 L85 75 L50 95 L15 75 L15 35 Z" fill="#fff"/>
-                <path d="M50 25 L75 40 L75 65 L50 80 L25 65 L25 40 Z" fill="#07508c"/>
-                <text x="50" y="55" fill="#fff" fontSize="18" fontWeight="bold" textAnchor="middle">BP</text>
-              </svg>
-            </span>
-            <span className="brand-copy">
-              <span className="brand-title">
-                <span className="brand-blue">Kemen</span><span className="brand-gold">dikdasmen</span>
-              </span>
-              <span className="brand-subtitle">BPMP Lampung</span>
-            </span>
+            <img src={mainLogo} alt="Kemendikdasmen BPMP Lampung" className="brand-logo-img" />
           </a>
 
           <div className="header-actions">
-            <button className="btn-tts">
-              <img src={ttsIcon} alt="TTS" className="tts-icon" />
-            </button>
             <button className="btn-search">
               <img src={searchIcon} alt="Search" />
+            </button>
+            <button className="btn-tts">
+              <img src={ttsIcon} alt="Tulisan Ke Suara" />
             </button>
           </div>
         </div>
@@ -116,6 +133,7 @@ function App() {
                   >
                     {item}
                   </button>
+                  {dropDownItems.includes(item) && <span className="nav-dropdown-arrow">▾</span>}
                   {index < menuItems.length - 1 && <span className="nav-divider" aria-hidden="true" />}
                 </div>
               ))}
@@ -128,7 +146,7 @@ function App() {
       <main className="hero-section" id="beranda">
         <section className="hero-copy">
           <p className="hero-kicker">Selamat Datang Di</p>
-          <h1 id="hero-title">Balai Penjaminan Mutu Pendidikan Provinsi Lampung</h1>
+          <h1 id="hero-title">Balai Penjaminan<br/>Mutu Pendidikan<br/>Provinsi Lampung</h1>
           <p className="hero-description">Kementerian Pendidikan Dasar dan Menengah</p>
 
           <div className="campaign-stack">
@@ -141,12 +159,7 @@ function App() {
         </section>
 
         <section className="hero-visual">
-          <div className="hero-arc hero-arc-primary" aria-hidden="true" />
-          <div className="hero-arc hero-arc-soft" aria-hidden="true" />
-          <div className="hero-arc hero-arc-light" aria-hidden="true" />
-          <div className="building-frame">
-            <img src={buildingImage} alt="Gedung perkantoran modern" />
-          </div>
+          <img src={buildingImage} alt="Gedung BPMP Lampung" className="hero-building-img" />
         </section>
 
         <aside className="social-dock">
