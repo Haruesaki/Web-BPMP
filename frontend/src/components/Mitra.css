@@ -1,0 +1,106 @@
+/* =========================================
+   MITRA BANNER
+========================================= */
+.mitra-banner {
+  background: #fff;
+  padding: 50px 0;
+  overflow: hidden;
+}
+
+.mitra-container {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: 0 56px;
+}
+
+.mitra-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.mitra-track img {
+  height: 60px;
+  object-fit: contain;
+  filter: grayscale(20%);
+  opacity: 0.8;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mitra-track img:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: translateY(-4px) scale(1.05);
+}
+
+.friendly-mark-blue {
+  display: flex;
+  flex-direction: column;
+  color: #36c2ff;
+  text-align: center;
+}
+
+.friendly-mark-blue span {
+  color: #e24b43;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.friendly-mark-blue strong {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #36c2ff, #72e8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive */
+@media (max-width: 1180px) {
+  .mitra-container {
+    padding-left: 34px;
+    padding-right: 34px;
+  }
+  
+  .mitra-track {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 820px) {
+  .mitra-banner {
+    padding: 30px 0;
+  }
+  
+  .mitra-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .mitra-track img {
+    height: 50px;
+  }
+  
+  .friendly-mark-blue strong {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .mitra-track {
+    gap: 20px;
+  }
+  
+  .mitra-track img {
+    height: 40px;
+  }
+  
+  .friendly-mark-blue strong {
+    font-size: 1.4rem;
+  }
+}
