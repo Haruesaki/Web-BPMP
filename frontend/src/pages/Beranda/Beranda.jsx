@@ -158,6 +158,7 @@ const Beranda = ({ lenisRef }) => {
       const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
       dropdownLinks.forEach((subLink) => {
         subLink.addEventListener('click', function (e) {
+          e.preventDefault();
           const parentNavItem = this.closest('.nav-item');
           if (parentNavItem) {
             const parentNavLink = parentNavItem.querySelector('.nav-link');
@@ -476,24 +477,57 @@ const Beranda = ({ lenisRef }) => {
             <a href="#" className="nav-link">
               Reformasi Birokrasi <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
+            <div className="dropdown-menu">
+              <a href="#">Manajemen Perubahan</a>
+              <a href="#">Penataan Tata Laksana</a>
+              <a href="#">Penataan Manajemen SDM</a>
+              <a href="#">Penguatan Akuntabilitas</a>
+              <a href="#">Penguatan Pengawasan</a>
+              <a href="#">Peningkatan Kualitas Pelayanan Publik</a>
+              <a href="#">Aktivitas RBI</a>
+            </div>
           </div>
 
           <div className="nav-item has-dropdown">
             <a href="#" className="nav-link">
               Dok. Kinerja <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
+            <div className="dropdown-menu">
+              <a href="#">Perjanjian Kinerja</a>
+              <a href="#">Renstra</a>
+              <a href="#">Lakin 2024</a>
+              <a href="#">Lakin 2025</a>
+            </div>
           </div>
 
           <div className="nav-item has-dropdown">
             <a href="#" className="nav-link">
               Pelayanan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
+            <div className="dropdown-menu">
+              <a href="#">Maklumat Pelayanan</a>
+              <a href="#">Standar Pelayanan</a>
+              <a href="#">Unit Layanan Terpadu</a>
+              <a href="#">Hasil Survey SKM</a>
+              <a href="#">Layanan Inovatif</a>
+              <a href="#">Peminjaman Sarana dan Prasarana</a>
+            </div>
           </div>
 
           <div className="nav-item has-dropdown">
             <a href="#" className="nav-link">
               Program <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
+            <div className="dropdown-menu">
+              <a href="#">Digitalisasi Pembelajaran</a>
+              <a href="#">Wajar 13 Tahun</a>
+              <a href="#">Revitalisasi Sekolah</a>
+              <a href="#">SPMB</a>
+              <a href="#">Penguatan Karakter</a>
+              <a href="#">Makan Bergizi Gratis</a>
+              <a href="#">Pembelajaran dan Penilaian</a>
+              <a href="#">Penjaminan Mutu</a>
+            </div>
           </div>
 
           <a href="#" className="nav-link">PPID</a>
@@ -504,6 +538,11 @@ const Beranda = ({ lenisRef }) => {
             <a href="#" className="nav-link">
               Pengaduan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
+            <div className="dropdown-menu">
+              <a href="#">WBS</a>
+              <a href="#">SP4N Lapor</a>
+              <a href="#">Lapor Gratifikasi</a>
+            </div>
           </div>
         </nav>
       </header>
