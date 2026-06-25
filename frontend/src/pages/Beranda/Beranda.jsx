@@ -39,6 +39,7 @@ const Beranda = ({ lenisRef }) => {
   // --- REF UNTUK ANIMASI MITRA (TAMBAHKAN INI) ---
   const trackRef = useRef(null);
   const partnersSectionRef = useRef(null);
+  const heroImageRef = useRef(null);
 
   // --- ARRAY LOGO MITRA (TAMBAHKAN INI) ---
   // Mengelompokkan logo agar mudah di-map dan diduplikasi secara natural oleh React
@@ -306,11 +307,11 @@ const Beranda = ({ lenisRef }) => {
 
         const screenCenter = window.innerWidth / 2;
         const maxDistance = window.innerWidth / 2;
-        const scrollY = lenisRef?.current?.scroll ?? window.scrollY ?? 0;
 
         for (let i = 0; i < allLogos.length; i++) {
           const rect = allLogos[i].getBoundingClientRect();
 
+          // Mencegah error hitungan jika gambar belum di-render ukurannya
           if (rect.width === 0) continue;
 
           const logoCenter = rect.left + rect.width / 2;
@@ -365,7 +366,57 @@ const Beranda = ({ lenisRef }) => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('load', () => { });
     };
-  }, [lenisRef]);
+  }, []);
+
+
+  useEffect(() => {
+    let animationFrame;
+
+    // KUNCI PERBAIKAN: Pindahkan titik pusat animasi ke tepi kanan
+    if (heroImageRef.current) {
+        heroImageRef.current.style.transformOrigin = 'right bottom'; 
+    }
+
+    const animateHero = () => {
+        if (!heroImageRef.current) return;
+
+        const scrollY = window.scrollY;
+
+        /*
+            Nilai maksimal pergeseran.
+            Semakin besar angkanya semakin tenggelam.
+        */
+        const translateY = Math.min(scrollY * 1.1, 8020);
+
+        /*
+            Sedikit mengecil agar muncul efek depth.
+            Karena transformOrigin sekarang di kanan, 
+            gambar tidak akan menjauh dari tepi layar.
+        */
+        const scale = Math.max(1 - scrollY * 0.00012, 0.93);
+
+        /*
+            Sedikit menggelap ketika semakin turun
+        */
+        const brightness = Math.max(
+            1 - scrollY * 0.00045,
+            0.78
+        );
+
+        heroImageRef.current.style.transform =
+            `translateY(${translateY}px) scale(${scale})`;
+
+        heroImageRef.current.style.filter =
+            `brightness(${brightness})`;
+
+        animationFrame = requestAnimationFrame(animateHero);
+    };
+
+    animationFrame = requestAnimationFrame(animateHero);
+
+    return () => cancelAnimationFrame(animationFrame);
+
+}, []);
 
   return (
     <>
@@ -474,6 +525,7 @@ const Beranda = ({ lenisRef }) => {
 
             <div className="hero-right-cms">
               <img
+                ref={heroImageRef}
                 src={BackgroundLanding}
                 alt="Visual Gedung dan Latar Belakang BPMP"
                 className="cms-dynamic-image"

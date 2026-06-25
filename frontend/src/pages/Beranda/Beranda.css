@@ -498,12 +498,17 @@ body {
 }
 
 .cms-dynamic-image {
+
     width: 100%;
     height: auto;
     max-height: 85vh;
     object-fit: contain;
     object-position: right center;
     pointer-events: none;
+
+    will-change: transform;
+    transform: translateY(0);
+    transition: filter .25s linear;
 }
 
 /* =========================================
