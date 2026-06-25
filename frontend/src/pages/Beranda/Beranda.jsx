@@ -28,11 +28,13 @@ import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
 import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
 import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
 
-const Beranda = () => {
+const Beranda = ({ lenisRef }) => {
   // --- 1. STATE & REF UNTUK FITUR SEARCH ---
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isProfileDropdownLocked, setIsProfileDropdownLocked] = useState(false);
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
+  const profileDropdownRef = useRef(null);
 
   // --- REF UNTUK ANIMASI MITRA (TAMBAHKAN INI) ---
   const trackRef = useRef(null);
@@ -68,6 +70,53 @@ const Beranda = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isSearchActive]);
+
+  // --- DROPDOWN LOCK: Tutup dropdown Profil saat klik di luar ---
+  useEffect(() => {
+    if (!isProfileDropdownLocked) return;
+
+    const handleClickOutsideProfile = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setIsProfileDropdownLocked(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutsideProfile);
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutsideProfile);
+    };
+  }, [isProfileDropdownLocked]);
+
+  // --- DROPDOWN LOCK: Tutup dropdown Profil saat scroll ---
+  useEffect(() => {
+    if (!isProfileDropdownLocked) return;
+
+    const lenis = lenisRef?.current;
+
+    const handleScroll = () => {
+      setIsProfileDropdownLocked(false);
+    };
+
+    if (lenis) {
+      lenis.on('scroll', handleScroll, { passive: true });
+      return () => lenis.off('scroll', handleScroll);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isProfileDropdownLocked, lenisRef]);
+
+  const handleProfileClick = (e) => {
+    e.preventDefault();
+    setIsProfileDropdownLocked((prev) => !prev);
+  };
 
   useEffect(() => {
 
@@ -257,11 +306,11 @@ const Beranda = () => {
 
         const screenCenter = window.innerWidth / 2;
         const maxDistance = window.innerWidth / 2;
+        const scrollY = lenisRef?.current?.scroll ?? window.scrollY ?? 0;
 
         for (let i = 0; i < allLogos.length; i++) {
           const rect = allLogos[i].getBoundingClientRect();
 
-          // Mencegah error hitungan jika gambar belum di-render ukurannya
           if (rect.width === 0) continue;
 
           const logoCenter = rect.left + rect.width / 2;
@@ -316,7 +365,7 @@ const Beranda = () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('load', () => { });
     };
-  }, []);
+  }, [lenisRef]);
 
   return (
     <>
@@ -357,13 +406,18 @@ const Beranda = () => {
           <div className="nav-selector"></div>
           <a href="#" className="nav-link active">Beranda</a>
 
-          <div className="nav-item has-dropdown">
-            <a href="#" className="nav-link">
+          <div className={`nav-item has-dropdown${isProfileDropdownLocked ? ' dropdown-locked' : ''}`} ref={profileDropdownRef}>
+            <a href="#" className="nav-link" onClick={handleProfileClick}>
               Profil <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
             </a>
             <div className="dropdown-menu">
               <a href="#">Sejarah</a>
               <a href="#">Visi & Misi</a>
+              <a href="#">Tugas & Fungsi</a>
+              <a href="#">Struktur Organisasi</a>
+              <a href="#">Pejabat</a>
+              <a href="#">Informasi Pegawai</a>
+              <a href="#">Sarana dan Prasarana</a>
             </div>
           </div>
 
