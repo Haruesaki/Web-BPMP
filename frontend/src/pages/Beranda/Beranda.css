@@ -1,0 +1,1679 @@
+/* =========================================
+   1. GLOBAL RESET & BASE
+   ========================================= */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    overflow-x: clip;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* =========================================
+   2. WADAH HALAMAN & ANIMASI (WRAPPERS)
+   ========================================= */
+.landing-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0B132B;
+    position: relative;
+    /* === TRIK ABSOLUTE-STICKY === */
+    /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
+    margin-top: -150px;
+
+    /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
+    padding-top: 140px;
+}
+
+/* =========================================
+   EFEK HIGHLIGHT CAHAYA (GLASS SHINE)
+   ========================================= */
+
+.background-glow-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 2. Bentuk Cahaya Miring */
+.background-glow-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 25%;
+    height: 100%;
+
+    background: linear-gradient(to right,
+            rgba(67, 67, 67, 0) 0%,
+            rgba(255, 255, 255, 0.095) 35%,
+            rgba(255, 255, 255, 0.327) 50%,
+            rgba(255, 255, 255, 0.095) 65%,
+            rgba(67, 67, 67, 0) 100%);
+
+    filter: blur(100px);
+    transform: skewX(35deg);
+    animation: lightSweep 10s infinite;
+}
+
+@keyframes lightSweep {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* =========================================
+   3. HEADER KESATUAN (STICKY HEADER)
+   ========================================= */
+.unified-header {
+    margin: 0px;
+    position: sticky;
+    top: 0;
+    gap: 0px;
+    z-index: 9999;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    /* --- ANIMASI MUNCUL DARI ATAS KE BAWAH --- */
+    opacity: 0;
+    transform: translateY(-100%);
+    will-change: transform, opacity; /* Optimasi GPU agar animasi sangat smooth */
+    /* Menggunakan durasi 1.2s dan delay 0.1s agar turun lebih dulu dari gedung */
+    animation: headerSlideDown 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+/* Kunci pergerakan animasi (Taruh tepat di bawah .unified-header) */
+@keyframes headerSlideDown {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   BARIS ATAS (LOGO & ACTIONS)
+   ========================================= */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 4vw 15px 4vw;
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.header-logo .main-logo {
+    height: clamp(40px, 2.8vw, 70px);
+    object-fit: contain;
+    display: block;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-actions button:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   4. NAVIGATION LINKS & DROPDOWN
+   ========================================= */
+.main-navbar {
+    position: sticky;
+    top: 84px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    /* PERBAIKAN: Mengubah 'center' menjadi 'flex-start' agar rata kiri */
+    gap: 1vw;
+    width: 100%;
+    background: transparent;
+    padding-top: 5px;
+    padding: 10px 4vw 15px 4vw;
+    flex-wrap: wrap;
+    z-index: 99;
+
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-selector {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.nav-link {
+    position: relative;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(12px, 1vw, 15px);
+    font-weight: 300;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 20px;
+    border-radius: 30px;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.nav-link:hover {
+    color: #A9CCE3;
+}
+
+.nav-link.active {
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.dropdown-icon {
+    width: 10px;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-item:hover .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0;
+    padding-top: 14px;
+    min-width: 220px;
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 0 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scaleY(0.95);
+    transform-origin: top center;
+    transition:
+        max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item.has-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 16px;
+    background: transparent;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scaleY(1);
+    transition:
+        max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 0s;
+}
+
+.dropdown-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 300;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    transition: background-color 0.25s ease, padding-left 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal per item when dropdown opens */
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(1) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(2) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(3) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(4) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(5) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(6) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(7) {
+    transition-delay: 0.02s;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(8) {
+    transition-delay: 0.02s;
+}
+
+.dropdown-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    padding-left: 26px;
+}
+
+/* =========================================
+   5. TOMBOL SEARCH & INPUT
+   ========================================= */
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(30, 45, 85, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s ease;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-wrapper:hover,
+.search-wrapper.active {
+    background: rgba(42, 60, 105, 0.8);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.search-wrapper.active {
+    width: 280px;
+}
+
+.search-input {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    padding-left: 25px;
+    padding-right: 65px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-wrapper.active .search-input {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0.15s;
+}
+
+/* Override Search Trigger */
+.navbar-actions .search-trigger,
+.header-actions .search-trigger {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+    transition: transform 0.4s ease;
+}
+
+.navbar-actions .search-trigger:hover,
+.header-actions .search-trigger:hover {
+    transform: scale(1.1);
+    border: none;
+    box-shadow: none;
+}
+
+/* =========================================
+   6. TOMBOL TULISAN KE SUARA
+   ========================================= */
+.btn-voice {
+    border-radius: 30px;
+    padding-left: 17px;
+    padding-right: 0px;
+    gap: 15px;
+    background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-voice span {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.btn-voice img {
+    height: auto;
+    width: 40px;
+}
+
+.btn-voice:hover {
+    background: linear-gradient(135deg, rgba(42, 60, 105, 0.9) 0%, rgba(30, 45, 85, 0.8) 100%);
+}
+
+/* =========================================
+   7. HERO SECTION UTAMA
+   ========================================= */
+.hero-section {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.hero-flex-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 4vw;
+    gap: 2rem;
+    box-sizing: border-box;
+}
+
+/* Hero Content Kiri */
+.hero-left-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 0 0 43%;
+    gap: 1.5rem;
+    color: #ffffff;
+    z-index: 222;
+}
+
+.welcome-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-weight: 500;
+}
+
+.main-title {
+    font-family: 'Poppins', serif;
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.sub-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 400;
+    margin: 0;
+}
+
+.hero-logos-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.bottom-logo {
+    height: clamp(40px, 5vw, 60px);
+    height: 120px;
+    width: auto;
+}
+
+/* Hero Content Kanan (CMS) */
+.hero-right-cms {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    opacity: 0;
+    transform: translateY(150px);
+    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+@keyframes buildingSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(150px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cms-dynamic-image {
+
+    width: 100%;
+    height: auto;
+    max-height: 85vh;
+    object-fit: contain;
+    object-position: right center;
+    pointer-events: none;
+
+    will-change: transform;
+    transform: translateY(0);
+    transition: filter .25s linear;
+}
+
+/* =========================================
+   8. FLOATING SOCIAL BAR
+   ========================================= */
+.floating-social-bar {
+    position: fixed;
+    right: 0.7vw;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 25px 12px;
+    z-index: 1000;
+}
+
+.glass-sidebar-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 30px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    z-index: 500;
+}
+
+.blur-shape {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 80px;
+    border-radius: 50%;
+    filter: blur(12px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.shape-pertama {
+    top: -5%;
+    background-color: rgba(68, 0, 194, 0.5);
+}
+
+.shape-kedua {
+    top: 40%;
+    background-color: rgba(130, 0, 190, 0.4);
+}
+
+.shape-ketiga {
+    bottom: -5%;
+    background-color: rgba(46, 67, 255, 0.5);
+}
+
+.social-icon {
+    position: relative;
+    z-index: 999;
+    width: clamp(35px, 1.2vw, 50px);
+    height: clamp(35px, 1.2w, 50px);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.social-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    z-index: 2;
+}
+
+.social-icon:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.social-text {
+    position: absolute;
+    right: calc(100% + 15px);
+    top: 50%;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    transform: translateY(-50%) translateX(50px);
+    background: rgba(11, 19, 43, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 400;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.social-icon:hover .social-text {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* =========================================
+   9. SECTION BERITA & INFORMASI
+   ========================================= */
+.news-section {
+    width: 90%;
+    margin-top: 50px;
+    margin-bottom: 80px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #0B132B;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+.news-header-bar {
+    background-color: #1A3C87;
+    padding: 20px 60px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.news-header-bar h2 {
+    color: #ffffff;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.news-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 50px 60px;
+    /* max-width: 1440px; */
+    margin: 0 auto;
+}
+
+.news-left,
+.news-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.news-divider {
+    width: 2px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    margin: 10px 10px;
+}
+
+/* Grid Berita Kiri */
+.news-left {
+    gap: 20px;
+}
+
+.featured-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    background-color: #1A3C87;
+}
+
+.featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 60px 25px 25px 25px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+}
+
+.featured-overlay h3 {
+    color: #ffffff;
+    font-size: clamp(14px, 1.5vw, 18px);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.thumbnail-row {
+    display: flex;
+    gap: 15px;
+}
+
+.thumb-img {
+    width: 140px;
+    height: 90px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: #1A3C87;
+}
+
+/* Grid Berita Kanan */
+.right-title {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 30px;
+    letter-spacing: 0.5px;
+}
+
+.news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.news-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #1A3C87 0%, #10255A 100%);
+    border: 1.5px solid #3498DB;
+    border-radius: 12px;
+    padding: 16px 20px 16px 40px;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.news-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    border-color: #ffffff;
+}
+
+.white-curve {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 16px;
+    background-color: #ffffff;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.news-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 1;
+}
+
+.news-category {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 300;
+}
+
+.news-title {
+    color: #ffffff;
+    font-size: 14.5px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.news-date {
+    color: #A9CCE3;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+}
+
+/* Pagination Berita */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 35px;
+}
+
+.page-num {
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.page-num:hover {
+    background-color: #d1d8e0;
+}
+
+.page-arrow {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-arrow:hover {
+    background-color: #ffffff;
+    color: #0B132B;
+}
+
+.page-dots {
+    color: #ffffff;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* =========================================
+   10. RESPONSIVE DESIGN (TABLET & HP)
+   ========================================= */
+@media (max-width: 960px) {
+    .news-grid {
+        flex-direction: column;
+        padding: 30px 20px;
+    }
+
+    .news-divider {
+        width: 100%;
+        height: 2px;
+        margin: 20px 0;
+    }
+
+    .news-header-bar {
+        padding: 20px;
+    }
+}
+
+
+/* =========================================
+   11. SECTION MITRA KERJA (3D CONCAVE EFFECT)
+   ========================================= */
+.partners-section {
+    position: relative;
+    width: 100%;
+    background-image: linear-gradient(to right,
+            #79cbf8 0%,
+            #aeceff 50%,
+            #79cbf8 100%);
+    padding: 65px 0vw;
+    /* Jarak atas bawah diperbesar untuk ruang lengkungan */
+    margin-top: 200px;
+    margin-bottom: 200px;
+    overflow: hidden;
+    /* Mencegah elips meluber keluar layar */
+    z-index: 1;
+}
+
+/* --- Trik Frame Oval (Biru Gelap melengkung ke dalam putih) --- */
+.partners-section::before,
+.partners-section::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    width: 110%;
+    /* Lebih lebar dari layar agar ujungnya mulus tanpa sudut */
+    height: 130px;
+    background-color: #ffffff;
+    /* Warna biru gelap menyatu dengan tema web */
+    border-radius: 100%;
+    /* Membentuk oval sempurna */
+    z-index: 2;
+    /* Berada di atas background putih, tapi di bawah logo */
+}
+
+/* Menempel di atap, melengkung ke bawah menembus area putih */
+.partners-section::before {
+    top: -70px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    /* Sedikit bayangan jatuh ke area putih */
+}
+
+/* Menempel di dasar, melengkung ke atas menembus area putih */
+.partners-section::after {
+    bottom: -70px;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Susunan Logo Pembungkus --- */
+/* --- Susunan Logo Pembungkus (Container) --- */
+.partners-container {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    /* Menyembunyikan logo yang keluar dari layar */
+    padding: 20px 0;
+}
+
+/* --- Jalur Bergulir (Track) --- */
+.partners-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    gap: 7vw;
+}
+
+/* --- Pengaturan Dasar Logo --- */
+.partner-logo {
+    height: clamp(50px, 6vw, 90px);
+    width: auto;
+    object-fit: contain;
+}
+
+
+/* =========================================
+   12. SECTION INSTAGRAM 
+   ========================================= */
+.instagram-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Banner Curved Layering Effect --- */
+.ig-banner-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background-color: #ffffff;
+    /* Sudut terluar putih */
+    border-top: 10px solid #050814;
+    /* Garis pembatas atas */
+    border-bottom: 10px solid #050814;
+    /* Garis pembatas bawah */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Trik Lapisan Oval 3D menggunakan Box-Shadow berlapis */
+.ig-banner-oval {
+    position: absolute;
+    width: 90%;
+    height: 140px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    filter: blur(10px);
+    /* box-shadow:
+        0 0 0 25px #80A1F0, 
+        0 0 0 55px #2A56CA,  
+        0 0 0 90px #0E225A,  
+        0 0 0 180px #000000;    */
+    z-index: 1;
+}
+
+.ig-banner-text {
+    position: relative;
+    z-index: 2;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 2.5vw, 32px);
+    color: #000000;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* --- Header Profile Info --- */
+.ig-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 35px 8%;
+    background-color: #0B132B;
+    color: #ffffff;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.ig-profile-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.ig-avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    background-color: #ffffff;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.ig-username {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(18px, 1.8vw, 22px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.ig-stats {
+    display: flex;
+    gap: clamp(30px, 4vw, 60px);
+    flex: 1.5;
+    justify-content: center;
+}
+
+.ig-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ig-stat-label {
+    font-size: clamp(14px, 1.2vw, 16px);
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.ig-stat-value {
+    font-size: clamp(15px, 1.5vw, 18px);
+    font-weight: 400;
+}
+
+.ig-profile-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ig-follow-btn {
+    background: linear-gradient(135deg, #1A3C87 0%, #080D21 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.ig-follow-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ig-btn-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* --- Feed Grid Container --- */
+.ig-feed-section {
+    background-color: #ffffff;
+    /* Ruang kosong menjadi putih */
+    padding: 40px 8% 80px 8%;
+}
+
+.ig-feed-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+/* Post Card Frame Gelap */
+.ig-post-card {
+    background-color: #0B132B;
+    /* Memberikan efek frame tebal biru gelap */
+    padding: 18px;
+    border-radius: 10px;
+    /* Sudut tajam sesuai desain */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.ig-post-card:hover {
+    transform: translateY(-10px) scale(1.02);
+}
+
+.ig-post-img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+}
+
+/* --- Responsive Table & Mobile --- */
+@media (max-width: 960px) {
+    .ig-profile-header {
+        flex-direction: column;
+        gap: 30px;
+        text-align: center;
+    }
+
+    .ig-profile-left,
+    .ig-profile-right {
+        justify-content: center;
+    }
+
+    .ig-stats {
+        gap: 30px;
+    }
+
+    .ig-feed-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ig-banner-oval {
+        width: 120vw;
+        /* Agar lengkungan tetap bagus di layar kecil */
+    }
+}
+
+@media (max-width: 500px) {
+    .ig-feed-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+
+
+/* =========================================
+   13. SECTION YOUTUBE 
+   ========================================= */
+.youtube-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Garis Biru Terang (Pemisah dari Footer IG) */
+.yt-divider-stripe {
+    width: 100%;
+    height: 25px;
+    background-color: #003399;
+    /* Warna biru terang sesuai desain */
+}
+
+/* --- Header YouTube Bar --- */
+.yt-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 8%;
+    background-color: #0B132B;
+    /* Biru nyaris hitam solid */
+    color: #ffffff;
+}
+
+.yt-profile-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.yt-icon {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+}
+
+.yt-channel-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(18px, 1.8vw, 22px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.yt-subscribe-btn {
+    background-color: #b00000;
+    /* Merah YouTube cerah */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 20px 80px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(248, 58, 58, 0.3);
+    transition: all 0.3s ease;
+}
+
+.yt-subscribe-btn:hover {
+    background-color: #D32F2F;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(248, 58, 58, 0.5);
+}
+
+/* --- Content Grid Video --- */
+.yt-content-area {
+    background-color: #ffffff;
+    /* Area kosong berwarna putih */
+    padding: 40px 8% 80px 8%;
+}
+
+.yt-feed-grid {
+    display: flex;
+    gap: 25px;
+}
+
+/* Box Card Kiri & Kanan */
+.yt-main-card {
+    flex: 2;
+    /* Mengambil ruang 2 kali lebih besar */
+    background-color: #0B132B;
+    border-radius: 4px;
+    padding: 22px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.yt-side-card {
+    flex: 1;
+    /* Mengambil ruang lebih kecil di kanan */
+    background-color: #0B132B;
+    border-radius: 4px;
+    padding: 22px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.yt-card-title {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 1.5vw, 18px);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Container Gambar Video */
+.yt-video-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    /* Frame tipis di pinggir gambar */
+}
+
+.yt-video-wrapper:hover .yt-thumbnail {
+    transform: scale(1.03);
+}
+
+.yt-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+/* Proporsi Aspek Rasio (Agar konsisten 16:9) */
+.main-wrapper {
+    aspect-ratio: 16 / 9;
+}
+
+/* Susunan Video Kanan (Bagi 2 secara vertikal) */
+.yt-side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.side-wrapper {
+    flex: 1;
+    /* Memastikan dua video dikanan membagi tinggi sama rata */
+}
+
+/* Ikon Play YouTube buatan murni CSS (Tanpa gambar eksternal) */
+.yt-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.yt-video-wrapper:hover .yt-play-overlay {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.yt-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    /* Sesuaikan dengan frame ujung video */
+}
+
+.yt-play-overlay i.fa-youtube {
+    color: #FF0000;
+    /* Merah FontAwesome */
+    font-size: 70px;
+    background-color: #ffffff;
+    /* Kotak putih di belakang ikon */
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.yt-play-overlay.small i.fa-youtube {
+    font-size: 50px;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+/* --- Responsive Table & Mobile --- */
+@media (max-width: 960px) {
+    .yt-header-bar {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .yt-feed-grid {
+        flex-direction: column;
+        /* Mengubah jadi susunan atas bawah di HP */
+    }
+
+    .main-wrapper {
+        aspect-ratio: auto;
+        height: 300px;
+    }
+
+    .side-wrapper {
+        height: 200px;
+    }
+}
+
+
+/* =========================================
+   14. SECTION FOOTER
+   ========================================= */
+.main-footer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Area Putih Konter Pengunjung */
+.visitor-counter-wrapper {
+    background-color: #ffffff;
+    padding: 50px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Desain Tombol Konter */
+.visitor-counter-box {
+    background-color: #23356A;
+    /* Biru keabu-abuan persis desain */
+    padding: 16px 45px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.visitor-counter-box:hover {
+    transform: translateY(-3px);
+}
+
+.visitor-icon {
+    color: #ffffff;
+    font-size: 26px;
+}
+
+.visitor-text {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 1.5vw, 18px);
+    font-weight: 600;
+}
+
+/* --- Area Utama Footer (3 Kolom) --- */
+.footer-content-area {
+    background-color: #0B132B;
+    padding: 60px 8% 40px 8%;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    /* Kolom pertama sedikit lebih lebar */
+    gap: 40px;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-col-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    margin-top: 0;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* Teks dan Link Footer */
+.footer-text,
+.footer-link {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: #D1D5DB;
+    /* Abu-abu terang sesuai desain */
+    margin: 0;
+    line-height: 1.6;
+    text-decoration: none;
+}
+
+.footer-link {
+    transition: color 0.3s ease, transform 0.3s ease;
+    width: max-content;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+    transform: translateX(5px);
+    /* Efek interaktif geser ke kanan */
+}
+
+/* Styling Peta Maps */
+.footer-map-wrapper iframe {
+    border-radius: 4px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    filter: contrast(1.1);
+    /* Sedikit menajamkan warna peta */
+}
+
+/* --- Bottom Bar Copyright --- */
+.footer-bottom-bar {
+    background-color: #050814;
+    /* Biru sangat gelap (nyaris hitam) */
+    text-align: center;
+    padding: 25px 0;
+}
+
+.footer-bottom-bar p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* --- Responsive Table & Mobile --- */
+@media (max-width: 960px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        /* Berubah menjadi 1 kolom (atas-bawah) */
+        gap: 50px;
+    }
+
+    .visitor-counter-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 30px;
+    }
+
+    .footer-col {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-link {
+        align-items: center;
+    }
+}
+
+/* =========================================
+   15. ANIMASI ENTRANCE (TYPEWRITER & FADE)
+   ========================================= */
+.entrance-fade-down {
+    opacity: 0;
+    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.entrance-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.entrance-fade-up-delay {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+    visibility: hidden;
+}
+
+/* Kursor berkedip layaknya terminal */
+.typing-cursor {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 300;
+    margin-left: 5px;
+    animation: blinkCursor 0.8s infinite;
+}
+
+/* Sembunyikan kursor jika sudah selesai mengetik */
+.typing-cursor.stop-blink {
+    display: none; 
+}
+
+@keyframes fadeDown {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blinkCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
