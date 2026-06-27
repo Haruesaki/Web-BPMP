@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Lenis from 'lenis';
 import Beranda from "./pages/Beranda/Beranda";
+import DashboardAdmin from "./pages/Admin/dashboard-admin";
 
 function App() {
   const lenisRef = useRef(null);
@@ -23,7 +25,6 @@ function App() {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
-
     requestAnimationFrame(raf);
 
     return () => {
@@ -31,7 +32,14 @@ function App() {
     };
   }, []);
 
-  return <Beranda lenisRef={lenisRef} />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
+        <Route path="/admin" element={<DashboardAdmin />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

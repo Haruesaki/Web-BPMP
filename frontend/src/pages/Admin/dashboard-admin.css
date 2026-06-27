@@ -1,0 +1,738 @@
+/* =========================================================================
+   DASHBOARD ADMIN — CMS WEBSITE BPMP
+   Mengikuti pola Beranda: font Poppins, palet dark navy.
+   ========================================================================= */
+
+.admin-layout {
+    --bg-app: #0B1326;
+    --bg-sidebar: #131B2E;
+    --bg-card: #131a2e;
+    --bg-card-soft: #0f1626;
+    --bg-elevated: #1a2238;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-mid: rgba(255, 255, 255, 0.14);
+    --purple: #5b5fe8;
+    --purple-hover: #6d71f0;
+    --purple-soft: #c3c4f7;
+    --green: #4cae8e;
+    --orange: #f5a623;
+    --text-main: #f3f5fb;
+    --text-sub: #C7C4D8;
+    --text-faint: #5b6478;
+
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+.admin-layout *,
+.admin-layout *::before,
+.admin-layout *::after {
+    box-sizing: border-box;
+}
+
+/* =========================================================================
+   SIDEBAR
+   ========================================================================= */
+.admin-layout .admin-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.admin-layout .sidebar-brand h1 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0 0 28px 6px;
+    color: var(--text-main);
+}
+
+.admin-layout .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.admin-layout .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 400;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.admin-layout .nav-item i {
+    width: 20px;
+    font-size: 15px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.admin-layout .nav-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+}
+
+.admin-layout .nav-item.active {
+    background: var(--purple);
+    color: #fff;
+    font-weight: 500;
+}
+
+.admin-layout .nav-divider {
+    height: 1px;
+    background: var(--border-soft);
+    margin: 10px 6px;
+}
+
+.admin-layout .btn-tambah-menu {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.18s ease;
+}
+
+.admin-layout .btn-tambah-menu:hover {
+    background: var(--purple-hover);
+}
+
+/* =========================================================================
+   MAIN AREA
+   ========================================================================= */
+.admin-layout .admin-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- TOPBAR ---------- */
+.admin-layout .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 480px;
+}
+
+.admin-layout .search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    cursor: text;
+    transition: border-color 0.18s ease;
+}
+
+.admin-layout .search-box.active {
+    border-color: var(--border-mid);
+}
+
+.admin-layout .search-icon {
+    color: var(--text-sub);
+    font-size: 14px;
+}
+
+.admin-layout .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-layout .search-input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .search-shortcut {
+    font-size: 12px;
+    color: var(--text-faint);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+}
+
+/* ---------- SEARCH DROPDOWN ---------- */
+.admin-layout .search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    z-index: 50;
+}
+
+.admin-layout .search-dropdown-header {
+    padding: 14px 18px 8px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    font-weight: 500;
+}
+
+.admin-layout .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .search-result-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-layout .search-result-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.admin-layout .search-result-title {
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.admin-layout .search-result-sub {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-top: 2px;
+}
+
+.admin-layout .search-dropdown-footer {
+    padding: 13px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-sub);
+    border-top: 1px solid var(--border-soft);
+    cursor: pointer;
+}
+
+.admin-layout .search-dropdown-footer:hover {
+    color: var(--text-main);
+}
+
+/* ---------- PROFILE ---------- */
+.admin-layout .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.admin-layout .profile-text {
+    text-align: right;
+}
+
+.admin-layout .profile-email {
+    font-size: 13.5px;
+    color: var(--text-main);
+}
+
+.admin-layout .profile-role {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.admin-layout .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 16px;
+}
+
+/* =========================================================================
+   CONTENT
+   ========================================================================= */
+.admin-layout .admin-content {
+    padding: 32px;
+    flex: 1;
+}
+
+.admin-layout .content-heading h2 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .content-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 6px 0 28px;
+}
+
+.admin-layout .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+/* ---------- CARD BASE ---------- */
+.admin-layout .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+/* ---------- CARD: CHART ---------- */
+.admin-layout .card-chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.admin-layout .card-chart-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.admin-layout .chart-title-icon {
+    color: var(--green);
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.admin-layout .card-chart-title h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .card-chart-title p {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin: 2px 0 0;
+}
+
+.admin-layout .chart-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-layout .chart-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.admin-layout .chart-select i {
+    font-size: 10px;
+    color: var(--text-sub);
+}
+
+/* ---------- CHART ---------- */
+.admin-layout .chart-area {
+    display: flex;
+    gap: 16px;
+    height: 300px;
+}
+
+.admin-layout .chart-yaxis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 26px;
+    font-size: 12px;
+    color: var(--text-faint);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.admin-layout .chart-bars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    border-left: 1px solid var(--border-soft);
+    padding-left: 14px;
+}
+
+.admin-layout .chart-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.admin-layout .chart-bar-track {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.admin-layout .chart-bar {
+    width: 60%;
+    max-width: 46px;
+    background: var(--green);
+    border-radius: 6px 6px 0 0;
+    transition: height 0.4s ease;
+}
+
+.admin-layout .chart-bar.highlight {
+    background: var(--purple-soft);
+}
+
+.admin-layout .chart-bar-label {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--text-sub);
+}
+
+/* ---------- CARD: ACTIVITY ---------- */
+.admin-layout .card-activity h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 22px;
+    color: var(--text-main);
+}
+
+.admin-layout .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.admin-layout .activity-item {
+    display: flex;
+    gap: 14px;
+}
+
+.admin-layout .activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+}
+
+.admin-layout .activity-dot.grey {
+    background: var(--text-faint);
+}
+
+.admin-layout .activity-dot.orange {
+    background: var(--orange);
+}
+
+.admin-layout .activity-title {
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--text-main);
+}
+
+.admin-layout .activity-time {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 4px;
+}
+
+/* =========================================================================
+   MODAL: TAMBAH MENU BARU
+   ========================================================================= */
+.admin-layout .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.admin-layout .modal-box {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    overflow: visible;
+}
+
+.admin-layout .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .modal-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-layout .modal-close {
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.admin-layout .modal-close:hover {
+    color: var(--text-main);
+}
+
+.admin-layout .modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-layout .form-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-layout .form-group label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.admin-layout .form-input,
+.admin-layout .form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 9px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-layout .form-input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .form-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+}
+
+.admin-layout .form-select .placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .form-select i {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+/* ---------- DROPDOWN (Ikon / Jenis) ---------- */
+.admin-layout .form-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-mid);
+    border-radius: 9px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    z-index: 20;
+}
+
+.admin-layout .form-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .form-dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--text-sub);
+}
+
+.admin-layout .form-dropdown-item .dropdown-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.admin-layout .form-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-layout .form-dropdown-item.selected {
+    background: var(--purple);
+    color: #fff;
+}
+
+.admin-layout .form-dropdown-item.selected i {
+    color: #fff;
+}
+
+/* ---------- MODAL FOOTER ---------- */
+.admin-layout .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.admin-layout .btn-batal {
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 10px 8px;
+}
+
+.admin-layout .btn-batal:hover {
+    color: var(--text-main);
+}
+
+.admin-layout .btn-simpan {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.admin-layout .btn-simpan:hover {
+    background: var(--purple-hover);
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 1024px) {
+    .admin-layout .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-layout .admin-sidebar {
+        width: 240px;
+    }
+    .admin-layout .admin-content,
+    .admin-layout .admin-topbar {
+        padding: 20px;
+    }
+    .admin-layout .content-heading h2 {
+        font-size: 24px;
+    }
+}
