@@ -8,6 +8,16 @@ body {
     width: 100%;
     min-height: 100%;
     overflow-x: clip;
+    
+    /* --- MENYEMBUNYIKAN SCROLLBAR (Firefox & IE/Edge) --- */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* --- MENYEMBUNYIKAN SCROLLBAR (Chrome, Safari, & Opera) --- */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
 }
 
 *,
