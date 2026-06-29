@@ -22,19 +22,36 @@ import Mitra3 from "../../assets/source/Mitra (3).png";
 import Mitra4 from "../../assets/source/Mitra (4).png";
 import Mitra5 from "../../assets/source/Mitra (5).png";
 
+
+// === TAMBAHKAN IMPORT INI UNTUK SECTION INSTAGRAM ===
+import FotoInstagram1 from "../../assets/source/Foto-Instagram-1.png";
+import FotoInstagram2 from "../../assets/source/Foto-Instagram-2.png";
+import FotoInstagram3 from "../../assets/source/Foto-Instagram-3.png";
+import FotoInstagram4 from "../../assets/source/Foto-Instagram-4.png";
+import ButtonFollowIG from "../../assets/source/Button-Follow-Instagram.png";
+
 // --- IMPORT ASSETS (Berita) ---
 import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
 // Gunakan yang beresolusi JPG sesuai data yang ada
 import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
 import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
 
+
+
+import { useTTS } from "../../context/TTSContext";
+
 const Beranda = ({ lenisRef }) => {
+  const { isActive, toggle } = useTTS();
+
   // --- 1. STATE & REF UNTUK FITUR SEARCH ---
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isProfileDropdownLocked, setIsProfileDropdownLocked] = useState(false);
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  const [typedText, setTypedText] = useState('');
+  const [showSubtitle, setShowSubtitle] = useState(false);
+  const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
 
   // --- REF UNTUK ANIMASI MITRA (TAMBAHKAN INI) ---
   const trackRef = useRef(null);
@@ -148,7 +165,7 @@ const Beranda = ({ lenisRef }) => {
       }
 
       navLinks.forEach((link) => {
-        link.addEventListener('click', function (e) {
+        link.addEventListener('click', function () {
           navLinks.forEach((item) => item.classList.remove('active'));
           this.classList.add('active');
           moveSelector(this);
@@ -369,55 +386,139 @@ const Beranda = ({ lenisRef }) => {
     };
   }, []);
 
+  // === 2. TAMBAHKAN EFEK TYPEWRITER DI SINI ===
+  useEffect(() => {
+    let i = 0;
+    let typingInterval;
+
+    // Beri jeda 500ms saat web baru dibuka sebelum mulai mengetik
+    const startDelay = setTimeout(() => {
+      typingInterval = setInterval(() => {
+        if (i < fullText.length) {
+          // Menambah huruf satu per satu ke dalam state
+          setTypedText(fullText.substring(0, i + 1));
+          i++;
+        } else {
+          clearInterval(typingInterval);
+          // Setelah ketikan selesai, munculkan teks kementerian dan logo di bawahnya
+          setShowSubtitle(true); 
+        }
+      }, 40); // 40ms adalah kecepatan ngetik (semakin kecil semakin cepat)
+    }, 500);
+
+    // Cleanup memori
+    return () => {
+      clearTimeout(startDelay);
+      if (typingInterval) clearInterval(typingInterval);
+    };
+  }, []);
+  // =============================================
+
+
+  /* =========================================================
+     5. EFEK MARQUEE SCROLL VELOCITY (PREMIUM EFFECT)
+     Kecepatan geser logo mengikuti kecepatan scroll layar
+     ========================================================= */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let percentX = 0;
+    let lastScrollY = window.scrollY;
+    let currentVelocity = 0;
+    let animationFrameId;
+
+    const animateMarquee = () => {
+      const currentScrollY = window.scrollY;
+      
+      // 1. Hitung jarak scroll sejak frame terakhir (Velocity)
+      const scrollDelta = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
+
+      // 2. LERP (Linear Interpolation) untuk efek rem yang mulus
+      // Angka 0.08 menentukan seberapa licin/halus efek remnya saat scroll berhenti
+      currentVelocity += (scrollDelta - currentVelocity) * 0.08;
+
+      // 3. Pengaturan Kecepatan
+      const baseSpeed = 0.04; // Kecepatan jalan normal saat didiamkan
+      const scrollSensitivity = 0.015; // Sensitivitas dorongan saat di-scroll
+
+      // 4. Kalkulasi total kecepatan geser
+      const totalSpeed = baseSpeed + (currentVelocity * scrollSensitivity);
+
+      percentX -= totalSpeed;
+
+      // 5. Logika Infinite Loop (-50% karena array diduplikasi 2x di JSX)
+      if (percentX <= -50) {
+        percentX += 50;
+      } else if (percentX > 0) {
+        // Efek Super Keren: Jika user scroll ke atas dengan cepat, 
+        // arah animasi akan berbalik arah ke kanan secara natural!
+        percentX -= 50;
+      }
+
+      // 6. Terapkan posisi baru menggunakan akselerasi GPU (translate3d)
+      track.style.transform = `translate3d(${percentX}%, 0, 0)`;
+
+      animationFrameId = requestAnimationFrame(animateMarquee);
+    };
+
+    // Jalankan mesin animasi
+    animationFrameId = requestAnimationFrame(animateMarquee);
+
+    // Cleanup saat komponen ditutup
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []); // <-- Pastikan array dependensi kosong agar hanya jalan 1x
+
 
   useEffect(() => {
     let animationFrame;
 
     // KUNCI PERBAIKAN: Pindahkan titik pusat animasi ke tepi kanan
     if (heroImageRef.current) {
-        heroImageRef.current.style.transformOrigin = 'right bottom'; 
+      heroImageRef.current.style.transformOrigin = 'right bottom';
     }
 
     const animateHero = () => {
-        if (!heroImageRef.current) return;
+      if (!heroImageRef.current) return;
 
-        const scrollY = window.scrollY;
+      const scrollY = window.scrollY;
 
-        /*
-            Nilai maksimal pergeseran.
-            Semakin besar angkanya semakin tenggelam.
-        */
-        const translateY = Math.min(scrollY * 1.1, 8020);
+      /*
+          Nilai maksimal pergeseran.
+          Semakin besar angkanya semakin tenggelam.
+      */
+      const translateY = Math.min(scrollY * 1.1, 1320);
 
-        /*
-            Sedikit mengecil agar muncul efek depth.
-            Karena transformOrigin sekarang di kanan, 
-            gambar tidak akan menjauh dari tepi layar.
-        */
-        const scale = Math.max(1 - scrollY * 0.00012, 0.93);
+      /*
+          Sedikit mengecil agar muncul efek depth.
+          Karena transformOrigin sekarang di kanan, 
+          gambar tidak akan menjauh dari tepi layar.
+      */
+      const scale = Math.max(1 - scrollY * 0.00012, 0.93);
 
-        /*
-            Sedikit menggelap ketika semakin turun
-        */
-        const brightness = Math.max(
-            1 - scrollY * 0.00045,
-            0.78
-        );
+      /*
+          Sedikit menggelap ketika semakin turun
+      */
+      const brightness = Math.max(
+        1 - scrollY * 0.00045,
+        0.78
+      );
 
-        heroImageRef.current.style.transform =
-            `translateY(${translateY}px) scale(${scale})`;
+      heroImageRef.current.style.transform =
+        `translateY(${translateY}px) scale(${scale})`;
 
-        heroImageRef.current.style.filter =
-            `brightness(${brightness})`;
+      heroImageRef.current.style.filter =
+        `brightness(${brightness})`;
 
-        animationFrame = requestAnimationFrame(animateHero);
+      animationFrame = requestAnimationFrame(animateHero);
     };
 
     animationFrame = requestAnimationFrame(animateHero);
 
     return () => cancelAnimationFrame(animationFrame);
 
-}, []);
+  }, []);
 
   return (
     <>
@@ -447,8 +548,8 @@ const Beranda = ({ lenisRef }) => {
               </button>
             </div>
 
-            <button className="btn-voice" aria-label="Tulisan Ke Suara">
-              <span>Tulisan Ke Suara</span>
+            <button className={`btn-voice ${isActive ? 'active' : ''}`} aria-label={isActive ? "Matikan Suara" : "Tulisan Ke Suara"} onClick={toggle}>
+              <span>{isActive ? "Suara Aktif" : "Tulisan Ke Suara"}</span>
               <img src={IconTextToSpeech} alt="" />
             </button>
           </div>
@@ -547,16 +648,52 @@ const Beranda = ({ lenisRef }) => {
         </nav>
       </header>
 
+      <aside className="floating-social-bar">
+        <div className="glass-sidebar-bg">
+          <div className="blur-shape shape-pertama"></div>
+          <div className="blur-shape shape-kedua"></div>
+          <div className="blur-shape shape-ketiga"></div>
+        </div>
+
+        {/* PERBAIKAN: Pemanggilan Asset menggunakan variable Import */}
+        <a href="#" className="social-icon" aria-label="Instagram">
+          <span className="social-text">@bpmplampung</span>
+          <img src={Instagram} alt="Instagram" />
+        </a>
+        <a href="#" className="social-icon" aria-label="YouTube">
+          <span className="social-text">bpmplampung</span>
+          <img src={Youtube} alt="YouTube" />
+        </a>
+        <a href="#" className="social-icon" aria-label="WhatsApp">
+          <span className="social-text">62+895-462-763</span>
+          <img src={Social} alt="WhatsApp" />
+        </a>
+        <a href="#" className="social-icon" aria-label="Facebook">
+          <span className="social-text">bpmplampung</span>
+          <img src={Facebook} alt="Facebook" />
+        </a>
+      </aside>
+
       <div className="landing-wrapper">
         <div className="background-glow-container"></div>
         <section className="hero-section">
           <div className="hero-flex-container">
-            <div className="hero-left-content">
-              <span className="welcome-text">Selamat Datang Di</span>
-              <h1 className="main-title">Balai Penjaminan Mutu Pendidikan Provinsi Lampung</h1>
-              <p className="sub-title">Kementerian Pendidikan Dasar dan Menengah</p>
+<div className="hero-left-content">
+              {/* Teks atas muncul perlahan dari atas */}
+              <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
+              
+              {/* Teks judul dicetak menggunakan efek ngetik */}
+              <h1 className="main-title">
+                {typedText}
+                <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
+              </h1>
+              
+              {/* Teks dan logo bawah menunggu ketikan selesai baru muncul */}
+              <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
+                Kementerian Pendidikan Dasar dan Menengah
+              </p>
 
-              <div className="hero-logos-flex">
+              <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
                 <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
                 <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
               </div>
@@ -571,32 +708,6 @@ const Beranda = ({ lenisRef }) => {
               />
             </div>
           </div>
-
-          <aside className="floating-social-bar">
-            <div className="glass-sidebar-bg">
-              <div className="blur-shape shape-pertama"></div>
-              <div className="blur-shape shape-kedua"></div>
-              <div className="blur-shape shape-ketiga"></div>
-            </div>
-
-            {/* PERBAIKAN: Pemanggilan Asset menggunakan variable Import */}
-            <a href="#" className="social-icon" aria-label="Instagram">
-              <span className="social-text">@bpmplampung</span>
-              <img src={Instagram} alt="Instagram" />
-            </a>
-            <a href="#" className="social-icon" aria-label="YouTube">
-              <span className="social-text">bpmplampung</span>
-              <img src={Youtube} alt="YouTube" />
-            </a>
-            <a href="#" className="social-icon" aria-label="WhatsApp">
-              <span className="social-text">62+895-462-763</span>
-              <img src={Social} alt="WhatsApp" />
-            </a>
-            <a href="#" className="social-icon" aria-label="Facebook">
-              <span className="social-text">bpmplampung</span>
-              <img src={Facebook} alt="Facebook" />
-            </a>
-          </aside>
         </section>
       </div>
 
@@ -722,6 +833,210 @@ const Beranda = ({ lenisRef }) => {
           </div>
         </div>
       </section>
+
+      {/* =========================================
+          SECTION INSTAGRAM BARU 
+      ========================================= */}
+      <section className="instagram-section">
+        {/* 1. Banner Curved Header */}
+        <div className="ig-banner-wrapper">
+          <div className="ig-banner-oval"></div>
+          <h2 className="ig-banner-text">Ikuti Media Sosial BPMP Lampung</h2>
+        </div>
+
+        {/* 2. Profile Info Bar */}
+        <div className="ig-profile-header">
+          <div className="ig-profile-left">
+            <img src={Logo} alt="Logo BPMP" className="ig-avatar" />
+            <span className="ig-username">@bpmplampung</span>
+          </div>
+
+          <div className="ig-stats">
+            <div className="ig-stat-item">
+              <span className="ig-stat-label">Postingan</span>
+              <span className="ig-stat-value">1865</span>
+            </div>
+            <div className="ig-stat-item">
+              <span className="ig-stat-label">Pengikut</span>
+              <span className="ig-stat-value">6,138</span>
+            </div>
+            <div className="ig-stat-item">
+              <span className="ig-stat-label">Diikuti</span>
+              <span className="ig-stat-value">1,151</span>
+            </div>
+          </div>
+
+          <div className="ig-profile-right">
+            {/* Menggunakan button CSS dengan Icon standard agar persis desain */}
+            <button className="ig-follow-btn">
+              <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
+              Follow
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Feed Image Grid */}
+        <div className="ig-feed-section">
+          <div className="ig-feed-grid">
+            <div className="ig-post-card">
+              <img src={FotoInstagram1} alt="Postingan Instagram 1" className="ig-post-img" />
+            </div>
+            <div className="ig-post-card">
+              <img src={FotoInstagram2} alt="Postingan Instagram 2" className="ig-post-img" />
+            </div>
+            <div className="ig-post-card">
+              <img src={FotoInstagram3} alt="Postingan Instagram 3" className="ig-post-img" />
+            </div>
+            <div className="ig-post-card">
+              <img src={FotoInstagram4} alt="Postingan Instagram 4" className="ig-post-img" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================
+          SECTION YOUTUBE BARU 
+          ========================================= */}
+      <section className="youtube-section">
+
+        {/* Header Channel Info */}
+        <div className="yt-header-bar">
+          <div className="yt-profile-left">
+            <img src={Youtube} alt="YouTube Icon" className="yt-icon" />
+            <span className="yt-channel-name">bpmplampung</span>
+          </div>
+          <button className="yt-subscribe-btn">Subscribe</button>
+        </div>
+
+        {/* Konten Grid Video */}
+        <div className="yt-content-area">
+          <div className="yt-feed-grid">
+            
+            {/* Kiri: Video Utama */}
+            <div className="yt-main-card">
+              <div className="yt-card-title">Jejak Dedikasi, Melanjutkan Inspirasi</div>
+              <div className="yt-video-wrapper main-wrapper">
+                
+                {/* INI ADALAH STANDAR IFRAME YOUTUBE DI REACT */}
+                {/* Tambahkan loading="lazy" agar web tetap ringan saat pertama dibuka */}
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src="https://www.youtube.com/embed/QxNwOccBIDQ?si=AlMEZ85_xx__tLII" 
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  allowFullScreen
+                  loading="lazy"
+                ></iframe>
+
+              </div>
+            </div>
+
+            {/* Kanan: Daftar Video Terbaru */}
+            <div className="yt-side-card">
+              <div className="yt-card-title text-center">Video Terbaru</div>
+              <div className="yt-side-list">
+                
+                <div className="yt-video-wrapper side-wrapper">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/QLxaUXpp1_w?si=Iu33f77NAv-x6BPM" 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+
+                <div className="yt-video-wrapper side-wrapper">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/eSEyIBKwqoE?si=3KHL2tm-zCmkXVce" 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+      {/* ========================================= */}
+
+{/* =========================================
+          SECTION FOOTER BARU
+          ========================================= */}
+      <footer className="main-footer">
+
+
+        {/* Bagian Visitor Counter (Background Putih) */}
+        <div className="visitor-counter-wrapper">
+          <div className="visitor-counter-box">
+            <i className="fa-solid fa-user visitor-icon"></i>
+            <span className="visitor-text">Total Jumlah Pengunjung : 107030</span>
+          </div>
+        </div>
+
+        {/* Konten Utama Footer */}
+        <div className="footer-content-area">
+          <div className="footer-grid">
+
+            {/* Kolom 1: Hubungi Kami */}
+            <div className="footer-col">
+              <h4 className="footer-col-title">Hubungi Kami</h4>
+              <p className="footer-text">Gatot Subroto 44 A Pahoman, Enggal, Kota</p>
+              <p className="footer-text">Bandar Lampung</p>
+              <p className="footer-text">WhatsApp: 08982969696</p>
+              <p className="footer-text">Posel: bpmplampung@kemendikdasmen.go.id</p>
+            </div>
+
+            {/* Kolom 2: Tautan */}
+            <div className="footer-col">
+              <h4 className="footer-col-title">Tautan</h4>
+              <a href="#" className="footer-link">Kemendikdasmen</a>
+              <a href="#" className="footer-link">Dapodik</a>
+              <a href="#" className="footer-link">Sekolah Kita</a>
+              <a href="#" className="footer-link">Rumah Pendidikan</a>
+              <a href="#" className="footer-link">Rapor Pendidikan</a>
+              <a href="#" className="footer-link">Portal Data Pendidikan</a>
+              <a href="#" className="footer-link">SPAB Kemendikdasmen</a>
+            </div>
+
+            {/* Kolom 3: Navigasi (Map Iframe) */}
+            <div className="footer-col">
+              <h4 className="footer-col-title">Navigasi</h4>
+              <div className="footer-map-wrapper">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.9546059286815!2d105.26875931476536!3d-5.424564996065545!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40db0008b8b40d%3A0xc665bb2c73041077!2sBPMP%20Provinsi%20Lampung!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid"
+                  width="100%"
+                  height="140"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Peta Lokasi BPMP Lampung"
+                ></iframe>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Bottom Bar Copyright */}
+        <div className="footer-bottom-bar">
+          <p>© 2026 BPMP Lampung</p>
+        </div>
+      </footer>
+
     </>
   );
 };
