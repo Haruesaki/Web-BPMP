@@ -48,7 +48,16 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    overflow-y: hidden;
+    scrollbar-width: none; /* Firefox */
+}
+
+.admin-layout .admin-sidebar:hover {
     overflow-y: auto;
+}
+
+.admin-layout .admin-sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .admin-layout .sidebar-brand h1 {
