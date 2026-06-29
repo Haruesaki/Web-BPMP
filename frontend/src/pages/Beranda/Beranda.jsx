@@ -43,6 +43,14 @@ const Beranda = ({ lenisRef }) => {
 
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const searchInputRef = useRef(null);
+  const searchWrapperRef = useRef(null);
+  
+  const [isProfileDropdownLocked, setIsProfileDropdownLocked] = useState(false);
+  const profileDropdownRef = useRef(null);
+  // ==========================================
+
   // --- YOUTUBE STATE ---
   const [ytVideos, setYtVideos] = useState([]);
 
