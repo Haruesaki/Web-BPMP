@@ -397,7 +397,7 @@ const Beranda = ({ lenisRef }) => {
         } else {
           clearInterval(typingInterval);
           // Setelah ketikan selesai, munculkan teks kementerian dan logo di bawahnya
-          setShowSubtitle(true); 
+          setShowSubtitle(true);
         }
       }, 40); // 40ms adalah kecepatan ngetik (semakin kecil semakin cepat)
     }, 500);
@@ -426,7 +426,7 @@ const Beranda = ({ lenisRef }) => {
 
     const animateMarquee = () => {
       const currentScrollY = window.scrollY;
-      
+
       // 1. Hitung jarak scroll sejak frame terakhir (Velocity)
       const scrollDelta = currentScrollY - lastScrollY;
       lastScrollY = currentScrollY;
@@ -636,16 +636,16 @@ const Beranda = ({ lenisRef }) => {
         <div className="background-glow-container"></div>
         <section className="hero-section">
           <div className="hero-flex-container">
-<div className="hero-left-content">
+            <div className="hero-left-content">
               {/* Teks atas muncul perlahan dari atas */}
               <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
-              
+
               {/* Teks judul dicetak menggunakan efek ngetik */}
               <h1 className="main-title">
                 {typedText}
                 <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
               </h1>
-              
+
               {/* Teks dan logo bawah menunggu ketikan selesai baru muncul */}
               <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
                 Kementerian Pendidikan Dasar dan Menengah
@@ -869,21 +869,21 @@ const Beranda = ({ lenisRef }) => {
         {/* Konten Grid Video */}
         <div className="yt-content-area">
           <div className="yt-feed-grid">
-            
+
             {/* Kiri: Video Utama */}
             <div className="yt-main-card">
               <div className="yt-card-title">Jejak Dedikasi, Melanjutkan Inspirasi</div>
               <div className="yt-video-wrapper main-wrapper">
-                
+
                 {/* INI ADALAH STANDAR IFRAME YOUTUBE DI REACT */}
                 {/* Tambahkan loading="lazy" agar web tetap ringan saat pertama dibuka */}
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src="https://www.youtube.com/embed/QxNwOccBIDQ?si=AlMEZ85_xx__tLII" 
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/QxNwOccBIDQ?si=AlMEZ85_xx__tLII"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   loading="lazy"
                 ></iframe>
@@ -895,28 +895,28 @@ const Beranda = ({ lenisRef }) => {
             <div className="yt-side-card">
               <div className="yt-card-title text-center">Video Terbaru</div>
               <div className="yt-side-list">
-                
+
                 <div className="yt-video-wrapper side-wrapper">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/QLxaUXpp1_w?si=Iu33f77NAv-x6BPM" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/QLxaUXpp1_w?si=Iu33f77NAv-x6BPM"
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     loading="lazy"
                   ></iframe>
                 </div>
 
                 <div className="yt-video-wrapper side-wrapper">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/eSEyIBKwqoE?si=3KHL2tm-zCmkXVce" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/eSEyIBKwqoE?si=3KHL2tm-zCmkXVce"
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     loading="lazy"
                   ></iframe>
@@ -930,7 +930,7 @@ const Beranda = ({ lenisRef }) => {
       </section>
       {/* ========================================= */}
 
-{/* =========================================
+      {/* =========================================
           SECTION FOOTER BARU
           ========================================= */}
       <footer className="main-footer">
