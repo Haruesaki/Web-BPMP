@@ -62,6 +62,9 @@ const Beranda = ({ lenisRef }) => {
   // Mengelompokkan logo agar mudah di-map dan diduplikasi secara natural oleh React
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
+  // --- YOUTUBE STATE ---
+  const [ytVideos, setYtVideos] = useState([]);
+
   // Fungsi untuk handle klik tombol search
   const handleSearchToggle = (e) => {
     e.preventDefault();
@@ -469,6 +472,22 @@ const Beranda = ({ lenisRef }) => {
     // Cleanup saat komponen ditutup
     return () => cancelAnimationFrame(animationFrameId);
   }, []); // <-- Pastikan array dependensi kosong agar hanya jalan 1x
+
+  // --- FETCH YOUTUBE VIDEOS ---
+  useEffect(() => {
+    const fetchYouTube = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/youtube');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setYtVideos(json.data);
+        }
+      } catch (e) {
+        console.error("Error fetching YT:", e);
+      }
+    };
+    fetchYouTube();
+  }, []);
 
 
   useEffect(() => {
@@ -914,22 +933,20 @@ const Beranda = ({ lenisRef }) => {
             
             {/* Kiri: Video Utama */}
             <div className="yt-main-card">
-              <div className="yt-card-title">Jejak Dedikasi, Melanjutkan Inspirasi</div>
-              <div className="yt-video-wrapper main-wrapper">
-                
-                {/* INI ADALAH STANDAR IFRAME YOUTUBE DI REACT */}
-                {/* Tambahkan loading="lazy" agar web tetap ringan saat pertama dibuka */}
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src="https://www.youtube.com/embed/QxNwOccBIDQ?si=AlMEZ85_xx__tLII" 
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                  allowFullScreen
-                  loading="lazy"
-                ></iframe>
-
+              <div className="yt-card-title">{ytVideos.length > 0 ? ytVideos[0].snippet.title : 'Memuat Video...'}</div>
+              <div className={`yt-video-wrapper main-wrapper ${ytVideos.length > 0 && ytVideos[0].videoType === 'short' ? 'short-format' : ''}`}>
+                {ytVideos.length > 0 && (
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={`https://www.youtube.com/embed/${ytVideos[0].id.videoId}`} 
+                    title={ytVideos[0].snippet.title} 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                )}
               </div>
             </div>
 
@@ -938,31 +955,20 @@ const Beranda = ({ lenisRef }) => {
               <div className="yt-card-title text-center">Video Terbaru</div>
               <div className="yt-side-list">
                 
-                <div className="yt-video-wrapper side-wrapper">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/QLxaUXpp1_w?si=Iu33f77NAv-x6BPM" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
-
-                <div className="yt-video-wrapper side-wrapper">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/eSEyIBKwqoE?si=3KHL2tm-zCmkXVce" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
+                {ytVideos.slice(1, 3).map((video, idx) => (
+                  <div key={idx} className={`yt-video-wrapper side-wrapper ${video.videoType === 'short' ? 'short-format' : ''}`}>
+                    <iframe 
+                      width="100%" 
+                      height="100%" 
+                      src={`https://www.youtube.com/embed/${video.id.videoId}`} 
+                      title={video.snippet.title} 
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      allowFullScreen
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                ))}
 
               </div>
             </div>

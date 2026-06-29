@@ -1324,7 +1324,7 @@ body {
 
 .yt-feed-grid {
     display: flex;
-    gap: 25px;
+    /* gap: 25px; */
 }
 
 /* Box Card Kiri & Kanan */
@@ -1390,6 +1390,15 @@ body {
 /* Proporsi Aspek Rasio (Agar konsisten 16:9) */
 .main-wrapper {
     aspect-ratio: 16 / 9;
+}
+
+/* Format khusus untuk YouTube Shorts */
+.yt-video-wrapper.short-format {
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    max-width: 310px;
+    height: auto;
+    margin: 0 auto;
 }
 
 /* Susunan Video Kanan (Bagi 2 secara vertikal) */
