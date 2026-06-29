@@ -34,6 +34,10 @@
     display: block;
 }
 
+.header-menu {
+    display: flex;
+}
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -481,7 +485,7 @@
     /* Ubah Sidebar menjadi Dropdown Atas Penuh (Full Width) */
     .main-navbar {
         left: 0;
-        top: -100%; /* Sembunyikan ke arah atas (plafon) */
+        top: -100%;
         width: 100%;
         height: auto;
         max-height: 85vh;
@@ -497,10 +501,6 @@
         left: 0;
     }
 
-    /* Sembunyikan Teks Tombol Suara agar tidak berdesakan di layar HP */
-    .header-actions .btn-voice .voice-text {
-        display: none;
-    }
 
     .header-actions .btn-voice {
         padding: 8px; /* Bentuk jadi lingkaran bulat */
@@ -509,5 +509,25 @@
 
     .header-actions .btn-voice img {
         width: 30px;
+    }
+}
+
+/* =========================================
+   BREAKPOINT 3: MOBILE LAYOUT (<= 845px)
+   (Memindahkan Search & Voice Button ke Bawah Logo)
+   ========================================= */
+@media (max-width: 845px) {
+    /* 1. Ubah susunan Header Top menjadi menurun (Kolom) */
+    .header-top {
+        flex-direction: column;
+        align-items: stretch; /* Agar elemen di dalamnya bisa meregang penuh */
+        gap: 15px; /* Jarak antara baris logo dan baris pencarian */
+        padding: 15px 4vw; 
+    }
+       
+    .header-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end; /* Pisahkan Search dan Voice button sejauh mungkin */
     }
 }

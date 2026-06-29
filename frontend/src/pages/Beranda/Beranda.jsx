@@ -626,46 +626,50 @@ const Beranda = ({ lenisRef }) => {
           <button className="yt-subscribe-btn">Subscribe</button>
         </div>
 
+{/* Konten Grid Video */}
         <div className="yt-content-area">
-          <div className="yt-feed-grid">
+          {/* WADAH TUNGGAL BARU */}
+          <div className="yt-unified-card">
+            
+            <h3 className="yt-unified-title">VIDEO TERBARU</h3>
 
-            <div className="yt-main-card">
-              <div className="yt-card-title">{ytVideos.length > 0 ? ytVideos[0].snippet.title : 'Memuat Video...'}</div>
-              <div className={`yt-video-wrapper main-wrapper ${ytVideos.length > 0 && ytVideos[0].videoType === 'short' ? 'short-format' : ''}`}>
-                {ytVideos.length > 0 && (
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={`https://www.youtube.com/embed/${ytVideos[0].id.videoId}`} 
-                    title={ytVideos[0].snippet.title} 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                )}
-              </div>
-            </div>
-
-            <div className="yt-side-card">
-              <div className="yt-card-title text-center">Video Terbaru</div>
-              <div className="yt-side-list">
-                
-                {ytVideos.slice(1, 3).map((video, idx) => (
-                  <div key={idx} className={`yt-video-wrapper side-wrapper ${video.videoType === 'short' ? 'short-format' : ''}`}>
+            <div className="yt-feed-grid">
+              {/* Kolom Kiri: Video Utama */}
+              <div className="yt-main-column">
+                <div className={`yt-video-wrapper main-wrapper ${ytVideos.length > 0 && ytVideos[0].videoType === 'short' ? 'short-format' : ''}`}>
+                  {ytVideos.length > 0 && (
                     <iframe 
                       width="100%" 
                       height="100%" 
-                      src={`https://www.youtube.com/embed/${video.id.videoId}`} 
-                      title={video.snippet.title} 
+                      src={`https://www.youtube.com/embed/${ytVideos[0].id.videoId}`} 
+                      title={ytVideos[0].snippet.title} 
                       frameBorder="0" 
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                       allowFullScreen
                       loading="lazy"
                     ></iframe>
-                  </div>
-                ))}
+                  )}
+                </div>
+              </div>
 
+              {/* Kolom Kanan: Daftar Video Terbaru */}
+              <div className="yt-side-column">
+                <div className="yt-side-list">
+                  {ytVideos.slice(1, 3).map((video, idx) => (
+                    <div key={idx} className={`yt-video-wrapper side-wrapper ${video.videoType === 'short' ? 'short-format' : ''}`}>
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src={`https://www.youtube.com/embed/${video.id.videoId}`} 
+                        title={video.snippet.title} 
+                        frameBorder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowFullScreen
+                        loading="lazy"
+                      ></iframe>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './Navbar.css'; 
+import './Navbar.css';
 
 import Logo from "../source/Logo.png";
 import Dropdown from "../source/Dropdown.png";
@@ -13,7 +13,7 @@ const Navbar = ({ lenisRef }) => {
 
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   // --- STATE BARU: Mengendalikan Dropdown Aktif (onClick) ---
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -36,7 +36,7 @@ const Navbar = ({ lenisRef }) => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     // Jika hamburger ditutup, pastikan semua sub-menu juga ikut tertutup
-    if (isMobileMenuOpen) setActiveDropdown(null); 
+    if (isMobileMenuOpen) setActiveDropdown(null);
   };
 
   // Efek Klik di Luar untuk Search
@@ -88,7 +88,7 @@ const Navbar = ({ lenisRef }) => {
 
     if (navbar && selector) {
       function moveSelector(targetElement) {
-        if (window.innerWidth <= 1277) return; 
+        if (window.innerWidth <= 1277) return;
 
         const targetRect = targetElement.getBoundingClientRect();
         const navbarRect = navbar.getBoundingClientRect();
@@ -108,10 +108,10 @@ const Navbar = ({ lenisRef }) => {
           navLinks.forEach((item) => item.classList.remove('active'));
           this.classList.add('active');
           moveSelector(this);
-          
+
           if (!this.closest('.has-dropdown')) {
-             setIsMobileMenuOpen(false);
-             setActiveDropdown(null);
+            setIsMobileMenuOpen(false);
+            setActiveDropdown(null);
           }
         });
       });
@@ -148,18 +148,20 @@ const Navbar = ({ lenisRef }) => {
   return (
     <header className="unified-header">
       <div className="header-top">
-        <button 
-          className="hamburger-btn" 
-          onClick={toggleMobileMenu} 
-          aria-label="Toggle Menu"
-        >
-          <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
-        </button>
+        <div className="header-menu">
+          <button
+            className="hamburger-btn"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle Menu"
+          >
+            <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+          </button>
 
-        <div className="header-logo">
-          <img src={Logo} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+          <div className="header-logo">
+            <img src={Logo} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+          </div>
         </div>
-        
+
         <div className="header-actions">
           <div className={`search-wrapper ${isSearchActive ? 'active' : ''}`} ref={searchWrapperRef}>
             <input type="text" className="search-input" placeholder="Cari informasi..." ref={searchInputRef} />
@@ -174,14 +176,14 @@ const Navbar = ({ lenisRef }) => {
         </div>
       </div>
 
-      <div 
-        className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`} 
+      <div
+        className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}
         onClick={toggleMobileMenu}
       ></div>
 
       <nav className={`main-navbar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="nav-selector"></div>
-        
+
         <a href="#" className="nav-link active">Beranda</a>
 
         {/* --- IMPLEMENTASI KELAS 'dropdown-open' & ONCLICK --- */}
