@@ -38,8 +38,11 @@ import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
 
 
 
+import { useTTS } from "../../context/TTSContext";
 
 const Beranda = ({ lenisRef }) => {
+  const { isActive, toggle } = useTTS();
+
   // --- 1. STATE & REF UNTUK FITUR SEARCH ---
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isProfileDropdownLocked, setIsProfileDropdownLocked] = useState(false);
@@ -162,7 +165,7 @@ const Beranda = ({ lenisRef }) => {
       }
 
       navLinks.forEach((link) => {
-        link.addEventListener('click', function (e) {
+        link.addEventListener('click', function () {
           navLinks.forEach((item) => item.classList.remove('active'));
           this.classList.add('active');
           moveSelector(this);
@@ -171,7 +174,7 @@ const Beranda = ({ lenisRef }) => {
 
       const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
       dropdownLinks.forEach((subLink) => {
-        subLink.addEventListener('click', function (e) {
+        subLink.addEventListener('click', function () {
           const parentNavItem = this.closest('.nav-item');
           if (parentNavItem) {
             const parentNavLink = parentNavItem.querySelector('.nav-link');
@@ -544,8 +547,8 @@ const Beranda = ({ lenisRef }) => {
               </button>
             </div>
 
-            <button className="btn-voice" aria-label="Tulisan Ke Suara">
-              <span>Tulisan Ke Suara</span>
+            <button className={`btn-voice ${isActive ? 'active' : ''}`} aria-label={isActive ? "Matikan Suara" : "Tulisan Ke Suara"} onClick={toggle}>
+              <span>{isActive ? "Suara Aktif" : "Tulisan Ke Suara"}</span>
               <img src={IconTextToSpeech} alt="" />
             </button>
           </div>
