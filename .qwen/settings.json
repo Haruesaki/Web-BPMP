@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "computer_use__page"
+      "Agent(Explore)",
+      "Bash(mkdir *)",
+      "Bash(npx *)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(pip show *)"
     ]
-  }
+  },
+  "$version": 4
 }

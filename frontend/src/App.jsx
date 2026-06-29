@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import Beranda from "./pages/Beranda/Beranda";
+import { useHoverToSpeak } from "./hooks/useHoverToSpeak";
 
 function App() {
+  useHoverToSpeak();
   const lenisRef = useRef(null);
 
   useEffect(() => {
