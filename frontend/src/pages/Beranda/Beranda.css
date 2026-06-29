@@ -1008,6 +1008,16 @@ body {
     aspect-ratio: 16 / 9;
 }
 
+/* Format khusus untuk YouTube Shorts */
+.yt-video-wrapper.short-format {
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    max-width: 310px;
+    height: auto;
+    margin: 0 auto;
+}
+
+/* Susunan Video Kanan (Bagi 2 secara vertikal) */
 .yt-side-list {
     display: flex;
     flex-direction: column;

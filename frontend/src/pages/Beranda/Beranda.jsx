@@ -43,11 +43,83 @@ const Beranda = ({ lenisRef }) => {
 
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
-  // ==============================================
-  // USE EFFECT ANIMASI KHUSUS KONTEN BERANDA
-  // ==============================================
+  // --- YOUTUBE STATE ---
+  const [ytVideos, setYtVideos] = useState([]);
 
-  // 1. ANIMASI BERITA (FRAME SLIDE & SCALE UP)
+  // Fungsi untuk handle klik tombol search
+  const handleSearchToggle = (e) => {
+    e.preventDefault();
+    setIsSearchActive(!isSearchActive);
+  };
+
+  // Effect khusus untuk "Klik di luar search bar agar menutup" dan Auto-focus
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Jika klik terjadi di luar komponen searchWrapper, matikan state active
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
+        setIsSearchActive(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Auto focus ke input saat search terbuka
+    if (isSearchActive && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSearchActive]);
+
+  // --- DROPDOWN LOCK: Tutup dropdown Profil saat klik di luar ---
+  useEffect(() => {
+    if (!isProfileDropdownLocked) return;
+
+    const handleClickOutsideProfile = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setIsProfileDropdownLocked(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutsideProfile);
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutsideProfile);
+    };
+  }, [isProfileDropdownLocked]);
+
+  // --- DROPDOWN LOCK: Tutup dropdown Profil saat scroll ---
+  useEffect(() => {
+    if (!isProfileDropdownLocked) return;
+
+    const lenis = lenisRef?.current;
+
+    const handleScroll = () => {
+      setIsProfileDropdownLocked(false);
+    };
+
+    if (lenis) {
+      lenis.on('scroll', handleScroll, { passive: true });
+      return () => lenis.off('scroll', handleScroll);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isProfileDropdownLocked, lenisRef]);
+
+  const handleProfileClick = (e) => {
+    e.preventDefault();
+    setIsProfileDropdownLocked((prev) => !prev);
+  };
+
   useEffect(() => {
     const newsLeft = document.querySelector('.news-left');
     const featuredCard = document.querySelector('.featured-card');
@@ -291,6 +363,23 @@ const Beranda = ({ lenisRef }) => {
     return () => cancelAnimationFrame(animationFrameId);
   }, []); 
 
+  // --- FETCH YOUTUBE VIDEOS ---
+  useEffect(() => {
+    const fetchYouTube = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/youtube');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setYtVideos(json.data);
+        }
+      } catch (e) {
+        console.error("Error fetching YT:", e);
+      }
+    };
+    fetchYouTube();
+  }, []);
+
+
   // 5. EFEK HERO PARALLAX
   useEffect(() => {
     let animationFrame;
@@ -533,50 +622,41 @@ const Beranda = ({ lenisRef }) => {
           <div className="yt-feed-grid">
 
             <div className="yt-main-card">
-              <div className="yt-card-title">Jejak Dedikasi, Melanjutkan Inspirasi</div>
-              <div className="yt-video-wrapper main-wrapper">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/QxNwOccBIDQ?si=AlMEZ85_xx__tLII"
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  loading="lazy"
-                ></iframe>
+              <div className="yt-card-title">{ytVideos.length > 0 ? ytVideos[0].snippet.title : 'Memuat Video...'}</div>
+              <div className={`yt-video-wrapper main-wrapper ${ytVideos.length > 0 && ytVideos[0].videoType === 'short' ? 'short-format' : ''}`}>
+                {ytVideos.length > 0 && (
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={`https://www.youtube.com/embed/${ytVideos[0].id.videoId}`} 
+                    title={ytVideos[0].snippet.title} 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                )}
               </div>
             </div>
 
             <div className="yt-side-card">
               <div className="yt-card-title text-center">Video Terbaru</div>
               <div className="yt-side-list">
-
-                <div className="yt-video-wrapper side-wrapper">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/QLxaUXpp1_w?si=Iu33f77NAv-x6BPM"
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
-
-                <div className="yt-video-wrapper side-wrapper">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/eSEyIBKwqoE?si=3KHL2tm-zCmkXVce"
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
+                
+                {ytVideos.slice(1, 3).map((video, idx) => (
+                  <div key={idx} className={`yt-video-wrapper side-wrapper ${video.videoType === 'short' ? 'short-format' : ''}`}>
+                    <iframe 
+                      width="100%" 
+                      height="100%" 
+                      src={`https://www.youtube.com/embed/${video.id.videoId}`} 
+                      title={video.snippet.title} 
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      allowFullScreen
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                ))}
 
               </div>
             </div>
