@@ -22,7 +22,6 @@ import Mitra3 from "../../assets/source/Mitra (3).png";
 import Mitra4 from "../../assets/source/Mitra (4).png";
 import Mitra5 from "../../assets/source/Mitra (5).png";
 
-import FotoInstagram1 from "../../assets/source/Foto-Instagram-1.png";
 import FotoInstagram2 from "../../assets/source/Foto-Instagram-2.png";
 import FotoInstagram3 from "../../assets/source/Foto-Instagram-3.png";
 import FotoInstagram4 from "../../assets/source/Foto-Instagram-4.png";
@@ -30,6 +29,42 @@ import FotoInstagram4 from "../../assets/source/Foto-Instagram-4.png";
 import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
 import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
 import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
+
+const InstagramEmbedCard = React.memo(({ postId }) => {
+  useEffect(() => {
+    // Fungsi untuk memicu proses embed dari script Instagram
+    const processInstagram = () => {
+      if (window.instgrm) {
+        window.instgrm.Embeds.process();
+      }
+    };
+
+    // Cek apakah script sudah ada, jika belum muat scriptnya
+    if (!document.getElementById('instagram-embed-script')) {
+      const script = document.createElement('script');
+      script.id = 'instagram-embed-script';
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      script.onload = processInstagram;
+      document.body.appendChild(script);
+    } else {
+      // Jika sudah ada, beri sedikit jeda agar DOM terupdate lalu jalankan ulang process()
+      setTimeout(processInstagram, 100);
+    }
+  }, [postId]);
+
+  return (
+    <div className="ig-post-card ig-embed-wrapper">
+      <blockquote 
+        className="instagram-media" 
+        data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`} 
+        data-instgrm-version="14" 
+        style={{ background: '#FFF', border: 0, borderRadius: '3px', boxShadow: '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', margin: '1px', maxWidth: '540px', minWidth: '326px', padding: 0, width: 'calc(100% - 2px)' }}
+      >
+      </blockquote>
+    </div>
+  );
+}, (prevProps, nextProps) => prevProps.postId === nextProps.postId);
 
 const Beranda = ({ lenisRef }) => {
   // --- STATE & REF UNTUK BERANDA (Hero, Typewriter, Mitra) ---
@@ -519,9 +554,8 @@ const Beranda = ({ lenisRef }) => {
 
         <div className="ig-feed-section">
           <div className="ig-feed-grid">
-            <div className="ig-post-card">
-              <img src={FotoInstagram1} alt="Postingan Instagram 1" className="ig-post-img" />
-            </div>
+            {/* Dynamic Instagram Embed Component */}
+            <InstagramEmbedCard postId="DaMGvRKAb7z" />
             <div className="ig-post-card">
               <img src={FotoInstagram2} alt="Postingan Instagram 2" className="ig-post-img" />
             </div>
