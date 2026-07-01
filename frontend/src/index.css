@@ -1,0 +1,37 @@
+/* =========================================
+   GLOBAL RESET
+========================================= */
+body {
+    margin: 0;
+}
+
+/* =========================================
+   LENIS SMOOTH SCROLL
+========================================= */
+html.lenis, html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+    pointer-events: none;
+}
+
+html.lenis {
+    scroll-behavior: auto !important;
+}
+
+html.lenis body {
+    scroll-behavior: auto !important;
+}

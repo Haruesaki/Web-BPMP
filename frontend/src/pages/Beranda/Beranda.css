@@ -1,0 +1,608 @@
+/* =========================================
+   GLOBAL BOX SIZING (Perbaikan Layout)
+   ========================================= */
+*,
+*::before,
+*::after {
+   box-sizing: border-box;
+}
+
+/* =========================================
+   PAGE WRAPPER (Mencegah Overflow)
+   ========================================= */
+.beranda-page-wrapper {
+   overflow-x: clip;
+}
+
+/* =========================================
+   6. SECTION MITRA KERJA (3D CONCAVE EFFECT)
+   ========================================= */
+.partners-section {
+    position: relative;
+    width: 100%;
+    background-image: linear-gradient(to right, #79cbf8 0%, #aeceff 50%, #79cbf8 100%);
+    padding: 65px 0vw;
+    margin-top: 200px;
+    margin-bottom: 200px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* --- Trik Frame Oval (Biru Gelap melengkung ke dalam putih) --- */
+.partners-section::before,
+.partners-section::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    width: 110%;
+    height: 130px;
+    background-color: #ffffff;
+    border-radius: 100%;
+    z-index: 2;
+}
+
+.partners-section::before {
+    top: -70px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.partners-section::after {
+    bottom: -70px;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Susunan Logo Pembungkus --- */
+.partners-container {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.partners-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    gap: 7vw;
+}
+
+.partner-logo {
+    height: clamp(50px, 6vw, 90px);
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- Responsive Mitra --- */
+@media (max-width: 953px) {
+    .partners-section {
+        margin-top: 10px;
+        margin-bottom: 50px;
+    }
+}
+
+/* =========================================
+   7. SECTION INSTAGRAM 
+   ========================================= */
+.instagram-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Banner Curved Layering Effect --- */
+.ig-banner-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background-color: #ffffff;
+    border-top: 10px solid #050814;
+    border-bottom: 10px solid #050814;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ig-banner-oval {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 140px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    filter: blur(10px);
+    z-index: 1;
+}
+
+.ig-banner-text {
+    position: relative;
+    z-index: 2;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 2.5vw, 32px);
+    color: #000000;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* --- Header Profile Info --- */
+.ig-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 35px 8%;
+    background-color: #0B132B;
+    color: #ffffff;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.ig-profile-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.ig-avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    background-color: #ffffff;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.ig-username {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(18px, 1.8vw, 22px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.ig-stats {
+    display: flex;
+    gap: clamp(30px, 4vw, 60px);
+    flex: 1.5;
+    justify-content: center;
+}
+
+.ig-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ig-stat-label {
+    font-size: clamp(14px, 1.2vw, 16px);
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.ig-stat-value {
+    font-size: clamp(15px, 1.5vw, 18px);
+    font-weight: 400;
+}
+
+.ig-profile-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ig-follow-btn {
+    background: linear-gradient(135deg, #1A3C87 0%, #080D21 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.ig-follow-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ig-btn-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* --- Feed Grid Container --- */
+.ig-feed-section {
+    background-color: #ffffff;
+    padding: 40px 8% 80px 8%;
+}
+
+.ig-feed-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    align-items: start;
+}
+
+.ig-post-card {
+    background-color: #0B132B;
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.ig-post-card:hover {
+    transform: translateY(-10px) scale(1.02);
+}
+
+.ig-post-img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+}
+
+/* --- Responsive Instagram --- */
+@media (max-width: 960px) {
+    .ig-profile-header {
+        flex-direction: column;
+        gap: 30px;
+        text-align: center;
+    }
+
+    .ig-profile-left,
+    .ig-profile-right {
+        justify-content: center;
+    }
+
+    .ig-stats {
+        gap: 30px;
+    }
+
+    .ig-feed-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ig-banner-oval {
+        /* Menggunakan % untuk menghindari overflow dari unit vw */
+        width: 120%;
+    }
+}
+
+@media (max-width: 500px) {
+    .ig-feed-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+/* =========================================
+   8. SECTION YOUTUBE 
+   ========================================= */
+.youtube-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Header YouTube Bar --- */
+.yt-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 8%;
+    background-color: #0B132B;
+    color: #ffffff;
+}
+
+.yt-profile-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.yt-icon {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+}
+
+.yt-channel-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(18px, 1.8vw, 22px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.yt-subscribe-btn {
+    background-color: #b00000;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 20px 80px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(248, 58, 58, 0.3);
+    transition: all 0.3s ease;
+}
+
+.yt-subscribe-btn:hover {
+    background-color: #D32F2F;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(248, 58, 58, 0.5);
+}
+
+/* --- Content Grid Video --- */
+.yt-content-area {
+    background-color: #ffffff;
+    padding: 40px 8% 80px 8%;
+}
+
+.yt-unified-card {
+    background-color: #0B132B;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.yt-unified-title {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+    text-align: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+}
+
+.yt-feed-grid {
+    display: flex;
+    gap: 25px;
+}
+/* --- Box Card Kiri & Kanan --- */
+.yt-main-column {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.yt-side-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* --- Container Gambar Video --- */
+.yt-video-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.yt-video-wrapper:hover .yt-thumbnail {
+    transform: scale(1.03);
+}
+
+.yt-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.main-wrapper {
+    aspect-ratio: 16 / 9;
+
+}
+
+/* Format khusus untuk YouTube Shorts */
+.yt-video-wrapper.short-format {
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    max-width: 310px;
+    height: auto;
+    margin: 0 auto;
+}
+
+/* Susunan Video Kanan (Bagi 2 secara vertikal) */
+.yt-side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.side-wrapper {
+    flex: 1;
+}
+
+/* --- Ikon Play YouTube --- */
+.yt-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.yt-video-wrapper:hover .yt-play-overlay {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.yt-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.yt-play-overlay i.fa-youtube {
+    color: #FF0000;
+    font-size: 70px;
+    background-color: #ffffff;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.yt-play-overlay.small i.fa-youtube {
+    font-size: 50px;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+/* --- Responsive YouTube --- */
+@media (max-width: 960px) {
+    .yt-header-bar {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .yt-feed-grid {
+        flex-direction: column;
+    }
+
+    .main-wrapper {
+        aspect-ratio: auto;
+        height: 300px;
+    }
+
+    .yt-side-list {
+        height: auto;
+    }
+
+    .side-wrapper {
+        flex: none;
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* =========================================
+   9. ANIMASI ENTRANCE (TYPEWRITER & FADE)
+   ========================================= */
+.entrance-fade-down {
+    opacity: 0;
+    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.entrance-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.entrance-fade-up-delay {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+    visibility: hidden;
+}
+
+/* Kursor berkedip layaknya terminal */
+.typing-cursor {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 300;
+    margin-left: 5px;
+    animation: blinkCursor 0.8s infinite;
+}
+
+/* Sembunyikan kursor jika sudah selesai mengetik */
+.typing-cursor.stop-blink {
+    display: none;
+}
+
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blinkCursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* --- Instagram Embed Styling --- */
+.ig-embed-wrapper {
+    padding: 0 !important;
+    display: block !important;
+    border-radius: 10px;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+.ig-embed-wrapper:hover {
+    transform: translateY(-10px) scale(1.02);
+}
+.ig-embed-wrapper iframe {
+    margin: 0 !important;
+    border-radius: 10px !important;
+    min-width: 100% !important;
+    width: 100% !important;
+    display: block;
+}

@@ -1,0 +1,546 @@
+/* Menghilangkan scrollbar di browser secara global */
+html, body {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Menghilangkan scrollbar untuk browser Webkit (Chrome, Safari, Opera) */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+}
+
+/* =========================================
+   1. HEADER KESATUAN (STICKY HEADER)
+   ========================================= */
+.unified-header {
+    margin: 0px;
+    position: sticky;
+    top: 0;
+    gap: 0px;
+    z-index: 9999;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   2. BARIS ATAS (LOGO & ACTIONS)
+   ========================================= */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 4vw 15px 4vw;
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.header-logo .main-logo {
+    height: clamp(40px, 2.8vw, 70px);
+    object-fit: contain;
+    display: block;
+}
+
+.header-menu {
+    display: flex;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-actions button:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   3. NAVIGATION LINKS & DROPDOWN (DESKTOP)
+   ========================================= */
+.main-navbar {
+    position: sticky;
+    top: 84px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1vw;
+    width: 100%;
+    background: transparent;
+    padding-top: 5px;
+    padding: 10px 4vw 15px 4vw;
+    flex-wrap: wrap;
+    z-index: 99;
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-selector {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.nav-link {
+    position: relative;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(12px, 1vw, 15px);
+    font-weight: 300;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 20px;
+    border-radius: 30px;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.nav-link:hover {
+    color: #A9CCE3;
+}
+
+.nav-link.active {
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.dropdown-icon {
+    width: 10px;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-item:hover .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0;
+    padding-top: 14px;
+    min-width: 220px;
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(11, 19, 43, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 0 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scaleY(0.95);
+    transform-origin: top center;
+    transition:
+        max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item.has-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 16px;
+    background: transparent;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scaleY(1);
+    transition:
+        max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 0s;
+}
+
+.dropdown-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 300;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    transition: background-color 0.25s ease, padding-left 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.nav-item.has-dropdown:hover .dropdown-menu a {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal per item when dropdown opens */
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(1) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(2) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(3) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(4) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(5) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(6) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(7) { transition-delay: 0.02s; }
+.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(8) { transition-delay: 0.02s; }
+
+.dropdown-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    padding-left: 26px;
+}
+
+/* =========================================
+   4. TOMBOL SEARCH & INPUT
+   ========================================= */
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(30, 45, 85, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s ease;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-wrapper:hover,
+.search-wrapper.active {
+    background: rgba(42, 60, 105, 0.8);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.search-wrapper.active {
+    width: 280px;
+}
+
+.search-input {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    padding-left: 25px;
+    padding-right: 65px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-wrapper.active .search-input {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0.15s;
+}
+
+.navbar-actions .search-trigger,
+.header-actions .search-trigger {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+    transition: transform 0.4s ease;
+}
+
+.navbar-actions .search-trigger:hover,
+.header-actions .search-trigger:hover {
+    transform: scale(1.1);
+    border: none;
+    box-shadow: none;
+}
+
+/* =========================================
+   5. TOMBOL TULISAN KE SUARA
+   ========================================= */
+.btn-voice {
+    border-radius: 30px;
+    padding-left: 17px;
+    padding-right: 0px;
+    gap: 15px;
+    background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-voice span {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(12px, 1.2vw, 14px);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.btn-voice img {
+    height: auto;
+    width: 40px;
+}
+
+.btn-voice:hover {
+    background: linear-gradient(135deg, rgba(42, 60, 105, 0.9) 0%, rgba(30, 45, 85, 0.8) 100%);
+}
+
+/* =========================================
+   6. STYLE HAMBURGER & OVERLAY (DEFAULT MOBILE)
+   ========================================= */
+.hamburger-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    margin-right: 15px;
+}
+
+.hamburger-btn:hover {
+    transform: scale(1.1);
+}
+
+.mobile-menu-overlay {
+    display: none;
+}
+
+/* =========================================
+   7. RESPONSIVE BREAKPOINT: TABLET & LAPTOP KECIL (<= 1277px)
+   (Sidebar Kiri & Sistem onClick Menu)
+   ========================================= */
+@media (max-width: 1277px) {
+    .hamburger-btn {
+        display: block;
+    }
+
+    .header-top {
+        justify-content: flex-start;
+    }
+
+    .header-actions {
+        margin-left: auto;
+    }
+
+    /* Efek Overlay Background */
+    .mobile-menu-overlay.active {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        z-index: 9998;
+    }
+
+    /* Transformasi Navbar Utama ke Sidebar */
+    .main-navbar {
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 320px;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        background: rgba(11, 19, 43, 0.98);
+        padding: 80px 20px 30px 20px;
+        transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        overflow-y: auto;
+    }
+
+    .main-navbar.mobile-open {
+        left: 0;
+    }
+
+    .nav-selector {
+        display: none !important;
+    }
+
+    .nav-item {
+        width: 100%;
+    }
+
+    .nav-link {
+        width: 100%;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        justify-content: space-between;
+    }
+
+    /* 1. Matikan efek hover otomatis pada mobile */
+    .nav-item.has-dropdown:hover .dropdown-menu {
+        max-height: 0;
+        padding: 0;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .nav-item.has-dropdown:hover .dropdown-icon {
+        transform: none;
+    }
+
+    /* 2. Dropdown mengubah gaya dari absolute ke alir biasa (inline) */
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: none;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+    }
+
+    /* 3. Buka dropdown HANYA jika class 'dropdown-open' aktif (via onClick React) */
+    .nav-item.has-dropdown.dropdown-open .dropdown-menu {
+        max-height: 600px;
+        padding: 10px 0;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* 4. Putar icon panah hanya saat menu aktif */
+    .nav-item.has-dropdown.dropdown-open .dropdown-icon {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu a {
+        opacity: 1;
+        transform: none;
+        padding: 12px 20px 12px 40px; /* Indentasi sub-menu */
+    }
+}
+
+/* =========================================
+   8. RESPONSIVE BREAKPOINT: SMARTPHONE (<= 768px)
+   (Menu Dropdown Penuh di Atas)
+   ========================================= */
+@media (max-width: 768px) {
+    /* Ubah Sidebar menjadi Dropdown Atas Penuh (Full Width) */
+    .main-navbar {
+        left: 0;
+        top: -100%;
+        width: 100%;
+        height: auto;
+        max-height: 85vh;
+        padding-top: 20px;
+        transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        transition-property: top;
+    }
+
+    .main-navbar.mobile-open {
+        top: 75px; /* Turun tepat di bawah header */
+        left: 0;
+    }
+
+
+    .header-actions .btn-voice {
+        padding: 8px; /* Bentuk jadi lingkaran bulat */
+        gap: 0;
+    }
+
+    .header-actions .btn-voice img {
+        width: 30px;
+    }
+}
+
+/* =========================================
+   BREAKPOINT 3: MOBILE LAYOUT (<= 845px)
+   (Memindahkan Search & Voice Button ke Bawah Logo)
+   ========================================= */
+@media (max-width: 845px) {
+    /* 1. Ubah susunan Header Top menjadi menurun (Kolom) */
+    .header-top {
+        flex-direction: column;
+        align-items: stretch; /* Agar elemen di dalamnya bisa meregang penuh */
+        gap: 15px; /* Jarak antara baris logo dan baris pencarian */
+        padding: 15px 4vw; 
+    }
+       
+    .header-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end; /* Pisahkan Search dan Voice button sejauh mungkin */
+    }
+}
