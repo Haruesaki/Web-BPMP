@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './NewsSection.css';
 import NewsCard from './NewsCard';
 
@@ -25,38 +25,68 @@ const allNewsData = [
 ];
 
 const ITEMS_PER_PAGE = 4;
+const AUTO_SLIDE_INTERVAL = 5000; // 5 detik
 
 const NewsSection = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [featuredNews, setFeaturedNews] = useState(null);
     const [paginatedNews, setPaginatedNews] = useState([]);
-    const [thumbnailNews, setThumbnailNews] = useState([]);
+    const [featuredIndex, setFeaturedIndex] = useState(0);
+    const intervalRef = useRef(null);
 
     const totalPages = Math.ceil(allNewsData.length / ITEMS_PER_PAGE);
 
-    // Efek untuk memperbarui berita saat halaman berubah
+    // State turunan: Dapatkan berita unggulan dan thumbnail dari state utama
+    const featuredNews = paginatedNews[featuredIndex] || null;
+    const thumbnailNews = paginatedNews.filter((_, index) => index !== featuredIndex).slice(0, 3);
+
+    // Fungsi untuk menghentikan auto-slide
+    const stopAutoSlide = useCallback(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    }, []);
+    
+    // Fungsi untuk memulai auto-slide
+    const startAutoSlide = useCallback(() => {
+        stopAutoSlide(); // Hentikan dulu untuk menghindari duplikasi interval
+        if (paginatedNews.length <= 1) return;
+
+        intervalRef.current = setInterval(() => {
+            setFeaturedIndex(prevIndex => (prevIndex + 1) % paginatedNews.length);
+        }, AUTO_SLIDE_INTERVAL);
+    }, [paginatedNews.length, stopAutoSlide]);
+
+    // Efek untuk memuat data berita saat halaman berubah
     useEffect(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         const currentNews = allNewsData.slice(startIndex, endIndex);
-        
-        setPaginatedNews(currentNews);
-        
-        if (currentNews.length > 0) {
-            // Atur item pertama sebagai pratinjau utama (default)
-            setFeaturedNews(currentNews[0]);
-            // Atur sisanya sebagai thumbnail
-            setThumbnailNews(currentNews.slice(1, 4));
-        }
-    }, [currentPage]);
 
-    // Fungsi untuk mengubah pratinjau utama saat mouse hover di daftar berita
+        setPaginatedNews(currentNews);
+
+        if (currentNews.length > 0) {
+            setFeaturedIndex(0);
+        } else {
+            setFeaturedIndex(0);
+        }
+
+        // Cleanup interval saat berpindah halaman
+        return () => stopAutoSlide();
+    }, [currentPage, stopAutoSlide]);
+
+    // Efek untuk memulai/menghentikan auto-slide saat data berubah
+    useEffect(() => {
+        startAutoSlide();
+        return () => stopAutoSlide();
+    }, [paginatedNews, startAutoSlide]);
+
+    // Fungsi untuk mengubah pratinjau utama saat di-hover secara manual
     const handleSetFeatured = (newsItem) => {
-        if (featuredNews && featuredNews.id === newsItem.id) return; // Jangan render ulang jika itemnya sama
-        setFeaturedNews(newsItem);
-        // Perbarui thumbnail dengan item lain di halaman yang sama
-        const otherNews = paginatedNews.filter(item => item.id !== newsItem.id);
-        setThumbnailNews(otherNews.slice(0, 3));
+        const newIndex = paginatedNews.findIndex(item => item.id === newsItem.id);
+        if (newIndex !== -1 && newIndex !== featuredIndex) {
+            setFeaturedIndex(newIndex);
+        }
     };
 
     const handlePageChange = (pageNumber) => {
@@ -70,16 +100,29 @@ const NewsSection = () => {
                 <h2>BERITA TERKINI</h2>
             </div>
 
-            <div className="news-grid">
+            <div 
+                className="news-grid"
+                onMouseEnter={stopAutoSlide}
+                onMouseLeave={startAutoSlide}
+            >
                 <div className="news-left">
-                    {featuredNews && (
-                        <div className="featured-card">
-                            <img src={featuredNews.image} alt={featuredNews.title} className="featured-img" />
-                            <div className="featured-overlay">
-                                <h3>{featuredNews.title}</h3>
+                    <div className="featured-card-wrapper">
+                        {paginatedNews.length > 0 && (
+                            <div
+                                className="featured-card-track"
+                                style={{ transform: `translateX(-${featuredIndex * 100}%)` }}
+                            >
+                                {paginatedNews.map(news => (
+                                    <div className="featured-card" key={news.id}>
+                                        <img src={news.image} alt={news.title} className="featured-img" />
+                                        <div className="featured-overlay">
+                                            <h3>{news.title}</h3>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     <div className="thumbnail-row">
                         {thumbnailNews.map(thumb => (

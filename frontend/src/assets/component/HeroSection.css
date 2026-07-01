@@ -86,7 +86,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    flex: 0 0 43%;
+    flex: 0 0 45%;
     gap: 1.5rem;
     color: #ffffff;
     z-index: 222;
@@ -121,8 +121,7 @@
 }
 
 .bottom-logo {
-    height: clamp(40px, 5vw, 60px);
-    height: 120px;
+    height: clamp(70px, 8vw, 200px);
     width: auto;
 }
 
@@ -139,7 +138,7 @@
     /* --- REVISI: Ukuran dinamis dan selalu di pojok kanan bawah --- */
     width: 55vw;
     height: 90vh;
-    max-width: 1000px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
+    max-width: 800px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
     max-height: 950px;
 }
 
@@ -169,30 +168,6 @@
 }
 
 /* =========================================
-   RESPONSIVE HERO SECTION (<= 1600px)
-   ========================================= */
-@media (max-width: 1600px) {
-    .hero-right-cms {
-        /* Ukuran disesuaikan untuk layar laptop standar */
-        width: 55vw;
-        height: 85vh;
-    }
-
-    .hero-left-content {
-        flex: 0 0 45%;
-        z-index: 10;
-    }
-
-    .main-title {
-        font-size: clamp(2rem, 4vw, 3.5rem);
-    }
-
-    .bottom-logo {
-        height: clamp(35px, 10vw, 100px);
-    }
-}
-
-/* =========================================
    RESPONSIVE HERO SECTION (<= 1277px)
    ========================================= */
 @media (max-width: 1277px) {
@@ -212,18 +187,17 @@
         align-items: flex-start;
         flex: 1;
         gap: 20px;
-        padding-bottom: 30vh; /* Beri ruang di bawah agar teks tidak tertabrak gambar */
+        padding-bottom: 30vh;
         padding-top: 20px;
     }
 
     .hero-left-content {
-        width: 65%;
+        width: 70%;
         z-index: 10;
     }
 
-    /* Pada mobile, gambar tetap absolute di kanan bawah, hanya ukurannya disesuaikan */
     .hero-right-cms {
-        width: 58vw;
+        width: 50vw;
         height: 58vh;
     }
 
@@ -249,7 +223,7 @@
     }
 
     .main-title {
-        font-size: clamp(2rem, 6vw, 8rem);
+        font-size: clamp(2.5rem, 6vw, 8rem);
     }
 }
 
