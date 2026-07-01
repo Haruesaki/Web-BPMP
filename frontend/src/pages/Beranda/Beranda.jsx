@@ -5,15 +5,15 @@ import './Beranda.css';
 // (Path disesuaikan dengan struktur folder src/assets/component/ di gambar)
 import Navbar from '../../assets/component/Navbar';
 import Footer from '../../assets/component/Footer';
-import NewsCard from '../../assets/component/NewsCard';
+import FloatingSocialBar from '../../assets/component/FloatingSocialBar';
+import NewsSection from '../../assets/component/NewsSection';
+import HeroSection from '../../assets/component/HeroSection';
+
 
 import Logo from "../../assets/source/Logo.png";
 // --- IMPORT ASSETS (Hero, Sosial, Mitra & Postingan) ---
-import BackgroundLanding from "../../assets/source/Section-Landing.png";
-import Facebook from "../../assets/source/facebook.png";
 import Instagram from "../../assets/source/instagram.png";
 import Youtube from "../../assets/source/youtube.png";
-import Social from "../../assets/source/social.png";
 
 import Mitra1Jpg from "../../assets/source/Mitra (1).jpg";
 import Mitra1Png from "../../assets/source/Mitra (1).png";
@@ -64,13 +64,8 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 
 const Beranda = ({ lenisRef }) => {
   // --- STATE & REF UNTUK BERANDA (Hero, Typewriter, Mitra) ---
-  const [typedText, setTypedText] = useState('');
-  const [showSubtitle, setShowSubtitle] = useState(false);
-  const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
-
   const trackRef = useRef(null);
   const partnersSectionRef = useRef(null);
-  const heroImageRef = useRef(null);
 
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
@@ -260,29 +255,6 @@ const Beranda = ({ lenisRef }) => {
     };
   }, []);
 
-  // 3. EFEK TYPEWRITER
-  useEffect(() => {
-    let i = 0;
-    let typingInterval;
-
-    const startDelay = setTimeout(() => {
-      typingInterval = setInterval(() => {
-        if (i < fullText.length) {
-          setTypedText(fullText.substring(0, i + 1));
-          i++;
-        } else {
-          clearInterval(typingInterval);
-          setShowSubtitle(true);
-        }
-      }, 40); 
-    }, 500);
-
-    return () => {
-      clearTimeout(startDelay);
-      if (typingInterval) clearInterval(typingInterval);
-    };
-  }, []);
-
   // 4. EFEK MARQUEE SCROLL VELOCITY 
   useEffect(() => {
     const track = trackRef.current;
@@ -318,6 +290,7 @@ const Beranda = ({ lenisRef }) => {
 
     animationFrameId = requestAnimationFrame(animateMarquee);
     return () => cancelAnimationFrame(animationFrameId);
+  }, []); 
   }, []); 
 
   // 5. EFEK HERO PARALLAX
@@ -368,134 +341,11 @@ const Beranda = ({ lenisRef }) => {
       {/* 1. MENGGUNAKAN KOMPONEN NAVBAR */}
       <Navbar lenisRef={lenisRef} />
 
-      <aside className="floating-social-bar">
-        <div className="glass-sidebar-bg">
-          <div className="blur-shape shape-pertama"></div>
-          <div className="blur-shape shape-kedua"></div>
-          <div className="blur-shape shape-ketiga"></div>
-        </div>
+      <FloatingSocialBar />
 
-        <a href="#" className="social-icon" aria-label="Instagram">
-          <span className="social-text">@bpmplampung</span>
-          <img src={Instagram} alt="Instagram" />
-        </a>
-        <a href="#" className="social-icon" aria-label="YouTube">
-          <span className="social-text">bpmplampung</span>
-          <img src={Youtube} alt="YouTube" />
-        </a>
-        <a href="#" className="social-icon" aria-label="WhatsApp">
-          <span className="social-text">62+895-462-763</span>
-          <img src={Social} alt="WhatsApp" />
-        </a>
-        <a href="#" className="social-icon" aria-label="Facebook">
-          <span className="social-text">bpmplampung</span>
-          <img src={Facebook} alt="Facebook" />
-        </a>
-      </aside>
+      <HeroSection />
 
-      <div className="landing-wrapper">
-        <div className="background-glow-container"></div>
-        <section className="hero-section">
-          <div className="hero-flex-container">
-            <div className="hero-left-content">
-              <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
-
-              <h1 className="main-title">
-                {typedText}
-                <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
-              </h1>
-
-              <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
-                Kementerian Pendidikan Dasar dan Menengah
-              </p>
-
-              <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
-                <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
-                <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
-              </div>
-            </div>
-
-            <div className="hero-right-cms">
-              <img
-                ref={heroImageRef}
-                src={BackgroundLanding}
-                alt="Visual Gedung dan Latar Belakang BPMP"
-                className="cms-dynamic-image"
-              />
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <section className="news-section">
-        <div className="news-header-bar">
-          <h2>BERITA TERKINI</h2>
-        </div>
-
-        <div className="news-grid">
-          <div className="news-left">
-            <div className="featured-card">
-              <img src={PreviewBerita1Jpg} alt="Berita Utama BPMP" className="featured-img" />
-              <div className="featured-overlay">
-                <h3>
-                  Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas
-                  Layanan
-                </h3>
-              </div>
-            </div>
-
-            <div className="thumbnail-row">
-              <img src={PreviewBerita2} alt="Thumbnail 1" className="thumb-img" />
-              <img src={PreviewBerita3} alt="Thumbnail 2" className="thumb-img" />
-            </div>
-          </div>
-
-          <div className="news-divider"></div>
-
-          <div className="news-right">
-            <h3 className="right-title">INFORMASI TERKINI</h3>
-
-            <div className="news-list">
-              {/* 2. MENGGUNAKAN KOMPONEN NEWSCARD */}
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-            </div>
-
-            <div className="pagination">
-              <button className="page-arrow" aria-label="Previous">
-                <i className="fa-solid fa-chevron-left"></i>
-              </button>
-              <button className="page-num">1</button>
-              <button className="page-num">2</button>
-              <button className="page-num">3</button>
-              <span className="page-dots">....</span>
-              <button className="page-num">11</button>
-              <button className="page-num">12</button>
-              <button className="page-arrow" aria-label="Next">
-                <i className="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <NewsSection />
 
       <section className="partners-section" ref={partnersSectionRef}>
         <div className="partners-container">
@@ -568,6 +418,7 @@ const Beranda = ({ lenisRef }) => {
           <button className="yt-subscribe-btn">Subscribe</button>
         </div>
 
+{/* Konten Grid Video */}
         <div className="yt-content-area">
           <div className="yt-feed-grid">
 
