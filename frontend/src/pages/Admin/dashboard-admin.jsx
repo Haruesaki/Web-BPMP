@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './dashboard-admin.css';
 
+import AdminSidebar from '../../assets/component-admin/AdminSidebar';
+import AdminHeader from '../../assets/component-admin/AdminHeader';
+
 // =========================================================================
 //  IMPORT ASSET IKON UNTUK DROPDOWN "PILIH IKON" (FORM TAMBAH MENU)
 //  -----------------------------------------------------------------------
@@ -16,10 +19,8 @@ import './dashboard-admin.css';
 // =========================================================================
 
 const DashboardAdmin = () => {
-  // --- 1. STATE: SEARCH ---
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const searchWrapperRef = useRef(null);
-  const searchInputRef = useRef(null);
+  // --- 1. STATE: MENU AKTIF (dipakai AdminSidebar) ---
+  const [activeMenu, setActiveMenu] = useState('beranda');
 
   // --- 2. STATE: MODAL TAMBAH MENU ---
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -33,33 +34,7 @@ const DashboardAdmin = () => {
   const iconDropdownRef = useRef(null);
   const typeDropdownRef = useRef(null);
 
-  // --- 4. DATA: SIDEBAR MENU (ikon memakai Font Awesome dari kit yang sudah dimuat) ---
-  const menuItems = [
-    { id: 'berita', label: 'Berita', icon: 'fa-solid fa-newspaper' },
-    { id: 'profil', label: 'Profil', icon: 'fa-solid fa-circle-user' },
-    { id: 'ziwbk', label: 'ZIWBK-WBBM', icon: 'fa-solid fa-circle-check' },
-    { id: 'dokumen', label: 'Dokumen Kinerja', icon: 'fa-solid fa-file-lines' },
-    { id: 'pelayanan', label: 'Pelayanan Publik', icon: 'fa-solid fa-headset' },
-    { id: 'ppid', label: 'PPID', icon: 'fa-solid fa-circle-info' },
-    { id: 'program', label: 'Program dan Kegiatan', icon: 'fa-solid fa-calendar-check' },
-    { id: 'pengaduan', label: 'Pengaduan', icon: 'fa-solid fa-comments' },
-    { id: 'kontak', label: 'Kontak', icon: 'fa-solid fa-circle-question' },
-  ];
-
-  // Menu khusus Super Admin atau untuk Menu Static (dibedakan dengan garis pemisah)
-  const adminMenuItems1 = [
-    { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large' },
-    { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
-  ];
-  
-  const adminMenuItems2 = [
-    { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users' },
-    { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear' },
-  ];
-
-  const [activeMenu, setActiveMenu] = useState('beranda');
-
-  // --- 5. DATA: PILIHAN IKON DROPDOWN (FORM TAMBAH MENU) ---
+  // --- 4. DATA: PILIHAN IKON DROPDOWN (FORM TAMBAH MENU) ---
   // Sesuai desain: Dashboard, Berita, Profil, Setting.
   // 'fa' = kelas Font Awesome (dipakai sekarang). Bila ingin pakai gambar,
   // ganti render-nya dengan <img src={item.img} /> dan isi field 'img'.
@@ -70,10 +45,10 @@ const DashboardAdmin = () => {
     { value: 'setting', label: 'Setting', fa: 'fa-solid fa-gear' },
   ];
 
-  // --- 6. DATA: JENIS MENU ---
+  // --- 5. DATA: JENIS MENU ---
   const typeOptions = ['Page', 'Post', 'Link', 'Form Jabatan'];
 
-  // --- 7. DATA: STATISTIK PENGUNJUNG (chart) ---
+  // --- 6. DATA: STATISTIK PENGUNJUNG (chart) ---
   const chartData = [
     { day: 'Mon', value: 38 },
     { day: 'Tue', value: 70 },
@@ -84,33 +59,12 @@ const DashboardAdmin = () => {
     { day: 'Sun', value: 22 },
   ];
 
-  // --- 8. DATA: AKTIVITAS TERKINI ---
+  // --- 7. DATA: AKTIVITAS TERKINI ---
   const recentActivity = [
     { dot: 'grey', title: 'Berita "Update Kurikulum" published.', time: '2 hours ago' },
     { dot: 'orange', title: 'New document uploaded to ZIWBK-WBBM.', time: '5 hours ago' },
     { dot: 'grey', title: 'System backup completed successfully.', time: 'Yesterday, 11:00 PM' },
   ];
-
-  // --- 9. DATA: HASIL PENCARIAN TERBARU ---
-  const searchResults = [
-    { icon: 'fa-solid fa-newspaper', title: 'Update Kurikulum 2024', sub: 'Published in Berita' },
-    { icon: 'fa-solid fa-file-lines', title: 'Laporan Keuangan Januari', sub: 'Document in Dokumen Kinerja' },
-    { icon: 'fa-solid fa-circle-user', title: 'Profil Sekolah Dasar', sub: 'Page in Profil' },
-  ];
-
-  // --- EFFECT: Klik di luar search untuk menutup ---
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
-        setIsSearchActive(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    if (isSearchActive && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSearchActive]);
 
   // --- EFFECT: Klik di luar dropdown form untuk menutup ---
   useEffect(() => {
@@ -143,104 +97,15 @@ const DashboardAdmin = () => {
 
   return (
     <div className="admin-layout">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="admin-sidebar">
-        <div className="sidebar-brand">
-          <h1>Content Management<br />System Website BPMP</h1>
-        </div>
-
-        <nav className="sidebar-nav">
-          {adminMenuItems1.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeMenu === item.id ? 'active' : ''}`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <i className={item.icon}></i>
-              <span>{item.label}</span>
-            </button>
-          ))}
-
-          <div className="nav-divider"></div>
-
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeMenu === item.id ? 'active' : ''}`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <i className={item.icon}></i>
-              <span>{item.label}</span>
-            </button>
-          ))}
-
-          <div className="nav-divider"></div>
-
-          {adminMenuItems2.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeMenu === item.id ? 'active' : ''}`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <i className={item.icon}></i>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <button className="btn-tambah-menu" onClick={() => setIsMenuModalOpen(true)}>
-          <i className="fa-solid fa-plus"></i> Tambah Menu
-        </button>
-      </aside>
+      <AdminSidebar
+        activeMenu={activeMenu}
+        onMenuClick={setActiveMenu}
+        onTambahMenu={() => setIsMenuModalOpen(true)}
+      />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
-        {/* ---------- TOPBAR ---------- */}
-        <header className="admin-topbar">
-          <div className="search-wrapper" ref={searchWrapperRef}>
-            <div
-              className={`search-box ${isSearchActive ? 'active' : ''}`}
-              onClick={() => setIsSearchActive(true)}
-            >
-              <i className="fa-solid fa-magnifying-glass search-icon"></i>
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search..."
-                className="search-input"
-              />
-              <span className="search-shortcut">Ctrl + K</span>
-            </div>
-
-            {isSearchActive && (
-              <div className="search-dropdown">
-                <div className="search-dropdown-header">PENCARIAN TERBARU</div>
-                {searchResults.map((r, i) => (
-                  <div key={i} className="search-result-item">
-                    <span className="search-result-icon">
-                      <i className={r.icon}></i>
-                    </span>
-                    <div className="search-result-text">
-                      <div className="search-result-title">{r.title}</div>
-                      <div className="search-result-sub">{r.sub}</div>
-                    </div>
-                  </div>
-                ))}
-                <div className="search-dropdown-footer">Lihat semua hasil</div>
-              </div>
-            )}
-          </div>
-
-          <div className="topbar-profile">
-            <div className="profile-text">
-              <div className="profile-email">bpmp_lampung@gmail.co.id</div>
-              <div className="profile-role">Super Admin</div>
-            </div>
-            <div className="profile-avatar">
-              <i className="fa-solid fa-user"></i>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
 
         {/* ---------- CONTENT ---------- */}
         <main className="admin-content">
