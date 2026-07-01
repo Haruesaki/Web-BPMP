@@ -77,7 +77,7 @@ app.get('/api/youtube', async (req, res) => {
         // 3. Simpan data baru ke database menggunakan knex (hapus data lama agar rapi)
         await db('youtube_cache').del(); // Hapus cache lama
         await db('youtube_cache').insert({
-            videos_data: processedVideos,
+            videos_data: JSON.stringify(processedVideos),
             updated_at: db.fn.now()
         });
 

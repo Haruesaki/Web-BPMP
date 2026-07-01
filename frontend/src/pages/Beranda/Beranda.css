@@ -378,8 +378,7 @@
 
 .yt-feed-grid {
     display: flex;
-    /* gap: 25px; */
-    /* gap: 25px; */
+    gap: 25px;
 }
 /* --- Box Card Kiri & Kanan --- */
 .yt-main-column {
