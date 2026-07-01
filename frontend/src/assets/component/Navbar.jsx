@@ -4,6 +4,8 @@ import './Navbar.css';
 import Logo from "../source/Logo.png";
 import Dropdown from "../source/Dropdown.png";
 import IconTextToSpeech from "../source/Ikon-TextToSpeech.png";
+import Gedung from "../source/Section-Landing.png";
+import Profile from "../source/WOWOK.jpg";
 import { useTTS } from "../../context/TTSContext";
 
 
@@ -158,7 +160,9 @@ const Navbar = ({ lenisRef }) => {
           </button>
 
           <div className="header-logo">
-            <img src={Logo} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+            <div className="logo-container">
+              <img src={Logo} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+            </div>
           </div>
         </div>
 
