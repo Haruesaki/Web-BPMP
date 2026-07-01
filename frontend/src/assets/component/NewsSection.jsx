@@ -6,21 +6,17 @@ import NewsCard from './NewsCard';
 import PreviewBerita1Jpg from "../source/Preveiw-berita (1).jpg";
 import PreviewBerita2 from "../source/Preveiw-berita (2).jpg";
 import PreviewBerita3 from "../source/Preveiw-berita (3).jpg";
-import FotoInstagram1 from "../source/Foto-Instagram-1.png";
-import FotoInstagram2 from "../source/Foto-Instagram-2.png";
-import FotoInstagram3 from "../source/Foto-Instagram-3.png";
-import FotoInstagram4 from "../source/Foto-Instagram-4.png";
 
 // Data tiruan untuk semua artikel berita. Nantinya ini bisa diambil dari API.
 const allNewsData = [
     { id: 1, category: 'Berita', title: 'Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan', date: '15 Juni 2026', image: PreviewBerita1Jpg },
     { id: 2, category: 'Artikel', title: 'Pentingnya Digitalisasi Sekolah di Era Merdeka Belajar', date: '14 Juni 2026', image: PreviewBerita2 },
     { id: 3, category: 'Pengumuman', title: 'Jadwal Pelatihan Guru Penggerak Angkatan 12 Telah Dirilis', date: '13 Juni 2026', image: PreviewBerita3 },
-    { id: 4, category: 'Berita', title: 'BPMP Lampung Kembali Raih Penghargaan Zona Integritas Wilayah Bebas Korupsi', date: '12 Juni 2026', image: FotoInstagram1 },
+    { id: 4, category: 'Berita', title: 'BPMP Lampung Kembali Raih Penghargaan Zona Integritas Wilayah Bebas Korupsi', date: '12 Juni 2026', image: PreviewBerita1Jpg },
     // Halaman 2
-    { id: 5, category: 'Artikel', title: 'Strategi Jitu Peningkatan Mutu Pendidikan Dasar di Provinsi Lampung', date: '11 Juni 2026', image: FotoInstagram2 },
-    { id: 6, category: 'Berita', title: 'Kolaborasi dengan Universitas Lampung untuk Riset Pendidikan Terapan', date: '10 Juni 2026', image: FotoInstagram3 },
-    { id: 7, category: 'Pengumuman', title: 'Hasil Seleksi Administrasi Calon Fasilitator Program Sekolah Penggerak', date: '09 Juni 2026', image: FotoInstagram4 },
+    { id: 5, category: 'Artikel', title: 'Strategi Jitu Peningkatan Mutu Pendidikan Dasar di Provinsi Lampung', date: '11 Juni 2026', image: PreviewBerita2 },
+    { id: 6, category: 'Berita', title: 'Kolaborasi dengan Universitas Lampung untuk Riset Pendidikan Terapan', date: '10 Juni 2026', image: PreviewBerita3 },
+    { id: 7, category: 'Pengumuman', title: 'Hasil Seleksi Administrasi Calon Fasilitator Program Sekolah Penggerak', date: '09 Juni 2026', image: PreviewBerita1Jpg },
     { id: 8, category: 'Berita', title: 'Workshop Implementasi Kurikulum Merdeka di Daerah Terpencil, Terluar, dan Tertinggal', date: '08 Juni 2026', image: PreviewBerita1Jpg },
 ];
 

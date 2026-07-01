@@ -72,116 +72,7 @@ const Beranda = ({ lenisRef }) => {
   // --- YOUTUBE STATE ---
   const [ytVideos, setYtVideos] = useState([]);
 
-  useEffect(() => {
-    const newsLeft = document.querySelector('.news-left');
-    const featuredCard = document.querySelector('.featured-card');
-    const featuredImg = document.querySelector('.featured-img');
-    const titleEl = document.querySelector('.featured-overlay h3');
-    const thumbnails = document.querySelectorAll('.thumb-img');
 
-    let newsInterval;
-
-    if (newsLeft && featuredCard && featuredImg && titleEl) {
-      newsLeft.style.position = 'relative';
-
-      const sliderData = [{ src: featuredImg.src, title: titleEl.innerText }];
-      thumbnails.forEach((thumb, index) => {
-        sliderData.push({
-          src: thumb.src,
-          title: 'Informasi Berita Lanjutan BPMP Provinsi Lampung - Bagian ' + (index + 2),
-        });
-      });
-
-      let slideIndex = 0;
-      let isAnimating = false;
-
-      function autoSlideNews() {
-        if (isAnimating || document.hidden) return;
-        isAnimating = true;
-
-        const nextIndex = (slideIndex + 1) % sliderData.length;
-        const nextData = sliderData[nextIndex];
-
-        const oldClone = featuredCard.cloneNode(true);
-        const newClone = featuredCard.cloneNode(true);
-
-        newClone.querySelector('.featured-img').src = nextData.src;
-        newClone.querySelector('h3').innerText = nextData.title;
-
-        const cardTop = featuredCard.offsetTop;
-        const cardLeft = featuredCard.offsetLeft;
-        const cardWidth = featuredCard.offsetWidth;
-        const cardHeight = featuredCard.offsetHeight;
-
-        oldClone.style.cssText = `position: absolute; top: ${cardTop}px; left: ${cardLeft}px; width: ${cardWidth}px; height: ${cardHeight}px; margin: 0; z-index: 10;`;
-        newClone.style.cssText = `position: absolute; top: ${cardTop + cardHeight + 20}px; left: ${cardLeft}px; width: ${cardWidth}px; height: ${cardHeight}px; margin: 0; z-index: 11; transform: scale(0.8) translateZ(0); transform-origin: top center; opacity: 0; will-change: transform, top, opacity;`;
-
-        newsLeft.appendChild(oldClone);
-        newsLeft.appendChild(newClone);
-
-        featuredCard.style.opacity = '0';
-
-        const slideDuration = 800;
-        const easing = 'cubic-bezier(0.25, 1, 0.5, 1)';
-
-        oldClone.style.transition = `all ${slideDuration}ms ${easing}`;
-        newClone.style.transition = `all ${slideDuration}ms ${easing}`;
-
-        void newClone.offsetWidth;
-
-        oldClone.style.transform = 'translateY(-30%) scale(0.9) translateZ(0)';
-        oldClone.style.opacity = '0';
-
-        newClone.style.top = cardTop + 'px';
-        newClone.style.transform = 'scale(1) translateZ(0)';
-        newClone.style.opacity = '1';
-
-        setTimeout(() => {
-          const oldFeaturedSrc = sliderData[slideIndex].src;
-          thumbnails.forEach((thumb) => {
-            thumb.style.transition = 'all 0.3s ease';
-          });
-
-          for (let i = 0; i < thumbnails.length - 1; i++) {
-            thumbnails[i].style.opacity = '0';
-            thumbnails[i].style.transform = 'scale(0.8)';
-            setTimeout(() => {
-              thumbnails[i].src = thumbnails[i + 1].src;
-              thumbnails[i].style.opacity = '1';
-              thumbnails[i].style.transform = 'scale(1)';
-            }, 300);
-          }
-
-          const lastThumb = thumbnails[thumbnails.length - 1];
-          lastThumb.style.opacity = '0';
-          lastThumb.style.transform = 'scale(0.8)';
-          setTimeout(() => {
-            lastThumb.src = oldFeaturedSrc;
-            lastThumb.style.opacity = '1';
-            lastThumb.style.transform = 'scale(1)';
-          }, 300);
-        }, 100);
-
-        setTimeout(() => {
-          featuredImg.src = nextData.src;
-          titleEl.innerText = nextData.title;
-          featuredCard.style.opacity = '1';
-
-          oldClone.remove();
-          newClone.remove();
-
-          slideIndex = nextIndex;
-          isAnimating = false;
-        }, slideDuration);
-      }
-
-      newsInterval = setInterval(autoSlideNews, 4500);
-    }
-
-    return () => {
-      if (newsInterval) clearInterval(newsInterval);
-    };
-  }, []);
 
   // 2. LENS EFEK 3D LOGO MITRA
   useEffect(() => {
@@ -291,7 +182,6 @@ const Beranda = ({ lenisRef }) => {
     animationFrameId = requestAnimationFrame(animateMarquee);
     return () => cancelAnimationFrame(animationFrameId);
   }, []); 
-  }, []); 
 
   // 5. EFEK HERO PARALLAX
   // --- FETCH YOUTUBE VIDEOS ---
@@ -311,30 +201,7 @@ const Beranda = ({ lenisRef }) => {
   }, []);
 
 
-  useEffect(() => {
-    let animationFrame;
 
-    if (heroImageRef.current) {
-      heroImageRef.current.style.transformOrigin = 'right bottom';
-    }
-
-    const animateHero = () => {
-      if (!heroImageRef.current) return;
-
-      const scrollY = window.scrollY;
-      const translateY = Math.min(scrollY * 1.1, 1320);
-      const scale = Math.max(1 - scrollY * 0.00012, 0.93);
-      const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
-
-      heroImageRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
-      heroImageRef.current.style.filter = `brightness(${brightness})`;
-
-      animationFrame = requestAnimationFrame(animateHero);
-    };
-
-    animationFrame = requestAnimationFrame(animateHero);
-    return () => cancelAnimationFrame(animationFrame);
-  }, []);
 
   return (
     <>
