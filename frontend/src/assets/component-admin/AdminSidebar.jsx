@@ -31,7 +31,6 @@ const adminMenuItems1 = [
 
 // --- DATA: MENU KONTEN (bisa nantinya diganti sumber dinamis dari backend) ---
 const menuItems = [
-  { id: 'berita', label: 'Berita', icon: 'fa-solid fa-newspaper' },
   { id: 'ziwbk', label: 'ZIWBK-WBBM', icon: 'fa-solid fa-circle-check' },
   { id: 'dokumen', label: 'Dokumen Kinerja', icon: 'fa-solid fa-file-lines' },
   { id: 'pelayanan', label: 'Pelayanan Publik', icon: 'fa-solid fa-headset' },
