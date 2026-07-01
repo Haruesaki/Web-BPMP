@@ -1,0 +1,78 @@
+/* Lenis smooth scrolling defaults */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+/* Site Shell - base layout container */
+.site-shell {
+  --nav-text: rgba(255, 255, 255, 0.88);
+  --muted-text: rgba(255, 255, 255, 0.78);
+  --grid-line: rgba(255, 255, 255, 0.045);
+  --nav-highlight: rgba(255, 255, 255, 0.12);
+  --bg-primary: #070833;
+
+  position: relative;
+  min-height: 100svh;
+  overflow-x: hidden;
+  color: #ffffff;
+  background:
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(0deg, var(--grid-line) 1px, transparent 1px),
+    radial-gradient(circle at 25% 16%, rgba(38, 87, 187, 0.22), transparent 26rem),
+    var(--bg-primary);
+  background-size: 50px 50px, 50px 50px, auto, auto;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Base resets for lists and buttons */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* A11y - Focus Styles */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #36c2ff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection */
+::selection {
+  background: rgba(54, 194, 255, 0.3);
+  color: #fff;
+}
+
+/* Smooth scrolling for fallback */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Section separators - visual rhythm between sections */
+.section-separator {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.section-separator--dark {
+  background: rgba(255,255,255,0.08);
+  height: 2px;
+}
