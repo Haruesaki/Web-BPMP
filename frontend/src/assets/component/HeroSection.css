@@ -1,0 +1,327 @@
+/* =========================================
+   WADAH HALAMAN & ANIMASI (WRAPPERS)
+   ========================================= */
+.landing-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0B132B;
+    position: relative;
+    overflow-x: clip; /* KUNCI: Mencegah scroll horizontal dari elemen anak */
+    /* === TRIK ABSOLUTE-STICKY === */
+    /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
+    margin-top: -150px;
+    /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
+    padding-top: 140px;
+}
+
+/* --- Efek Highlight Cahaya (Glass Shine) --- */
+.background-glow-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.background-glow-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 25%;
+    height: 100%;
+    background: linear-gradient(to right,
+            rgba(67, 67, 67, 0) 0%,
+            rgba(255, 255, 255, 0.095) 35%,
+            rgba(255, 255, 255, 0.327) 50%,
+            rgba(255, 255, 255, 0.095) 65%,
+            rgba(67, 67, 67, 0) 100%);
+    filter: blur(100px);
+    transform: skewX(35deg);
+    animation: lightSweep 10s infinite;
+}
+
+@keyframes lightSweep {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* =========================================
+   HERO SECTION UTAMA
+   ========================================= */
+.hero-section {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.hero-flex-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 4vw;
+    gap: 2rem;
+    box-sizing: border-box;
+}
+
+/* --- Hero Content Kiri --- */
+.hero-left-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 0 0 43%;
+    gap: 1.5rem;
+    color: #ffffff;
+    z-index: 222;
+}
+
+.welcome-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-weight: 500;
+}
+
+.main-title {
+    font-family: 'Poppins', serif;
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.sub-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 400;
+    margin: 0;
+}
+
+.hero-logos-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.bottom-logo {
+    height: clamp(40px, 5vw, 60px);
+    height: 120px;
+    width: auto;
+}
+
+/* --- Hero Content Kanan (CMS) --- */
+.hero-right-cms {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    opacity: 0;
+    transform: translateY(150px);
+    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+    
+    /* --- REVISI: Ukuran dinamis dan selalu di pojok kanan bawah --- */
+    width: 55vw;
+    height: 90vh;
+    max-width: 1000px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
+    max-height: 950px;
+}
+
+@keyframes buildingSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(150px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cms-dynamic-image {
+    /* --- REVISI: Paksa gambar untuk scale down (contain) bukan terpotong (cover) --- */
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* KUNCI: Menyesuaikan ukuran tanpa memotong */
+    object-position: right bottom; /* KUNCI: Menempel di pojok kanan bawah wadah */
+    
+    pointer-events: none;
+    will-change: transform;
+    transform: translateY(0);
+    transition: filter .25s linear;
+}
+
+/* =========================================
+   RESPONSIVE HERO SECTION (<= 1600px)
+   ========================================= */
+@media (max-width: 1600px) {
+    .hero-right-cms {
+        /* Ukuran disesuaikan untuk layar laptop standar */
+        width: 55vw;
+        height: 85vh;
+    }
+
+    .hero-left-content {
+        flex: 0 0 45%;
+        z-index: 10;
+    }
+
+    .main-title {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+    }
+
+    .bottom-logo {
+        height: clamp(35px, 10vw, 100px);
+    }
+}
+
+/* =========================================
+   RESPONSIVE HERO SECTION (<= 1277px)
+   ========================================= */
+@media (max-width: 1277px) {
+    .landing-wrapper {
+        min-height: 100vh;
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+    }
+
+    .hero-section {
+        align-items: stretch;
+    }
+
+    .hero-flex-container {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex: 1;
+        gap: 20px;
+        padding-bottom: 30vh; /* Beri ruang di bawah agar teks tidak tertabrak gambar */
+        padding-top: 20px;
+    }
+
+    .hero-left-content {
+        width: 65%;
+        z-index: 10;
+    }
+
+    /* Pada mobile, gambar tetap absolute di kanan bawah, hanya ukurannya disesuaikan */
+    .hero-right-cms {
+        width: 58vw;
+        height: 58vh;
+    }
+
+    .cms-dynamic-image {
+        position: relative;
+    }
+
+    .main-title {
+        font-size: clamp(3rem, 4vw, 4rem);
+    }
+}
+
+
+@media (max-width: 900px) {
+    .hero-left-content {
+        width: 100%;
+    }
+
+    /* Pada layar ponsel, gambar lebih dominan di kanan bawah */
+    .hero-right-cms {
+        width: 100vw;
+        height: 45vh;
+    }
+
+    .main-title {
+        font-size: clamp(2rem, 6vw, 8rem);
+    }
+}
+
+/* =========================================
+   ANIMASI ENTRANCE (TYPEWRITER & FADE)
+   ========================================= */
+.entrance-fade-down {
+    opacity: 0;
+    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.entrance-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.entrance-fade-up-delay {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+    visibility: hidden;
+}
+
+/* Kursor berkedip layaknya terminal */
+.typing-cursor {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 300;
+    margin-left: 5px;
+    animation: blinkCursor 0.8s infinite;
+}
+
+/* Sembunyikan kursor jika sudah selesai mengetik */
+.typing-cursor.stop-blink {
+    display: none;
+}
+
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blinkCursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}

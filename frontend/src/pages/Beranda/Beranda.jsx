@@ -5,15 +5,15 @@ import './Beranda.css';
 // (Path disesuaikan dengan struktur folder src/assets/component/ di gambar)
 import Navbar from '../../assets/component/Navbar';
 import Footer from '../../assets/component/Footer';
-import NewsCard from '../../assets/component/NewsCard';
+import FloatingSocialBar from '../../assets/component/FloatingSocialBar';
+import NewsSection from '../../assets/component/NewsSection';
+import HeroSection from '../../assets/component/HeroSection';
+
 
 import Logo from "../../assets/source/Logo.png";
 // --- IMPORT ASSETS (Hero, Sosial, Mitra & Postingan) ---
-import BackgroundLanding from "../../assets/source/Section-Landing.png";
-import Facebook from "../../assets/source/facebook.png";
 import Instagram from "../../assets/source/instagram.png";
 import Youtube from "../../assets/source/youtube.png";
-import Social from "../../assets/source/social.png";
 
 import Mitra1Jpg from "../../assets/source/Mitra (1).jpg";
 import Mitra1Png from "../../assets/source/Mitra (1).png";
@@ -27,217 +27,15 @@ import FotoInstagram2 from "../../assets/source/Foto-Instagram-2.png";
 import FotoInstagram3 from "../../assets/source/Foto-Instagram-3.png";
 import FotoInstagram4 from "../../assets/source/Foto-Instagram-4.png";
 
-import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
-
 const Beranda = ({ lenisRef }) => {
   // --- STATE & REF UNTUK BERANDA (Hero, Typewriter, Mitra) ---
-  const [typedText, setTypedText] = useState('');
-  const [showSubtitle, setShowSubtitle] = useState(false);
-  const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
-
   const trackRef = useRef(null);
   const partnersSectionRef = useRef(null);
-  const heroImageRef = useRef(null);
 
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const searchInputRef = useRef(null);
-  const searchWrapperRef = useRef(null);
-  
-  const [isProfileDropdownLocked, setIsProfileDropdownLocked] = useState(false);
-  const profileDropdownRef = useRef(null);
-  // ==========================================
-
   // --- YOUTUBE STATE ---
   const [ytVideos, setYtVideos] = useState([]);
-
-  // Fungsi untuk handle klik tombol search
-  const handleSearchToggle = (e) => {
-    e.preventDefault();
-    setIsSearchActive(!isSearchActive);
-  };
-
-  // Effect khusus untuk "Klik di luar search bar agar menutup" dan Auto-focus
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Jika klik terjadi di luar komponen searchWrapper, matikan state active
-      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
-        setIsSearchActive(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    // Auto focus ke input saat search terbuka
-    if (isSearchActive && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSearchActive]);
-
-  // --- DROPDOWN LOCK: Tutup dropdown Profil saat klik di luar ---
-  useEffect(() => {
-    if (!isProfileDropdownLocked) return;
-
-    const handleClickOutsideProfile = (event) => {
-      if (
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target)
-      ) {
-        setIsProfileDropdownLocked(false);
-      }
-    };
-
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutsideProfile);
-    }, 50);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('mousedown', handleClickOutsideProfile);
-    };
-  }, [isProfileDropdownLocked]);
-
-  // --- DROPDOWN LOCK: Tutup dropdown Profil saat scroll ---
-  useEffect(() => {
-    if (!isProfileDropdownLocked) return;
-
-    const lenis = lenisRef?.current;
-
-    const handleScroll = () => {
-      setIsProfileDropdownLocked(false);
-    };
-
-    if (lenis) {
-      lenis.on('scroll', handleScroll, { passive: true });
-      return () => lenis.off('scroll', handleScroll);
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isProfileDropdownLocked, lenisRef]);
-
-  const handleProfileClick = (e) => {
-    e.preventDefault();
-    setIsProfileDropdownLocked((prev) => !prev);
-  };
-
-  useEffect(() => {
-    const newsLeft = document.querySelector('.news-left');
-    const featuredCard = document.querySelector('.featured-card');
-    const featuredImg = document.querySelector('.featured-img');
-    const titleEl = document.querySelector('.featured-overlay h3');
-    const thumbnails = document.querySelectorAll('.thumb-img');
-
-    let newsInterval;
-
-    if (newsLeft && featuredCard && featuredImg && titleEl) {
-      newsLeft.style.position = 'relative';
-
-      const sliderData = [{ src: featuredImg.src, title: titleEl.innerText }];
-      thumbnails.forEach((thumb, index) => {
-        sliderData.push({
-          src: thumb.src,
-          title: 'Informasi Berita Lanjutan BPMP Provinsi Lampung - Bagian ' + (index + 2),
-        });
-      });
-
-      let slideIndex = 0;
-      let isAnimating = false;
-
-      function autoSlideNews() {
-        if (isAnimating || document.hidden) return;
-        isAnimating = true;
-
-        const nextIndex = (slideIndex + 1) % sliderData.length;
-        const nextData = sliderData[nextIndex];
-
-        const oldClone = featuredCard.cloneNode(true);
-        const newClone = featuredCard.cloneNode(true);
-
-        newClone.querySelector('.featured-img').src = nextData.src;
-        newClone.querySelector('h3').innerText = nextData.title;
-
-        const cardTop = featuredCard.offsetTop;
-        const cardLeft = featuredCard.offsetLeft;
-        const cardWidth = featuredCard.offsetWidth;
-        const cardHeight = featuredCard.offsetHeight;
-
-        oldClone.style.cssText = `position: absolute; top: ${cardTop}px; left: ${cardLeft}px; width: ${cardWidth}px; height: ${cardHeight}px; margin: 0; z-index: 10;`;
-        newClone.style.cssText = `position: absolute; top: ${cardTop + cardHeight + 20}px; left: ${cardLeft}px; width: ${cardWidth}px; height: ${cardHeight}px; margin: 0; z-index: 11; transform: scale(0.8) translateZ(0); transform-origin: top center; opacity: 0; will-change: transform, top, opacity;`;
-
-        newsLeft.appendChild(oldClone);
-        newsLeft.appendChild(newClone);
-
-        featuredCard.style.opacity = '0';
-
-        const slideDuration = 800;
-        const easing = 'cubic-bezier(0.25, 1, 0.5, 1)';
-
-        oldClone.style.transition = `all ${slideDuration}ms ${easing}`;
-        newClone.style.transition = `all ${slideDuration}ms ${easing}`;
-
-        void newClone.offsetWidth;
-
-        oldClone.style.transform = 'translateY(-30%) scale(0.9) translateZ(0)';
-        oldClone.style.opacity = '0';
-
-        newClone.style.top = cardTop + 'px';
-        newClone.style.transform = 'scale(1) translateZ(0)';
-        newClone.style.opacity = '1';
-
-        setTimeout(() => {
-          const oldFeaturedSrc = sliderData[slideIndex].src;
-          thumbnails.forEach((thumb) => {
-            thumb.style.transition = 'all 0.3s ease';
-          });
-
-          for (let i = 0; i < thumbnails.length - 1; i++) {
-            thumbnails[i].style.opacity = '0';
-            thumbnails[i].style.transform = 'scale(0.8)';
-            setTimeout(() => {
-              thumbnails[i].src = thumbnails[i + 1].src;
-              thumbnails[i].style.opacity = '1';
-              thumbnails[i].style.transform = 'scale(1)';
-            }, 300);
-          }
-
-          const lastThumb = thumbnails[thumbnails.length - 1];
-          lastThumb.style.opacity = '0';
-          lastThumb.style.transform = 'scale(0.8)';
-          setTimeout(() => {
-            lastThumb.src = oldFeaturedSrc;
-            lastThumb.style.opacity = '1';
-            lastThumb.style.transform = 'scale(1)';
-          }, 300);
-        }, 100);
-
-        setTimeout(() => {
-          featuredImg.src = nextData.src;
-          titleEl.innerText = nextData.title;
-          featuredCard.style.opacity = '1';
-
-          oldClone.remove();
-          newClone.remove();
-
-          slideIndex = nextIndex;
-          isAnimating = false;
-        }, slideDuration);
-      }
-
-      newsInterval = setInterval(autoSlideNews, 4500);
-    }
-
-    return () => {
-      if (newsInterval) clearInterval(newsInterval);
-    };
-  }, []);
 
   // 2. LENS EFEK 3D LOGO MITRA
   useEffect(() => {
@@ -311,29 +109,6 @@ const Beranda = ({ lenisRef }) => {
     };
   }, []);
 
-  // 3. EFEK TYPEWRITER
-  useEffect(() => {
-    let i = 0;
-    let typingInterval;
-
-    const startDelay = setTimeout(() => {
-      typingInterval = setInterval(() => {
-        if (i < fullText.length) {
-          setTypedText(fullText.substring(0, i + 1));
-          i++;
-        } else {
-          clearInterval(typingInterval);
-          setShowSubtitle(true);
-        }
-      }, 40); 
-    }, 500);
-
-    return () => {
-      clearTimeout(startDelay);
-      if (typingInterval) clearInterval(typingInterval);
-    };
-  }, []);
-
   // 4. EFEK MARQUEE SCROLL VELOCITY 
   useEffect(() => {
     const track = trackRef.current;
@@ -387,166 +162,16 @@ const Beranda = ({ lenisRef }) => {
     fetchYouTube();
   }, []);
 
-
-  // 5. EFEK HERO PARALLAX
-  useEffect(() => {
-    let animationFrame;
-
-    if (heroImageRef.current) {
-      heroImageRef.current.style.transformOrigin = 'right bottom';
-    }
-
-    const animateHero = () => {
-      if (!heroImageRef.current) return;
-
-      const scrollY = window.scrollY;
-      const translateY = Math.min(scrollY * 1.1, 1320);
-      const scale = Math.max(1 - scrollY * 0.00012, 0.93);
-      const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
-
-      heroImageRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
-      heroImageRef.current.style.filter = `brightness(${brightness})`;
-
-      animationFrame = requestAnimationFrame(animateHero);
-    };
-
-    animationFrame = requestAnimationFrame(animateHero);
-    return () => cancelAnimationFrame(animationFrame);
-  }, []);
-
   return (
     <>
       {/* 1. MENGGUNAKAN KOMPONEN NAVBAR */}
       <Navbar lenisRef={lenisRef} />
 
-      <aside className="floating-social-bar">
-        <div className="glass-sidebar-bg">
-          <div className="blur-shape shape-pertama"></div>
-          <div className="blur-shape shape-kedua"></div>
-          <div className="blur-shape shape-ketiga"></div>
-        </div>
+      <FloatingSocialBar />
 
-        <a href="#" className="social-icon" aria-label="Instagram">
-          <span className="social-text">@bpmplampung</span>
-          <img src={Instagram} alt="Instagram" />
-        </a>
-        <a href="#" className="social-icon" aria-label="YouTube">
-          <span className="social-text">bpmplampung</span>
-          <img src={Youtube} alt="YouTube" />
-        </a>
-        <a href="#" className="social-icon" aria-label="WhatsApp">
-          <span className="social-text">62+895-462-763</span>
-          <img src={Social} alt="WhatsApp" />
-        </a>
-        <a href="#" className="social-icon" aria-label="Facebook">
-          <span className="social-text">bpmplampung</span>
-          <img src={Facebook} alt="Facebook" />
-        </a>
-      </aside>
+      <HeroSection />
 
-      <div className="landing-wrapper">
-        <div className="background-glow-container"></div>
-        <section className="hero-section">
-          <div className="hero-flex-container">
-            <div className="hero-left-content">
-              <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
-
-              <h1 className="main-title">
-                {typedText}
-                <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
-              </h1>
-
-              <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
-                Kementerian Pendidikan Dasar dan Menengah
-              </p>
-
-              <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
-                <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
-                <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
-              </div>
-            </div>
-
-            <div className="hero-right-cms">
-              <img
-                ref={heroImageRef}
-                src={BackgroundLanding}
-                alt="Visual Gedung dan Latar Belakang BPMP"
-                className="cms-dynamic-image"
-              />
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <section className="news-section">
-        <div className="news-header-bar">
-          <h2>BERITA TERKINI</h2>
-        </div>
-
-        <div className="news-grid">
-          <div className="news-left">
-            <div className="featured-card">
-              <img src={PreviewBerita1Jpg} alt="Berita Utama BPMP" className="featured-img" />
-              <div className="featured-overlay">
-                <h3>
-                  Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas
-                  Layanan
-                </h3>
-              </div>
-            </div>
-
-            <div className="thumbnail-row">
-              <img src={PreviewBerita2} alt="Thumbnail 1" className="thumb-img" />
-              <img src={PreviewBerita3} alt="Thumbnail 2" className="thumb-img" />
-            </div>
-          </div>
-
-          <div className="news-divider"></div>
-
-          <div className="news-right">
-            <h3 className="right-title">INFORMASI TERKINI</h3>
-
-            <div className="news-list">
-              {/* 2. MENGGUNAKAN KOMPONEN NEWSCARD */}
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-              <NewsCard 
-                category="Berita" 
-                title="Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan"
-                date="15 Juni 2026" 
-              />
-            </div>
-
-            <div className="pagination">
-              <button className="page-arrow" aria-label="Previous">
-                <i className="fa-solid fa-chevron-left"></i>
-              </button>
-              <button className="page-num">1</button>
-              <button className="page-num">2</button>
-              <button className="page-num">3</button>
-              <span className="page-dots">....</span>
-              <button className="page-num">11</button>
-              <button className="page-num">12</button>
-              <button className="page-arrow" aria-label="Next">
-                <i className="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <NewsSection />
 
       <section className="partners-section" ref={partnersSectionRef}>
         <div className="partners-container">

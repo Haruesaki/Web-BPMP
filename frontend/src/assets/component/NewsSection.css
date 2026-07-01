@@ -1,0 +1,208 @@
+/* =========================================
+   SECTION BERITA & INFORMASI
+   ========================================= */
+.news-section {
+    width: 90%;
+    margin-top: 50px;
+    margin-bottom: 80px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #0B132B;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+.news-header-bar {
+    background-color: #1A3C87;
+    padding: 20px 60px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.news-header-bar h2 {
+    color: #ffffff;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.news-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 50px 60px;
+    margin: 0 auto;
+}
+
+.news-left,
+.news-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.news-divider {
+    width: 2px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    margin: 10px 10px;
+}
+
+/* --- Grid Berita Kiri --- */
+.news-left {
+    gap: 20px;
+}
+
+.featured-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    background-color: #1A3C87;
+}
+
+.featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.featured-card:hover .featured-img {
+    transform: scale(1.05);
+}
+
+.featured-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 60px 25px 25px 25px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+}
+
+.featured-overlay h3 {
+    color: #ffffff;
+    font-size: clamp(14px, 1.5vw, 18px);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.thumbnail-row {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+
+.thumb-img {
+    flex: 1;
+    max-width: 140px;
+    height: 90px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: #1A3C87;
+}
+
+/* --- Grid Berita Kanan --- */
+.right-title {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 30px;
+    letter-spacing: 0.5px;
+}
+
+.news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Pagination Berita --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 35px;
+}
+
+.page-num {
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.page-num:hover {
+    background-color: #d1d8e0;
+}
+
+.page-num.active {
+    background-color: #1A3C87;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+}
+
+.page-arrow {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-arrow:hover:not(:disabled) {
+    background-color: #ffffff;
+    color: #0B132B;
+}
+
+.page-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* --- Responsive Berita --- */
+@media (max-width: 960px) {
+    .news-grid {
+        flex-direction: column;
+        padding: 30px 20px;
+    }
+
+    .news-divider {
+        width: 100%;
+        height: 2px;
+        margin: 20px 0;
+    }
+
+    .news-header-bar {
+        padding: 20px;
+    }
+}
