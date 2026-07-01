@@ -17,9 +17,11 @@ app.get('/api/salam', (req, res) => {
 
 // Endpoint untuk mengambil 3 video terbaru dari YouTube (dengan caching PostgreSQL)
 app.get('/api/youtube', async (req, res) => {
+    console.log("Menerima request /api/youtube");
     try {
-        // 1. Cek cache di database terlebih dahulu menggunakan knex
+        console.log("Menghubungi DB...");
         const cacheData = await db('youtube_cache').orderBy('id', 'desc').first();
+        console.log("DB response received!");
         const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 Jam
 
         if (cacheData) {
@@ -29,7 +31,8 @@ app.get('/api/youtube', async (req, res) => {
             // Jika cache masih valid (di bawah 1 jam)
             if (now - updatedAt < CACHE_DURATION_MS) {
                 console.log("Menggunakan data dari cache PostgreSQL (Knex)...");
-                return res.json({ success: true, data: cacheData.videos_data, cached: true });
+                const data = typeof cacheData.videos_data === 'string' ? JSON.parse(cacheData.videos_data) : cacheData.videos_data;
+                return res.json({ success: true, data: data, cached: true });
             }
         }
 
@@ -74,7 +77,7 @@ app.get('/api/youtube', async (req, res) => {
         // 3. Simpan data baru ke database menggunakan knex (hapus data lama agar rapi)
         await db('youtube_cache').del(); // Hapus cache lama
         await db('youtube_cache').insert({
-            videos_data: JSON.stringify(processedVideos),
+            videos_data: processedVideos,
             updated_at: db.fn.now()
         });
 
