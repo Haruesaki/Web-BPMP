@@ -107,21 +107,18 @@ const NewsSection = () => {
             >
                 <div className="news-left">
                     <div className="featured-card-wrapper">
-                        {paginatedNews.length > 0 && (
+                        {paginatedNews.map((news, index) => (
                             <div
-                                className="featured-card-track"
-                                style={{ transform: `translateX(-${featuredIndex * 100}%)` }}
+                                className="featured-card"
+                                key={news.id}
+                                style={{ transform: `translateX(${(index - featuredIndex) * 100}%)` }}
                             >
-                                {paginatedNews.map(news => (
-                                    <div className="featured-card" key={news.id}>
-                                        <img src={news.image} alt={news.title} className="featured-img" />
-                                        <div className="featured-overlay">
-                                            <h3>{news.title}</h3>
-                                        </div>
-                                    </div>
-                                ))}
+                                <img src={news.image} alt={news.title} className="featured-img" />
+                                <div className="featured-overlay">
+                                    <h3>{news.title}</h3>
+                                </div>
                             </div>
-                        )}
+                        ))}
                     </div>
 
                     <div className="thumbnail-row">

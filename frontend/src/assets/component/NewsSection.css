@@ -62,27 +62,29 @@
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 10;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    background-color: #1A3C87; /* Warna latar belakang jika gambar belum termuat */
+    /* Wrapper ini sekarang hanya menjadi "panggung" tak terlihat untuk animasi. */
+    /* Semua gaya visual dipindahkan ke .featured-card */
+    overflow: hidden; 
 }
 
-/* Track yang akan bergerak secara horizontal */
 .featured-card-track {
-    display: flex;
-    height: 100%;
-    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); /* Animasi slide */
+    /* Elemen ini tidak lagi digunakan. */
 }
 
-/* Setiap item slide di dalam track */
+/* Setiap kartu sekarang adalah unit animasi yang lengkap */
 .featured-card {
     width: 100%;
     height: 100%;
-    flex-shrink: 0; /* Mencegah item menyusut */
-    position: relative;
-    overflow: hidden; /* Pastikan konten di dalamnya tidak meluber */
+    position: absolute; /* KUNCI: Semua card ditumpuk di posisi yang sama */
+    top: 0;
+    left: 0;
+    overflow: hidden; /* Untuk menjaga konten di dalam card (misal: efek zoom gambar) */
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); /* KUNCI: Animasikan setiap card secara individual */
+    /* Gaya visual dari wrapper dipindahkan ke sini */
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    background-color: #1A3C87;
 }
 
 .featured-img {
