@@ -41,8 +41,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+.header-logo {
+    height: clamp(45px, 4vw, 65px);
+    width: clamp(250px, 22vw, 380px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
 .header-logo .main-logo {
-    height: clamp(40px, 2.8vw, 70px);
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
     display: block;
 }
@@ -530,17 +550,56 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
    (Memindahkan Search & Voice Button ke Bawah Logo)
    ========================================= */
 @media (max-width: 845px) {
-    /* 1. Ubah susunan Header Top menjadi menurun (Kolom) */
     .header-top {
-        flex-direction: column;
-        align-items: stretch; /* Agar elemen di dalamnya bisa meregang penuh */
-        gap: 15px; /* Jarak antara baris logo dan baris pencarian */
-        padding: 15px 4vw; 
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* KUNCI: Sejajarkan item ke atas agar logo tidak di tengah */
+        row-gap: 15px; /* Jarak vertikal antar baris */
     }
        
     .header-actions {
-        width: 100%;
+        /* KUNCI: Tumpuk tombol secara vertikal dan ratakan ke kanan */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
         margin-left: 0;
-        justify-content: flex-end; /* Pisahkan Search dan Voice button sejauh mungkin */
+        gap: 15px;
+    }
+
+    .header-actions .search-wrapper {
+        order: 2; /* Pastikan search-bar muncul di urutan kedua (bawah) */
+    }
+
+    .header-actions .btn-voice {
+        order: 1; /* Pastikan tombol suara di urutan pertama (atas) */
+    }
+}
+
+/* =========================================
+   BREAKPOINT 4: MOBILE LAYOUT (<= 625px)
+   (Memindahkan Search & Voice Button ke Bawah Logo)
+   ========================================= */
+@media (max-width: 625px) {
+    .header-top {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px; /* Jarak vertikal antar baris */
+    }
+       
+    .header-actions {
+        display: flex;
+        flex-direction: row;
+        align-self: flex-end;
+        margin-left: 0;
+        gap: 15px;
+
+    }
+
+    .header-actions .search-wrapper {
+        order: 1; /* Pastikan search-bar muncul di urutan kedua (bawah) */
+    }
+
+    .header-actions .btn-voice {
+        order: 2; /* Pastikan tombol suara di urutan pertama (atas) */
     }
 }
