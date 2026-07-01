@@ -22,10 +22,6 @@ import Mitra3 from "../../assets/source/Mitra (3).png";
 import Mitra4 from "../../assets/source/Mitra (4).png";
 import Mitra5 from "../../assets/source/Mitra (5).png";
 
-import FotoInstagram2 from "../../assets/source/Foto-Instagram-2.png";
-import FotoInstagram3 from "../../assets/source/Foto-Instagram-3.png";
-import FotoInstagram4 from "../../assets/source/Foto-Instagram-4.png";
-
 import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
 import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
 import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
@@ -556,15 +552,9 @@ const Beranda = ({ lenisRef }) => {
           <div className="ig-feed-grid">
             {/* Dynamic Instagram Embed Component */}
             <InstagramEmbedCard postId="DaMGvRKAb7z" />
-            <div className="ig-post-card">
-              <img src={FotoInstagram2} alt="Postingan Instagram 2" className="ig-post-img" />
-            </div>
-            <div className="ig-post-card">
-              <img src={FotoInstagram3} alt="Postingan Instagram 3" className="ig-post-img" />
-            </div>
-            <div className="ig-post-card">
-              <img src={FotoInstagram4} alt="Postingan Instagram 4" className="ig-post-img" />
-            </div>
+            <InstagramEmbedCard postId="DZR9Hdfh9Zs" />
+            <InstagramEmbedCard postId="DaNwf5vyIYn" />
+            <InstagramEmbedCard postId="DaKohaEPomy" />
           </div>
         </div>
       </section>
