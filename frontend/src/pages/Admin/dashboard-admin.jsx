@@ -71,7 +71,7 @@ const DashboardAdmin = () => {
   ];
 
   // --- 6. DATA: JENIS MENU ---
-  const typeOptions = ['Page', 'Post', 'Link'];
+  const typeOptions = ['Page', 'Post', 'Link', 'Form Jabatan'];
 
   // --- 7. DATA: STATISTIK PENGUNJUNG (chart) ---
   const chartData = [
