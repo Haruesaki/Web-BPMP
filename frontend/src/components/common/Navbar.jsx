@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Navbar.css';
 
-import Logo from "../source/Logo.png";
-import Dropdown from "../source/Dropdown.png";
-import IconTextToSpeech from "../source/Ikon-TextToSpeech.png";
-import Gedung from "../source/Section-Landing.png";
-import Profile from "../source/WOWOK.jpg";
+import Logo from "../../assets/source/Logo.png";
+import Dropdown from "../../assets/source/Dropdown.png";
+import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
+import Gedung from "../../assets/source/Section-Landing.png";
+import Profile from "../../assets/source/WOWOK.jpg";
 import { useTTS } from "../../context/TTSContext";
 
 

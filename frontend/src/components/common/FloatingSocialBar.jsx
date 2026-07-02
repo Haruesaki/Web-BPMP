@@ -2,10 +2,10 @@ import React from 'react';
 import './FloatingSocialBar.css';
 
 // --- IMPORT ASSETS ---
-import Facebook from "../source/facebook.png";
-import Instagram from "../source/instagram.png";
-import Youtube from "../source/youtube.png";
-import Social from "../source/social.png";
+import Facebook from "../../assets/source/facebook.png";
+import Instagram from "../../assets/source/instagram.png";
+import Youtube from "../../assets/source/youtube.png";
+import Social from "../../assets/source/social.png";
 
 const FloatingSocialBar = () => {
   return (

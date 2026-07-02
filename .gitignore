@@ -1,5 +1,6 @@
-/GEMINI.md
 /.agents
 /log.md
 .qwen/
 .log/
+**/.env
+**/.env.*

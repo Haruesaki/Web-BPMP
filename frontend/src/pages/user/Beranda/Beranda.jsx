@@ -1,30 +1,31 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useYoutube } from '../../../hooks/useYoutube';
 import './Beranda.css';
 
 // --- IMPORT COMPONENTS KITA ---
-// (Path disesuaikan dengan struktur folder src/assets/component/ di gambar)
-import Navbar from '../../assets/component/Navbar';
-import Footer from '../../assets/component/Footer';
-import FloatingSocialBar from '../../assets/component/FloatingSocialBar';
-import NewsSection from '../../assets/component/NewsSection';
-import HeroSection from '../../assets/component/HeroSection';
+// (Path disesuaikan dengan struktur folder src/components/common/ di gambar)
+import Navbar from '../../../components/common/Navbar';
+import Footer from '../../../components/common/Footer';
+import FloatingSocialBar from '../../../components/common/FloatingSocialBar';
+import NewsSection from '../../../components/common/NewsSection';
+import HeroSection from '../../../components/common/HeroSection';
 
 
-import Logo from "../../assets/source/Logo.png";
+import Logo from "../../../assets/source/Logo.png";
 // --- IMPORT ASSETS (Hero, Sosial, Mitra & Postingan) ---
-import Instagram from "../../assets/source/instagram.png";
-import Youtube from "../../assets/source/youtube.png";
+import Instagram from "../../../assets/source/instagram.png";
+import Youtube from "../../../assets/source/youtube.png";
 
-import Mitra1Jpg from "../../assets/source/Mitra (1).jpg";
-import Mitra1Png from "../../assets/source/Mitra (1).png";
-import Mitra2 from "../../assets/source/Mitra (2).png";
-import Mitra3 from "../../assets/source/Mitra (3).png";
-import Mitra4 from "../../assets/source/Mitra (4).png";
-import Mitra5 from "../../assets/source/Mitra (5).png";
+import Mitra1Jpg from "../../../assets/source/Mitra (1).jpg";
+import Mitra1Png from "../../../assets/source/Mitra (1).png";
+import Mitra2 from "../../../assets/source/Mitra (2).png";
+import Mitra3 from "../../../assets/source/Mitra (3).png";
+import Mitra4 from "../../../assets/source/Mitra (4).png";
+import Mitra5 from "../../../assets/source/Mitra (5).png";
 
-import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
+import PreviewBerita1Jpg from "../../../assets/source/Preveiw-berita (1).jpg";
+import PreviewBerita2 from "../../../assets/source/Preveiw-berita (2).jpg";
+import PreviewBerita3 from "../../../assets/source/Preveiw-berita (3).jpg";
 
 const InstagramEmbedCard = React.memo(({ postId }) => {
   useEffect(() => {
@@ -70,7 +71,7 @@ const Beranda = ({ lenisRef }) => {
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
   // --- YOUTUBE STATE ---
-  const [ytVideos, setYtVideos] = useState([]);
+  const { ytVideos } = useYoutube();
 
 
 

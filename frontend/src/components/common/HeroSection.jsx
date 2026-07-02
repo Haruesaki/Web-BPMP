@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import './HeroSection.css';
 
 // Import assets
-import WOWOK from '../source/WOWOK.jpg';
-import Mitra4 from '../source/Mitra (4).png';
-import Mitra5 from '../source/Mitra (5).png';
-import Background from '../source/section-landing.png';
+import WOWOK from '../../assets/source/WOWOK.jpg';
+import Mitra4 from '../../assets/source/Mitra (4).png';
+import Mitra5 from '../../assets/source/Mitra (5).png';
+import Background from '../../assets/source/section-landing.png';
 
 const HeroSection = () => {
     const [typedText, setTypedText] = useState('');

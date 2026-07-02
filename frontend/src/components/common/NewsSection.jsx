@@ -3,9 +3,9 @@ import './NewsSection.css';
 import NewsCard from './NewsCard';
 
 // Import assets untuk data tiruan (mock data)
-import PreviewBerita1Jpg from "../source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../source/Preveiw-berita (3).jpg";
+import PreviewBerita1Jpg from "../../assets/source/Preveiw-berita (1).jpg";
+import PreviewBerita2 from "../../assets/source/Preveiw-berita (2).jpg";
+import PreviewBerita3 from "../../assets/source/Preveiw-berita (3).jpg";
 
 // Data tiruan untuk semua artikel berita. Nantinya ini bisa diambil dari API.
 const allNewsData = [
