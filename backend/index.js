@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -40,13 +40,19 @@ app.get('/api/youtube', async (req, res) => {
         console.log("Mengambil data baru dari YouTube API...");
         const API_KEY = process.env.YOUTUBE_API_KEY;
         const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
+
+        console.log("API Key:", API_KEY);
+        console.log("Channel ID:", CHANNEL_ID);
         
         if (!API_KEY || !CHANNEL_ID) {
+            console.error("YouTube API Key atau Channel ID tidak dikonfigurasi.");
             return res.status(500).json({ error: "YouTube API Key atau Channel ID tidak dikonfigurasi." });
         }
 
         const url = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=3`;
+        console.log("YouTube API URL:", url);
         const response = await axios.get(url);
+        console.log("YouTube API response:", response.data);
         
         let videos = response.data.items;
         
