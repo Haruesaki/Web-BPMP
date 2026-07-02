@@ -24,20 +24,22 @@ import './AdminSidebar.css';
 // --- DATA: MENU STATIS BAGIAN ATAS ---
 const adminMenuItems1 = [
   { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large' },
-  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders' },
   { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
-  { id: 'profil', label: 'Profil', icon: 'fa-solid fa-circle-user' }
+  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders' },
+  { id: 'berita', label: 'Berita', icon: 'fa-solid fa-file-lines' },
 ];
 
 // --- DATA: MENU KONTEN (bisa nantinya diganti sumber dinamis dari backend) ---
 const menuItems = [
-  { id: 'ziwbk', label: 'ZIWBK-WBBM', icon: 'fa-solid fa-circle-check' },
-  { id: 'dokumen', label: 'Dokumen Kinerja', icon: 'fa-solid fa-file-lines' },
-  { id: 'pelayanan', label: 'Pelayanan Publik', icon: 'fa-solid fa-headset' },
+  { id: 'profil', label: 'Profil', icon: 'fa-solid fa-circle-user' },
+  { id: 'reformasi-birokrasi', label: 'Reformasi Birokrasi', icon: 'fa-solid fa-building-columns' },
+  { id: 'dok-kinerja', label: 'Dok. Kinerja', icon: 'fa-solid fa-file-lines' },
+  { id: 'pelayanan', label: 'Pelayanan', icon: 'fa-solid fa-hands-holding-circle' },
+  { id: 'program', label: 'Program', icon: 'fa-solid fa-calendar-check' },
   { id: 'ppid', label: 'PPID', icon: 'fa-solid fa-circle-info' },
-  { id: 'program', label: 'Program dan Kegiatan', icon: 'fa-solid fa-calendar-check' },
+  { id: 'sipers', label: 'Sipers', icon: 'fa-solid fa-file-lines' },
+  { id: 'spab', label: 'SPAB', icon: 'fa-solid fa-shield-halved' },
   { id: 'pengaduan', label: 'Pengaduan', icon: 'fa-solid fa-comments' },
-  { id: 'kontak', label: 'Kontak', icon: 'fa-solid fa-circle-question' },
 ];
 
 // --- DATA: MENU STATIS BAGIAN BAWAH ---

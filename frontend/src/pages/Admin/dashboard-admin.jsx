@@ -29,6 +29,7 @@ const DashboardAdmin = () => {
   const [menuName, setMenuName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [selectedPostLayout, setSelectedPostLayout] = useState('');
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const iconDropdownRef = useRef(null);
@@ -46,7 +47,8 @@ const DashboardAdmin = () => {
   ];
 
   // --- 5. DATA: JENIS MENU ---
-  const typeOptions = ['Page', 'Post', 'Link', 'Form Jabatan'];
+  const typeOptions = ['Post', 'Link'];
+  const postLayoutOptions = ['Default', 'Profile Card', 'Berita Card'];
 
   // --- 6. DATA: STATISTIK PENGUNJUNG (chart) ---
   const chartData = [
@@ -85,6 +87,7 @@ const DashboardAdmin = () => {
     setIsMenuModalOpen(false);
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
+    setSelectedPostLayout(''); // tambahan
   };
 
   const handleSaveMenu = () => {
@@ -217,8 +220,9 @@ const DashboardAdmin = () => {
                         key={opt.value}
                         className={`form-dropdown-item ${selectedIcon === opt.value ? 'selected' : ''}`}
                         onClick={() => {
-                          setSelectedIcon(opt.value);
-                          setIsIconDropdownOpen(false);
+                          setSelectedType(opt);
+                          setIsTypeDropdownOpen(false);
+                          if (opt !== 'Post') setSelectedPostLayout(''); // tambahan
                         }}
                       >
                         {/* Render ikon Font Awesome.
@@ -264,6 +268,28 @@ const DashboardAdmin = () => {
                   </div>
                 )}
               </div>
+              {/* Sub-pilihan Layout (muncul hanya kalau Jenis Menu = Post) */}
+
+              {selectedType === 'Post' && (
+                <div className="form-group">
+                  <label>Layout Post</label>
+                  <div className="form-radio-group">
+                    {postLayoutOptions.map((opt) => (
+                      <label key={opt} className="form-radio-item">
+                        <input
+                          type="radio"
+                          name="postLayout"
+                          value={opt}
+                          checked={selectedPostLayout === opt}
+                          onChange={() => setSelectedPostLayout(opt)}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
             </div>
 
             <div className="modal-footer">

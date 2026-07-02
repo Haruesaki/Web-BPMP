@@ -322,6 +322,28 @@
     gap: 8px;
 }
 
+.admin-layout .form-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-layout .form-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.admin-layout .form-radio-item input[type="radio"] {
+    accent-color: var(--purple);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
 .admin-layout .form-group label {
     font-size: 13.5px;
     font-weight: 500;
@@ -466,6 +488,7 @@
         grid-template-columns: 1fr;
     }
 }
+
 
 @media (max-width: 768px) {
     /* .admin-sidebar width & .admin-topbar padding responsive rules
