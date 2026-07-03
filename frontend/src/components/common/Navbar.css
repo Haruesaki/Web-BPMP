@@ -553,29 +553,29 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
    BREAKPOINT 3: MOBILE LAYOUT (<= 845px)
    (Memindahkan Search & Voice Button ke Bawah Logo)
    ========================================= */
-@media (max-width: 845px) {
+@media (max-width: 888px) {
     .header-top {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        justify-content: center;
         align-items: flex-start; /* KUNCI: Sejajarkan item ke atas agar logo tidak di tengah */
-        row-gap: 15px; /* Jarak vertikal antar baris */
+        row-gap: 10px; /* Jarak vertikal antar baris */
+    }
+
+    .header-menu {
+        justify-content: space-between;
+        width: 100%;
+        padding-bottom: 15px;
+        border-bottom: 1.2px solid rgba(255, 255, 255, 0.375);
     }
        
     .header-actions {
         /* KUNCI: Tumpuk tombol secara vertikal dan ratakan ke kanan */
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
+        flex-direction: row;
+        align-self: flex-end;
         margin-left: 0;
         gap: 15px;
-    }
-
-    .header-actions .search-wrapper {
-        order: 2; /* Pastikan search-bar muncul di urutan kedua (bawah) */
-    }
-
-    .header-actions .btn-voice {
-        order: 1; /* Pastikan tombol suara di urutan pertama (atas) */
     }
 }
 
