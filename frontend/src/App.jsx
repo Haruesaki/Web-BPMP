@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Lenis from 'lenis';
 import Beranda from "./pages/Beranda/Beranda";
 import DashboardAdmin from "./pages/Admin/dashboard-admin";
+import Login from "./pages/Admin/Login";
+import LupaPassword from "./pages/Admin/LupaPassword";
 
 function App() {
   const lenisRef = useRef(null);
@@ -37,6 +39,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
         <Route path="/admin" element={<DashboardAdmin />} />
+        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/lupa-password" element={<LupaPassword />} />
       </Routes>
     </BrowserRouter>
   );
