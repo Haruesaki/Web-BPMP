@@ -1,0 +1,489 @@
+/* =========================================================================
+   MANAJEMEN USER — CMS WEBSITE BPMP
+   Memakai variabel & tema dari dashboard-admin.css (scope ".admin-layout").
+   ========================================================================= */
+
+/* ---------- HERO CARD ---------- */
+.admin-layout .mu-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 30px;
+    border-radius: 16px;
+    border: 1px solid var(--border-soft);
+    background: linear-gradient(115deg, #141b34 0%, #1c2350 52%, #2c2f7d 100%);
+    margin-bottom: 26px;
+}
+
+.admin-layout .mu-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.admin-layout .mu-hero-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: rgba(91, 95, 232, 0.22);
+    color: var(--purple-soft);
+    font-size: 22px;
+}
+
+.admin-layout .mu-hero-text h2 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.admin-layout .mu-hero-text p {
+    margin: 6px 0 0;
+    font-size: 14.5px;
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-hero-stat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    padding: 16px 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(91, 95, 232, 0.35);
+    background: rgba(91, 95, 232, 0.16);
+}
+
+.admin-layout .mu-hero-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--purple-soft);
+    font-size: 20px;
+}
+
+.admin-layout .mu-hero-stat-number {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-main);
+}
+
+.admin-layout .mu-hero-stat-label {
+    margin-top: 6px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-sub);
+}
+
+/* ---------- TOOLBAR ---------- */
+.admin-layout .mu-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.admin-layout .mu-search {
+    position: relative;
+    flex: 1;
+    max-width: 440px;
+}
+
+.admin-layout .mu-search i {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    font-size: 14px;
+}
+
+.admin-layout .mu-search input {
+    width: 100%;
+    padding: 13px 16px 13px 42px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-layout .mu-search input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .mu-search input:focus {
+    border-color: var(--border-mid);
+}
+
+.admin-layout .btn-tambah-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 22px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    white-space: nowrap;
+}
+
+.admin-layout .btn-tambah-user:hover {
+    background: var(--purple-hover);
+}
+
+/* ---------- TABLE CARD ---------- */
+.admin-layout .mu-table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.admin-layout .mu-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-layout .mu-table thead th {
+    padding: 18px 28px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    color: var(--text-faint);
+    background: var(--bg-card-soft);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .mu-table tbody td {
+    padding: 18px 28px;
+    font-size: 14.5px;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.admin-layout .mu-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-layout .mu-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-layout .mu-col-no {
+    width: 70px;
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-col-aksi {
+    width: 120px;
+    text-align: right;
+}
+
+.admin-layout .mu-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-layout .mu-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.admin-layout .mu-user-name {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.admin-layout .mu-user-email {
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-empty-row {
+    text-align: center;
+    color: var(--text-sub);
+    padding: 40px 28px;
+}
+
+.admin-layout .mu-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.admin-layout .mu-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-layout .mu-action-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+/* ---------- FOOTER / PAGINATION ---------- */
+.admin-layout .mu-table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 28px;
+    background: var(--bg-card-soft);
+    border-top: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+}
+
+.admin-layout .mu-footer-info {
+    font-size: 13.5px;
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-layout .mu-page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-layout .mu-page-btn:hover:not(:disabled):not(.active) {
+    border-color: var(--border-mid);
+    color: var(--text-main);
+}
+
+.admin-layout .mu-page-btn.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    font-weight: 500;
+}
+
+.admin-layout .mu-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.admin-layout .mu-page-dots {
+    color: var(--text-faint);
+    padding: 0 2px;
+}
+
+/* =========================================================================
+   MODAL: TAMBAH / EDIT USER (varian lebar)
+   ========================================================================= */
+.admin-layout .modal-box-lg {
+    max-width: 700px;
+}
+
+.admin-layout .mu-modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.admin-layout .mu-modal-sub {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--text-sub);
+    font-weight: 400;
+}
+
+.admin-layout .mu-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.admin-layout .mu-form-grid .form-group label,
+.admin-layout .mu-access-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    color: var(--text-sub);
+    text-transform: uppercase;
+}
+
+/* ---------- HAK AKSES MENU ---------- */
+.admin-layout .mu-access-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.admin-layout .mu-access-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 16px;
+    padding: 22px 24px;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card-soft);
+}
+
+.admin-layout .mu-access-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.admin-layout .mu-access-item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--purple);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.admin-layout .mu-access-empty {
+    padding: 40px 24px;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card-soft);
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.5;
+}
+
+.admin-layout .btn-simpan:disabled {
+    background: var(--bg-elevated);
+    color: var(--text-faint);
+    cursor: not-allowed;
+}
+
+/* =========================================================================
+   MODAL: HAPUS AKUN USER
+   ========================================================================= */
+.admin-layout .mu-delete-box {
+    max-width: 440px;
+}
+
+.admin-layout .mu-delete-title {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.admin-layout .mu-delete-desc {
+    margin: 0 0 20px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-delete-target {
+    padding: 16px 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card-soft);
+}
+
+.admin-layout .mu-delete-target-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    color: var(--text-faint);
+    margin-bottom: 12px;
+}
+
+.admin-layout .mu-delete-target-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-layout .btn-hapus {
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.admin-layout .btn-hapus:hover {
+    background: #dc2626;
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 900px) {
+    .admin-layout .mu-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .admin-layout .mu-form-grid,
+    .admin-layout .mu-access-grid {
+        grid-template-columns: 1fr;
+    }
+    .admin-layout .mu-table thead th,
+    .admin-layout .mu-table tbody td {
+        padding: 14px 16px;
+    }
+}

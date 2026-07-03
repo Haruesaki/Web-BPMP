@@ -7,6 +7,7 @@ import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
 import Login from '../pages/Admin/Login/Login';
 import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
+import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -23,6 +24,7 @@ const AppRoutes = ({ lenisRef }) => {
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/lupa-password" element={<LupaPassword />} />
             <Route path="/admin" element={<DashboardAdmin />} />
+            <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
         </Routes>
     );
 };
