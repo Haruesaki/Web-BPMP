@@ -130,6 +130,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     z-index: -1;
     pointer-events: none;
 }
+.nav-selector.no-transition {
+    transition: none !important;
+}
+
 
 .nav-link {
     position: relative;

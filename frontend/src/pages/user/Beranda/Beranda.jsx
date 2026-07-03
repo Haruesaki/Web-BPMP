@@ -3,10 +3,6 @@ import { useYoutube } from '../../../hooks/useYoutube';
 import './Beranda.css';
 
 // --- IMPORT COMPONENTS KITA ---
-// (Path disesuaikan dengan struktur folder src/components/common/ di gambar)
-import Navbar from '../../../components/common/Navbar';
-import Footer from '../../../components/common/Footer';
-import FloatingSocialBar from '../../../components/common/FloatingSocialBar';
 import NewsSection from '../../../components/user/berita/NewsSection';
 import HeroSection from '../../../components/common/HeroSection';
 import PartnerSection from '../../../components/user/partner/PartnerSection';
@@ -24,11 +20,6 @@ const Beranda = ({ lenisRef }) => {
 
   return (
     <>
-      {/* 1. MENGGUNAKAN KOMPONEN NAVBAR */}
-      <Navbar lenisRef={lenisRef} />
-
-      <FloatingSocialBar />
-
       <HeroSection />
 
       <NewsSection />
@@ -39,8 +30,6 @@ const Beranda = ({ lenisRef }) => {
 
       <YoutubeSection ytVideos={ytVideos} ytChannel={ytChannel} />
 
-      {/* 3. MENGGUNAKAN KOMPONEN FOOTER */}
-      <Footer />
     </>
   );
 };

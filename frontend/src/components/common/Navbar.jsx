@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Navbar.css';
+import { Link, useLocation } from 'react-router-dom';
 
 import Logo from "../../assets/source/Logo.png";
 import Dropdown from "../../assets/source/Dropdown.png";
@@ -13,6 +14,7 @@ import Mitra5 from '../../assets/source/Mitra (5).png';
 
 const Navbar = ({ lenisRef }) => {
   const { isActive, toggle } = useTTS();
+  const location = useLocation(); // Hook untuk mendapatkan info URL saat ini
 
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -83,70 +85,81 @@ const Navbar = ({ lenisRef }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeDropdown, lenisRef]);
 
-  // Logika Smooth Selector Animasi
+  // EFEK BARU: Logika selector yang sadar akan perubahan rute (URL)
   useEffect(() => {
+    // --- Bagian Setup ---
     const navbar = document.querySelector('.main-navbar');
     const selector = document.querySelector('.nav-selector');
-    const navLinks = document.querySelectorAll('.main-navbar > .nav-link, .main-navbar .nav-item > .nav-link');
+    const allLinks = document.querySelectorAll('.main-navbar [data-path-group]');
 
-    if (navbar && selector) {
-      function moveSelector(targetElement) {
-        if (window.innerWidth <= 1277) return;
+    if (!navbar || !selector || allLinks.length === 0) return;
 
-        const targetRect = targetElement.getBoundingClientRect();
-        const navbarRect = navbar.getBoundingClientRect();
-        const leftPos = targetRect.left - navbarRect.left;
-        const topPos = targetRect.top - navbarRect.top;
+    const moveSelector = (targetElement) => {
+      // Sembunyikan selector jika tidak ada target atau di layar mobile
+      if (!targetElement || window.innerWidth <= 1277) {
+        selector.style.opacity = '0';
+        return;
+      };
 
-        selector.style.width = `${targetRect.width}px`;
-        selector.style.height = `${targetRect.height}px`;
-        selector.style.transform = `translate(${leftPos}px, ${topPos}px)`;
+      const targetRect = targetElement.getBoundingClientRect();
+      const navbarRect = navbar.getBoundingClientRect();
+      const leftPos = targetRect.left - navbarRect.left;
+      const topPos = targetRect.top - navbarRect.top;
+
+      selector.style.opacity = '1';
+      selector.style.width = `${targetRect.width}px`;
+      selector.style.height = `${targetRect.height}px`;
+      selector.style.transform = `translate(${leftPos}px, ${topPos}px)`;
+    };
+
+    // --- Bagian Logika Inti ---
+
+    // 1. Temukan link aktif sebelumnya SEBELUM mengubah kelas apa pun
+    const prevActiveLink = document.querySelector('.nav-link.active');
+
+    // 2. Hapus semua kelas 'active' untuk reset
+    allLinks.forEach(link => link.classList.remove('active'));
+
+    // 3. Tentukan link mana yang harus aktif berdasarkan URL saat ini
+    let newActiveLink = null;
+    if (location.pathname === '/') {
+      newActiveLink = document.querySelector('[data-path-group="beranda"]');
+    } else if (location.pathname.startsWith('/profil/')) {
+      newActiveLink = document.querySelector('[data-path-group="profil"]');
+    } // Tambahkan else if untuk grup lain di sini (e.g., /rb/, /kinerja/)
+
+    // 4. Jika link aktif baru ditemukan, jalankan logika pergerakan
+    if (newActiveLink) {
+      newActiveLink.classList.add('active');
+
+      // Jika tidak ada link aktif sebelumnya (beban halaman pertama),
+      // posisikan selector secara instan tanpa animasi dari kiri.
+      if (!prevActiveLink) {
+        selector.classList.add('no-transition');
+        moveSelector(newActiveLink);
+        requestAnimationFrame(() => {
+          selector.classList.remove('no-transition');
+        });
+      } else {
+        // Jika ada, biarkan transisi CSS normal yang menangani pergerakan
+        moveSelector(newActiveLink);
       }
-
-      const initialActive = document.querySelector('.nav-link.active');
-      if (initialActive) requestAnimationFrame(() => moveSelector(initialActive));
-
-      navLinks.forEach((link) => {
-        link.addEventListener('click', function () {
-          navLinks.forEach((item) => item.classList.remove('active'));
-          this.classList.add('active');
-          moveSelector(this);
-
-          if (!this.closest('.has-dropdown')) {
-            setIsMobileMenuOpen(false);
-            setActiveDropdown(null);
-          }
-        });
-      });
-
-      const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-      dropdownLinks.forEach((subLink) => {
-        subLink.addEventListener('click', function (e) {
-          e.preventDefault();
-          const parentNavItem = this.closest('.nav-item');
-          if (parentNavItem) {
-            const parentNavLink = parentNavItem.querySelector('.nav-link');
-            if (parentNavLink) {
-              navLinks.forEach((item) => item.classList.remove('active'));
-              parentNavLink.classList.add('active');
-              moveSelector(parentNavLink);
-              setIsMobileMenuOpen(false);
-              setActiveDropdown(null);
-            }
-          }
-        });
-      });
-
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          const currentActive = document.querySelector('.nav-link.active');
-          if (currentActive) moveSelector(currentActive);
-        }, 100);
-      });
     }
-  }, []);
+
+    // Handler untuk menyesuaikan posisi selector saat ukuran window berubah
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const currentActive = document.querySelector('.nav-link.active');
+        if (currentActive) moveSelector(currentActive);
+      }, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+
+  }, [location.pathname]); // KUNCI: Efek ini berjalan setiap kali URL berubah
 
   return (
     <header className="unified-header">
@@ -189,16 +202,16 @@ const Navbar = ({ lenisRef }) => {
       <nav className={`main-navbar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="nav-selector"></div>
 
-        <a href="#" className="nav-link active">Beranda</a>
+        <Link to="/" className="nav-link" data-path-group="beranda">Beranda</Link>
 
         {/* --- IMPLEMENTASI KELAS 'dropdown-open' & ONCLICK --- */}
         <div className={`nav-item has-dropdown ${activeDropdown === 'profil' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'profil')}>
+          <a href="#" className="nav-link" data-path-group="profil" onClick={(e) => handleDropdownClick(e, 'profil')}>
             Profil <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
             <a href="#">Sejarah</a>
-            <a href="#">Visi & Misi</a>
+            <Link to="/profil/visi-misi">Visi & Misi</Link>
             <a href="#">Tugas & Fungsi</a>
             <a href="#">Struktur Organisasi</a>
             <a href="#">Pejabat</a>
@@ -208,7 +221,7 @@ const Navbar = ({ lenisRef }) => {
         </div>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'rb' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'rb')}>
+          <a href="#" className="nav-link" data-path-group="rb" onClick={(e) => handleDropdownClick(e, 'rb')}>
             Reformasi Birokrasi <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
@@ -223,7 +236,7 @@ const Navbar = ({ lenisRef }) => {
         </div>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'kinerja' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'kinerja')}>
+          <a href="#" className="nav-link" data-path-group="kinerja" onClick={(e) => handleDropdownClick(e, 'kinerja')}>
             Dok. Kinerja <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
@@ -235,7 +248,7 @@ const Navbar = ({ lenisRef }) => {
         </div>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'pelayanan' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'pelayanan')}>
+          <a href="#" className="nav-link" data-path-group="pelayanan" onClick={(e) => handleDropdownClick(e, 'pelayanan')}>
             Pelayanan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
@@ -249,7 +262,7 @@ const Navbar = ({ lenisRef }) => {
         </div>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'program' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'program')}>
+          <a href="#" className="nav-link" data-path-group="program" onClick={(e) => handleDropdownClick(e, 'program')}>
             Program <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
@@ -264,12 +277,12 @@ const Navbar = ({ lenisRef }) => {
           </div>
         </div>
 
-        <a href="#" className="nav-link">PPID</a>
-        <a href="#" className="nav-link">Sipers</a>
-        <a href="#" className="nav-link">SPAB</a>
+        <a href="#" className="nav-link" data-path-group="ppid">PPID</a>
+        <a href="#" className="nav-link" data-path-group="sipers">Sipers</a>
+        <a href="#" className="nav-link" data-path-group="spab">SPAB</a>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'pengaduan' ? 'dropdown-open' : ''}`}>
-          <a href="#" className="nav-link" onClick={(e) => handleDropdownClick(e, 'pengaduan')}>
+          <a href="#" className="nav-link" data-path-group="pengaduan" onClick={(e) => handleDropdownClick(e, 'pengaduan')}>
             Pengaduan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">

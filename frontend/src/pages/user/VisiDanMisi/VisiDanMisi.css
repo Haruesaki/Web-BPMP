@@ -1,0 +1,73 @@
+.visimisi-page-wrapper {
+    background-color: #f0f2f5; /* Latar belakang netral untuk halaman konten */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* KUNCI PERBAIKAN: Memberi ruang di atas agar konten tidak tertutup Navbar */
+.visimisi-container {
+    padding-top: 180px; /* Sesuaikan nilai ini dengan tinggi Navbar + sedikit spasi */
+    padding-bottom: 80px;
+    width: 100%;
+    max-width: 960px; /* Batasi lebar konten agar mudah dibaca */
+    margin: 0 auto;
+    flex-grow: 1; /* Memastikan konten mengisi ruang dan mendorong footer ke bawah */
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.visimisi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* Jarak antar kartu Visi dan Misi */
+}
+
+.vm-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vm-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.vm-card-header {
+    background-color: #1A3C87; /* Warna biru konsisten dengan tema */
+    color: #ffffff;
+    padding: 20px 30px;
+}
+
+.vm-card-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.vm-card-body {
+    padding: 30px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #333;
+}
+
+.vm-quote {
+    font-style: italic;
+    font-weight: 500;
+    color: #0B132B;
+    padding: 20px;
+    background-color: #f0f2f5;
+    border-left: 4px solid #1A3C87;
+    margin: 20px 0;
+}
+
+.vm-list {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
