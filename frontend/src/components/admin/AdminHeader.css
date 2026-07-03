@@ -1,0 +1,182 @@
+/* =========================================================================
+   ADMIN HEADER (TOPBAR)
+   Catatan: variabel warna (--bg-card, --text-sub, dst.) berasal dari
+   scope ".admin-layout" yang dideklarasikan di dashboard-admin.css.
+   Pastikan halaman Admin manapun yang memakai komponen ini tetap
+   dibungkus <div className="admin-layout">.
+   ========================================================================= */
+
+.admin-layout .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 480px;
+}
+
+.admin-layout .search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    cursor: text;
+    transition: border-color 0.18s ease;
+}
+
+.admin-layout .search-box.active {
+    border-color: var(--border-mid);
+}
+
+.admin-layout .search-icon {
+    color: var(--text-sub);
+    font-size: 14px;
+}
+
+.admin-layout .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-layout .search-input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .search-shortcut {
+    font-size: 12px;
+    color: var(--text-faint);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+}
+
+/* ---------- SEARCH DROPDOWN ---------- */
+.admin-layout .search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    z-index: 50;
+}
+
+.admin-layout .search-dropdown-header {
+    padding: 14px 18px 8px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    font-weight: 500;
+}
+
+.admin-layout .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .search-result-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-layout .search-result-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.admin-layout .search-result-title {
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.admin-layout .search-result-sub {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-top: 2px;
+}
+
+.admin-layout .search-dropdown-footer {
+    padding: 13px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-sub);
+    border-top: 1px solid var(--border-soft);
+    cursor: pointer;
+}
+
+.admin-layout .search-dropdown-footer:hover {
+    color: var(--text-main);
+}
+
+/* ---------- PROFILE ---------- */
+.admin-layout .topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.admin-layout .profile-text {
+    text-align: right;
+}
+
+.admin-layout .profile-email {
+    font-size: 13.5px;
+    color: var(--text-main);
+}
+
+.admin-layout .profile-role {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.admin-layout .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 16px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .admin-layout .admin-topbar {
+        padding: 20px;
+    }
+}

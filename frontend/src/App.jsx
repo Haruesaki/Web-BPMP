@@ -2,10 +2,8 @@ import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
-import { useHoverToSpeak } from "./hooks/useHoverToSpeak";
 
 function App() {
-  useHoverToSpeak();
   const lenisRef = useRef(null);
 
   useEffect(() => {

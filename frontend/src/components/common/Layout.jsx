@@ -3,8 +3,12 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingSocialBar from './FloatingSocialBar';
+import { useHoverToSpeak } from '../../hooks/useHoverToSpeak';
 
 const Layout = ({ lenisRef }) => {
+  // TTS hover-to-speak hanya aktif di halaman user (di dalam Layout), tidak di admin
+  useHoverToSpeak();
+
   return (
     <>
       <Navbar lenisRef={lenisRef} />

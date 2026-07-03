@@ -1,0 +1,192 @@
+/* =========================================================================
+   HALAMAN AUTH (LOGIN & LUPA PASSWORD) — CMS WEBSITE BPMP
+   Palet dark navy + aksen hijau/ungu, font Poppins.
+   Semua style di-scope ke ".auth-layout" agar tidak bocor ke halaman lain.
+   Catatan: file ini memuat style dasar yang dipakai bersama oleh halaman
+   Login dan Lupa Password. Style khusus OTP ada di LupaPassword.css.
+   ========================================================================= */
+
+.auth-layout {
+    --bg-app: #0B1326;
+    --bg-card: #182233;
+    --bg-card-soft: #0f1626;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-mid: rgba(255, 255, 255, 0.14);
+    --purple: #5b5fe8;
+    --purple-hover: #6d71f0;
+    --green: #34d399;
+    --text-main: #f3f5fb;
+    --text-sub: #9aa4bd;
+    --text-faint: #5b6478;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 24px;
+    background-color: var(--bg-app);
+    background-image: radial-gradient(circle at 50% 42%, rgba(40, 52, 84, 0.55), transparent 60%);
+    color: var(--text-main);
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+.auth-layout *,
+.auth-layout *::before,
+.auth-layout *::after {
+    box-sizing: border-box;
+}
+
+/* ---------- CARD ---------- */
+.auth-layout .auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: linear-gradient(155deg, rgba(30, 41, 63, 0.95), rgba(19, 26, 46, 0.95));
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- JUDUL ---------- */
+.auth-layout .auth-title {
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 12px;
+    color: var(--text-main);
+}
+
+.auth-layout .auth-title-accent {
+    color: var(--green);
+}
+
+.auth-layout .auth-subtitle {
+    font-size: 14px;
+    line-height: 1.55;
+    text-align: center;
+    color: var(--text-sub);
+    margin: 0 0 30px;
+}
+
+/* ---------- FIELD ---------- */
+.auth-layout .auth-field {
+    margin-bottom: 22px;
+}
+
+.auth-layout .auth-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+}
+
+.auth-layout .auth-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-layout .auth-input-icon {
+    position: absolute;
+    left: 16px;
+    font-size: 15px;
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.auth-layout .auth-input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.18s ease;
+}
+
+.auth-layout .auth-input::placeholder {
+    color: var(--text-faint);
+}
+
+.auth-layout .auth-input:focus {
+    border-color: var(--border-mid);
+}
+
+/* ---------- OPSI (INGAT SAYA / LUPA PASSWORD) ---------- */
+.auth-layout .auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 4px 0 28px;
+}
+
+.auth-layout .auth-remember {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    color: var(--text-sub);
+    cursor: pointer;
+}
+
+.auth-layout .auth-remember input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--purple);
+    cursor: pointer;
+}
+
+.auth-layout .auth-link {
+    font-size: 14px;
+    color: var(--text-sub);
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+
+.auth-layout .auth-link:hover {
+    color: var(--text-main);
+}
+
+/* ---------- TOMBOL ---------- */
+.auth-layout .auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.auth-layout .auth-btn:hover {
+    background: var(--purple-hover);
+}
+
+.auth-layout .auth-btn i {
+    font-size: 14px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 520px) {
+    .auth-layout .auth-card {
+        padding: 28px 22px;
+    }
+    .auth-layout .auth-title {
+        font-size: 26px;
+    }
+}
