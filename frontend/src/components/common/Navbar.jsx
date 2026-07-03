@@ -5,7 +5,6 @@ import { Link, useLocation } from 'react-router-dom';
 import Logo from "../../assets/source/Logo.png";
 import Dropdown from "../../assets/source/Dropdown.png";
 import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
-import Gedung from "../../assets/source/Section-Landing.png";
 import Profile from "../../assets/source/WOWOK.jpg";
 import { useTTS } from "../../context/TTSContext";
 import Mitra5 from '../../assets/source/Mitra (5).png';
