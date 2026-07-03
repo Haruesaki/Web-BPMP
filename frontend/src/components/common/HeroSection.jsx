@@ -79,9 +79,20 @@ const HeroSection = () => {
                             Kementerian Pendidikan Dasar dan Menengah
                         </p>
 
-                        <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
-                            <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
-                            <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
+                        {/* Pembungkus terluar untuk menjaga tata letak agar tetap terkunci */}
+                        <div className="hero-logos-wrapper-cms">
+                            {/* Kontainer untuk daftar logo mitra, akan menjadi wadah dinamis */}
+                            <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
+                                {/* Setiap logo dibungkus dalam div-nya sendiri untuk pengelolaan CMS yang lebih baik */}
+                                <div className="logo-item-cms">
+                                    {/* Gambar logo mitra pertama */}
+                                    <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
+                                </div>
+                                <div className="logo-item-cms">
+                                    {/* Gambar logo mitra kedua */}
+                                    <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 

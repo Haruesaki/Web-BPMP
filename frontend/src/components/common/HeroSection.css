@@ -86,7 +86,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    flex: 0 0 45%;
+    flex: 0 0 43%;
     gap: 1.5rem;
     color: #ffffff;
     z-index: 222;
@@ -111,18 +111,43 @@
     font-weight: 400;
     margin: 0;
 }
+/* Gaya untuk pembungkus CMS logo mitra */
+/* Wadah paling luar untuk logo, berfungsi sebagai frame statis-dinamis */
+.hero-logos-wrapper-cms {
+    display: flex;
+    width: 100%;
+    height: clamp(80px, 10vw, 120px);
+}
 
+/* Kontainer untuk daftar logo, agar bisa di-scroll atau wrap jika perlu */
 .hero-logos-flex {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 2rem;
-    margin-top: 2rem;
+    justify-content: flex-start;
+    gap: 2.5rem;
+    height: 100%;
+    width: 100%;
 }
 
+/* Gaya untuk setiap item logo di dalam flex container (wadah gambar) */
+.logo-item-cms {
+    height: 100%; /* Tinggi item mengikuti tinggi flex container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Gambar logo yang ukurannya akan menyesuaikan wadahnya */
 .bottom-logo {
-    height: clamp(70px, 8vw, 200px);
-    width: auto;
+    /* KUNCI: Tinggi gambar tidak akan melebihi wadahnya (.logo-item-cms) */
+    max-height: 100%;
+    /* KUNCI: Lebar gambar juga tidak akan melebihi wadahnya */
+    max-width: 100%;
+    /* KUNCI: Tinggi disesuaikan otomatis untuk menjaga rasio aspek */
+    height: auto;
+    /* Memastikan gambar termuat utuh di dalam area yang tersedia */
+    object-fit: contain;
 }
 
 /* --- Hero Content Kanan (CMS) --- */
@@ -192,13 +217,14 @@
     }
 
     .hero-left-content {
-        width: 70%;
+        width: 100%;
         z-index: 10;
     }
 
     .hero-right-cms {
-        width: 50vw;
-        height: 58vh;
+        max-width: none;
+        width: 100vw;
+        height: 48vh;
     }
 
     .cms-dynamic-image {
@@ -219,7 +245,7 @@
     /* Pada layar ponsel, gambar lebih dominan di kanan bawah */
     .hero-right-cms {
         width: 100vw;
-        height: 45vh;
+        height: 50vh;
     }
 
     .main-title {

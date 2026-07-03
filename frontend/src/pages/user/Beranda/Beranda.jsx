@@ -7,7 +7,7 @@ import './Beranda.css';
 import Navbar from '../../../components/common/Navbar';
 import Footer from '../../../components/common/Footer';
 import FloatingSocialBar from '../../../components/common/FloatingSocialBar';
-import NewsSection from '../../../components/common/NewsSection';
+import NewsSection from '../../../components/user/berita/NewsSection';
 import HeroSection from '../../../components/common/HeroSection';
 
 
@@ -23,9 +23,9 @@ import Mitra3 from "../../../assets/source/Mitra (3).png";
 import Mitra4 from "../../../assets/source/Mitra (4).png";
 import Mitra5 from "../../../assets/source/Mitra (5).png";
 
-import PreviewBerita1Jpg from "../../../assets/source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../../../assets/source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../../../assets/source/Preveiw-berita (3).jpg";
+// import PreviewBerita1Jpg from "../../../assets/source/Preveiw-berita (1).jpg";
+// import PreviewBerita2 from "../../../assets/source/Preveiw-berita (2).jpg";
+// import PreviewBerita3 from "../../../assets/source/Preveiw-berita (3).jpg";
 
 const InstagramEmbedCard = React.memo(({ postId }) => {
   useEffect(() => {
