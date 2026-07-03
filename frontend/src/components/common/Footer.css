@@ -1,0 +1,150 @@
+
+/* =========================================
+   14. SECTION FOOTER
+   ========================================= */
+.main-footer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Area Putih Konter Pengunjung */
+.visitor-counter-wrapper {
+    background-color: #ffffff;
+    padding: 50px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Desain Tombol Konter */
+.visitor-counter-box {
+    background-color: #23356A;
+    /* Biru keabu-abuan persis desain */
+    padding: 16px 45px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.visitor-counter-box:hover {
+    transform: translateY(-3px);
+}
+
+.visitor-icon {
+    color: #ffffff;
+    font-size: 26px;
+}
+
+.visitor-text {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 1.5vw, 18px);
+    font-weight: 600;
+}
+
+/* --- Area Utama Footer (3 Kolom) --- */
+.footer-content-area {
+    background-color: #0B132B;
+    padding: 60px 8% 40px 8%;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    /* Kolom pertama sedikit lebih lebar */
+    gap: 40px;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-col-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    margin-top: 0;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* Teks dan Link Footer */
+.footer-text,
+.footer-link {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: #D1D5DB;
+    /* Abu-abu terang sesuai desain */
+    margin: 0;
+    line-height: 1.6;
+    text-decoration: none;
+}
+
+.footer-link {
+    transition: color 0.3s ease, transform 0.3s ease;
+    width: max-content;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+    transform: translateX(5px);
+    /* Efek interaktif geser ke kanan */
+}
+
+/* Styling Peta Maps */
+.footer-map-wrapper iframe {
+    border-radius: 4px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    filter: contrast(1.1);
+    /* Sedikit menajamkan warna peta */
+}
+
+/* --- Bottom Bar Copyright --- */
+.footer-bottom-bar {
+    background-color: #050814;
+    /* Biru sangat gelap (nyaris hitam) */
+    text-align: center;
+    padding: 25px 0;
+}
+
+.footer-bottom-bar p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* --- Responsive Table & Mobile --- */
+@media (max-width: 960px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        /* Berubah menjadi 1 kolom (atas-bawah) */
+        gap: 50px;
+    }
+
+    .visitor-counter-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 30px;
+    }
+
+    .footer-col {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-link {
+        align-items: center;
+    }
+}

@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Lenis from 'lenis';
-import Beranda from "./pages/Beranda/Beranda";
-import DashboardAdmin from "./pages/Admin/dashboard-admin";
-import Login from "./pages/Admin/Login";
-import LupaPassword from "./pages/Admin/LupaPassword";
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
+import { useHoverToSpeak } from "./hooks/useHoverToSpeak";
 
 function App() {
+  useHoverToSpeak();
   const lenisRef = useRef(null);
 
   useEffect(() => {
@@ -27,6 +26,7 @@ function App() {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
+
     requestAnimationFrame(raf);
 
     return () => {
@@ -34,16 +34,9 @@ function App() {
     };
   }, []);
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
-        <Route path="/admin" element={<DashboardAdmin />} />
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/lupa-password" element={<LupaPassword />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <BrowserRouter>
+      <AppRoutes lenisRef={lenisRef} />
+    </BrowserRouter>;
 }
 
 export default App;

@@ -1,0 +1,88 @@
+/* =========================================
+   GLOBAL BOX SIZING (Perbaikan Layout)
+   ========================================= */
+*,
+*::before,
+*::after {
+   box-sizing: border-box;
+}
+
+/* =========================================
+   PAGE WRAPPER (Mencegah Overflow)
+   ========================================= */
+.beranda-page-wrapper {
+   overflow-x: clip;
+}
+
+/* =========================================
+   9. ANIMASI ENTRANCE (TYPEWRITER & FADE)
+   ========================================= */
+.entrance-fade-down {
+    opacity: 0;
+    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.entrance-fade-up {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.entrance-fade-up-delay {
+    opacity: 0;
+    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+    visibility: hidden;
+}
+
+/* Kursor berkedip layaknya terminal */
+.typing-cursor {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 300;
+    margin-left: 5px;
+    animation: blinkCursor 0.8s infinite;
+}
+
+/* Sembunyikan kursor jika sudah selesai mengetik */
+.typing-cursor.stop-blink {
+    display: none;
+}
+
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blinkCursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
