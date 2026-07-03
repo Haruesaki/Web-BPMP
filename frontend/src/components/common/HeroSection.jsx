@@ -12,6 +12,7 @@ const HeroSection = () => {
     const [showSubtitle, setShowSubtitle] = useState(false);
     const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
     const heroImageRef = useRef(null);
+    const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
 
     // EFEK TYPEWRITER
     useEffect(() => {
@@ -40,24 +41,38 @@ const HeroSection = () => {
     useEffect(() => {
         let animationFrame;
 
-        if (heroImageRef.current) {
-            heroImageRef.current.style.transformOrigin = 'right bottom';
+        const rightImage = heroImageRef.current;
+        const leftContent = heroLeftContentRef.current;
+
+        if (rightImage) {
+            rightImage.style.transformOrigin = 'right bottom';
         }
 
         const animateHero = () => {
-            if (!heroImageRef.current) return;
+            // Pastikan kedua elemen ada sebelum melanjutkan
+            if (!rightImage || !leftContent) return;
 
             const scrollY = window.scrollY;
-            const translateY = Math.min(scrollY * 1.1, 1320);
+
+            // --- Kalkulasi untuk Gambar Kanan (Gedung) ---
+            const rightTranslateY = Math.min(scrollY * 1.5 , 1820); // Tingkatkan kecepatan "tenggelam"
             const scale = Math.max(1 - scrollY * 0.00012, 0.93);
             const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-            heroImageRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
-            heroImageRef.current.style.filter = `brightness(${brightness})`;
+            rightImage.style.transform = `translateY(${rightTranslateY}px) scale(${scale})`;
+            rightImage.style.filter = `brightness(${brightness})`;
+
+            // 2. Tambahkan kalkulasi untuk Konten Kiri
+            const leftTranslateY = scrollY * 1.050; // Nilai Y dipertahankan
+            const leftTranslateX = scrollY * 0.4;   // Tambahkan parameter X untuk gerakan diagonal
+            const leftOpacity = Math.max(1 - scrollY * 0.0007, 0); // Sesuaikan kecepatan menghilang
+
+            // Gabungkan X dan Y untuk menciptakan gerakan diagonal
+            leftContent.style.transform = `translate(${leftTranslateX}px, ${leftTranslateY}px)`;
+            leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
         };
-
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
     }, []);
@@ -67,7 +82,7 @@ const HeroSection = () => {
             <div className="background-glow-container"></div>
             <section className="hero-section">
                 <div className="hero-flex-container">
-                    <div className="hero-left-content">
+                    <div className="hero-left-content" ref={heroLeftContentRef}>
                         <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
 
                         <h1 className="main-title">

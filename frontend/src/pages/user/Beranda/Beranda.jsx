@@ -15,9 +15,6 @@ const Beranda = ({ lenisRef }) => {
   const { ytVideos, ytChannel } = useYoutube();
 
 
-
-  // 5. EFEK HERO PARALLAX
-
   return (
     <>
       <HeroSection />
