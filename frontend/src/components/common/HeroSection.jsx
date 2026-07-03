@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
 
 // Import assets
@@ -13,6 +13,31 @@ const HeroSection = () => {
     const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
     const heroImageRef = useRef(null);
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
+
+    // EFEK PARTIKEL
+    const particles = useMemo(() => {
+        const particleCount = 50;
+        return Array.from({ length: particleCount }).map((_, i) => {
+            const size = Math.random() * 1 + 4; // Ukuran antara 1px dan 4px
+            const duration = Math.random() * 8 + 3; // Durasi antara 10s dan 20s
+            const delay = Math.random() * 3; // Delay hingga 20s
+            const left = Math.random() * 120; // Posisi horizontal acak
+
+            return (
+                <div
+                    key={i}
+                    className="particle"
+                    style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        left: `${left}%`,
+                        animationDuration: `${duration}s`,
+                        animationDelay: `${delay}s`,
+                    }}
+                />
+            );
+        });
+    }, []);
 
     // EFEK TYPEWRITER
     useEffect(() => {
@@ -63,12 +88,12 @@ const HeroSection = () => {
             rightImage.style.filter = `brightness(${brightness})`;
 
             // 2. Tambahkan kalkulasi untuk Konten Kiri
-            const leftTranslateY = scrollY * 1.050; // Nilai Y dipertahankan
-            const leftTranslateX = scrollY * 0.4;   // Tambahkan parameter X untuk gerakan diagonal
-            const leftOpacity = Math.max(1 - scrollY * 0.0007, 0); // Sesuaikan kecepatan menghilang
+            const leftTranslateY = scrollY * 1.90; // Nilai Y dipertahankan
+            const leftTranslateX = scrollY * -0.500;   // Tambahkan parameter X untuk gerakan diagonal
+            const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
 
             // Gabungkan X dan Y untuk menciptakan gerakan diagonal
-            leftContent.style.transform = `translate(${leftTranslateX}px, ${leftTranslateY}px)`;
+            leftContent.style.transform = `translate(${leftTranslateX}px`;
             leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
@@ -80,6 +105,7 @@ const HeroSection = () => {
     return (
         <div className="landing-wrapper">
             <div className="background-glow-container"></div>
+            <div className="particle-container">{particles}</div>
             <section className="hero-section">
                 <div className="hero-flex-container">
                     <div className="hero-left-content" ref={heroLeftContentRef}>
