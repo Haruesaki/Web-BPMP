@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
 
 // Import assets
@@ -12,6 +12,32 @@ const HeroSection = () => {
     const [showSubtitle, setShowSubtitle] = useState(false);
     const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
     const heroImageRef = useRef(null);
+    const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
+
+    // EFEK PARTIKEL
+    const particles = useMemo(() => {
+        const particleCount = 50;
+        return Array.from({ length: particleCount }).map((_, i) => {
+            const size = Math.random() * 1 + 4; // Ukuran antara 1px dan 4px
+            const duration = Math.random() * 8 + 3; // Durasi antara 10s dan 20s
+            const delay = Math.random() * 3; // Delay hingga 20s
+            const left = Math.random() * 120; // Posisi horizontal acak
+
+            return (
+                <div
+                    key={i}
+                    className="particle"
+                    style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        left: `${left}%`,
+                        animationDuration: `${duration}s`,
+                        animationDelay: `${delay}s`,
+                    }}
+                />
+            );
+        });
+    }, []);
 
     // EFEK TYPEWRITER
     useEffect(() => {
@@ -40,24 +66,38 @@ const HeroSection = () => {
     useEffect(() => {
         let animationFrame;
 
-        if (heroImageRef.current) {
-            heroImageRef.current.style.transformOrigin = 'right bottom';
+        const rightImage = heroImageRef.current;
+        const leftContent = heroLeftContentRef.current;
+
+        if (rightImage) {
+            rightImage.style.transformOrigin = 'right bottom';
         }
 
         const animateHero = () => {
-            if (!heroImageRef.current) return;
+            // Pastikan kedua elemen ada sebelum melanjutkan
+            if (!rightImage || !leftContent) return;
 
             const scrollY = window.scrollY;
-            const translateY = Math.min(scrollY * 1.1, 1320);
+
+            // --- Kalkulasi untuk Gambar Kanan (Gedung) ---
+            const rightTranslateY = Math.min(scrollY * 1.5 , 1820); // Tingkatkan kecepatan "tenggelam"
             const scale = Math.max(1 - scrollY * 0.00012, 0.93);
             const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-            heroImageRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
-            heroImageRef.current.style.filter = `brightness(${brightness})`;
+            rightImage.style.transform = `translateY(${rightTranslateY}px) scale(${scale})`;
+            rightImage.style.filter = `brightness(${brightness})`;
+
+            // 2. Tambahkan kalkulasi untuk Konten Kiri
+            const leftTranslateY = scrollY * 1.90; // Nilai Y dipertahankan
+            const leftTranslateX = scrollY * -0.500;   // Tambahkan parameter X untuk gerakan diagonal
+            const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
+
+            // Gabungkan X dan Y untuk menciptakan gerakan diagonal
+            leftContent.style.transform = `translate(${leftTranslateX}px`;
+            leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
         };
-
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
     }, []);
@@ -65,9 +105,10 @@ const HeroSection = () => {
     return (
         <div className="landing-wrapper">
             <div className="background-glow-container"></div>
+            <div className="particle-container">{particles}</div>
             <section className="hero-section">
                 <div className="hero-flex-container">
-                    <div className="hero-left-content">
+                    <div className="hero-left-content" ref={heroLeftContentRef}>
                         <span className="welcome-text entrance-fade-down">Selamat Datang Di</span>
 
                         <h1 className="main-title">

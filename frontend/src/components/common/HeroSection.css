@@ -38,21 +38,60 @@
     background: linear-gradient(to right,
             rgba(67, 67, 67, 0) 0%,
             rgba(255, 255, 255, 0.095) 35%,
-            rgba(255, 255, 255, 0.327) 50%,
+            rgba(255, 255, 255, 0.261) 50%,
             rgba(255, 255, 255, 0.095) 65%,
             rgba(67, 67, 67, 0) 100%);
-    filter: blur(100px);
+    filter: blur(80px);
     transform: skewX(35deg);
-    animation: lightSweep 10s infinite;
+    animation: lightSweep 11s infinite;
 }
 
 @keyframes lightSweep {
     0% {
-        left: -100%;
+        left: -70%;
     }
 
     100% {
-        left: 200%;
+        left: 150%;
+    }
+}
+
+/* =========================================
+   ANIMASI PARTIKEL
+   ========================================= */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1; /* Di bawah konten, tapi bisa di atas background glow */
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    bottom: -10%; /* Mulai dari bawah layar */
+    background-color: rgba(255, 255, 255, 0.24);
+    border-radius: 50%;
+    filter: blur(0.5px);
+    animation-name: floatUp;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    30%, 60% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-110vh); /* Bergerak ke atas hingga hilang */
+        opacity: 0;
     }
 }
 
