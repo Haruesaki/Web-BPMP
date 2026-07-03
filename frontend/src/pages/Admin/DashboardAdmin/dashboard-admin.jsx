@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './dashboard-admin.css';
 
-import AdminSidebar from '../../components/admin/AdminSidebar';
-import AdminHeader from '../../components/admin/AdminHeader';
+import AdminSidebar from '../../../components/admin/AdminSidebar';
+import AdminHeader from '../../../components/admin/AdminHeader';
 
 // =========================================================================
 //  IMPORT ASSET IKON UNTUK DROPDOWN "PILIH IKON" (FORM TAMBAH MENU)

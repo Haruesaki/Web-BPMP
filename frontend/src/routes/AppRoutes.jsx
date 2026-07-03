@@ -4,9 +4,9 @@ import Beranda from '../pages/user/Beranda/Beranda';
 import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
 
 // Halaman Admin
-import Login from '../pages/Admin/Login';
-import LupaPassword from '../pages/Admin/LupaPassword';
-import DashboardAdmin from '../pages/Admin/dashboard-admin';
+import Login from '../pages/Admin/Login/Login';
+import LupaPassword from '../pages/Admin/Login/LupaPassword';
+import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 
 const AppRoutes = ({ lenisRef }) => {
     return (
