@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './dashboard-admin.css';
 
-import AdminSidebar from '../../assets/component-admin/AdminSidebar';
-import AdminHeader from '../../assets/component-admin/AdminHeader';
+import AdminSidebar from '../../components/admin/AdminSidebar';
+import AdminHeader from '../../components/admin/AdminHeader';
 
 // =========================================================================
 //  IMPORT ASSET IKON UNTUK DROPDOWN "PILIH IKON" (FORM TAMBAH MENU)
@@ -220,9 +220,8 @@ const DashboardAdmin = () => {
                         key={opt.value}
                         className={`form-dropdown-item ${selectedIcon === opt.value ? 'selected' : ''}`}
                         onClick={() => {
-                          setSelectedType(opt);
-                          setIsTypeDropdownOpen(false);
-                          if (opt !== 'Post') setSelectedPostLayout(''); // tambahan
+                          setSelectedIcon(opt.value);
+                          setIsIconDropdownOpen(false);
                         }}
                       >
                         {/* Render ikon Font Awesome.
