@@ -3,6 +3,7 @@ import { getYoutubeVideos } from '../api/youtubeApi';
 
 export const useYoutube = () => {
     const [ytVideos, setYtVideos] = useState([]);
+    const [ytChannel, setYtChannel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -11,7 +12,13 @@ export const useYoutube = () => {
             try {
                 const result = await getYoutubeVideos();
                 if (result.success) {
-                    setYtVideos(result.data);
+                    // Cek apakah data memiliki struktur baru { videos, channel } atau format lama (array)
+                    if (result.data && !Array.isArray(result.data)) {
+                        setYtVideos(result.data.videos || []);
+                        setYtChannel(result.data.channel || null);
+                    } else {
+                        setYtVideos(result.data || []);
+                    }
                 }
             } catch (err) {
                 setError(err);
@@ -23,5 +30,5 @@ export const useYoutube = () => {
         fetchVideos();
     }, []);
 
-    return { ytVideos, loading, error };
+    return { ytVideos, ytChannel, loading, error };
 };

@@ -71,7 +71,7 @@ const Beranda = ({ lenisRef }) => {
   const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
 
   // --- YOUTUBE STATE ---
-  const { ytVideos } = useYoutube();
+  const { ytVideos, ytChannel } = useYoutube();
 
 
 
@@ -185,21 +185,6 @@ const Beranda = ({ lenisRef }) => {
   }, []); 
 
   // 5. EFEK HERO PARALLAX
-  // --- FETCH YOUTUBE VIDEOS ---
-  useEffect(() => {
-    const fetchYouTube = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/youtube');
-        const json = await res.json();
-        if (json.success && json.data) {
-          setYtVideos(json.data);
-        }
-      } catch (e) {
-        console.error("Error fetching YT:", e);
-      }
-    };
-    fetchYouTube();
-  }, []);
 
 
 
@@ -280,10 +265,34 @@ const Beranda = ({ lenisRef }) => {
       <section className="youtube-section">
         <div className="yt-header-bar">
           <div className="yt-profile-left">
-            <img src={Youtube} alt="YouTube Icon" className="yt-icon" />
-            <span className="yt-channel-name">bpmplampung</span>
+            <img src={ytChannel?.thumbnails?.default?.url || Youtube} alt="YouTube Icon" className="yt-icon" style={ytChannel?.thumbnails ? { borderRadius: '50%' } : {}} />
+            <span className="yt-channel-name">
+              {ytChannel?.title || "Memuat..."}
+            </span>
           </div>
-          <button className="yt-subscribe-btn">Subscribe</button>
+
+          <div className="yt-stats">
+            <div className="yt-stat-item">
+              <span className="yt-stat-label">Subscribe</span>
+              <span className="yt-stat-value">{ytChannel?.statistics?.subscriberCount ? Number(ytChannel.statistics.subscriberCount).toLocaleString('id-ID') : '-'}</span>
+            </div>
+            <div className="yt-stat-item">
+              <span className="yt-stat-label">Video</span>
+              <span className="yt-stat-value">{ytChannel?.statistics?.videoCount ? Number(ytChannel.statistics.videoCount).toLocaleString('id-ID') : '-'}</span>
+            </div>
+            <div className="yt-stat-item">
+              <span className="yt-stat-label">Rata-rata Views</span>
+              <span className="yt-stat-value">
+                {ytChannel?.statistics?.viewCount && ytChannel?.statistics?.videoCount 
+                  ? Math.round(Number(ytChannel.statistics.viewCount) / Number(ytChannel.statistics.videoCount)).toLocaleString('id-ID') 
+                  : '-'}
+              </span>
+            </div>
+          </div>
+
+          <div className="yt-profile-right">
+            <a href={`https://www.youtube.com/channel/${ytChannel?.id || 'UC1ZsLrBw_Vq0b3Db9ruTwdA'}?sub_confirmation=1`} target="_blank" rel="noopener noreferrer" className="yt-subscribe-btn" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Subscribe</a>
+          </div>
         </div>
 
 {/* Konten Grid Video */}

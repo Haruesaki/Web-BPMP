@@ -8,7 +8,7 @@ class YoutubeController {
             console.log("Menghubungi DB...");
             const cacheData = await YoutubeModel.getLatestCache();
             console.log("DB response received!");
-            const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 Jam
+            const CACHE_DURATION_MS = 15 * 60 * 1000; // 15 Menit (dipercepat agar video baru cepat muncul)
             
             if (cacheData) {
                 const now = new Date();
@@ -17,7 +17,11 @@ class YoutubeController {
                 if (now - updatedAt < CACHE_DURATION_MS) {
                     console.log("Menggunakan data dari cache PostgreSQL (Knex)...");
                     const data = typeof cacheData.videos_data === 'string' ? JSON.parse(cacheData.videos_data) : cacheData.videos_data;
-                    return res.json({ success: true, data: data, cached: true });
+                    
+                    // Cek jika struktur data masih format lama (array), abaikan cache
+                    if (!Array.isArray(data)) {
+                        return res.json({ success: true, data: data, cached: true });
+                    }
                 }
             }
             
@@ -29,9 +33,23 @@ class YoutubeController {
                 return res.status(500).json({ error: "YouTube API Key atau Channel ID tidak dikonfigurasi." });
             }
             
-            const url = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=3`;
+            // Mengubah ke endpoint playlistItems agar video yang baru diupload langsung terindeks (Search API mengalami delay server)
+            const uploadsPlaylistId = CHANNEL_ID.replace(/^UC/, 'UU');
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${uploadsPlaylistId}&part=snippet&maxResults=3`;
             const response = await axios.get(url);
-            let videos = response.data.items;
+            
+            // Format ulang respons playlistItems agar struktur id.videoId tetap kompatibel dengan frontend lama
+            let videos = response.data.items.map(item => ({
+                ...item,
+                id: { videoId: item.snippet.resourceId.videoId }
+            }));
+            
+            // Mengambil info profil channel dan statistik
+            const channelUrl = `https://www.googleapis.com/youtube/v3/channels?key=${API_KEY}&id=${CHANNEL_ID}&part=snippet,statistics`;
+            const channelResponse = await axios.get(channelUrl);
+            let channelSnippet = channelResponse.data.items[0]?.snippet || {};
+            let channelStats = channelResponse.data.items[0]?.statistics || {};
+            let channelData = { ...channelSnippet, statistics: channelStats, id: CHANNEL_ID };
             
             const processedVideos = await Promise.all(videos.map(async (item) => {
                 let isShort = false;
@@ -53,10 +71,15 @@ class YoutubeController {
                 };
             }));
             
-            await YoutubeModel.clearCache();
-            await YoutubeModel.insertCache(processedVideos);
+            const finalData = {
+                videos: processedVideos,
+                channel: channelData
+            };
             
-            res.json({ success: true, data: processedVideos, cached: false });
+            await YoutubeModel.clearCache();
+            await YoutubeModel.insertCache(finalData);
+            
+            res.json({ success: true, data: finalData, cached: false });
         } catch (error) {
             console.error("Error fetching YouTube API:", error?.response?.data || error.message);
             res.status(500).json({ success: false, error: "Gagal mengambil data dari YouTube" });

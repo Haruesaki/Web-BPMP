@@ -36,13 +36,13 @@ const Footer = () => {
             <h4 className="footer-col-title">Navigasi</h4>
             <div className="footer-map-wrapper">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.9546059286815!2d105.26875931476536!3d-5.424564996065545!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40db0008b8b40d%3A0xc665bb2c73041077!2sBPMP%20Provinsi%20Lampung!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.9088032690074!2d105.27287497439964!3d-5.430822354200016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40dbc8d708c65d%3A0x1830f3cb58f92593!2sBPMP%20Lampung!5e0!3m2!1sen!2sid!4v1782974751659!5m2!1sen!2sid"
                 width="100%"
-                height="140"
-                style={{ border: 0 }}
+                height="180"
+                style={{ border: 2, borderRadius: 15 }}
                 allowFullScreen=""
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="strict-origin-when-cross-origin"
                 title="Peta Lokasi BPMP Lampung"
               ></iframe>
             </div>
