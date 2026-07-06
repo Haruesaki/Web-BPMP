@@ -1,7 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/common/Layout'; // 1. Impor Layout baru
 import Beranda from '../pages/user/Beranda/Beranda';
-import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
+// import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
+// import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi'; // Komponen ini sekarang digantikan oleh GenericPage
+import GenericPage from '../pages/user/GenericPage/GenericPage';
 
 // Halaman Admin
 import Login from '../pages/Admin/Login/Login';
@@ -12,12 +14,11 @@ import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 const AppRoutes = ({ lenisRef }) => {
     return (
         <Routes>
-            {/* 2. Gunakan Layout sebagai pembungkus rute */}
             <Route element={<Layout lenisRef={lenisRef} />}>
-                {/* 3. Jadikan halaman sebagai anak dari Layout */}
                 <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
-                <Route path="/profil/visi-misi" element={<VisiDanMisi lenisRef={lenisRef} />} />
-                {/* Rute-rute lain di masa depan bisa ditambahkan di sini */}
+                <Route path="/profil/visi-misi" element={<GenericPage lenisRef={lenisRef} />} />
+                {/* <Route path="/profil/visi-misi" element={<VisiDanMisi lenisRef={lenisRef} />} /> */}
+                {/* <Route path="/profil/VisiDanMisi" element={<GenericPage lenisRef={lenisRef} />} /> */}
             </Route>
 
             {/* Rute Admin (tanpa Layout user: punya sidebar/header sendiri) */}
