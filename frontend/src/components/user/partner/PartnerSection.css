@@ -1,0 +1,67 @@
+/* =========================================
+   SECTION MITRA KERJA (3D CONCAVE EFFECT)
+   ========================================= */
+.partners-section {
+    position: relative;
+    width: 100%;
+    background-image: linear-gradient(to right, #79cbf8 0%, #aeceff 50%, #79cbf8 100%);
+    padding: 65px 0vw;
+    margin-top: 200px;
+    margin-bottom: 200px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* --- Trik Frame Oval (Biru Gelap melengkung ke dalam putih) --- */
+.partners-section::before,
+.partners-section::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    width: 110%;
+    height: 130px;
+    background-color: #ffffff;
+    border-radius: 100%;
+    z-index: 2;
+}
+
+.partners-section::before {
+    top: -70px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.partners-section::after {
+    bottom: -70px;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Susunan Logo Pembungkus --- */
+.partners-container {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.partners-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    gap: 7vw;
+}
+
+.partner-logo {
+    height: clamp(50px, 6vw, 90px);
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- Responsive Mitra --- */
+@media (max-width: 953px) {
+    .partners-section {
+        margin-top: 10px;
+        margin-bottom: 50px;
+    }
+}

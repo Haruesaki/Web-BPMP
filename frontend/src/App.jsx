@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
-import Beranda from "./pages/Beranda/Beranda";
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   const lenisRef = useRef(null);
@@ -31,7 +32,9 @@ function App() {
     };
   }, []);
 
-  return <Beranda lenisRef={lenisRef} />;
+  return <BrowserRouter>
+      <AppRoutes lenisRef={lenisRef} />
+    </BrowserRouter>;
 }
 
 export default App;

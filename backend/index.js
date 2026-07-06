@@ -1,17 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const apiRoutes = require('./routes/api');
+
 const app = express();
-const port = 5000;
 
-// Mengizinkan React untuk mengakses backend ini
+// Middleware
 app.use(cors());
+app.use(express.json());
 
-// Membuat endpoint sederhana
-app.get('/api/salam', (req, res) => {
-    res.json({ pesan: "Halo dari Node.js Backend!" });
-});
+// Routes
+app.use('/api', apiRoutes);
 
-// Menjalankan server
-app.listen(port, () => {
-    console.log(`Backend berjalan di http://localhost:${port}`);
-});
+// Ekspor app untuk digunakan di server.js (Pemisahan MVC)
+module.exports = app;

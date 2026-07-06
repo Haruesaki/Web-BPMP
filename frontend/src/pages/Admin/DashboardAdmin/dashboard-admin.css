@@ -1,0 +1,504 @@
+/* =========================================================================
+   DASHBOARD ADMIN — CMS WEBSITE BPMP
+   Mengikuti pola Beranda: font Poppins, palet dark navy.
+   ========================================================================= */
+
+.admin-layout {
+    --bg-app: #0B1326;
+    --bg-sidebar: #131B2E;
+    --bg-card: #131a2e;
+    --bg-card-soft: #0f1626;
+    --bg-elevated: #1a2238;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-mid: rgba(255, 255, 255, 0.14);
+    --purple: #5b5fe8;
+    --purple-hover: #6d71f0;
+    --purple-soft: #c3c4f7;
+    --green: #4cae8e;
+    --orange: #f5a623;
+    --text-main: #f3f5fb;
+    --text-sub: #C7C4D8;
+    --text-faint: #5b6478;
+
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+.admin-layout *,
+.admin-layout *::before,
+.admin-layout *::after {
+    box-sizing: border-box;
+}
+
+/* =========================================================================
+   SIDEBAR
+   Dipindahkan ke: src/assets/component/Admin/AdminSidebar.css
+   ========================================================================= */
+
+/* =========================================================================
+   MAIN AREA
+   ========================================================================= */
+.admin-layout .admin-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- TOPBAR ----------
+   Dipindahkan ke: src/assets/component/Admin/AdminHeader.css
+   ---------------------------- */
+
+/* =========================================================================
+   CONTENT
+   ========================================================================= */
+.admin-layout .admin-content {
+    padding: 32px;
+    flex: 1;
+}
+
+.admin-layout .content-heading h2 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .content-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 6px 0 28px;
+}
+
+.admin-layout .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+/* ---------- CARD BASE ---------- */
+.admin-layout .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+/* ---------- CARD: CHART ---------- */
+.admin-layout .card-chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.admin-layout .card-chart-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.admin-layout .chart-title-icon {
+    color: var(--green);
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.admin-layout .card-chart-title h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .card-chart-title p {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin: 2px 0 0;
+}
+
+.admin-layout .chart-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-layout .chart-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.admin-layout .chart-select i {
+    font-size: 10px;
+    color: var(--text-sub);
+}
+
+/* ---------- CHART ---------- */
+.admin-layout .chart-area {
+    display: flex;
+    gap: 16px;
+    height: 300px;
+}
+
+.admin-layout .chart-yaxis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 26px;
+    font-size: 12px;
+    color: var(--text-faint);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.admin-layout .chart-bars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    border-left: 1px solid var(--border-soft);
+    padding-left: 14px;
+}
+
+.admin-layout .chart-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.admin-layout .chart-bar-track {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.admin-layout .chart-bar {
+    width: 60%;
+    max-width: 46px;
+    background: var(--green);
+    border-radius: 6px 6px 0 0;
+    transition: height 0.4s ease;
+}
+
+.admin-layout .chart-bar.highlight {
+    background: var(--purple-soft);
+}
+
+.admin-layout .chart-bar-label {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--text-sub);
+}
+
+/* ---------- CARD: ACTIVITY ---------- */
+.admin-layout .card-activity h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 22px;
+    color: var(--text-main);
+}
+
+.admin-layout .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.admin-layout .activity-item {
+    display: flex;
+    gap: 14px;
+}
+
+.admin-layout .activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+}
+
+.admin-layout .activity-dot.grey {
+    background: var(--text-faint);
+}
+
+.admin-layout .activity-dot.orange {
+    background: var(--orange);
+}
+
+.admin-layout .activity-title {
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--text-main);
+}
+
+.admin-layout .activity-time {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 4px;
+}
+
+/* =========================================================================
+   MODAL: TAMBAH MENU BARU
+   ========================================================================= */
+.admin-layout .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: flex-start; /* changed from center to avoid cutting off top when tall */
+    justify-content: center;
+    z-index: 100;
+    padding: 40px 20px; /* increased top/bottom padding */
+    overflow-y: auto; /* allow scroll */
+}
+
+.admin-layout .modal-box {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    overflow: visible;
+    margin: auto; /* centers it vertically since parent is flex-start */
+}
+
+.admin-layout .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .modal-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-layout .modal-close {
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.admin-layout .modal-close:hover {
+    color: var(--text-main);
+}
+
+.admin-layout .modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-layout .form-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-layout .form-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-layout .form-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.admin-layout .form-radio-item input[type="radio"] {
+    accent-color: var(--purple);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.admin-layout .form-group label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.admin-layout .form-input,
+.admin-layout .form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 9px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-layout .form-input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .form-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+}
+
+.admin-layout .form-select .placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .form-select i {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+/* ---------- DROPDOWN (Ikon / Jenis) ---------- */
+.admin-layout .form-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-mid);
+    border-radius: 9px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    z-index: 20;
+}
+
+.admin-layout .form-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .form-dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--text-sub);
+}
+
+.admin-layout .form-dropdown-item .dropdown-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.admin-layout .form-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-layout .form-dropdown-item.selected {
+    background: var(--purple);
+    color: #fff;
+}
+
+.admin-layout .form-dropdown-item.selected i {
+    color: #fff;
+}
+
+/* ---------- MODAL FOOTER ---------- */
+.admin-layout .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.admin-layout .btn-batal {
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 10px 8px;
+}
+
+.admin-layout .btn-batal:hover {
+    color: var(--text-main);
+}
+
+.admin-layout .btn-simpan {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.admin-layout .btn-simpan:hover {
+    background: var(--purple-hover);
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 1024px) {
+    .admin-layout .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 768px) {
+    /* .admin-sidebar width & .admin-topbar padding responsive rules
+       kini ada di AdminSidebar.css & AdminHeader.css masing-masing. */
+    .admin-layout .admin-content {
+        padding: 20px;
+    }
+    .admin-layout .content-heading h2 {
+        font-size: 24px;
+    }
+}
