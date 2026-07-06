@@ -62,9 +62,8 @@
 }
 
 .admin-layout .content-heading h1 {
-    font-size: 52px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 32px;
+    font-weight: 600;
     margin: 0;
     color: var(--text-main);
 }
@@ -506,9 +505,7 @@
     .admin-layout .admin-content {
         padding: 20px;
     }
-    .admin-layout .content-heading h1 {
-        font-size: 34px;
-    }
+    .admin-layout .content-heading h1,
     .admin-layout .content-heading h2 {
         font-size: 24px;
     }
