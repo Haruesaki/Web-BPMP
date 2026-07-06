@@ -26,13 +26,33 @@ const defaultSearchResults = [
 ];
 
 const AdminHeader = ({
-  userEmail = 'bpmp_lampung@gmail.co.id',
-  userRole = 'Super Admin',
+  // nama, email, & role diambil dari sessionStorage (data user yang login,
+  // bersumber dari backend/DB). Bukan lagi prop hardcoded.
   searchResults = defaultSearchResults,
+  onLogout,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
+  const profileRef = useRef(null);
+
+  const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin', email: '' });
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('adminSession');
+    if (saved) {
+      try {
+        setSession(JSON.parse(saved));
+      } catch (e) {
+        console.error("Gagal memuat session", e);
+      }
+    }
+  }, []);
+
+  const userName = session.nama;
+  const userRole = session.role;
+  const userEmail = session.email;
 
   // --- EFFECT: Klik di luar search untuk menutup ---
   useEffect(() => {
@@ -47,6 +67,17 @@ const AdminHeader = ({
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSearchActive]);
+
+  // --- EFFECT: Klik di luar dropdown profil untuk menutup ---
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="admin-topbar">
@@ -84,14 +115,47 @@ const AdminHeader = ({
         )}
       </div>
 
-      <div className="topbar-profile">
-        <div className="profile-text">
-          <div className="profile-email">{userEmail}</div>
-          <div className="profile-role">{userRole}</div>
-        </div>
-        <div className="profile-avatar">
-          <i className="fa-solid fa-user"></i>
-        </div>
+      <div className="topbar-profile" ref={profileRef}>
+        <button
+          type="button"
+          className={`profile-trigger ${isProfileOpen ? 'active' : ''}`}
+          onClick={() => setIsProfileOpen((prev) => !prev)}
+        >
+          <div className="profile-text">
+            <div className="profile-name">{userEmail}</div>
+            <div className="profile-role">{userRole}</div>
+          </div>
+          <div className="profile-avatar">
+            <i className="fa-solid fa-user"></i>
+          </div>
+        </button>
+
+        {isProfileOpen && (
+          <div className="profile-dropdown">
+            <div className="profile-dropdown-user">
+              <span className="profile-dropdown-avatar">
+                <i className="fa-solid fa-user"></i>
+              </span>
+              <div className="profile-dropdown-info">
+                <div className="profile-dropdown-eyebrow">User</div>
+                <div className="profile-dropdown-name">{userName}</div>
+                <div className="profile-dropdown-email">{userEmail}</div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="profile-dropdown-logout"
+              onClick={() => {
+                setIsProfileOpen(false);
+                onLogout?.();
+              }}
+            >
+              <i className="fa-solid fa-right-from-bracket"></i>
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

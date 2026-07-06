@@ -13,6 +13,10 @@
     gap: 24px;
     padding: 18px 32px;
     border-bottom: 1px solid var(--border-soft);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg-app);
 }
 
 .admin-layout .search-wrapper {
@@ -141,17 +145,34 @@
 
 /* ---------- PROFILE ---------- */
 .admin-layout .topbar-profile {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.admin-layout .profile-trigger {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    margin: -4px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .profile-trigger:hover,
+.admin-layout .profile-trigger.active {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .admin-layout .profile-text {
     text-align: right;
 }
 
-.admin-layout .profile-email {
+.admin-layout .profile-name {
     font-size: 13.5px;
     color: var(--text-main);
 }
@@ -172,6 +193,89 @@
     justify-content: center;
     color: var(--text-sub);
     font-size: 16px;
+}
+
+/* ---------- PROFILE DROPDOWN ---------- */
+.admin-layout .profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 264px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    z-index: 60;
+}
+
+.admin-layout .profile-dropdown-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+}
+
+.admin-layout .profile-dropdown-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.admin-layout .profile-dropdown-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    margin-bottom: 2px;
+}
+
+.admin-layout .profile-dropdown-name {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.25;
+}
+
+.admin-layout .profile-dropdown-email {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-top: 2px;
+    word-break: break-all;
+}
+
+.admin-layout .profile-dropdown-logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    background: transparent;
+    color: #f26d6d;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .profile-dropdown-logout i {
+    font-size: 15px;
+    width: 18px;
+    text-align: center;
+}
+
+.admin-layout .profile-dropdown-logout:hover {
+    background: rgba(242, 109, 109, 0.08);
 }
 
 /* ---------- RESPONSIVE ---------- */
