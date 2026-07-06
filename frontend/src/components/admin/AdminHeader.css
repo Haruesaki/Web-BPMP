@@ -13,6 +13,10 @@
     gap: 24px;
     padding: 18px 32px;
     border-bottom: 1px solid var(--border-soft);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg-app);
 }
 
 .admin-layout .search-wrapper {

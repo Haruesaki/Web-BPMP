@@ -113,7 +113,7 @@ const DashboardAdmin = () => {
         {/* ---------- CONTENT ---------- */}
         <main className="admin-content">
           <div className="content-heading">
-            <h2>SELAMAT DATANG! Admin BPMP Lampung</h2>
+            <h1>SELAMAT DATANG! Admin BPMP Lampung</h1>
             <p>Dashboard Overview</p>
           </div>
 

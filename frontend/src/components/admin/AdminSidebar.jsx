@@ -28,7 +28,7 @@ import './AdminSidebar.css';
 const adminMenuItems1 = [
   { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin' },
   { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
-  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders' },
+  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: '/admin/pengaturan-menu' },
   { id: 'berita', label: 'Berita', icon: 'fa-solid fa-file-lines' },
 ];
 
