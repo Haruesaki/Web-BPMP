@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-// Reuse tema & layout dari dashboard-admin (variabel CSS --bg-app, dst.
-// dideklarasikan di scope ".admin-layout" pada dashboard-admin.css).
-import '../DashboardAdmin/dashboard-admin.css';
+// Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
+// menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
+// <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
 import './PengaturanMenu.css';
-
-import AdminSidebar from '../../../components/admin/AdminSidebar';
-import AdminHeader from '../../../components/admin/AdminHeader';
 
 // =========================================================================
 //  DATA MENU
@@ -61,33 +58,26 @@ const PengaturanMenu = () => {
     setMenus((prev) => prev.filter((m) => m.id !== id));
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar activeMenu="pengaturan-menu" />
+    <main className="admin-content">
+      {/* ---------- HEADING ---------- */}
+      <div className="pm-heading">
+        <h1>Pengaturan Menu</h1>
+        <p>Kelola urutan dan status tampilan menu di halaman beranda.</p>
+      </div>
 
-      {/* ================= MAIN AREA ================= */}
-      <div className="admin-main">
-        <AdminHeader />
-
-        <main className="admin-content">
-          {/* ---------- HEADING ---------- */}
-          <div className="pm-heading">
-            <h1>Pengaturan Menu</h1>
-            <p>Kelola urutan dan status tampilan menu di halaman beranda.</p>
+      {/* ---------- CARD STRUKTUR NAVIGASI ---------- */}
+      <section className="pm-card">
+        <div className="pm-card-header">
+          <div className="pm-card-title">
+            <i className="fa-solid fa-bars"></i>
+            <span>Struktur Navigasi Utama</span>
           </div>
+          <span className="pm-card-hint">
+            Geser ikon titik-titik untuk mengubah urutan
+          </span>
+        </div>
 
-          {/* ---------- CARD STRUKTUR NAVIGASI ---------- */}
-          <section className="pm-card">
-            <div className="pm-card-header">
-              <div className="pm-card-title">
-                <i className="fa-solid fa-bars"></i>
-                <span>Struktur Navigasi Utama</span>
-              </div>
-              <span className="pm-card-hint">
-                Geser ikon titik-titik untuk mengubah urutan
-              </span>
-            </div>
-
-            <div className="pm-list">
+        <div className="pm-list">
               {menus.map((menu, index) => (
                 <div
                   key={menu.id}
@@ -156,10 +146,8 @@ const PengaturanMenu = () => {
 
               <button className="pm-save">Simpan Perubahan</button>
             </div>
-          </section>
-        </main>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

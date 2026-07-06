@@ -181,6 +181,27 @@
     font-size: 14px;
 }
 
+.auth-layout .auth-toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 15px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease;
+}
+
+.auth-layout .auth-toggle-password:hover {
+    color: var(--text-main);
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 520px) {
     .auth-layout .auth-card {

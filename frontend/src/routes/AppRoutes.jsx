@@ -11,6 +11,8 @@ import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
+import AdminLayout from '../components/admin/AdminLayout';
+import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -25,9 +27,17 @@ const AppRoutes = ({ lenisRef }) => {
             {/* Rute Admin (tanpa Layout user: punya sidebar/header sendiri) */}
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/lupa-password" element={<LupaPassword />} />
-            <Route path="/admin" element={<DashboardAdmin />} />
-            <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
-            <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+
+            {/* Proteksi Rute Admin (dari branch test): ProtectedRoute menjaga
+                autentikasi, AdminLayout menyediakan sidebar + header + Outlet.
+                Semua halaman admin di sini bersifat content-only (return <main>). */}
+            <Route element={<ProtectedRoute />}>
+                <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<DashboardAdmin />} />
+                    <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
+                    <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+                </Route>
+            </Route>
         </Routes>
     );
 };

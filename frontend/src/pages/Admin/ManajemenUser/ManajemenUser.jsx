@@ -4,9 +4,6 @@ import React, { useMemo, useState } from 'react';
 import '../DashboardAdmin/dashboard-admin.css';
 import './ManajemenUser.css';
 
-import AdminSidebar from '../../../components/admin/AdminSidebar';
-import AdminHeader from '../../../components/admin/AdminHeader';
-
 // =========================================================================
 //  DATA DUMMY
 //  -----------------------------------------------------------------------
@@ -180,14 +177,8 @@ const ManajemenUser = () => {
   };
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar activeMenu="manajemen" />
-
-      {/* ================= MAIN AREA ================= */}
-      <div className="admin-main">
-        <AdminHeader />
-
-        <main className="admin-content">
+    <>
+      <main className="admin-content">
           {/* ---------- HERO CARD ---------- */}
           <section className="mu-hero">
             <div className="mu-hero-left">
@@ -329,11 +320,10 @@ const ManajemenUser = () => {
             </div>
           </section>
         </main>
-      </div>
 
       {/* ================= MODAL: TAMBAH / EDIT USER ================= */}
       {formModalOpen && (
-        <div className="modal-overlay" onClick={closeFormModal}>
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={closeFormModal}>
           <div className="modal-box modal-box-lg" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header mu-modal-header">
               <div>
@@ -430,7 +420,7 @@ const ManajemenUser = () => {
 
       {/* ================= MODAL: HAPUS AKUN USER ================= */}
       {deleteTarget && (
-        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDeleteTarget(null)}>
           <div className="modal-box mu-delete-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-body">
               <h3 className="mu-delete-title">Hapus Akun User</h3>
@@ -460,7 +450,7 @@ const ManajemenUser = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

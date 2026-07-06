@@ -26,9 +26,9 @@ const defaultSearchResults = [
 ];
 
 const AdminHeader = ({
-  userName = 'BPMP Lampung',
+  // userName & userRole diambil dari sessionStorage (lihat di bawah), jadi
+  // tidak lagi jadi prop. userEmail tetap prop karena dipakai di dropdown.
   userEmail = 'bpmp_lampung@gmail.co.id',
-  userRole = 'Super Admin',
   searchResults = defaultSearchResults,
   onLogout,
 }) => {
@@ -37,6 +37,22 @@ const AdminHeader = ({
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
   const profileRef = useRef(null);
+
+  const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin' });
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('adminSession');
+    if (saved) {
+      try {
+        setSession(JSON.parse(saved));
+      } catch (e) {
+        console.error("Gagal memuat session", e);
+      }
+    }
+  }, []);
+
+  const userName = session.nama;
+  const userRole = session.role;
 
   // --- EFFECT: Klik di luar search untuk menutup ---
   useEffect(() => {

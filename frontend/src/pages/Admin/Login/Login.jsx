@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
+import { useAuth } from '../../../hooks/useAuth';
 
 // =========================================================================
 //  HALAMAN LOGIN CMS — Web BPMP Lampung
@@ -12,27 +13,46 @@ import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, loading, error } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = () => {
-    // TODO: integrasi ke backend (POST /api/auth/login).
-    console.log({ email, password, rememberMe });
-    // Contoh redirect setelah login sukses:
-    // navigate('/admin');
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    const result = await login(email, password);
+    if (result.success) {
+      navigate('/admin');
+    }
   };
 
   return (
     <div className="auth-layout">
-      <div className="auth-card">
+      <form className="auth-card" onSubmit={handleSubmit}>
         <h1 className="auth-title">
           Login <span className="auth-title-accent">CMS</span>
         </h1>
         <p className="auth-subtitle">
           Silakan masukkan Email akun Anda untuk melanjutkan ke dashboard CMS.
         </p>
+
+        {error && (
+          <div className="auth-error-message" style={{ 
+            color: '#ef4444', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            marginBottom: '20px', 
+            fontSize: '13.5px', 
+            textAlign: 'center' 
+          }}>
+            <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '8px' }}></i>
+            {error}
+          </div>
+        )}
 
         {/* EMAIL */}
         <div className="auth-field">
@@ -55,12 +75,20 @@ const Login = () => {
           <div className="auth-input-wrapper">
             <i className="fa-solid fa-lock auth-input-icon"></i>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               className="auth-input"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              style={{ paddingRight: '44px' }}
             />
+            <button
+              type="button"
+              className="auth-toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
           </div>
         </div>
 
@@ -80,10 +108,10 @@ const Login = () => {
         </div>
 
         {/* TOMBOL MASUK */}
-        <button className="auth-btn" onClick={handleSubmit}>
-          Masuk <i className="fa-solid fa-arrow-right"></i>
+        <button type="submit" className="auth-btn" disabled={loading}>
+          {loading ? 'Memuat...' : 'Masuk'} <i className="fa-solid fa-arrow-right"></i>
         </button>
-      </div>
+      </form>
     </div>
   );
 };

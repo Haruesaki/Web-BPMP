@@ -172,7 +172,7 @@
     text-align: right;
 }
 
-.admin-layout .profile-email {
+.admin-layout .profile-name {
     font-size: 13.5px;
     color: var(--text-main);
 }
