@@ -26,9 +26,8 @@ const defaultSearchResults = [
 ];
 
 const AdminHeader = ({
-  // userName & userRole diambil dari sessionStorage (lihat di bawah), jadi
-  // tidak lagi jadi prop. userEmail tetap prop karena dipakai di dropdown.
-  userEmail = 'bpmp_lampung@gmail.co.id',
+  // nama, email, & role diambil dari sessionStorage (data user yang login,
+  // bersumber dari backend/DB). Bukan lagi prop hardcoded.
   searchResults = defaultSearchResults,
   onLogout,
 }) => {
@@ -38,7 +37,7 @@ const AdminHeader = ({
   const searchInputRef = useRef(null);
   const profileRef = useRef(null);
 
-  const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin' });
+  const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin', email: '' });
 
   useEffect(() => {
     const saved = sessionStorage.getItem('adminSession');
@@ -53,6 +52,7 @@ const AdminHeader = ({
 
   const userName = session.nama;
   const userRole = session.role;
+  const userEmail = session.email;
 
   // --- EFFECT: Klik di luar search untuk menutup ---
   useEffect(() => {
@@ -122,7 +122,7 @@ const AdminHeader = ({
           onClick={() => setIsProfileOpen((prev) => !prev)}
         >
           <div className="profile-text">
-            <div className="profile-email">{userEmail}</div>
+            <div className="profile-name">{userEmail}</div>
             <div className="profile-role">{userRole}</div>
           </div>
           <div className="profile-avatar">
