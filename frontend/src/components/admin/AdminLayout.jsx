@@ -6,10 +6,8 @@ import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 
 const AdminLayout = () => {
-  // --- 1. STATE: MENU AKTIF (dipakai AdminSidebar) ---
-  const [activeMenu, setActiveMenu] = useState('beranda');
-
-  // --- 2. STATE: MODAL TAMBAH MENU ---
+  // --- STATE: MODAL TAMBAH MENU ---
+  // (Sorotan menu aktif kini ditangani sendiri oleh AdminSidebar via URL.)
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   // --- 3. STATE: FORM TAMBAH MENU ---
@@ -65,16 +63,12 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-layout">
-      <AdminSidebar
-        activeMenu={activeMenu}
-        onMenuClick={setActiveMenu}
-        onTambahMenu={() => setIsMenuModalOpen(true)}
-      />
+      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
         <AdminHeader />
-        <Outlet context={{ activeMenu, setActiveMenu }} />
+        <Outlet />
       </div>
 
       {/* ================= MODAL: TAMBAH MENU BARU ================= */}
