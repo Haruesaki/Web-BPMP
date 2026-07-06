@@ -10,6 +10,8 @@ import Login from '../pages/Admin/Login/Login';
 import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
+import AdminLayout from '../components/admin/AdminLayout';
+import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -24,8 +26,14 @@ const AppRoutes = ({ lenisRef }) => {
             {/* Rute Admin (tanpa Layout user: punya sidebar/header sendiri) */}
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/lupa-password" element={<LupaPassword />} />
-            <Route path="/admin" element={<DashboardAdmin />} />
-            <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+
+            {/* Proteksi Rute Admin */}
+            <Route element={<ProtectedRoute />}>
+                <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<DashboardAdmin />} />
+                    <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+                </Route>
+            </Route>
         </Routes>
     );
 };

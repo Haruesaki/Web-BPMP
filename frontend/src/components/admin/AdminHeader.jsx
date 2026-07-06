@@ -26,13 +26,27 @@ const defaultSearchResults = [
 ];
 
 const AdminHeader = ({
-  userEmail = 'bpmp_lampung@gmail.co.id',
-  userRole = 'Super Admin',
   searchResults = defaultSearchResults,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin' });
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('adminSession');
+    if (saved) {
+      try {
+        setSession(JSON.parse(saved));
+      } catch (e) {
+        console.error("Gagal memuat session", e);
+      }
+    }
+  }, []);
+
+  const userName = session.nama;
+  const userRole = session.role;
 
   // --- EFFECT: Klik di luar search untuk menutup ---
   useEffect(() => {
@@ -86,7 +100,7 @@ const AdminHeader = ({
 
       <div className="topbar-profile">
         <div className="profile-text">
-          <div className="profile-email">{userEmail}</div>
+          <div className="profile-name">{userName}</div>
           <div className="profile-role">{userRole}</div>
         </div>
         <div className="profile-avatar">

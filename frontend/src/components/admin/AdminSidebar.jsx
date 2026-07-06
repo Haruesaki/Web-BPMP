@@ -86,7 +86,7 @@ const AdminSidebar = ({ activeMenu, onMenuClick, onTambahMenu }) => {
         <h1>Content Management<br />System Website BPMP</h1>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" data-lenis-prevent="true">
         {adminMenuItems1.map(renderNavItem)}
 
         <div className="nav-divider"></div>

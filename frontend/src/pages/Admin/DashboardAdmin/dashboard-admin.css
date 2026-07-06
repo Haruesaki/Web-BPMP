@@ -265,10 +265,11 @@
     background: rgba(5, 8, 16, 0.72);
     backdrop-filter: blur(2px);
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* changed from center to avoid cutting off top when tall */
     justify-content: center;
     z-index: 100;
-    padding: 20px;
+    padding: 40px 20px; /* increased top/bottom padding */
+    overflow-y: auto; /* allow scroll */
 }
 
 .admin-layout .modal-box {
@@ -279,6 +280,7 @@
     border-radius: 16px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
     overflow: visible;
+    margin: auto; /* centers it vertically since parent is flex-start */
 }
 
 .admin-layout .modal-header {
