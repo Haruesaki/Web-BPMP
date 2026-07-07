@@ -11,6 +11,9 @@ router.get('/salam', (req, res) => {
 
 router.get('/youtube', YoutubeController.getVideos);
 router.post('/auth/login', AuthController.login);
+router.post('/auth/forgot-password', AuthController.requestOtp);
+router.post('/auth/verify-otp', AuthController.verifyOtp);
+router.post('/auth/reset-password', AuthController.resetPassword);
 
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
