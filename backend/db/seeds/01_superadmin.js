@@ -10,7 +10,7 @@ exports.seed = async function(knex) {
 
   // Hash kata sandi "nasiliwet"
   const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash('nasiliwet', salt);
+  const hash = await bcrypt.hash('  ', salt);
 
   // Hapus pengguna lama jika sudah ada dengan email atau nama yang sama untuk menghindari duplikasi
   await knex('pengguna').where({ email: 'haruesakii@gmail.com' }).del();

@@ -46,7 +46,7 @@ const AppRoutes = ({ lenisRef }) => {
                 {/* Editor post: halaman fokus penuh (punya layout/tema sendiri),
                     di luar AdminLayout tapi tetap diproteksi login. */}
                 <Route
-                    path="/admin/post/baru"
+                    path="/admin/post/default"
                     element={
                         <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', background: '#0B1326', minHeight: '100vh' }}>Memuat editor…</div>}>
                             <PostDefault />
