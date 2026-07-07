@@ -55,6 +55,7 @@ class AuthController {
                 message: 'Login berhasil.',
                 data: {
                     user: {
+                        id: user.id,
                         nama: user.nama_pengguna,
                         email: user.email,
                         role: user.nama_peran

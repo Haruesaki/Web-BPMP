@@ -1,44 +1,88 @@
 /* Base styling for all content type sections */
 .content-type-section {
-    padding: 40px 20px;
-    margin: 0 auto;
-    max-width: 1200px; /* Batasi lebar agar tidak terlalu lebar di layar besar */
+    position: relative;
+    margin: 0;
+    width: 100%;; /* Batasi lebar agar tidak terlalu lebar di layar besar */
     color: #333;
     font-family: 'Roboto', sans-serif; /* Contoh font */
     line-height: 1.6;
+    background-color: #232F72;
+    border-radius: 20px;
 }
 
 /* --- Default Content Styling --- */
 .default-content {
     text-align: left;
+    margin-top: 100px;
+}
+
+@keyframes lightswap {
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
 }
 
 .default-banner-wrapper {
-    background-color: #0056b3; /* Warna biru contoh */
+    position: relative;
+    background-color: rgba(6, 21, 60, 0.5); /* Warna biru contoh dengan transparansi */
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 60px 40px;
-    margin-bottom: 30px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.473);
+    z-index: 2;
+    overflow: hidden;
+
+}
+
+.default-banner-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 75%; /* Adjust to start off-screen to the right when translateX(100%) is applied */
+    width: 200%; /* Make it wider to cover the entire swipe area */
+    height: 100%;
+    background: linear-gradient(to right, 
+    transparent, 
+    rgba(255, 255, 255, 0.589) 50%, transparent); /* Light stripe */
+    opacity: 0.8;
+    z-index: 3; /* Ensure it's above the banner content */
+    pointer-events: none;
+    filter: blur(90px);
+    animation: lightswap 10s infinite linear;
 }
 
 .default-banner-title {
-    font-size: 3em;
-    margin-bottom: 15px;
+    font-size: 2.5rem;
     font-weight: 700;
+    margin: 0;
 }
 
 .default-description-container {
-    background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 8px;
+    position: relative;
+    z-index: 1;
+    top: -15px;
+    color: white;
+    background-color: rgba(35, 47, 114, 0.7); /* Warna biru dengan transparansi */
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 3px solid rgba(255, 255, 255, 0.188);
+    padding: 50px 35px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+
 }
 
 .default-description-container p {
     margin-bottom: 1em;
     font-size: 1.1em;
+    text-align: justify;
 }
 
 .default-description-container h3 {
@@ -67,4 +111,23 @@
     .default-banner-title {
         font-size: 2em;
     }
+}
+
+.default-description-container .image-frame {
+    width: 100%; /* Frame mengambil lebar penuh kontainer */
+    max-width: 600px; /* Batasi lebar frame jika tidak ingin 100% selalu */
+    height: 500px; /* Tentukan tinggi frame */
+    overflow: hidden; /* Penting! Menyembunyikan bagian gambar yang keluar dari frame */
+    border-radius: 8px; /* Contoh: beri sudut melengkung pada frame */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Contoh: beri bayangan */
+    display: block; /* Agar margin auto berfungsi */
+    position: relative; /* Jika ada elemen lain di dalam frame */
+}
+
+.default-description-container .image-frame img {
+    width: 100%; /* Gambar mengisi lebar frame */
+    height: 100%; /* Gambar mengisi tinggi frame */
+    object-fit: cover; /* Penting! Gambar akan mengisi frame, memotong bagian yang tidak perlu */
+    /* object-fit: contain; // Alternatif: Gambar akan menyesuaikan diri di dalam frame tanpa terpotong, mungkin menyisakan ruang kosong */
+    display: block; /* Menghilangkan spasi tambahan */
 }

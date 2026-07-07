@@ -1,32 +1,46 @@
-import React from 'react';
-import './DefaultContent.css';
+import React from "react";
+import "./DefaultContent.css";
+import parse from 'html-react-parser'; // Import library
 
-const DefaultContent = () => {
+const DefaultContent = ({ contentHtml = `
+  <p>Ini adalah konten dummy.</p>
+  <p>Paragraf lain untuk mengisi ruang.</p>
+  <img src="https://via.placeholder.com/800x600" alt="Placeholder Image">
+  <p>Teks setelah gambar.</p>` 
+}) => {
+  // Fungsi untuk membungkus elemen <img>
+  const replaceImagesWithFrames = (node) => {
+    if (node.type === 'tag' && node.name === 'img') {
+      // Dapatkan atribut src dari gambar
+      const imgSrc = node.attribs.src;
+      // Hapus atribut style, width, height dari gambar,
+      // karena kita akan mengontrolnya dari frame pembungkus.
+      const cleanedAttribs = { ...node.attribs };
+      delete cleanedAttribs.width;
+      delete cleanedAttribs.height;
+      delete cleanedAttribs.style;
+
+      return (
+        <div className="image-frame"> {/* Ini adalah wadah kontainer khusus */}
+          <img {...cleanedAttribs} src={imgSrc} alt={node.attribs.alt || ''} />
+        </div>
+      );
+    }
+    return node; // Kembalikan node apa adanya jika bukan <img>
+  };
+
+  // Gunakan parse untuk mengubah HTML string menjadi elemen React
+  // dan terapkan fungsi replaceImagesWithFrames
+  const parsedContent = parse(contentHtml, { replace: replaceImagesWithFrames });
+
   return (
     <div className="content-type-section default-content">
       <div className="default-banner-wrapper">
         <h1 className="default-banner-title">Judul Halaman Default</h1>
       </div>
       <div className="default-description-container">
-        <p>
-          Ini adalah deskripsi halaman default. Konten ini akan datang dari CKEditor.
-          Anda bisa membayangkan di sini ada banyak paragraf, gambar, atau elemen lain.
-        </p>
-        <p>
-          Tujuannya adalah untuk memastikan layout dari judul banner dan konten teks
-          sudah sesuai dengan ekspektasi. Ini adalah simulasi dari halaman seperti
-          "Visi Misi" atau "Tentang Kami".
-        </p>
-        <ul>
-          <li>Poin pertama</li>
-          <li>Poin kedua</li>
-          <li>Poin ketiga</li>
-        </ul>
-        <h3>Sub-judul Contoh</h3>
-        <p>
-          Paragraf lain dengan beberapa <b>teks tebal</b> dan <i>teks miring</i> untuk
-          menguji rendering konten.
-        </p>
+        {/* Render konten HTML yang sudah di-parse dan diubah */}
+        {parsedContent}
       </div>
     </div>
   );
