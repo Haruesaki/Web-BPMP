@@ -37,6 +37,14 @@
     border-bottom: 1px solid var(--border-soft);
 }
 
+/* Sisi kanan header: hint + legenda status (ditumpuk vertikal) */
+.admin-layout .pm-card-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
 .admin-layout .pm-card-title {
     display: flex;
     align-items: center;
@@ -242,6 +250,16 @@
     background: rgba(201, 162, 66, 0.22);
 }
 
+/* Lebar TETAP & sama persis agar ukuran tombol tidak berubah saat toggle
+   Aktifkan <-> Nonaktifkan. box-sizing border-box supaya padding tidak
+   menambah lebar total. */
+.admin-layout .pm-btn-nonaktif,
+.admin-layout .pm-btn-aktif {
+    width: 128px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
 .admin-layout .pm-btn-nonaktif {
     color: var(--text-sub);
     border-color: var(--border-mid);
@@ -277,7 +295,7 @@
 .admin-layout .pm-card-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
     padding: 20px 24px;
     border-top: 1px solid var(--border-soft);
