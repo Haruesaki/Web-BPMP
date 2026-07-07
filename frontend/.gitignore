@@ -25,3 +25,10 @@ dist-ssr
 
 .env
 .env.*
+
+# Playwright / e2e testing — lokal saja, JANGAN dibagikan ke tim
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/e2e/
+playwright.config.js
