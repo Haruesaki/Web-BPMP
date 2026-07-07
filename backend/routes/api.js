@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const YoutubeController = require('../controllers/youtubeController');
 const AuthController = require('../controllers/authController');
+const UserController = require('../controllers/userController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
@@ -9,5 +11,8 @@ router.get('/salam', (req, res) => {
 
 router.get('/youtube', YoutubeController.getVideos);
 router.post('/auth/login', AuthController.login);
+
+router.get('/users', authMiddleware, UserController.getUsers);
+router.delete('/users/:id', authMiddleware, UserController.deleteUser);
 
 module.exports = router;

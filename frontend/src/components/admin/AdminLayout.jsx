@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import '../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import { useAuth } from '../../hooks/useAuth';
 
 const AdminLayout = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   // --- STATE: MODAL TAMBAH MENU ---
   // (Sorotan menu aktif kini ditangani sendiri oleh AdminSidebar via URL.)
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -67,7 +71,10 @@ const AdminLayout = () => {
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
-        <AdminHeader />
+        <AdminHeader onLogout={() => {
+          logout();
+          navigate('/admin/login');
+        }} />
         <Outlet />
       </div>
 
