@@ -141,9 +141,20 @@ const PengaturanMenu = () => {
             <i className="fa-solid fa-bars"></i>
             <span>Struktur Navigasi Utama</span>
           </div>
-          <span className="pm-card-hint">
-            Geser ikon titik-titik untuk mengubah urutan
-          </span>
+
+          <div className="pm-card-header-right">
+            <span className="pm-card-hint">
+              Geser ikon titik-titik untuk mengubah urutan
+            </span>
+            <div className="pm-legend">
+              <span className="pm-legend-item">
+                <span className="pm-dot pm-dot-active"></span> Aktif
+              </span>
+              <span className="pm-legend-item">
+                <span className="pm-dot pm-dot-inactive"></span> Non-aktif
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="pm-list">
@@ -182,22 +193,21 @@ const PengaturanMenu = () => {
 
                   <span className="pm-number">{index + 1}</span>
 
-                  {/* Label juga bisa diklik untuk buka/tutup submenu */}
+                  {/* Label juga bisa diklik untuk buka/tutup submenu.
+                      Dot di kanan nama menandakan status aktif (hijau) / nonaktif (abu). */}
                   <div
                     className={`pm-label ${hasSub ? 'pm-label-clickable' : ''}`}
                     onClick={hasSub ? () => toggleExpand(menu.id) : undefined}
                   >
                     <span>{menu.label}</span>
+                    <span
+                      className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`}
+                      title={menu.active ? 'Aktif' : 'Non-aktif'}
+                    ></span>
                   </div>
 
                   <div className="pm-actions">
                     <button className="pm-btn pm-btn-submenu">Tambah Submenu</button>
-
-                    <span
-                      className={`pm-status ${menu.active ? 'is-active' : 'is-inactive'}`}
-                    >
-                      Info: {menu.active ? 'Aktif' : 'Nonaktif'}
-                    </span>
 
                     <button className="pm-btn pm-btn-edit">Edit</button>
 
@@ -257,15 +267,13 @@ const PengaturanMenu = () => {
 
                       <div className="pm-label">
                         <span>{sub.label}</span>
+                        <span
+                          className={`pm-dot ${sub.active ? 'pm-dot-active' : 'pm-dot-inactive'}`}
+                          title={sub.active ? 'Aktif' : 'Non-aktif'}
+                        ></span>
                       </div>
 
                       <div className="pm-actions">
-                        <span
-                          className={`pm-status ${sub.active ? 'is-active' : 'is-inactive'}`}
-                        >
-                          Info: {sub.active ? 'Aktif' : 'Nonaktif'}
-                        </span>
-
                         <button className="pm-btn pm-btn-edit">Edit</button>
 
                         {sub.active ? (
@@ -300,15 +308,6 @@ const PengaturanMenu = () => {
 
             {/* ---------- FOOTER ---------- */}
             <div className="pm-card-footer">
-              <div className="pm-legend">
-                <span className="pm-legend-item">
-                  <span className="pm-dot pm-dot-active"></span> Aktif
-                </span>
-                <span className="pm-legend-item">
-                  <span className="pm-dot pm-dot-inactive"></span> Non-aktif
-                </span>
-              </div>
-
               <button className="pm-save">Simpan Perubahan</button>
             </div>
       </section>
