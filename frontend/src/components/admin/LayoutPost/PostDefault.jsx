@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
   ClassicEditor,
@@ -171,6 +171,68 @@ const PostDefault = ({
 }) => {
   const [judul, setJudul] = useState(initialTitle);
   const [konten, setKonten] = useState(initialContent);
+
+  // --- Auto-scroll halaman saat menyeret (mis. gambar) ke tepi atas/bawah ---
+  // CKEditor tidak menggulir window secara otomatis saat drag; ini menutup
+  // celah itu agar gambar mudah dipindah ke posisi yang sedang di luar layar.
+  // Zona bawah dibuat lebih lebar dari atas karena di bawah viewport ada
+  // taskbar OS — scroll harus mulai lebih awal sebelum kursor keluar browser.
+  useEffect(() => {
+    const EDGE_TOP = 110; // px zona pemicu dari tepi atas
+    const EDGE_BOTTOM = 190; // px zona pemicu dari tepi bawah (lebih lebar)
+    const MIN_SPEED = 8; // langsung bergerak begitu masuk zona
+    const MAX_SPEED = 28; // saat mepet tepi
+    let pointerY = 0;
+    let active = false;
+    let raf = null;
+
+    const ramp = (t) => MIN_SPEED + (MAX_SPEED - MIN_SPEED) * Math.max(0, Math.min(1, t));
+
+    const step = () => {
+      if (!active) {
+        raf = null;
+        return;
+      }
+      const h = window.innerHeight;
+      let dy = 0;
+      const distTop = pointerY;
+      const distBottom = h - pointerY;
+      if (distTop < EDGE_TOP) {
+        dy = -ramp(1 - distTop / EDGE_TOP); // makin dekat tepi → makin cepat
+      } else if (distBottom < EDGE_BOTTOM) {
+        dy = ramp(1 - distBottom / EDGE_BOTTOM);
+      }
+      if (dy !== 0) window.scrollBy(0, dy);
+      raf = requestAnimationFrame(step);
+    };
+
+    const onDragOver = (e) => {
+      // Batasi ke posisi valid dalam viewport; bila kursor mepet/melewati
+      // tepi bawah, anggap tepat di tepi agar tetap scroll kecepatan penuh.
+      pointerY = Math.max(0, Math.min(e.clientY, window.innerHeight));
+      if (!active) {
+        active = true;
+        if (!raf) raf = requestAnimationFrame(step);
+      }
+    };
+    const stop = () => {
+      active = false;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+    };
+
+    window.addEventListener('dragover', onDragOver, true);
+    window.addEventListener('drop', stop, true);
+    window.addEventListener('dragend', stop, true);
+    return () => {
+      window.removeEventListener('dragover', onDragOver, true);
+      window.removeEventListener('drop', stop, true);
+      window.removeEventListener('dragend', stop, true);
+      stop();
+    };
+  }, []);
 
   const handleSimpan = () => {
     if (onSave) onSave({ judul, konten });

@@ -133,18 +133,22 @@
    Variabel --ck-* mengikuti palet web ini. Diset di scope .postdefault agar
    toolbar, editable area, dropdown, dan panel semuanya ikut gelap.
    ========================================================================= */
-.postdefault {
-    --ck-color-base-background: var(--bg-card-soft);
-    --ck-color-base-border: var(--border-mid);
-    --ck-color-base-text: var(--text-main);
+/* Nilai hex literal (bukan var --bg-*) supaya juga berlaku di .ck-body-wrapper
+   — kontainer panel/balloon CKEditor yang ditempel ke <body>, di luar
+   .postdefault, sehingga tidak kebagian custom-property dari .postdefault. */
+.postdefault,
+.ck-body-wrapper {
+    --ck-color-base-background: #0f1626;
+    --ck-color-base-border: rgba(255, 255, 255, 0.14);
+    --ck-color-base-text: #f3f5fb;
 
-    --ck-color-text: var(--text-main);
+    --ck-color-text: #f3f5fb;
     --ck-color-shadow-drop: rgba(0, 0, 0, 0.45);
     --ck-color-shadow-inner: rgba(0, 0, 0, 0.3);
 
     /* Toolbar */
-    --ck-color-toolbar-background: var(--bg-card);
-    --ck-color-toolbar-border: var(--border-soft);
+    --ck-color-toolbar-background: #131a2e;
+    --ck-color-toolbar-border: rgba(255, 255, 255, 0.08);
 
     /* Tombol toolbar */
     --ck-color-button-default-background: transparent;
@@ -153,26 +157,48 @@
     --ck-color-button-on-background: rgba(91, 95, 232, 0.28);
     --ck-color-button-on-hover-background: rgba(91, 95, 232, 0.4);
     --ck-color-button-on-active-background: rgba(91, 95, 232, 0.4);
-    --ck-color-button-on-color: var(--text-main);
+    --ck-color-button-on-color: #f3f5fb;
+
+    /* Tombol split (mis. Insert image) */
+    --ck-color-split-button-hover-background: rgba(255, 255, 255, 0.09);
+    --ck-color-split-button-hover-border: rgba(255, 255, 255, 0.14);
 
     /* Panel / dropdown / list */
-    --ck-color-panel-background: var(--bg-elevated);
-    --ck-color-panel-border: var(--border-soft);
-    --ck-color-dropdown-panel-background: var(--bg-elevated);
-    --ck-color-list-background: var(--bg-elevated);
+    --ck-color-panel-background: #1a2238;
+    --ck-color-panel-border: rgba(255, 255, 255, 0.08);
+    --ck-color-dropdown-panel-background: #1a2238;
+    --ck-color-list-background: #1a2238;
     --ck-color-list-button-hover-background: rgba(255, 255, 255, 0.06);
     --ck-color-list-button-on-background: rgba(91, 95, 232, 0.28);
-    --ck-color-list-button-on-text: var(--text-main);
+    --ck-color-list-button-on-background-focus: rgba(91, 95, 232, 0.4);
+    --ck-color-list-button-on-text: #f3f5fb;
 
-    /* Input di dalam editor (mis. form link) */
-    --ck-color-input-background: var(--bg-card-soft);
-    --ck-color-input-border: var(--border-mid);
-    --ck-color-input-text: var(--text-main);
-    --ck-color-input-disabled-background: var(--bg-card);
+    /* Input (form link, dsb.) */
+    --ck-color-input-background: #0f1626;
+    --ck-color-input-border: rgba(255, 255, 255, 0.14);
+    --ck-color-input-text: #f3f5fb;
+    --ck-color-input-disabled-background: #131a2e;
+    --ck-color-labeled-field-label-background: #1a2238;
 
     /* Link & placeholder */
     --ck-color-link-default: #8fa2ff;
-    --ck-color-engine-placeholder-text: var(--text-faint);
+    --ck-color-engine-placeholder-text: #5b6478;
+}
+
+/* Jaring pengaman: samakan state aktif/toggle/klik SEMUA tombol (toolbar &
+   panel yang ditempel ke body) dengan Bold/Italic — cegah latar terang/putih
+   yang membuat ikon tak terlihat. */
+.postdefault .ck.ck-button.ck-on,
+.postdefault .ck.ck-button:active,
+.ck-body-wrapper .ck.ck-button.ck-on,
+.ck-body-wrapper .ck.ck-button:active {
+    background: rgba(91, 95, 232, 0.28) !important;
+    color: #f3f5fb !important;
+}
+
+.postdefault .ck.ck-button.ck-on:hover,
+.ck-body-wrapper .ck.ck-button.ck-on:hover {
+    background: rgba(91, 95, 232, 0.4) !important;
 }
 
 /* Bingkai editor mengikuti sudut membulat kartu */
