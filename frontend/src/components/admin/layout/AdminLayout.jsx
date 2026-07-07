@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import '../../pages/Admin/DashboardAdmin/dashboard-admin.css';
+import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../../hooks/useAuth';
+import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
 
 const AdminLayout = () => {
   const { logout } = useAuth();
@@ -61,8 +62,19 @@ const AdminLayout = () => {
   };
 
   const handleSaveMenu = () => {
+    // TODO: simpan menu ke backend (POST /api/menus) → dapatkan slug/id.
     console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, menuLink });
+
+    const nama = menuName;
+    const isPost = selectedType === 'Post';
+    const layoutKey = LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default';
+
     closeModal();
+
+    // Untuk menu bertipe Post → langsung buka editor konten sesuai layout.
+    if (isPost) {
+      navigate(`/admin/post/${layoutKey}`, { state: { menuName: nama } });
+    }
   };
 
   const selectedIconLabel = iconOptions.find((o) => o.value === selectedIcon)?.label;

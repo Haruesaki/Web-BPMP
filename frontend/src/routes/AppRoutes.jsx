@@ -12,12 +12,12 @@ import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
-import AdminLayout from '../components/admin/AdminLayout';
+import AdminLayout from '../components/admin/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 
-// Editor post (CKEditor) berukuran besar → lazy-load agar tidak membebani
-// bundle halaman admin lain. Hanya dimuat saat rutenya dibuka.
-const PostDefault = lazy(() => import('../components/admin/LayoutPost/PostDefault'));
+// Editor konten menu (CKEditor) berukuran besar → lazy-load agar tidak
+// membebani bundle halaman admin lain. Host ini memilih editor sesuai layout.
+const MenuContentEditor = lazy(() => import('../components/admin/LayoutPost/MenuContentEditor'));
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -43,13 +43,14 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                 </Route>
 
-                {/* Editor post: halaman fokus penuh (punya layout/tema sendiri),
-                    di luar AdminLayout tapi tetap diproteksi login. */}
+                {/* Editor konten menu — route DINAMIS per layout (:layout).
+                    Contoh: /admin/post/default → editor layout Default.
+                    Halaman fokus penuh (tema sendiri), tetap diproteksi login. */}
                 <Route
-                    path="/admin/post/default"
+                    path="/admin/post/:layout"
                     element={
                         <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', background: '#0B1326', minHeight: '100vh' }}>Memuat editor…</div>}>
-                            <PostDefault />
+                            <MenuContentEditor />
                         </Suspense>
                     }
                 />

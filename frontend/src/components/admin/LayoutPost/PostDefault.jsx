@@ -72,11 +72,18 @@ import 'ckeditor5/ckeditor5.css';
 import './PostDefault.css';
 
 // =========================================================================
-//  POST DEFAULT — halaman editor konten (layout "Default").
+//  POST DEFAULT — EDITOR konten admin untuk layout "Default".
 //  -----------------------------------------------------------------------
-//  Berisi input judul post + rich text editor (CKEditor 5) + tombol aksi.
-//  Belum terhubung ke menu/route manapun. Nanti tinggal disambungkan ke
-//  backend (POST /api/posts) pada handleSimpan.
+//  Komponen editor yang bisa dipakai ulang: input judul + CKEditor + aksi.
+//  Dipilih lewat registry layout (lihat layoutRegistry.js) dan dirender oleh
+//  MenuContentEditor sesuai layout menu yang dibuat Super Admin.
+//
+//  Props (semua opsional supaya tetap bisa dipakai standalone):
+//    - menuName        : nama menu yang sedang diedit (untuk judul halaman)
+//    - initialTitle    : judul awal (saat edit konten yang sudah ada)
+//    - initialContent  : HTML konten awal
+//    - onSave(data)    : dipanggil saat klik Simpan → { judul, konten }
+//    - onCancel()      : dipanggil saat klik Batal
 // =========================================================================
 
 // Konfigurasi editor lengkap (menyerupai toolbar penuh CKEditor).
@@ -155,18 +162,27 @@ const editorConfig = {
   placeholder: 'Tulis isi konten di sini...',
 };
 
-const PostDefault = () => {
-  const [judul, setJudul] = useState('');
-  const [konten, setKonten] = useState('');
+const PostDefault = ({
+  menuName = '',
+  initialTitle = '',
+  initialContent = '',
+  onSave,
+  onCancel,
+}) => {
+  const [judul, setJudul] = useState(initialTitle);
+  const [konten, setKonten] = useState(initialContent);
 
   const handleSimpan = () => {
-    // TODO: sambungkan ke backend (POST /api/posts)
-    console.log({ judul, konten });
+    if (onSave) onSave({ judul, konten });
+    else console.log({ judul, konten }); // fallback standalone
   };
 
   const handleBatal = () => {
-    setJudul('');
-    setKonten('');
+    if (onCancel) onCancel();
+    else {
+      setJudul('');
+      setKonten('');
+    }
   };
 
   return (
@@ -174,7 +190,7 @@ const PostDefault = () => {
       <main className="pd-content">
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
-          <h1>Buat Post Baru</h1>
+          <h1>{menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru'}</h1>
           <p>Isi judul lalu tulis konten menggunakan editor di bawah.</p>
         </div>
 
