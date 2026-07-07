@@ -1,0 +1,207 @@
+/* =========================================================================
+   POST PROFILE CARD — gaya khusus form profil (CRUD banyak kartu).
+   Memakai ulang palet & kelas dasar dari PostDefault.css (.postdefault, .pd-*).
+   ========================================================================= */
+
+/* Judul tiap section (Tambah Profil / Daftar Profil) */
+.postdefault .ppc-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 18px;
+}
+
+/* ---------- Bagian foto profil ---------- */
+.postdefault .ppc-photo-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.postdefault .ppc-avatar {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.postdefault .ppc-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.postdefault .ppc-avatar-fallback {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+}
+
+.postdefault .ppc-photo-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Tombol Ganti Gambar & Hapus sejajar (satu baris) */
+.postdefault .ppc-photo-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.postdefault .ppc-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.postdefault .ppc-disabled {
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: none;
+}
+
+.postdefault .ppc-hint {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-faint);
+}
+
+.postdefault .ppc-error {
+    margin: 0;
+    font-size: 12.5px;
+    color: #ff6b6b;
+}
+
+/* Textarea Quotes */
+.postdefault .ppc-textarea {
+    resize: vertical;
+    min-height: 96px;
+    line-height: 1.5;
+}
+
+/* Aksi form (Batal Edit / Tambah-Perbarui) */
+.postdefault .ppc-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+/* ---------- Daftar profil ---------- */
+.postdefault .ppc-list-card {
+    margin-top: 20px;
+}
+
+.postdefault .ppc-empty {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-faint);
+}
+
+.postdefault .ppc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.postdefault .ppc-list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+}
+
+.postdefault .ppc-list-avatar {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-faint);
+}
+
+.postdefault .ppc-list-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.postdefault .ppc-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.postdefault .ppc-list-nama {
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--text-main);
+}
+
+.postdefault .ppc-list-jabatan {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 2px;
+}
+
+.postdefault .ppc-list-quotes {
+    font-size: 12.5px;
+    font-style: italic;
+    color: var(--text-faint);
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.postdefault .ppc-list-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.postdefault .ppc-icon-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-mid);
+    background: transparent;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.postdefault .ppc-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.postdefault .ppc-icon-btn-danger:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}

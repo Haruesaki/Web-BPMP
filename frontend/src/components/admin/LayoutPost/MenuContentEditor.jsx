@@ -23,9 +23,11 @@ const MenuContentEditor = () => {
   const Editor = getLayoutEditor(layout);
   const menuName = location.state?.menuName || '';
 
-  const handleSave = ({ judul, konten }) => {
+  const handleSave = (data) => {
+    // `data` bentuknya berbeda per layout: Default → { judul, konten },
+    // Profile Card → { profiles: [...] }. Diteruskan apa adanya.
     // TODO: sambungkan ke backend (mis. PUT /api/menus/:slug/konten)
-    console.log('Simpan konten menu:', { layout, menuName, judul, konten });
+    console.log('Simpan konten menu:', { layout, menuName, ...data });
   };
 
   const handleCancel = () => navigate(-1); // kembali ke halaman sebelumnya

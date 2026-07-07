@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
   ClassicEditor,
@@ -57,7 +57,7 @@ import {
   ImageInsert,
   AutoImage,
   ImageUpload,
-  Base64UploadAdapter,
+  SimpleUploadAdapter,
   MediaEmbed,
   // Tabel
   Table,
@@ -98,7 +98,7 @@ const editorConfig = {
     List, TodoList, ListProperties, Indent, IndentBlock,
     BlockQuote, CodeBlock, HorizontalLine, PageBreak, SpecialCharacters, SpecialCharactersEssentials,
     Link, AutoLink, LinkImage,
-    Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload, Base64UploadAdapter,
+    Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload, SimpleUploadAdapter,
     MediaEmbed,
     Table, TableToolbar, TableProperties, TableCellProperties, TableColumnResize, TableCaption,
   ],
@@ -160,7 +160,24 @@ const editorConfig = {
     allow: [{ name: /.*/, attributes: true, classes: true, styles: true }],
   },
   placeholder: 'Tulis isi konten di sini...',
+  // Catatan: konfigurasi `simpleUpload` (URL + token) TIDAK ditaruh di sini
+  // karena butuh token yang baru tersedia saat runtime. Lihat useMemo di
+  // dalam komponen — di sana editorConfig digabung dengan simpleUpload.
 };
+
+// Ambil header Authorization dari sesi admin (disimpan saat login).
+// Endpoint upload diproteksi authMiddleware, jadi token wajib disertakan.
+const getAuthToken = () => {
+  try {
+    const session = sessionStorage.getItem('adminSession');
+    return session ? JSON.parse(session)?.token || '' : '';
+  } catch {
+    return '';
+  }
+};
+
+// URL endpoint upload gambar di backend (samakan dengan axiosInstance).
+const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/gambar`;
 
 const PostDefault = ({
   menuName = '',
@@ -171,6 +188,20 @@ const PostDefault = ({
 }) => {
   const [judul, setJudul] = useState(initialTitle);
   const [konten, setKonten] = useState(initialContent);
+
+  // Config final = editorConfig statis + simpleUpload (butuh token runtime).
+  // Dengan SimpleUploadAdapter, gambar yang disisipkan admin dikirim ke
+  // backend lalu yang disimpan di konten hanya <img src="URL"> (bukan base64).
+  const finalEditorConfig = useMemo(
+    () => ({
+      ...editorConfig,
+      simpleUpload: {
+        uploadUrl: UPLOAD_URL,
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      },
+    }),
+    []
+  );
 
   // --- Auto-scroll halaman saat menyeret (mis. gambar) ke tepi atas/bawah ---
   // CKEditor tidak menggulir window secara otomatis saat drag; ini menutup
@@ -277,7 +308,7 @@ const PostDefault = ({
             <div className="pd-editor">
               <CKEditor
                 editor={ClassicEditor}
-                config={editorConfig}
+                config={finalEditorConfig}
                 data={konten}
                 onChange={(event, editor) => setKonten(editor.getData())}
               />

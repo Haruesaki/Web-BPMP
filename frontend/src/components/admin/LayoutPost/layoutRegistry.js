@@ -13,11 +13,12 @@
 // =========================================================================
 
 import PostDefault from './PostDefault';
+import PostProfileCard from './PostProfileCard';
 import { DEFAULT_LAYOUT_KEY } from './layoutMeta';
 
 export const LAYOUT_EDITORS = {
   default: PostDefault,
-  // 'profile-card': ProfileCard,
+  'profile-card': PostProfileCard,
   // 'berita-card': BeritaCard,
 };
 
