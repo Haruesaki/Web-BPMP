@@ -15,6 +15,7 @@ const AdminLayout = () => {
   const [selectedIcon, setSelectedIcon] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedPostLayout, setSelectedPostLayout] = useState('');
+  const [menuLink, setMenuLink] = useState(''); // diisi bila jenis menu = Link
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const iconDropdownRef = useRef(null);
@@ -52,10 +53,11 @@ const AdminLayout = () => {
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
     setSelectedPostLayout('');
+    setMenuLink('');
   };
 
   const handleSaveMenu = () => {
-    console.log({ menuName, selectedIcon, selectedType });
+    console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, menuLink });
     closeModal();
   };
 
@@ -182,6 +184,20 @@ const AdminLayout = () => {
                       </label>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Jika jenis menu = Link, tampilkan form isian URL */}
+              {selectedType === 'Link' && (
+                <div className="form-group">
+                  <label>URL / Link Tujuan</label>
+                  <input
+                    type="url"
+                    className="form-input"
+                    placeholder="https://contoh.com/halaman"
+                    value={menuLink}
+                    onChange={(e) => setMenuLink(e.target.value)}
+                  />
                 </div>
               )}
             </div>

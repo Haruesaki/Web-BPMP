@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/common/Layout'; // 1. Impor Layout baru
 import Beranda from '../pages/user/Beranda/Beranda';
@@ -13,6 +14,10 @@ import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
 import AdminLayout from '../components/admin/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
+
+// Editor post (CKEditor) berukuran besar → lazy-load agar tidak membebani
+// bundle halaman admin lain. Hanya dimuat saat rutenya dibuka.
+const PostDefault = lazy(() => import('../components/admin/LayoutPost/PostDefault'));
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -37,6 +42,17 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                 </Route>
+
+                {/* Editor post: halaman fokus penuh (punya layout/tema sendiri),
+                    di luar AdminLayout tapi tetap diproteksi login. */}
+                <Route
+                    path="/admin/post/baru"
+                    element={
+                        <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', background: '#0B1326', minHeight: '100vh' }}>Memuat editor…</div>}>
+                            <PostDefault />
+                        </Suspense>
+                    }
+                />
             </Route>
         </Routes>
     );

@@ -1,0 +1,208 @@
+/* =========================================================================
+   POST DEFAULT — editor konten (layout "Default")
+   Komponen ini self-contained: palet warna dideklarasikan sendiri di scope
+   ".postdefault" (menyamai tema admin) supaya tidak bergantung pada
+   ".admin-layout". Termasuk override tema bawaan CKEditor 5 agar ikut gelap.
+   ========================================================================= */
+
+.postdefault {
+    --bg-app: #0B1326;
+    --bg-card: #131a2e;
+    --bg-card-soft: #0f1626;
+    --bg-elevated: #1a2238;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-mid: rgba(255, 255, 255, 0.14);
+    --purple: #5b5fe8;
+    --purple-hover: #6d71f0;
+    --text-main: #f3f5fb;
+    --text-sub: #c7c4d8;
+    --text-faint: #5b6478;
+
+    background: var(--bg-app);
+    color: var(--text-main);
+    min-height: 100vh;
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+
+.postdefault .pd-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+/* ---------- HEADING ---------- */
+.postdefault .pd-heading h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.postdefault .pd-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 6px 0 28px;
+}
+
+/* ---------- CARD ---------- */
+.postdefault .pd-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.postdefault .pd-field {
+    margin-bottom: 22px;
+}
+
+.postdefault .pd-field:last-child {
+    margin-bottom: 0;
+}
+
+.postdefault .pd-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+}
+
+.postdefault .pd-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14.5px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.postdefault .pd-input::placeholder {
+    color: var(--text-faint);
+}
+
+.postdefault .pd-input:focus {
+    border-color: var(--purple);
+}
+
+/* ---------- ACTIONS ---------- */
+.postdefault .pd-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.postdefault .pd-btn {
+    padding: 12px 26px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.postdefault .pd-btn-batal {
+    background: transparent;
+    border-color: var(--border-mid);
+    color: var(--text-sub);
+}
+
+.postdefault .pd-btn-batal:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.postdefault .pd-btn-simpan {
+    background: var(--purple);
+    color: #fff;
+}
+
+.postdefault .pd-btn-simpan:hover {
+    background: var(--purple-hover);
+}
+
+/* =========================================================================
+   OVERRIDE TEMA CKEDITOR 5 → GELAP
+   Variabel --ck-* mengikuti palet web ini. Diset di scope .postdefault agar
+   toolbar, editable area, dropdown, dan panel semuanya ikut gelap.
+   ========================================================================= */
+.postdefault {
+    --ck-color-base-background: var(--bg-card-soft);
+    --ck-color-base-border: var(--border-mid);
+    --ck-color-base-text: var(--text-main);
+
+    --ck-color-text: var(--text-main);
+    --ck-color-shadow-drop: rgba(0, 0, 0, 0.45);
+    --ck-color-shadow-inner: rgba(0, 0, 0, 0.3);
+
+    /* Toolbar */
+    --ck-color-toolbar-background: var(--bg-card);
+    --ck-color-toolbar-border: var(--border-soft);
+
+    /* Tombol toolbar */
+    --ck-color-button-default-background: transparent;
+    --ck-color-button-default-hover-background: rgba(255, 255, 255, 0.06);
+    --ck-color-button-default-active-background: rgba(255, 255, 255, 0.09);
+    --ck-color-button-on-background: rgba(91, 95, 232, 0.28);
+    --ck-color-button-on-hover-background: rgba(91, 95, 232, 0.4);
+    --ck-color-button-on-active-background: rgba(91, 95, 232, 0.4);
+    --ck-color-button-on-color: var(--text-main);
+
+    /* Panel / dropdown / list */
+    --ck-color-panel-background: var(--bg-elevated);
+    --ck-color-panel-border: var(--border-soft);
+    --ck-color-dropdown-panel-background: var(--bg-elevated);
+    --ck-color-list-background: var(--bg-elevated);
+    --ck-color-list-button-hover-background: rgba(255, 255, 255, 0.06);
+    --ck-color-list-button-on-background: rgba(91, 95, 232, 0.28);
+    --ck-color-list-button-on-text: var(--text-main);
+
+    /* Input di dalam editor (mis. form link) */
+    --ck-color-input-background: var(--bg-card-soft);
+    --ck-color-input-border: var(--border-mid);
+    --ck-color-input-text: var(--text-main);
+    --ck-color-input-disabled-background: var(--bg-card);
+
+    /* Link & placeholder */
+    --ck-color-link-default: #8fa2ff;
+    --ck-color-engine-placeholder-text: var(--text-faint);
+}
+
+/* Bingkai editor mengikuti sudut membulat kartu */
+.postdefault .pd-editor .ck.ck-editor__top .ck-toolbar {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.postdefault .pd-editor .ck.ck-editor__main > .ck-editor__editable {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    min-height: 320px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+}
+
+/* Area konten saat fokus */
+.postdefault .pd-editor .ck.ck-editor__main > .ck-editor__editable.ck-focused {
+    border-color: var(--purple);
+    box-shadow: none;
+}
+
+/* Warna teks heading di dalam konten */
+.postdefault .pd-editor .ck-content h2,
+.postdefault .pd-editor .ck-content h3,
+.postdefault .pd-editor .ck-content h4 {
+    color: var(--text-main);
+}
+
+.postdefault .pd-editor .ck-content blockquote {
+    border-left-color: var(--purple);
+    color: var(--text-sub);
+}
