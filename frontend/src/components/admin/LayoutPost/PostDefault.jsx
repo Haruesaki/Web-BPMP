@@ -57,7 +57,6 @@ import {
   ImageInsert,
   AutoImage,
   ImageUpload,
-  SimpleUploadAdapter,
   MediaEmbed,
   // Tabel
   Table,
@@ -69,6 +68,7 @@ import {
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
+import { CustomUploadAdapterPlugin } from '../../../utils/CustomUploadAdapter';
 import './PostDefault.css';
 
 // =========================================================================
@@ -104,7 +104,7 @@ const editorConfig = {
     List, TodoList, ListProperties, Indent, IndentBlock,
     BlockQuote, CodeBlock, HorizontalLine, PageBreak, SpecialCharacters, SpecialCharactersEssentials,
     Link, AutoLink, LinkImage,
-    Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload, SimpleUploadAdapter,
+    Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload,
     MediaEmbed,
     Table, TableToolbar, TableProperties, TableCellProperties, TableColumnResize, TableCaption,
   ],
@@ -217,17 +217,17 @@ const PostDefault = ({
   const [konten, setKonten] = useState('');
   const [editingId, setEditingId] = useState(null); // null = mode tambah
   const [formError, setFormError] = useState('');
+  const [compressMsg, setCompressMsg] = useState('');
 
-  // Config final = editorConfig statis + simpleUpload (butuh token runtime).
-  // Dengan SimpleUploadAdapter, gambar yang disisipkan admin dikirim ke
-  // backend lalu yang disimpan di konten hanya <img src="URL"> (bukan base64).
+  // Config final = editorConfig statis + customUpload (butuh token runtime).
+  // Menggunakan CustomUploadAdapterPlugin untuk kompresi frontend jika gambar >2MB.
+  // Gambar yang disisipkan admin dikirim ke backend lalu URL nya yang disimpan.
   const finalEditorConfig = useMemo(
     () => ({
       ...editorConfig,
-      simpleUpload: {
-        uploadUrl: UPLOAD_URL,
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      },
+      extraPlugins: [
+        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg)
+      ]
     }),
     []
   );
@@ -404,8 +404,17 @@ const PostDefault = ({
           </div>
 
           {/* Editor Konten */}
-          <div className="pd-field">
+          <div className="pd-field" style={{ position: 'relative' }}>
             <label>Konten</label>
+            {compressMsg && (
+              <div style={{ position: 'absolute', top: '30px', right: '15px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 14px', borderRadius: '6px', fontSize: '13px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 2s linear infinite' }}>
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                </svg>
+                {compressMsg}
+                <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
             <div className="pd-editor">
               <CKEditor
                 editor={ClassicEditor}
