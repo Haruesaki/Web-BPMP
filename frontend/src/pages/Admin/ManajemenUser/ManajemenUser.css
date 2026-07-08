@@ -198,7 +198,7 @@
 
 .admin-layout .mu-col-aksi {
     width: 120px;
-    text-align: right;
+    text-align: center;
 }
 
 .admin-layout .mu-user-cell {
@@ -239,7 +239,7 @@
 .admin-layout .mu-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 8px;
 }
 

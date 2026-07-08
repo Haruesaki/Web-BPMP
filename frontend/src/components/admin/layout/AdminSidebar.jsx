@@ -1,30 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './AdminSidebar.css';
 
 // =========================================================================
-//  ADMIN SIDEBAR — dipakai berulang di semua halaman Admin (Dashboard,
-//  Berita, Profil, Setting, dll).
+//  ADMIN SIDEBAR — dirender sekali di dalam <AdminLayout> untuk semua
+//  halaman Admin.
 //  -----------------------------------------------------------------------
-//  Cara pakai di halaman lain:
+//  Cara pakai:
 //
-//    import AdminSidebar from '../../assets/component-admin/AdminSidebar';
+//    <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} />
 //
-//    <AdminSidebar
-//      activeMenu={activeMenu}
-//      onMenuClick={(id) => setActiveMenu(id)}
-//      onTambahMenu={() => setIsMenuModalOpen(true)}
-//    />
+//  Sorotan menu aktif sepenuhnya mengikuti URL (route-based), jadi tidak
+//  perlu lagi prop activeMenu/onMenuClick.
 //
-//  Catatan: parent page WAJIB membungkus seluruh layout-nya dengan
-//  <div className="admin-layout"> ... </div> karena warna, font, dan
+//  Catatan: harus berada di dalam <div className="admin-layout"> karena
 //  variabel CSS (--bg-app, --bg-sidebar, dst.) dideklarasikan di scope
 //  ".admin-layout" pada dashboard-admin.css.
 // =========================================================================
 
 // --- DATA: MENU STATIS BAGIAN ATAS ---
-// Item dengan properti `path` akan bernavigasi antar-halaman admin
-// (routing). Item tanpa `path` tetap memakai state `activeMenu` seperti semula.
+// Item dengan properti `path` akan bernavigasi antar-halaman admin (routing).
+// Item tanpa `path` hanya menyorot dirinya sendiri (belum punya halaman).
 const adminMenuItems1 = [
   { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin' },
   { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
@@ -51,19 +47,26 @@ const adminMenuItems2 = [
   { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear' },
 ];
 
-// Semua item digabung untuk mencocokkan rute aktif saat awal mount.
+// Semua item digabung untuk mencocokkan rute aktif dengan URL.
 const allMenuItems = [...adminMenuItems1, ...menuItems, ...adminMenuItems2];
 
-const AdminSidebar = ({ activeMenu, onMenuClick, onTambahMenu }) => {
+const AdminSidebar = ({ onTambahMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Satu sumber kebenaran untuk item yang tersorot. Diinisialisasi dari rute
-  // yang sedang dibuka (item ber-`path` yang cocok), lalu fallback ke prop
-  // activeMenu, lalu 'beranda'. Karena hanya satu state, tidak mungkin ada
-  // dua menu aktif bersamaan.
+  // Satu sumber kebenaran untuk item yang tersorot. Nilai awal dari rute yang
+  // sedang dibuka; fallback 'beranda'. Karena hanya satu state, tidak mungkin
+  // ada dua menu aktif bersamaan.
   const routeMatch = allMenuItems.find((it) => it.path === location.pathname);
-  const [selectedId, setSelectedId] = useState(routeMatch?.id || activeMenu || 'beranda');
+  const [selectedId, setSelectedId] = useState(routeMatch?.id || 'beranda');
+
+  // Sidebar ini persist di dalam <AdminLayout> (tidak remount tiap pindah
+  // halaman), jadi sorotan disinkronkan setiap URL berubah — termasuk saat
+  // tombol back/forward browser atau membuka URL admin langsung.
+  useEffect(() => {
+    const match = allMenuItems.find((it) => it.path === location.pathname);
+    if (match) setSelectedId(match.id);
+  }, [location.pathname]);
 
   const renderNavItem = (item) => (
     <button
@@ -72,7 +75,6 @@ const AdminSidebar = ({ activeMenu, onMenuClick, onTambahMenu }) => {
       onClick={() => {
         setSelectedId(item.id);
         if (item.path) navigate(item.path);
-        onMenuClick?.(item.id);
       }}
     >
       <i className={item.icon}></i>

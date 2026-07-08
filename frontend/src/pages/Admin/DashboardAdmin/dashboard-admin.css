@@ -4,6 +4,11 @@
    ========================================================================= */
 
 .admin-layout {
+    /* Perkecil seluruh UI admin serempak (font, tombol, padding, sidebar)
+       agar di zoom browser 100% tampil sepadat zoom ~70%, tanpa mengubah
+       proporsi/layout. Ubah nilai ini untuk menyetel skalanya. */
+    zoom: 0.7;
+
     --bg-app: #0B1326;
     --bg-sidebar: #131B2E;
     --bg-card: #131a2e;
@@ -21,7 +26,9 @@
     --text-faint: #5b6478;
 
     display: flex;
-    min-height: 100vh;
+    /* Dikompensasi terhadap zoom: 0.7 di atas — tanpa ini 100vh ter-zoom
+       menjadi ~70vh dan menyisakan ruang hitam kosong di bawah. */
+    min-height: calc(100vh / 0.7);
     width: 100%;
     background-color: var(--bg-app);
     color: var(--text-main);
@@ -62,9 +69,8 @@
 }
 
 .admin-layout .content-heading h1 {
-    font-size: 52px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 32px;
+    font-weight: 600;
     margin: 0;
     color: var(--text-main);
 }
@@ -87,6 +93,13 @@
     grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
+}
+
+/* Susun kartu ke bawah (statistik lalu aktivitas), full-width */
+.admin-layout .content-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 /* ---------- CARD BASE ---------- */
@@ -225,43 +238,149 @@
     color: var(--text-main);
 }
 
-.admin-layout .activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
+/* ---------- TABEL AKTIVITAS TERKINI ---------- */
+.admin-layout .activity-table-wrap {
+    overflow-x: auto;
 }
 
-.admin-layout .activity-item {
-    display: flex;
-    gap: 14px;
+.admin-layout .activity-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.admin-layout .activity-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 7px;
-    flex-shrink: 0;
+.admin-layout .activity-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    padding: 0 8px 14px;
+    border-bottom: 1px solid var(--border-soft);
 }
 
-.admin-layout .activity-dot.grey {
-    background: var(--text-faint);
-}
-
-.admin-layout .activity-dot.orange {
-    background: var(--orange);
-}
-
-.admin-layout .activity-title {
+.admin-layout .activity-table td {
     font-size: 14.5px;
+    color: var(--text-main);
     line-height: 1.45;
+    padding: 16px 8px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.admin-layout .activity-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-layout .activity-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Kolom pelaku: badge inisial + nama */
+.admin-layout .activity-col-actor {
+    width: 1%;
+    white-space: nowrap;
+    padding-right: 56px;
+}
+
+.admin-layout .activity-actor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-layout .activity-actor-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.admin-layout .activity-actor-name {
+    font-size: 14px;
+    font-weight: 500;
     color: var(--text-main);
 }
 
-.admin-layout .activity-time {
+/* Kolom waktu: rata kanan, teks lebih redup, tidak membungkus */
+.admin-layout .activity-col-time {
+    text-align: right;
+    white-space: nowrap;
+    color: var(--text-sub);
+    width: 1%;
+    padding-left: 24px;
+}
+
+.admin-layout .activity-table td.activity-col-time {
     font-size: 13px;
     color: var(--text-sub);
-    margin-top: 4px;
+}
+
+/* ---------- FOOTER / PAGINATION AKTIVITAS (gaya Manajemen User) ---------- */
+.admin-layout .activity-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.admin-layout .activity-info {
+    font-size: 13.5px;
+    color: var(--text-sub);
+}
+
+.admin-layout .activity-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-layout .activity-page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-layout .activity-page-btn:hover:not(:disabled):not(.active) {
+    border-color: var(--border-mid);
+    color: var(--text-main);
+}
+
+.admin-layout .activity-page-btn.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    font-weight: 500;
+}
+
+.admin-layout .activity-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.admin-layout .activity-page-dots {
+    color: var(--text-faint);
+    padding: 0 2px;
 }
 
 /* =========================================================================
@@ -506,9 +625,7 @@
     .admin-layout .admin-content {
         padding: 20px;
     }
-    .admin-layout .content-heading h1 {
-        font-size: 34px;
-    }
+    .admin-layout .content-heading h1,
     .admin-layout .content-heading h2 {
         font-size: 24px;
     }

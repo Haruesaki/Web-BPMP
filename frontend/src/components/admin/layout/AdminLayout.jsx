@@ -1,15 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
-import '../../pages/Admin/DashboardAdmin/dashboard-admin.css';
+import { Outlet, useNavigate } from 'react-router-dom';
+import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import { useAuth } from '../../../hooks/useAuth';
+import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
 
 const AdminLayout = () => {
-  // --- 1. STATE: MENU AKTIF (dipakai AdminSidebar) ---
-  const [activeMenu, setActiveMenu] = useState('beranda');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
-  // --- 2. STATE: MODAL TAMBAH MENU ---
+  // --- STATE: MODAL TAMBAH MENU ---
+  // (Sorotan menu aktif kini ditangani sendiri oleh AdminSidebar via URL.)
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   // --- 3. STATE: FORM TAMBAH MENU ---
@@ -17,6 +20,8 @@ const AdminLayout = () => {
   const [selectedIcon, setSelectedIcon] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedPostLayout, setSelectedPostLayout] = useState('');
+  const [selectedPostView, setSelectedPostView] = useState('Vertikal'); // orientasi card berita di halaman user
+  const [menuLink, setMenuLink] = useState(''); // diisi bila jenis menu = Link
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const iconDropdownRef = useRef(null);
@@ -33,6 +38,7 @@ const AdminLayout = () => {
   // --- 5. DATA: JENIS MENU ---
   const typeOptions = ['Post', 'Link'];
   const postLayoutOptions = ['Default', 'Profile Card', 'Berita Card'];
+  const postViewOptions = ['Vertikal', 'Horizontal']; // orientasi tampilan card berita
 
   // --- EFFECT: Klik di luar dropdown form untuk menutup ---
   useEffect(() => {
@@ -54,27 +60,41 @@ const AdminLayout = () => {
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
     setSelectedPostLayout('');
+    setSelectedPostView('Vertikal');
+    setMenuLink('');
   };
 
   const handleSaveMenu = () => {
-    console.log({ menuName, selectedIcon, selectedType });
+    // TODO: simpan menu ke backend (POST /api/menus) → dapatkan slug/id.
+    console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, selectedPostView, menuLink });
+
+    const nama = menuName;
+    const isPost = selectedType === 'Post';
+    const layoutKey = LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default';
+    const view = selectedPostView;
+
     closeModal();
+
+    // Untuk menu bertipe Post → langsung buka editor konten sesuai layout.
+    // `view` (Vertikal/Horizontal) dibawa untuk dipakai tampilan publik nanti.
+    if (isPost) {
+      navigate(`/admin/post/${layoutKey}`, { state: { menuName: nama, postView: view } });
+    }
   };
 
   const selectedIconLabel = iconOptions.find((o) => o.value === selectedIcon)?.label;
 
   return (
     <div className="admin-layout">
-      <AdminSidebar
-        activeMenu={activeMenu}
-        onMenuClick={setActiveMenu}
-        onTambahMenu={() => setIsMenuModalOpen(true)}
-      />
+      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
-        <AdminHeader />
-        <Outlet context={{ activeMenu, setActiveMenu }} />
+        <AdminHeader onLogout={() => {
+          logout();
+          navigate('/admin/login');
+        }} />
+        <Outlet />
       </div>
 
       {/* ================= MODAL: TAMBAH MENU BARU ================= */}
@@ -188,6 +208,41 @@ const AdminLayout = () => {
                       </label>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Sub-pilihan Tampilan Post: orientasi card berita di halaman user */}
+              {selectedType === 'Post' && (
+                <div className="form-group">
+                  <label>Tampilan Post</label>
+                  <div className="form-radio-group">
+                    {postViewOptions.map((opt) => (
+                      <label key={opt} className="form-radio-item">
+                        <input
+                          type="radio"
+                          name="postView"
+                          value={opt}
+                          checked={selectedPostView === opt}
+                          onChange={() => setSelectedPostView(opt)}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Jika jenis menu = Link, tampilkan form isian URL */}
+              {selectedType === 'Link' && (
+                <div className="form-group">
+                  <label>URL / Link Tujuan</label>
+                  <input
+                    type="url"
+                    className="form-input"
+                    placeholder="https://contoh.com/halaman"
+                    value={menuLink}
+                    onChange={(e) => setMenuLink(e.target.value)}
+                  />
                 </div>
               )}
             </div>

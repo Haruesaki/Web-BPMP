@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 // Reuse tema & layout dari dashboard-admin (variabel CSS --bg-app, dst.
 // dideklarasikan di scope ".admin-layout" pada dashboard-admin.css).
 import '../DashboardAdmin/dashboard-admin.css';
 import './ManajemenUser.css';
+import { useUsers } from '../../../hooks/useUsers';
 
 // =========================================================================
 //  DATA DUMMY
@@ -64,9 +65,22 @@ const PAGE_SIZE = 10;
 const EMPTY_FORM = { nama: '', email: '', password: '', verify: '', access: [] };
 
 const ManajemenUser = () => {
-  const [users, setUsers] = useState(buildUsers);
+  const { users, setUsers, loading, error: fetchError, fetchUsers, deleteUser } = useUsers();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Ambil data session admin saat ini
+  const currentUser = useMemo(() => {
+    const session = sessionStorage.getItem('adminSession');
+    if (session) {
+      try {
+        return JSON.parse(session);
+      } catch (e) {
+        console.error("Gagal membaca session admin", e);
+      }
+    }
+    return null;
+  }, []);
 
   // Modal form (dipakai untuk mode "add" dan "edit").
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -76,6 +90,12 @@ const ManajemenUser = () => {
 
   // Modal hapus.
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+
+  // Ambil data user dari database saat komponen dimuat
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // --- Filter + pagination ---
   const filtered = useMemo(() => {
@@ -145,11 +165,16 @@ const ManajemenUser = () => {
     closeFormModal();
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget) {
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setDeleteError(null);
+      const result = await deleteUser(deleteTarget.id);
+      if (result.success) {
+        setDeleteTarget(null);
+      } else {
+        setDeleteError(result.error);
+      }
     }
-    setDeleteTarget(null);
   };
 
   // Simpan dinonaktifkan bila belum ada menu tersedia (empty state).
@@ -233,7 +258,19 @@ const ManajemenUser = () => {
                 </tr>
               </thead>
               <tbody>
-                {visibleUsers.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row">
+                      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i> Memuat data pengguna...
+                    </td>
+                  </tr>
+                ) : fetchError ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row" style={{ color: '#ef4444' }}>
+                      <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '8px' }}></i> {fetchError}
+                    </td>
+                  </tr>
+                ) : visibleUsers.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="mu-empty-row">
                       Tidak ada user yang cocok dengan pencarian.
@@ -264,13 +301,18 @@ const ManajemenUser = () => {
                           >
                             <i className="fa-solid fa-pen"></i>
                           </button>
-                          <button
-                            className="mu-action-btn"
-                            title="Hapus"
-                            onClick={() => setDeleteTarget(user)}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
+                          {currentUser && currentUser.role === 'superadmin' && Number(user.id) !== Number(currentUser.id) && (
+                            <button
+                              className="mu-action-btn"
+                              title="Hapus"
+                              onClick={() => {
+                                setDeleteError(null);
+                                setDeleteTarget(user);
+                              }}
+                            >
+                              <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -441,6 +483,25 @@ const ManajemenUser = () => {
                   <span className="mu-user-name">{deleteTarget.nama}</span>
                 </div>
               </div>
+
+              {deleteError && (
+                <div className="mu-delete-error" style={{
+                  color: '#ef4444',
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginTop: '16px',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  <span>{deleteError}</span>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">

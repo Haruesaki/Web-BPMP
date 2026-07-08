@@ -16,3 +16,7 @@ coverage
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Berkas hasil upload editor (jangan commit isinya, pertahankan foldernya)
+/uploads/*
+!/uploads/.gitkeep
