@@ -4,6 +4,11 @@
    ========================================================================= */
 
 .admin-layout {
+    /* Perkecil seluruh UI admin serempak (font, tombol, padding, sidebar)
+       agar di zoom browser 100% tampil sepadat zoom ~70%, tanpa mengubah
+       proporsi/layout. Ubah nilai ini untuk menyetel skalanya. */
+    zoom: 0.7;
+
     --bg-app: #0B1326;
     --bg-sidebar: #131B2E;
     --bg-card: #131a2e;
@@ -21,7 +26,9 @@
     --text-faint: #5b6478;
 
     display: flex;
-    min-height: 100vh;
+    /* Dikompensasi terhadap zoom: 0.7 di atas — tanpa ini 100vh ter-zoom
+       menjadi ~70vh dan menyisakan ruang hitam kosong di bawah. */
+    min-height: calc(100vh / 0.7);
     width: 100%;
     background-color: var(--bg-app);
     color: var(--text-main);

@@ -138,10 +138,26 @@ const editorConfig = {
   },
   fontFamily: { supportAllValues: true },
   style: {
+    // Meniru set gaya web BPMP lama (CKEditor 4). CKEditor 5 hanya mendukung
+    // element + class, jadi tampilannya dibuat setara lewat CSS (lihat
+    // "GAYA STYLE KONTEN" di PostDefault.css & DefaultContent.css).
     definitions: [
-      { name: 'Judul Artikel', element: 'h2', classes: ['pd-style-title'] },
-      { name: 'Kotak Info', element: 'p', classes: ['pd-style-info'] },
-      { name: 'Teks Kecil', element: 'span', classes: ['pd-style-small'] },
+      // --- Block styles ---
+      // Diarahkan ke 'p' (blok default) agar bisa langsung diterapkan ke teks
+      // biasa. Di CKEditor 5 block style hanya aktif bila elemen blok terpilih
+      // cocok dengan elemen style-nya; memakai h2/h3/div membuatnya hanya aktif
+      // saat sudah jadi heading/div. Tampilan judul/kotak diberikan via CSS.
+      { name: 'Italic Title', element: 'p', classes: ['article-italic-title'] },
+      { name: 'Subtitle', element: 'p', classes: ['article-subtitle'] },
+      { name: 'Special Container', element: 'p', classes: ['article-special-container'] },
+      // --- Text (inline) styles ---
+      { name: 'Marker', element: 'span', classes: ['article-marker'] },
+      { name: 'Big', element: 'span', classes: ['article-big'] },
+      { name: 'Small', element: 'span', classes: ['article-small'] },
+      { name: 'Computer Code', element: 'span', classes: ['article-code'] },
+      { name: 'Keyboard Phrase', element: 'span', classes: ['article-kbd'] },
+      { name: 'Cited Work', element: 'span', classes: ['article-cite'] },
+      { name: 'Inline Quotation', element: 'span', classes: ['article-quote'] },
     ],
   },
   image: {
@@ -329,6 +345,38 @@ const PostDefault = ({
     }
   };
 
+  // Penyesuaian saat editor siap: memperbaiki dua perilaku panel/dialog CKEditor.
+  const handleEditorReady = (editor) => {
+    // CKEditor menaruh dropdown/dialog di ".ck-body-wrapper" (level <body>).
+    // Tandai dengan data-lenis-prevent agar Lenis (smooth-scroll global) tidak
+    // membajak wheel → grid Special Characters bisa di-scroll sendiri, bukan
+    // halaman. Pola ini sama seperti sidebar/modal admin lain.
+    const markLenisPrevent = () =>
+      document
+        .querySelectorAll('.ck-body-wrapper')
+        .forEach((el) => el.setAttribute('data-lenis-prevent', 'true'));
+    markLenisPrevent();
+
+    if (editor.plugins.has('Dialog')) {
+      const dialog = editor.plugins.get('Dialog');
+
+      // Wrapper bisa baru dibuat saat dialog pertama kali muncul → tandai ulang.
+      dialog.on('change:id', (evt, name, id) => {
+        if (id) markLenisPrevent();
+      });
+
+      // Tutup dialog (mis. Special Characters) begitu dropdown toolbar lain
+      // dibuka — CKEditor tidak menutupnya otomatis.
+      editor.ui.view.toolbar.items.forEach((item) => {
+        if (item && item.panelView && typeof item.on === 'function') {
+          item.on('change:isOpen', (evt, name, isOpen) => {
+            if (isOpen && dialog.id) dialog.hide();
+          });
+        }
+      });
+    }
+  };
+
   return (
     <div className="postdefault">
       <main className="pd-content">
@@ -363,6 +411,7 @@ const PostDefault = ({
                 editor={ClassicEditor}
                 config={finalEditorConfig}
                 data={konten}
+                onReady={handleEditorReady}
                 onChange={(event, editor) => setKonten(editor.getData())}
               />
             </div>

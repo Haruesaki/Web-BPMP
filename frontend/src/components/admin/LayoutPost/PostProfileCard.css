@@ -5,23 +5,23 @@
 
 /* Judul tiap section (Tambah Profil / Daftar Profil) */
 .postdefault .ppc-section-title {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-main);
-    margin: 0 0 18px;
+    margin: 0 0 13px;
 }
 
 /* ---------- Bagian foto profil ---------- */
 .postdefault .ppc-photo-row {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .postdefault .ppc-avatar {
-    width: 96px;
-    height: 96px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
     border-radius: 50%;
     overflow: hidden;
@@ -40,7 +40,7 @@
 }
 
 .postdefault .ppc-avatar-fallback {
-    font-size: 30px;
+    font-size: 22px;
     font-weight: 600;
     color: var(--text-faint);
     letter-spacing: 1px;
@@ -76,20 +76,20 @@
 
 .postdefault .ppc-hint {
     margin: 0;
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--text-faint);
 }
 
 .postdefault .ppc-error {
     margin: 0;
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: #ff6b6b;
 }
 
 /* Textarea Quotes */
 .postdefault .ppc-textarea {
     resize: vertical;
-    min-height: 96px;
+    min-height: 72px;
     line-height: 1.5;
 }
 
@@ -121,16 +121,16 @@
 .postdefault .ppc-list-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
+    gap: 12px;
+    padding: 10px 12px;
     background: var(--bg-card-soft);
     border: 1px solid var(--border-soft);
-    border-radius: 12px;
+    border-radius: 11px;
 }
 
 .postdefault .ppc-list-avatar {
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     flex-shrink: 0;
     border-radius: 50%;
     overflow: hidden;
@@ -140,7 +140,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 13px;
     color: var(--text-faint);
 }
 
@@ -158,21 +158,21 @@
 
 .postdefault .ppc-list-nama {
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 12.5px;
     color: var(--text-main);
 }
 
 .postdefault .ppc-list-jabatan {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-sub);
     margin-top: 2px;
 }
 
 .postdefault .ppc-list-quotes {
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-style: italic;
     color: var(--text-faint);
-    margin-top: 4px;
+    margin-top: 3px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -185,13 +185,13 @@
 }
 
 .postdefault .ppc-icon-btn {
-    padding: 7px 14px;
+    padding: 6px 12px;
     border-radius: 8px;
     border: 1px solid var(--border-mid);
     background: transparent;
     color: var(--text-sub);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }

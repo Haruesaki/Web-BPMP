@@ -16,7 +16,9 @@
     padding: 24px 18px;
     position: sticky;
     top: 0;
-    height: 100vh;
+    /* Dikompensasi terhadap zoom: 0.7 pada .admin-layout — tanpa ini 100vh
+       ter-zoom menjadi ~70vh sehingga sidebar berhenti di tengah layar. */
+    height: calc(100vh / 0.7);
     /* Brand (atas) & tombol Tambah Menu (bawah) tetap diam; hanya daftar
        menu di tengah yang bisa di-scroll (lihat .sidebar-nav). */
     overflow: hidden;
