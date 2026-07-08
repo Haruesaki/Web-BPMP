@@ -74,17 +74,23 @@ import './PostDefault.css';
 // =========================================================================
 //  POST DEFAULT — EDITOR konten admin untuk layout "Default".
 //  -----------------------------------------------------------------------
-//  Komponen editor yang bisa dipakai ulang: input judul + CKEditor + aksi.
-//  Dipilih lewat registry layout (lihat layoutRegistry.js) dan dirender oleh
-//  MenuContentEditor sesuai layout menu yang dibuat Super Admin.
+//  Mendukung CRUD BANYAK konten (mirip Profile Card): form "Tambah Konten"
+//  (Judul + CKEditor) + daftar "Data Konten" dengan Edit/Hapus. Tiap konten
+//  nanti dibungkus jadi card di halaman user, dengan orientasi (Vertikal/
+//  Horizontal) yang diatur lewat "Tampilan Post" di modal Tambah Menu.
+//  Dirender oleh MenuContentEditor via layoutRegistry (key: 'default').
 //
 //  Props (semua opsional supaya tetap bisa dipakai standalone):
 //    - menuName        : nama menu yang sedang diedit (untuk judul halaman)
-//    - initialTitle    : judul awal (saat edit konten yang sudah ada)
-//    - initialContent  : HTML konten awal
-//    - onSave(data)    : dipanggil saat klik Simpan → { judul, konten }
+//    - initialContents : array konten awal [{ id?, judul, konten }]
+//    - onSave(data)    : dipanggil saat klik Simpan → { contents: [...] }
 //    - onCancel()      : dipanggil saat klik Batal
 // =========================================================================
+
+const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+// Buang tag HTML untuk pratinjau ringkas di daftar konten.
+const stripHtml = (html) =>
+  html ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
 
 // Konfigurasi editor lengkap (menyerupai toolbar penuh CKEditor).
 const editorConfig = {
@@ -181,13 +187,20 @@ const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/a
 
 const PostDefault = ({
   menuName = '',
-  initialTitle = '',
-  initialContent = '',
+  initialContents = [],
   onSave,
   onCancel,
 }) => {
-  const [judul, setJudul] = useState(initialTitle);
-  const [konten, setKonten] = useState(initialContent);
+  // Daftar konten yang sudah ditambahkan.
+  const [contents, setContents] = useState(() =>
+    initialContents.map((c) => ({ id: c.id || makeId(), ...c }))
+  );
+
+  // --- STATE FORM (untuk menambah / mengedit satu konten) ---
+  const [judul, setJudul] = useState('');
+  const [konten, setKonten] = useState('');
+  const [editingId, setEditingId] = useState(null); // null = mode tambah
+  const [formError, setFormError] = useState('');
 
   // Config final = editorConfig statis + simpleUpload (butuh token runtime).
   // Dengan SimpleUploadAdapter, gambar yang disisipkan admin dikirim ke
@@ -265,16 +278,54 @@ const PostDefault = ({
     };
   }, []);
 
+  const resetForm = () => {
+    setJudul('');
+    setKonten('');
+    setEditingId(null);
+    setFormError('');
+  };
+
+  // Tambah konten baru ATAU perbarui konten yang sedang diedit.
+  const handleTambahAtauPerbarui = () => {
+    if (!judul.trim()) {
+      setFormError('Judul wajib diisi.');
+      return;
+    }
+    const entry = { judul: judul.trim(), konten };
+    if (editingId) {
+      setContents((prev) => prev.map((c) => (c.id === editingId ? { ...c, ...entry } : c)));
+    } else {
+      setContents((prev) => [...prev, { id: makeId(), ...entry }]);
+    }
+    resetForm();
+  };
+
+  const handleEditItem = (id) => {
+    const c = contents.find((x) => x.id === id);
+    if (!c) return;
+    setJudul(c.judul || '');
+    setKonten(c.konten || '');
+    setEditingId(id);
+    setFormError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleHapusItem = (id) => {
+    setContents((prev) => prev.filter((c) => c.id !== id));
+    if (editingId === id) resetForm();
+  };
+
   const handleSimpan = () => {
-    if (onSave) onSave({ judul, konten });
-    else console.log({ judul, konten }); // fallback standalone
+    const data = { contents };
+    if (onSave) onSave(data);
+    else console.log(data); // fallback standalone
   };
 
   const handleBatal = () => {
     if (onCancel) onCancel();
     else {
-      setJudul('');
-      setKonten('');
+      setContents([]);
+      resetForm();
     }
   };
 
@@ -284,14 +335,16 @@ const PostDefault = ({
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
           <h1>{menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru'}</h1>
-          <p>Isi judul lalu tulis konten menggunakan editor di bawah.</p>
+          <p>Tambahkan satu atau beberapa konten untuk ditampilkan di halaman user.</p>
         </div>
 
-        {/* ---------- CARD FORM ---------- */}
+        {/* ---------- FORM: TAMBAH / EDIT SATU KONTEN ---------- */}
         <section className="pd-card">
-          {/* Judul Post */}
+          <h2 className="pd-section-title">{editingId ? 'Edit Konten' : 'Tambah Konten'}</h2>
+
+          {/* Judul Konten */}
           <div className="pd-field">
-            <label htmlFor="pd-judul">Judul Post</label>
+            <label htmlFor="pd-judul">Judul Konten</label>
             <input
               id="pd-judul"
               type="text"
@@ -314,9 +367,62 @@ const PostDefault = ({
               />
             </div>
           </div>
+
+          {formError && <p className="pd-error">{formError}</p>}
+
+          <div className="pd-form-actions">
+            {editingId && (
+              <button type="button" className="pd-btn pd-btn-batal" onClick={resetForm}>
+                Batal Edit
+              </button>
+            )}
+            <button
+              type="button"
+              className="pd-btn pd-btn-simpan"
+              onClick={handleTambahAtauPerbarui}
+            >
+              {editingId ? 'Perbarui Konten' : '+ Tambah Konten'}
+            </button>
+          </div>
         </section>
 
-        {/* ---------- AKSI ---------- */}
+        {/* ---------- DATA KONTEN ---------- */}
+        <section className="pd-card pd-list-card">
+          <h2 className="pd-section-title">Data Konten ({contents.length})</h2>
+          {contents.length === 0 ? (
+            <p className="pd-empty">Belum ada konten. Tambahkan lewat form di atas.</p>
+          ) : (
+            <div className="pd-list">
+              {contents.map((c, i) => {
+                const preview = stripHtml(c.konten);
+                return (
+                  <div className="pd-list-item" key={c.id}>
+                    <div className="pd-list-item-main">
+                      <div className="pd-list-item-title">
+                        {i + 1}. {c.judul}
+                      </div>
+                      {preview && <div className="pd-list-item-preview">{preview}</div>}
+                    </div>
+                    <div className="pd-list-actions">
+                      <button type="button" className="pd-icon-btn" onClick={() => handleEditItem(c.id)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="pd-icon-btn pd-icon-btn-danger"
+                        onClick={() => handleHapusItem(c.id)}
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* ---------- AKSI SIMPAN SELURUH DAFTAR ---------- */}
         <div className="pd-actions">
           <button className="pd-btn pd-btn-batal" onClick={handleBatal}>
             Batal
