@@ -14,12 +14,13 @@
 
 import PostDefault from './PostDefault';
 import PostProfileCard from './PostProfileCard';
+import PostBeritaCard from './PostBeritaCard';
 import { DEFAULT_LAYOUT_KEY } from './layoutMeta';
 
 export const LAYOUT_EDITORS = {
   default: PostDefault,
   'profile-card': PostProfileCard,
-  // 'berita-card': BeritaCard,
+  'berita-card': PostBeritaCard,
 };
 
 // Ambil komponen editor untuk sebuah key layout (fallback ke Default).

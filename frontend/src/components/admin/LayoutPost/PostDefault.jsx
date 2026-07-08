@@ -204,18 +204,30 @@ const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/a
 const PostDefault = ({
   menuName = '',
   initialContents = [],
+  autoEditFirst = false, // muat konten pertama LANGSUNG ke form (untuk edit 1 item)
+  heading,      // override judul halaman (mis. PostBeritaCard: "Tambah Berita")
+  subheading,   // override teks bantu di bawah judul
   onSave,
   onCancel,
 }) => {
-  // Daftar konten yang sudah ditambahkan.
-  const [contents, setContents] = useState(() =>
-    initialContents.map((c) => ({ id: c.id || makeId(), ...c }))
+  // Normalisasi sekali: pastikan tiap konten awal punya id yang stabil, agar
+  // id di daftar konten cocok dengan editingId form saat autoEditFirst.
+  const normalizedInitial = useMemo(
+    () => initialContents.map((c) => ({ id: c.id || makeId(), ...c })),
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  // Daftar konten yang sudah ditambahkan.
+  const [contents, setContents] = useState(normalizedInitial);
+
+  // Saat autoEditFirst, form langsung menampilkan konten pertama (mode edit
+  // item) sehingga CKEditor tampil sudah terisi judul + konten.
+  const firstContent = autoEditFirst ? normalizedInitial[0] : null;
+
   // --- STATE FORM (untuk menambah / mengedit satu konten) ---
-  const [judul, setJudul] = useState('');
-  const [konten, setKonten] = useState('');
-  const [editingId, setEditingId] = useState(null); // null = mode tambah
+  const [judul, setJudul] = useState(firstContent ? firstContent.judul || '' : '');
+  const [konten, setKonten] = useState(firstContent ? firstContent.konten || '' : '');
+  const [editingId, setEditingId] = useState(firstContent ? firstContent.id : null);
   const [formError, setFormError] = useState('');
 
   // Config final = editorConfig statis + simpleUpload (butuh token runtime).
@@ -332,7 +344,17 @@ const PostDefault = ({
   };
 
   const handleSimpan = () => {
-    const data = { contents };
+    // Commit isi form yang belum di-"Tambah/Perbarui" agar tidak hilang saat
+    // admin langsung klik Simpan (mis. saat mengedit satu konten). Bila judul
+    // form kosong, tidak ada yang di-commit.
+    let finalContents = contents;
+    if (judul.trim()) {
+      const entry = { judul: judul.trim(), konten };
+      finalContents = editingId
+        ? contents.map((c) => (c.id === editingId ? { ...c, ...entry } : c))
+        : [...contents, { id: makeId(), ...entry }];
+    }
+    const data = { contents: finalContents };
     if (onSave) onSave(data);
     else console.log(data); // fallback standalone
   };
@@ -382,8 +404,8 @@ const PostDefault = ({
       <main className="pd-content">
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
-          <h1>{menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru'}</h1>
-          <p>Tambahkan satu atau beberapa konten untuk ditampilkan di halaman user.</p>
+          <h1>{heading || (menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru')}</h1>
+          <p>{subheading || 'Tambahkan satu atau beberapa konten untuk ditampilkan di halaman user.'}</p>
         </div>
 
         {/* ---------- FORM: TAMBAH / EDIT SATU KONTEN ---------- */}
