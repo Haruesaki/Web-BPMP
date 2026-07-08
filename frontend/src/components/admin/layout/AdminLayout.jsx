@@ -20,6 +20,7 @@ const AdminLayout = () => {
   const [selectedIcon, setSelectedIcon] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedPostLayout, setSelectedPostLayout] = useState('');
+  const [selectedPostView, setSelectedPostView] = useState('Vertikal'); // orientasi card berita di halaman user
   const [menuLink, setMenuLink] = useState(''); // diisi bila jenis menu = Link
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
@@ -37,6 +38,7 @@ const AdminLayout = () => {
   // --- 5. DATA: JENIS MENU ---
   const typeOptions = ['Post', 'Link'];
   const postLayoutOptions = ['Default', 'Profile Card', 'Berita Card'];
+  const postViewOptions = ['Vertikal', 'Horizontal']; // orientasi tampilan card berita
 
   // --- EFFECT: Klik di luar dropdown form untuk menutup ---
   useEffect(() => {
@@ -58,22 +60,25 @@ const AdminLayout = () => {
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
     setSelectedPostLayout('');
+    setSelectedPostView('Vertikal');
     setMenuLink('');
   };
 
   const handleSaveMenu = () => {
     // TODO: simpan menu ke backend (POST /api/menus) → dapatkan slug/id.
-    console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, menuLink });
+    console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, selectedPostView, menuLink });
 
     const nama = menuName;
     const isPost = selectedType === 'Post';
     const layoutKey = LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default';
+    const view = selectedPostView;
 
     closeModal();
 
     // Untuk menu bertipe Post → langsung buka editor konten sesuai layout.
+    // `view` (Vertikal/Horizontal) dibawa untuk dipakai tampilan publik nanti.
     if (isPost) {
-      navigate(`/admin/post/${layoutKey}`, { state: { menuName: nama } });
+      navigate(`/admin/post/${layoutKey}`, { state: { menuName: nama, postView: view } });
     }
   };
 
@@ -198,6 +203,27 @@ const AdminLayout = () => {
                           value={opt}
                           checked={selectedPostLayout === opt}
                           onChange={() => setSelectedPostLayout(opt)}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-pilihan Tampilan Post: orientasi card berita di halaman user */}
+              {selectedType === 'Post' && (
+                <div className="form-group">
+                  <label>Tampilan Post</label>
+                  <div className="form-radio-group">
+                    {postViewOptions.map((opt) => (
+                      <label key={opt} className="form-radio-item">
+                        <input
+                          type="radio"
+                          name="postView"
+                          value={opt}
+                          checked={selectedPostView === opt}
+                          onChange={() => setSelectedPostView(opt)}
                         />
                         <span>{opt}</span>
                       </label>
