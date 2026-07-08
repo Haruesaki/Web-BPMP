@@ -5,8 +5,7 @@
   width: 400px;
   height: 430px;
   border-radius: 35px; /* Sesuai dengan sudut melengkung di gambar */
-  border-top-right-radius: 100px;
-  border-bottom-left-radius: 100px;
+  border-top-right-radius: 110px;
   position: relative;
   overflow: hidden;
   background-color: #000a3a; /* Latar belakang putih untuk area gambar */
@@ -109,7 +108,9 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   z-index: 2;
   
   /* Menghasilkan bayangan halus mengikuti bentuk potongan masking anak-nya */
-  filter: drop-shadow(0px -8px 15px rgba(255, 255, 255, 0.6));
+  filter: 
+  drop-shadow(0px -7px 15px rgba(255, 255, 255, 0.6))
+  drop-shadow(-2px 2px 0px rgb(255, 255, 255));
   
 }
 
@@ -139,37 +140,45 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 /* ========================================= */
 .CardNewstext {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   bottom: 0px;
   z-index: 999999;
   height: 50%;
-  padding: 25px 35px;
+  gap: 2px;
+  padding: 20px 35px;
   background-color: #01004361;
   backdrop-filter: blur(20px);
-  border-top: 2px solid rgba(182, 182, 182, 0.334);
+  border-top: 1.3px solid rgb(255, 255, 255);
 }
 
 .CardNewstitle {
   color: #ffffff;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  line-height: 1.3;
+  word-spacing: 3px;
+  line-height: 1.2;
   font-family: 'Poppins', sans-serif;
   margin: 0;
+  margin-bottom: 1px;
 }
 
 .CardNewsdate {
   color: #ffffff;
-  font-size: 0.6rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 400;
   margin: 0px;
-    margin-bottom: 15px;
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid white;
   font-family: 'Poppins', sans-serif;
 }
 
 .CardNewsexcerpt {
   color: #ffffff;
   font-size: 0.8rem;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.2;
   margin: 0;
   font-family: 'Poppins', sans-serif;

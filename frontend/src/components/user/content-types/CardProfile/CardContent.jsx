@@ -17,7 +17,7 @@ const CardContent = ({
       </div>
 
       <div className="card-text">
-        <h1 className="name">{name}</h1>
+        <p className="name">{name}</p>
         <p className="role">{role}</p>
         <p className="quote">{quote}</p>
       </div>

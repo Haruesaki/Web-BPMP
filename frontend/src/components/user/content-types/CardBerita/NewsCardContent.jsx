@@ -5,7 +5,7 @@ import WOWOK from "../../../../assets/source/JanganKorupsi.png";
 const NewsCardContent = ({
   title = "Sepanjang Jalan Kenangan, Kasus Korupsi Selalu Meningkat",
   date = "Selasa, 24 Februari 2026 12:13",
-  excerpt = "Ini adalah sebuah pengingat untuk kita semua, jangan pernah korupsi ya manis ganteng cantik ",
+  excerpt = "Ini adalah sebuah pengingat untuk kita semua, jangan pernah korupsi ya manis ganteng cantik...... ",
   imageSrc = WOWOK, // Kosongkan jika ingin background putih seperti di gambar, atau isi path/URL gambar
 }) => {
   return (
