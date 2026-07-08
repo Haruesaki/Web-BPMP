@@ -3,14 +3,15 @@
 /* ========================================= */
 .news-card {
   width: 400px;
-  height: 400px;
+  height: 430px;
   border-radius: 35px; /* Sesuai dengan sudut melengkung di gambar */
+  border-top-right-radius: 100px;
+  border-bottom-left-radius: 100px;
   position: relative;
-  overflow: hidden; 
+  overflow: hidden;
   background-color: #000a3a; /* Latar belakang putih untuk area gambar */
   font-family: 'Poppins', sans-serif;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); 
-  margin: 0px auto;
 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.871);
 transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transform-style: preserve-3d; /* Mengaktifkan konteks 3D */
@@ -109,6 +110,7 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   
   /* Menghasilkan bayangan halus mengikuti bentuk potongan masking anak-nya */
   filter: drop-shadow(0px -8px 15px rgba(255, 255, 255, 0.6));
+  
 }
 
 /* ========================================= */
@@ -140,9 +142,10 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   bottom: 0px;
   z-index: 999999;
   height: 50%;
-  padding: 20px 35px;
+  padding: 25px 35px;
   background-color: #01004361;
   backdrop-filter: blur(20px);
+  border-top: 2px solid rgba(182, 182, 182, 0.334);
 }
 
 .CardNewstitle {
@@ -172,8 +175,7 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   font-family: 'Poppins', sans-serif;
   
   /* Trik opsional: Memotong teks jika terlalu panjang dan menambahkan titik-titik (...) */
-  display: -webkit-box;
-  -webkit-line-clamp: 4; /* Maksimal 4 baris */
+  display: -webkit-box; /* Maksimal 4 baris */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -32,9 +32,7 @@ const CardContent = ({
           <div className="orb orb-bwh2"></div>
           <div className="orb orb-bwh3"></div>
           <div className="orb orb-bwh4"></div>
-          {/* <div className="orb orb-6"></div> */}
           <div className="orb orb-7"></div>
-          {/* <div className="orb orb-8"></div> */}
         </div>
       </div>
     </div>
