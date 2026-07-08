@@ -9,6 +9,9 @@ const CardContent = ({
 }) => {
   return (
     <div className="card-profile">
+      {/* Elemen baru untuk efek kilau saat hover */}
+      <div className="card-light-sweep"></div>
+
       <div className="profile-frame">
         <img src={imageSrc} alt={`Profil ${name}`} />
       </div>

@@ -1,13 +1,14 @@
 .news-item {
     position: relative;
     display: flex;
+    height: auto;
     align-items: center;
     background: linear-gradient(90deg, #1A3C87 0%, #10255A 100%);
     border: 1.5px solid #3498DB;
     border-radius: 12px;
     padding: 16px 20px 16px 40px;
     text-decoration: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: transfor5m 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .news-item:hover {

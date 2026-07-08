@@ -3,22 +3,39 @@
 .card-profile {
   width: 400px;
   height: 500px;
-  background: linear-gradient(140deg, #000268 0%,rgb(0, 0, 0) 40%);
+  background: rgb(3, 0, 62) ;
+  /* background: linear-gradient(140deg, #001148 0%,rgb(0, 10, 63) 25%); */
   border-radius: 40px;
   position: relative;
   overflow: hidden; /* KUNCI MASKING */
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.871);
   display: flex;
   flex-direction: column;
   align-items: center;
   font-family: 'Poppins', sans-serif; /* Pastikan font ini ada, atau guna sans-serif */
-  margin: 80px auto;
+  margin: 0px auto;
   color: white;
+  border-top-left-radius: 100px;
+  border-bottom-right-radius: 100px;
+  /* --- PENAMBAHAN BARU UNTUK TRANSISI --- */
+  /* Nilai cubic-bezier sebelumnya (0.2, 4, 2, 2) tidak valid karena nilai X > 1. */
+  /* Diganti dengan nilai yang valid untuk menciptakan efek elastis/memantul. */
+  transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d; /* Mengaktifkan konteks 3D */
+  /* Mengecilkan ukuran visual kartu menggunakan transform: scale() */
+  /* Nilai awal ditambahkan agar animasi hover tetap mulus dari kondisi awal */
+  transform: perspective(4000px) scale(0.85) rotateY(0deg) rotateX(0deg);
+}
+
+/* --- PENAMBAHAN BARU: EFEK HOVER 3D --- */
+.card-profile:hover {
+  transform: perspective(1000px) scale(0.9) rotateY(-5deg) rotateX(6deg); /* Skala diperbarui: 0.85 (skala dasar) * 1.05 (pembesaran hover) = 0.8925 */
+  box-shadow: 0 40px 70px -20px rgba(0, 0, 0, 0.7);
 }
 
 .orb {
   position: absolute;
-  background: linear-gradient(130deg, #77abff  0%, rgb(22, 57, 255) 30%, rgb(18, 0, 118) 80%);
+  background: linear-gradient(130deg, #77abff  0%, rgb(57, 87, 255) 30%, rgb(18, 0, 118) 80%);
   pointer-events: none; 
   border-radius: 100%;
   filter: drop-shadow(-2px 0px 10px rgba(0, 7, 198, 0.7));
@@ -64,22 +81,21 @@
   height: 530px;
   bottom: -120px;
   left: -100px;
-  background: linear-gradient(0deg, #00f7ff  50%, rgb(102, 7, 255) 80%);
+  background: linear-gradient(90deg, #002594  30%, rgb(93, 0, 255) 100%);
   filter: blur(20px);
   z-index: 1;
   animation: liquidFlow 8s ease-in-out infinite;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .orb-bwh2 {
   width: 350px;
   height: 270px;
   bottom: -50px;
   left: -100px;
-  background: linear-gradient(40deg, #44aac0  0%, rgba(60, 53, 255, 0.753) 100%);
+  background: linear-gradient(0deg, #0c00ae  30%, rgba(0, 210, 221, 0.605) 80%);
   z-index: 3;
-  filter: blur(18px);
+  filter: blur(20px);
   animation: liquidFlow 9s ease-in-out -3s infinite;
-  opacity: 0.7;
 }
 .orb-bwh3 {
   width: 500px;
@@ -87,7 +103,7 @@
   bottom: -100px;
   left: 100px;
   z-index: 2;
-  background: linear-gradient(-150deg, #5000bf  0%, rgb(0, 200, 255) 100%);
+  background: linear-gradient(-95deg, #000e33  20%, rgb(0, 21, 255) 100%);
   filter: blur(20px);
   animation: liquidFlow 13s ease-in-out -10s infinite;
 }
@@ -95,12 +111,11 @@
   width: 500px;
   height: 300px;
   bottom: -150px;
-  left: 180px;
+  left: 100px;
   z-index: 4;
-  background: linear-gradient(90deg, #1125ff  0%, rgb(79, 21, 255) 100%);
+  background: linear-gradient(90deg, #2e0090  0%, rgb(67, 34, 255) 80%);
   filter: blur(20px);
-  animation: liquidFlow 10s ease-in-out -7s infinite;
-  opacity: 0.7;
+  animation: liquidFlow 10s ease-in-out -15s infinite;
 }
 .orb-bwh5 {
   width: 800px;
@@ -130,7 +145,7 @@
   z-index: -1;
   opacity: 0.7;
   filter: blur(20px);
-  background: linear-gradient(160deg, #002e4a  0%,#57bfff  50%, rgb(0, 2, 133) 80%, rgb(0, 12, 60) 100%);
+  background: linear-gradient(160deg, #009dff  0%,#1d30ff  50%, rgb(1, 3, 84) 80%, rgb(1, 7, 32) 100%);
 }
 
 .orb-8 {
@@ -179,7 +194,7 @@
   z-index: 99;
   margin: 0px;
   padding: 0px;
-  height: 50%;
+  height: 63%;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -187,6 +202,7 @@
 }
 .name {
   margin: 0px;
+  font-size: 28px;
 }
 
 .role {
@@ -200,13 +216,16 @@
 
 .profile-frame {
   position: absolute;
+  filter: drop-shadow(0px 0px 7px  rgb(8, 8, 8));
   left: 10%;
   top: 1.5%;
   height: 210px;
   width: 210px;
   border-radius: 100%;
   overflow: hidden;
-  border: 4px solid white;
+  border: 3px solid rgb(255, 255, 255);
+  /* --- PENAMBAHAN BARU: Menerapkan animasi melayang --- */
+  animation: profileFloat 13s ease-in-out infinite;
 }
 
 .profile-frame img {
@@ -230,7 +249,45 @@
   
   /* Efek bayangan yang akan mengikuti bentuk mask di dalamnya */
   /* Format: drop-shadow(X-offset Y-offset Blur Warna) */
-  filter: drop-shadow(0px -10px 15px rgba(24, 24, 24, 0.7)); 
+  filter: drop-shadow(7px 7px 10px rgb(255, 255, 255)); 
+}
+
+/* =================================================== */
+/* EFEK KILAU KACA (LIGHT SWEEP) SAAT HOVER            */
+/* =================================================== */
+.card-light-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit; /* Ikuti radius parent */
+  overflow: hidden; /* Pastikan kilau tidak bocor */
+  z-index: 98; /* Di bawah teks (99), di atas segalanya */
+  pointer-events: none; /* Agar tidak mengganggu klik */
+}
+
+.card-light-sweep::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%; /* Mulai dari luar kiri */
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  filter: blur(30px);
+}
+
+.card-profile:hover .card-light-sweep::before {
+  animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 
@@ -270,6 +327,35 @@
   }
   75% {
     transform: translate(-10px, 10px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+/* ========================================= */
+/* KEYFRAME UNTUK ANIMASI KILAU KACA         */
+/* ========================================= */
+@keyframes lightSweepCard {
+  from { left: -150%; }
+  to { left: 150%; }
+}
+
+/* ========================================= */
+/* KEYFRAME UNTUK ANIMASI FOTO PROFIL        */
+/* ========================================= */
+@keyframes profileFloat {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  25% {
+    transform: translate(10px, 20px) scale(0.85) rotate(-6deg);
+  }
+  50% {
+    transform: translate(-10px, -5px) scale(0.92) rotate(4deg);
+  }
+  75% {
+    transform: translate(15px, 0px) scale(0.89) rotate(-2deg);
   }
   100% {
     transform: translate(0px, 0px) scale(1);

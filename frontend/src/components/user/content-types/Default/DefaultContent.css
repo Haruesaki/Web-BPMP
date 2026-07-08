@@ -1,13 +1,14 @@
 /* Base styling for all content type sections */
 .content-type-section {
     position: relative;
-    margin: 0;
+    margin: 0 auto;
     width: 100%;; /* Batasi lebar agar tidak terlalu lebar di layar besar */
     color: #333;
     font-family: 'Roboto', sans-serif; /* Contoh font */
     line-height: 1.6;
     background-color: #232F72;
     border-radius: 20px;
+    max-width: 1300px;
 }
 
 /* --- Default Content Styling --- */
