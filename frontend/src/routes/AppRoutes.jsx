@@ -12,6 +12,7 @@ import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
+import CustomizeBeranda from '../pages/Admin/CustomizeBeranda/CustomizeBeranda';
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -39,6 +40,7 @@ const AppRoutes = ({ lenisRef }) => {
             <Route element={<ProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<DashboardAdmin />} />
+                    <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                 </Route>

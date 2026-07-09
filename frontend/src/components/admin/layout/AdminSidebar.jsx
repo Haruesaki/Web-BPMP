@@ -23,7 +23,7 @@ import './AdminSidebar.css';
 // Item tanpa `path` hanya menyorot dirinya sendiri (belum punya halaman).
 const adminMenuItems1 = [
   { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin' },
-  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
+  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square', path: '/admin/customize-beranda' },
   { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: '/admin/pengaturan-menu' },
   { id: 'berita', label: 'Berita', icon: 'fa-solid fa-file-lines' },
 ];
