@@ -1,58 +1,96 @@
-import React, { useState } from 'react';
-// Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
-// menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
-// <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
 import './PengaturanMenu.css';
-
-// =========================================================================
-//  DATA MENU
-//  -----------------------------------------------------------------------
-//  Disamakan dengan daftar "menuItems" di AdminSidebar.jsx. Properti `active`
-//  menyimpan status tampil/tidaknya menu di halaman beranda publik.
-//  Nanti tinggal diganti fetch ke backend (GET /api/menus).
-// =========================================================================
-// Setiap menu utama punya array `submenus`. Hanya menu utama yang boleh
-// menambah submenu; submenu tidak bisa punya submenu lagi (satu tingkat saja).
-// Sebagai contoh, hanya "Pelayanan" yang diisi submenu.
-const INITIAL_MENUS = [
-  { id: 'profil', label: 'Profil', active: true, submenus: [] },
-  { id: 'reformasi-birokrasi', label: 'Reformasi Birokrasi', active: true, submenus: [] },
-  { id: 'dok-kinerja', label: 'Dok. Kinerja', active: false, submenus: [] },
-  {
-    id: 'pelayanan',
-    label: 'Pelayanan',
-    active: true,
-    submenus: [
-      { id: 'standar-pelayanan', label: 'Standar Pelayanan', active: false },
-      { id: 'maklumat-pelayanan', label: 'Maklumat Pelayanan', active: false },
-      { id: 'unit-layanan-terpadu', label: 'Unit Layanan Terpadu', active: false },
-      { id: 'survey-kepuasan', label: 'Survey Kepuasan Masyarakat', active: false },
-      { id: 'hasil-survey-skm', label: 'Hasil Survey SKM', active: false },
-    ],
-  },
-  { id: 'program', label: 'Program', active: true, submenus: [] },
-  { id: 'ppid', label: 'PPID', active: false, submenus: [] },
-  { id: 'sipers', label: 'Sipers', active: true, submenus: [] },
-  { id: 'spab', label: 'SPAB', active: true, submenus: [] },
-  { id: 'pengaduan', label: 'Pengaduan', active: false, submenus: [] },
-];
+import TambahSubmenu from './TambahSubmenu';
 
 const PengaturanMenu = () => {
-  const [menus, setMenus] = useState(INITIAL_MENUS);
+  const [menus, setMenus] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [dragIndex, setDragIndex] = useState(null);
   const [subDrag, setSubDrag] = useState(null); // { parentId, index } | null
   const [expandedIds, setExpandedIds] = useState([]); // menu utama yang terbuka
-  // Popup konfirmasi aktif/nonaktif. null = tertutup.
+
+  // State modal tambah submenu
+  const [isModalSubmenuOpen, setIsModalSubmenuOpen] = useState(false);
+  const [modalSubmenuParentId, setModalSubmenuParentId] = useState(null);
+
+  // State modal konfirmasi hapus
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null, title: '' });
+
+  // State popup konfirmasi aktif/nonaktif. null = tertutup.
   // { kind: 'menu'|'sub', id, parentId, willActivate, label }
   const [confirm, setConfirm] = useState(null);
 
-  // --- Expand/collapse dropdown submenu ---
+  const fetchMenus = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/api/menus');
+      const flatData = res.data;
+
+      // Parse flat data jadi parent-child
+      const parentMenus = flatData.filter(m => m.induk_id === null).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+      const subMenusFlat = flatData.filter(m => m.induk_id !== null).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+
+      const treeData = parentMenus.map(p => {
+        return {
+          ...p,
+          label: p.nama_menu,
+          active: p.is_aktif,
+          submenus: subMenusFlat.filter(s => s.induk_id === p.id).map(s => ({
+            ...s,
+            label: s.nama_menu,
+            active: s.is_aktif
+          }))
+        };
+      });
+
+      setMenus(treeData);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMenus();
+  }, []);
+
+  const triggerSidebarRefresh = () => {
+    window.dispatchEvent(new Event('refreshSidebar'));
+  };
+
+  // Simpan urutan ke database
+  const saveUrutanToDB = async (newMenus) => {
+    try {
+      let updates = [];
+      newMenus.forEach((parent, pIndex) => {
+        updates.push({ id: parent.id, urutan_tampil: pIndex });
+        parent.submenus.forEach((sub, sIndex) => {
+          updates.push({ id: sub.id, urutan_tampil: sIndex });
+        });
+      });
+
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+
+      await axiosInstance.patch('/api/menus/reorder', { updates }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      triggerSidebarRefresh();
+    } catch (error) {
+      console.error('Gagal menyimpan urutan', error);
+      alert('Gagal menyimpan urutan menu!');
+    }
+  };
+
   const toggleExpand = (id) =>
     setExpandedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
 
-  // --- Reorder MENU UTAMA via drag pada ikon grip (titik-titik) ---
+  // --- Reorder MENU UTAMA ---
   const reorder = (from, to) => {
     setMenus((prev) => {
       const next = [...prev];
@@ -68,12 +106,15 @@ const PengaturanMenu = () => {
     event.preventDefault(); // izinkan drop
     if (dragIndex === null || dragIndex === index) return;
     reorder(dragIndex, index);
-    setDragIndex(index); // posisi item yang diseret kini di index baru
+    setDragIndex(index);
   };
 
-  const handleDragEnd = () => setDragIndex(null);
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    saveUrutanToDB(menus); // simpan dan refresh sidebar
+  };
 
-  // --- Reorder SUBMENU (dibatasi hanya di dalam induk yang sama) ---
+  // --- Reorder SUBMENU ---
   const reorderSub = (parentId, from, to) =>
     setMenus((prev) =>
       prev.map((m) => {
@@ -94,18 +135,36 @@ const PengaturanMenu = () => {
     setSubDrag({ parentId, index });
   };
 
-  const handleSubDragEnd = () => setSubDrag(null);
+  const handleSubDragEnd = () => {
+    setSubDrag(null);
+    saveUrutanToDB(menus); // simpan dan refresh sidebar
+  };
 
-  // --- Aksi baris MENU UTAMA ---
+  // --- Aksi Hapus ---
+  const hapusMenuApi = async (id) => {
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+
+      await axiosInstance.delete(`/api/menus/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Update local state and sidebar
+      fetchMenus();
+      triggerSidebarRefresh();
+    } catch (error) {
+      console.error(error);
+      alert('Terjadi kesalahan saat menghapus menu.');
+    }
+  };
+
+  // Biarkan toggle active tidak ke DB dulu sesuai instruksi (dibiarin dummy/local saja sementara)
   const toggleActive = (id) =>
     setMenus((prev) =>
       prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
     );
 
-  const hapusMenu = (id) =>
-    setMenus((prev) => prev.filter((m) => m.id !== id));
-
-  // --- Aksi baris SUBMENU ---
   const toggleSubActive = (parentId, subId) =>
     setMenus((prev) =>
       prev.map((m) =>
@@ -116,15 +175,6 @@ const PengaturanMenu = () => {
                 s.id === subId ? { ...s, active: !s.active } : s
               ),
             }
-          : m
-      )
-    );
-
-  const hapusSub = (parentId, subId) =>
-    setMenus((prev) =>
-      prev.map((m) =>
-        m.id === parentId
-          ? { ...m, submenus: m.submenus.filter((s) => s.id !== subId) }
           : m
       )
     );
@@ -141,6 +191,10 @@ const PengaturanMenu = () => {
     else toggleSubActive(confirm.parentId, confirm.id);
     setConfirm(null);
   };
+
+  if (loading) {
+    return <main className="admin-content"><p>Memuat data menu...</p></main>;
+  }
 
   return (
     <main className="admin-content">
@@ -192,9 +246,6 @@ const PengaturanMenu = () => {
                     <i className="fa-solid fa-grip-vertical"></i>
                   </span>
 
-                  {/* Panah dropdown di paling kiri, tepat di samping grip.
-                      Selalu dirender (kosong bila tak punya submenu) agar nomor
-                      antar-baris tetap sejajar. */}
                   <span
                     className={`pm-caret-slot ${hasSub ? 'pm-caret-clickable' : ''}`}
                     onClick={hasSub ? () => toggleExpand(menu.id) : undefined}
@@ -209,12 +260,11 @@ const PengaturanMenu = () => {
 
                   <span className="pm-number">{index + 1}</span>
 
-                  {/* Label juga bisa diklik untuk buka/tutup submenu.
-                      Dot di kanan nama menandakan status aktif (hijau) / nonaktif (abu). */}
                   <div
                     className={`pm-label ${hasSub ? 'pm-label-clickable' : ''}`}
                     onClick={hasSub ? () => toggleExpand(menu.id) : undefined}
                   >
+                    <i className={menu.ikon_menu} style={{ marginRight: '8px' }}></i>
                     <span>{menu.label}</span>
                     <span
                       className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`}
@@ -223,7 +273,15 @@ const PengaturanMenu = () => {
                   </div>
 
                   <div className="pm-actions">
-                    <button className="pm-btn pm-btn-submenu">Tambah Submenu</button>
+                    <button
+                      className="pm-btn pm-btn-submenu"
+                      onClick={() => {
+                        setModalSubmenuParentId(menu.id);
+                        setIsModalSubmenuOpen(true);
+                      }}
+                    >
+                      Tambah Submenu
+                    </button>
 
                     <button className="pm-btn pm-btn-edit">Edit</button>
 
@@ -245,14 +303,14 @@ const PengaturanMenu = () => {
 
                     <button
                       className="pm-btn pm-btn-hapus"
-                      onClick={() => hapusMenu(menu.id)}
+                      onClick={() => setConfirmDelete({ isOpen: true, id: menu.id, title: menu.label })}
                     >
                       Hapus
                     </button>
                   </div>
                 </div>
 
-                {/* ===== DROPDOWN BARIS SUBMENU (tanpa tombol "Tambah Submenu") ===== */}
+                {/* ===== DROPDOWN BARIS SUBMENU ===== */}
                 {isExpanded &&
                   menu.submenus.map((sub, subIndex) => (
                     <div
@@ -273,8 +331,6 @@ const PengaturanMenu = () => {
                         <i className="fa-solid fa-grip-vertical"></i>
                       </span>
 
-                      {/* Slot panah kosong: submenu tak bisa punya submenu lagi,
-                          tapi tetap disisakan agar nomor sejajar dengan induk. */}
                       <span className="pm-caret-slot"></span>
 
                       <span className="pm-number pm-subnumber">
@@ -282,6 +338,7 @@ const PengaturanMenu = () => {
                       </span>
 
                       <div className="pm-label">
+                        <i className={sub.ikon_menu} style={{ marginRight: '8px' }}></i>
                         <span>{sub.label}</span>
                         <span
                           className={`pm-dot ${sub.active ? 'pm-dot-active' : 'pm-dot-inactive'}`}
@@ -310,7 +367,7 @@ const PengaturanMenu = () => {
 
                         <button
                           className="pm-btn pm-btn-hapus"
-                          onClick={() => hapusSub(menu.id, sub.id)}
+                          onClick={() => setConfirmDelete({ isOpen: true, id: sub.id, title: sub.label })}
                         >
                           Hapus
                         </button>
@@ -321,12 +378,56 @@ const PengaturanMenu = () => {
             );
           })}
         </div>
-
-            {/* ---------- FOOTER ---------- */}
-            <div className="pm-card-footer">
-              <button className="pm-save">Simpan Perubahan</button>
-            </div>
       </section>
+
+      {/* Modal Tambah Submenu */}
+      <TambahSubmenu
+        isOpen={isModalSubmenuOpen}
+        onClose={() => setIsModalSubmenuOpen(false)}
+        parentId={modalSubmenuParentId}
+        onSuccess={() => {
+          fetchMenus();
+          triggerSidebarRefresh();
+        }}
+      />
+
+      {/* Modal Konfirmasi Hapus */}
+      {confirmDelete.isOpen && (
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3>Konfirmasi Hapus</h3>
+              <button className="modal-close" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="modal-body" style={{ paddingBottom: '30px', textAlign: 'center' }}>
+              <div style={{ color: '#ff4d4d', fontSize: '48px', marginBottom: '15px' }}>
+                <i className="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
+                Apakah Anda yakin ingin menghapus <strong>"{confirmDelete.title}"</strong>?<br/>
+                <span style={{ fontSize: '14px', color: '#888', marginTop: '10px', display: 'block' }}>
+                  Tindakan ini permanen dan submenu (jika ada) akan ikut terhapus.
+                </span>
+              </p>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'center', gap: '15px' }}>
+              <button className="btn-batal" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>Batal</button>
+              <button
+                className="btn-simpan"
+                style={{ backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' }}
+                onClick={() => {
+                  hapusMenuApi(confirmDelete.id);
+                  setConfirmDelete({ isOpen: false, id: null, title: '' });
+                }}
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ---------- POPUP KONFIRMASI AKTIVASI MENU ---------- */}
       {confirm && (

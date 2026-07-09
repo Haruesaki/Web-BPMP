@@ -6,14 +6,16 @@ import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import { useAuth } from '../../../hooks/useAuth';
 import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
+import axiosInstance from '../../../api/axiosInstance';
 
 const AdminLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   // --- STATE: MODAL TAMBAH MENU ---
-  // (Sorotan menu aktif kini ditangani sendiri oleh AdminSidebar via URL.)
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [refreshSidebarTrigger, setRefreshSidebarTrigger] = useState(0); // trigger untuk refresh sidebar
+  const [formError, setFormError] = useState(''); // state untuk error message di form
 
   // --- 3. STATE: FORM TAMBAH MENU ---
   const [menuName, setMenuName] = useState('');
@@ -29,19 +31,19 @@ const AdminLayout = () => {
 
   // --- 4. DATA: PILIHAN IKON DROPDOWN (FORM TAMBAH MENU) ---
   const iconOptions = [
-    { value: 'beranda', label: 'Menu utama', fa: 'fa-solid fa-table-cells-large' },
-    { value: 'customize', label: 'Customize', fa: 'fa-solid fa-pen-to-square' },
-    { value: 'pengaturan-menu', label: 'Preferensi', fa: 'fa-solid fa-sliders' },
-    { value: 'berita', label: 'Dokumen', fa: 'fa-solid fa-file-lines' },
-    { value: 'profil', label: 'Profil', fa: 'fa-solid fa-circle-user' },
-    { value: 'reformasi-birokrasi', label: 'Institusi', fa: 'fa-solid fa-building-columns' },
-    { value: 'pelayanan', label: 'Layanan', fa: 'fa-solid fa-hands-holding-circle' },
-    { value: 'program', label: 'Agenda / Tugas', fa: 'fa-solid fa-calendar-check' },
-    { value: 'ppid', label: 'informasi', fa: 'fa-solid fa-circle-info' },
-    { value: 'spab', label: 'Privasi', fa: 'fa-solid fa-shield-halved' },
-    { value: 'pengaduan', label: 'Pesan / Forum', fa: 'fa-solid fa-comments' },
-    { value: 'manajemen', label: 'Daftar Pengguna', fa: 'fa-solid fa-users' },
-    { value: 'setting', label: 'Pengaturan', fa: 'fa-solid fa-gear' },
+    { value: 'fa-solid fa-table-cells-large', label: 'Menu utama', fa: 'fa-solid fa-table-cells-large' },
+    { value: 'fa-solid fa-pen-to-square', label: 'Customize', fa: 'fa-solid fa-pen-to-square' },
+    { value: 'fa-solid fa-sliders', label: 'Preferensi', fa: 'fa-solid fa-sliders' },
+    { value: 'fa-solid fa-file-lines', label: 'Dokumen', fa: 'fa-solid fa-file-lines' },
+    { value: 'fa-solid fa-circle-user', label: 'Profil', fa: 'fa-solid fa-circle-user' },
+    { value: 'fa-solid fa-building-columns', label: 'Institusi', fa: 'fa-solid fa-building-columns' },
+    { value: 'fa-solid fa-hands-holding-circle', label: 'Layanan', fa: 'fa-solid fa-hands-holding-circle' },
+    { value: 'fa-solid fa-calendar-check', label: 'Agenda / Tugas', fa: 'fa-solid fa-calendar-check' },
+    { value: 'fa-solid fa-circle-info', label: 'Informasi', fa: 'fa-solid fa-circle-info' },
+    { value: 'fa-solid fa-shield-halved', label: 'Privasi', fa: 'fa-solid fa-shield-halved' },
+    { value: 'fa-solid fa-comments', label: 'Pesan / Forum', fa: 'fa-solid fa-comments' },
+    { value: 'fa-solid fa-users', label: 'Daftar Pengguna', fa: 'fa-solid fa-users' },
+    { value: 'fa-solid fa-gear', label: 'Pengaturan', fa: 'fa-solid fa-gear' },
   ];
 
   // --- 5. DATA: JENIS MENU ---
@@ -63,31 +65,61 @@ const AdminLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- EFFECT: Listen to custom event for sidebar refresh ---
+  useEffect(() => {
+    const handleRefreshSidebar = () => {
+      setRefreshSidebarTrigger(prev => prev + 1);
+    };
+    window.addEventListener('refreshSidebar', handleRefreshSidebar);
+    return () => window.removeEventListener('refreshSidebar', handleRefreshSidebar);
+  }, []);
+
   // --- HANDLER: Tutup modal & reset form ---
   const closeModal = () => {
     setIsMenuModalOpen(false);
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
+    setFormError('');
+    setMenuName('');
+    setSelectedIcon('');
+    setSelectedType('');
     setSelectedPostLayout('');
     setSelectedPostView('Vertikal');
     setMenuLink('');
   };
 
-  const handleSaveMenu = () => {
-    // TODO: simpan menu ke backend (POST /api/menus) → dapatkan slug/id.
-    console.log({ menuName, selectedIcon, selectedType, selectedPostLayout, selectedPostView, menuLink });
+  const handleSaveMenu = async () => {
+    setFormError(''); // Reset error message
+    // Validasi
+    if (!menuName || !selectedIcon || !selectedType) {
+      setFormError("Nama menu, ikon, dan jenis menu wajib diisi!");
+      return;
+    }
 
-    const nama = menuName;
-    const isPost = selectedType === 'Post';
-    const layoutKey = LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default';
-    const view = selectedPostView;
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
 
-    closeModal();
+      // POST data ke backend menggunakan axiosInstance
+      const res = await axiosInstance.post('/api/menus', {
+        nama_menu: menuName,
+        ikon_menu: selectedIcon,
+        jenis_menu: selectedType.toLowerCase(), // post / link
+        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default')
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-    // Untuk menu bertipe Post → langsung buka editor konten sesuai layout.
-    // `view` (Vertikal/Horizontal) dibawa untuk dipakai tampilan publik nanti.
-    if (isPost) {
-      navigate(`/admin/post/${layoutKey}`, { state: { menuName: nama, postView: view } });
+      if (res.status === 200 || res.status === 201) {
+        setRefreshSidebarTrigger(prev => prev + 1); // trigger reload sidebar
+        closeModal(); // tutup modal, TIDAK ADA redirect
+      }
+    } catch (error) {
+      console.error(error);
+      const errMsg = error.response?.data?.pesan || "Terjadi kesalahan jaringan. Gagal menyimpan menu.";
+      setFormError(errMsg);
     }
   };
 
@@ -95,7 +127,7 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-layout">
-      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} />
+      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} refreshTrigger={refreshSidebarTrigger} />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
@@ -118,6 +150,14 @@ const AdminLayout = () => {
             </div>
 
             <div className="modal-body">
+              {/* Notifikasi Error jika ada */}
+              {formError && (
+                <div style={{ color: '#ff4d4d', backgroundColor: '#331111', padding: '10px 14px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', border: '1px solid #ff4d4d', display: 'flex', alignItems: 'center' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '10px', fontSize: '16px' }}></i>
+                  <span>{formError}</span>
+                </div>
+              )}
+
               {/* Nama Menu */}
               <div className="form-group">
                 <label>Nama Menu</label>

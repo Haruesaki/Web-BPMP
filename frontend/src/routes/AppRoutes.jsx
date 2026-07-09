@@ -43,19 +43,18 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+                    {/* Editor konten menu — route DINAMIS per layout (:layout).
+                        Contoh: /admin/post/default → editor layout Default.
+                        Dimasukkan ke dalam AdminLayout agar Sidebar tetap terlihat! */}
+                    <Route
+                        path="/admin/post/:layout"
+                        element={
+                            <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', minHeight: '100vh' }}>Memuat editor…</div>}>
+                                <MenuContentEditor />
+                            </Suspense>
+                        }
+                    />
                 </Route>
-
-                {/* Editor konten menu — route DINAMIS per layout (:layout).
-                    Contoh: /admin/post/default → editor layout Default.
-                    Halaman fokus penuh (tema sendiri), tetap diproteksi login. */}
-                <Route
-                    path="/admin/post/:layout"
-                    element={
-                        <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', background: '#0B1326', minHeight: '100vh' }}>Memuat editor…</div>}>
-                            <MenuContentEditor />
-                        </Suspense>
-                    }
-                />
             </Route>
         </Routes>
     );
