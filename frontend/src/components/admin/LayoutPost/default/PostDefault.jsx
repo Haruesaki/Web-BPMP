@@ -68,7 +68,7 @@ import {
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
-import { CustomUploadAdapterPlugin } from '../../../utils/CustomUploadAdapter';
+import { CustomUploadAdapterPlugin } from '../../../../utils/CustomUploadAdapter';
 import './PostDefault.css';
 
 // =========================================================================

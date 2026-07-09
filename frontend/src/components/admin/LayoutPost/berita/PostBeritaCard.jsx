@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import './PostDefault.css'; // pakai ulang palet gelap + tombol dasar (.pd-*)
+import '../default/PostDefault.css'; // pakai ulang palet gelap + tombol dasar (.pd-*)
 import './PostBeritaCard.css';
-import PostDefault from './PostDefault';
+import PostDefault from '../default/PostDefault';
 
 // =========================================================================
 //  POST BERITA CARD — halaman KELOLA BERITA (layout "Berita Card").

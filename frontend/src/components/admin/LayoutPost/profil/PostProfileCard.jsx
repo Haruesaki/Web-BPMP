@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import './PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
+import '../default/PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
 import './PostProfileCard.css';
-import { uploadImageToServer } from './uploadImage';
+import { uploadImageToServer } from '../uploadImage';
 
 // =========================================================================
 //  POST PROFILE CARD — EDITOR konten admin untuk layout "Profile Card".

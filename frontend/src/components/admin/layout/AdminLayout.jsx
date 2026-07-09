@@ -29,21 +29,19 @@ const AdminLayout = () => {
 
   // --- 4. DATA: PILIHAN IKON DROPDOWN (FORM TAMBAH MENU) ---
   const iconOptions = [
-    { value: 'beranda', label: 'Beranda', fa: 'fa-solid fa-table-cells-large' },
-    { value: 'customize', label: 'Customize Beranda', fa: 'fa-solid fa-pen-to-square' },
-    { value: 'pengaturan-menu', label: 'Pengaturan Menu', fa: 'fa-solid fa-sliders' },
-    { value: 'berita', label: 'Berita', fa: 'fa-solid fa-file-lines' },
+    { value: 'beranda', label: 'Menu utama', fa: 'fa-solid fa-table-cells-large' },
+    { value: 'customize', label: 'Customize', fa: 'fa-solid fa-pen-to-square' },
+    { value: 'pengaturan-menu', label: 'Preferensi', fa: 'fa-solid fa-sliders' },
+    { value: 'berita', label: 'Dokumen', fa: 'fa-solid fa-file-lines' },
     { value: 'profil', label: 'Profil', fa: 'fa-solid fa-circle-user' },
-    { value: 'reformasi-birokrasi', label: 'Reformasi Birokrasi', fa: 'fa-solid fa-building-columns' },
-    { value: 'dok-kinerja', label: 'Dok. Kinerja', fa: 'fa-solid fa-file-lines' },
-    { value: 'pelayanan', label: 'Pelayanan', fa: 'fa-solid fa-hands-holding-circle' },
-    { value: 'program', label: 'Program', fa: 'fa-solid fa-calendar-check' },
-    { value: 'ppid', label: 'PPID', fa: 'fa-solid fa-circle-info' },
-    { value: 'sipers', label: 'Sipers', fa: 'fa-solid fa-file-lines' },
-    { value: 'spab', label: 'SPAB', fa: 'fa-solid fa-shield-halved' },
-    { value: 'pengaduan', label: 'Pengaduan', fa: 'fa-solid fa-comments' },
-    { value: 'manajemen', label: 'Manajemen User', fa: 'fa-solid fa-users' },
-    { value: 'setting', label: 'Setting', fa: 'fa-solid fa-gear' },
+    { value: 'reformasi-birokrasi', label: 'Institusi', fa: 'fa-solid fa-building-columns' },
+    { value: 'pelayanan', label: 'Layanan', fa: 'fa-solid fa-hands-holding-circle' },
+    { value: 'program', label: 'Agenda / Tugas', fa: 'fa-solid fa-calendar-check' },
+    { value: 'ppid', label: 'informasi', fa: 'fa-solid fa-circle-info' },
+    { value: 'spab', label: 'Privasi', fa: 'fa-solid fa-shield-halved' },
+    { value: 'pengaduan', label: 'Pesan / Forum', fa: 'fa-solid fa-comments' },
+    { value: 'manajemen', label: 'Daftar Pengguna', fa: 'fa-solid fa-users' },
+    { value: 'setting', label: 'Pengaturan', fa: 'fa-solid fa-gear' },
   ];
 
   // --- 5. DATA: JENIS MENU ---
