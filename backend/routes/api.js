@@ -4,6 +4,7 @@ const YoutubeController = require('../controllers/youtubeController');
 const AuthController = require('../controllers/authController');
 const UserController = require('../controllers/userController');
 const UploadController = require('../controllers/uploadController');
+const MenuController = require('../controllers/menuController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
@@ -19,6 +20,12 @@ router.post('/auth/reset-password', AuthController.resetPassword);
 
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
+
+// Routes Menu
+router.get('/menus', MenuController.getMenus);
+router.post('/menus', authMiddleware, MenuController.createMenu);
+router.patch('/menus/reorder', authMiddleware, MenuController.reorderMenus);
+router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)

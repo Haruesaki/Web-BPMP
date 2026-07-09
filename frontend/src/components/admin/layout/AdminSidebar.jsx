@@ -1,44 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axiosInstance from '../../../api/axiosInstance';
 import './AdminSidebar.css';
 
-// =========================================================================
-//  ADMIN SIDEBAR — dirender sekali di dalam <AdminLayout> untuk semua
-//  halaman Admin.
-//  -----------------------------------------------------------------------
-//  Cara pakai:
-//
-//    <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} />
-//
-//  Sorotan menu aktif sepenuhnya mengikuti URL (route-based), jadi tidak
-//  perlu lagi prop activeMenu/onMenuClick.
-//
-//  Catatan: harus berada di dalam <div className="admin-layout"> karena
-//  variabel CSS (--bg-app, --bg-sidebar, dst.) dideklarasikan di scope
-//  ".admin-layout" pada dashboard-admin.css.
-// =========================================================================
-
 // --- DATA: MENU STATIS BAGIAN ATAS ---
-// Item dengan properti `path` akan bernavigasi antar-halaman admin (routing).
-// Item tanpa `path` hanya menyorot dirinya sendiri (belum punya halaman).
 const adminMenuItems1 = [
   { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin' },
   { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square' },
   { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: '/admin/pengaturan-menu' },
-  { id: 'berita', label: 'Berita', icon: 'fa-solid fa-file-lines' },
-];
-
-// --- DATA: MENU KONTEN (bisa nantinya diganti sumber dinamis dari backend) ---
-const menuItems = [
-  { id: 'profil', label: 'Profil', icon: 'fa-solid fa-circle-user' },
-  { id: 'reformasi-birokrasi', label: 'Reformasi Birokrasi', icon: 'fa-solid fa-building-columns' },
-  { id: 'dok-kinerja', label: 'Dok. Kinerja', icon: 'fa-solid fa-file-lines' },
-  { id: 'pelayanan', label: 'Pelayanan', icon: 'fa-solid fa-hands-holding-circle' },
-  { id: 'program', label: 'Program', icon: 'fa-solid fa-calendar-check' },
-  { id: 'ppid', label: 'PPID', icon: 'fa-solid fa-circle-info' },
-  { id: 'sipers', label: 'Sipers', icon: 'fa-solid fa-file-lines' },
-  { id: 'spab', label: 'SPAB', icon: 'fa-solid fa-shield-halved' },
-  { id: 'pengaduan', label: 'Pengaduan', icon: 'fa-solid fa-comments' },
 ];
 
 // --- DATA: MENU STATIS BAGIAN BAWAH ---
@@ -47,28 +16,57 @@ const adminMenuItems2 = [
   { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear' },
 ];
 
-// Semua item digabung untuk mencocokkan rute aktif dengan URL.
-const allMenuItems = [...adminMenuItems1, ...menuItems, ...adminMenuItems2];
-
-const AdminSidebar = ({ onTambahMenu }) => {
+const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [dynamicMenus, setDynamicMenus] = useState([]);
+  const [selectedId, setSelectedId] = useState('beranda');
+  const [expandedMenus, setExpandedMenus] = useState([]); // Array of parent IDs yang sedang di-expand
 
-  // Satu sumber kebenaran untuk item yang tersorot. Nilai awal dari rute yang
-  // sedang dibuka; fallback 'beranda'. Karena hanya satu state, tidak mungkin
-  // ada dua menu aktif bersamaan.
-  const routeMatch = allMenuItems.find((it) => it.path === location.pathname);
-  const [selectedId, setSelectedId] = useState(routeMatch?.id || 'beranda');
-
-  // Sidebar ini persist di dalam <AdminLayout> (tidak remount tiap pindah
-  // halaman), jadi sorotan disinkronkan setiap URL berubah — termasuk saat
-  // tombol back/forward browser atau membuka URL admin langsung.
+  // Fetch menu dinamis dari backend
   useEffect(() => {
-    const match = allMenuItems.find((it) => it.path === location.pathname);
-    if (match) setSelectedId(match.id);
-  }, [location.pathname]);
+    const fetchMenus = async () => {
+      try {
+        const response = await axiosInstance.get('/api/menus');
+        const data = response.data;
+        
+        // Membentuk struktur Tree (Parent-Child)
+        const parentMenus = data.filter(m => m.induk_id === null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
+        const childMenus = data.filter(m => m.induk_id !== null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
 
-  const renderNavItem = (item) => (
+        const tree = parentMenus.map(p => {
+          const subs = childMenus.filter(c => c.induk_id === p.id);
+          return {
+            id: p.id.toString(),
+            label: p.nama_menu,
+            icon: p.ikon_menu,
+            jenis: p.jenis_menu,
+            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}` : (p.slug_atau_tautan || '#'),
+            submenus: subs.map(s => ({
+              id: s.id.toString(),
+              label: s.nama_menu,
+              icon: s.ikon_menu,
+              jenis: s.jenis_menu,
+              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}` : (s.slug_atau_tautan || '#')
+            }))
+          };
+        });
+
+        setDynamicMenus(tree);
+      } catch (error) {
+        console.error('Gagal fetch menus:', error);
+      }
+    };
+    fetchMenus();
+  }, [refreshTrigger]);
+
+  const toggleExpand = (id) => {
+    setExpandedMenus(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const renderStaticItem = (item) => (
     <button
       key={item.id}
       className={`nav-item ${selectedId === item.id ? 'active' : ''}`}
@@ -82,6 +80,69 @@ const AdminSidebar = ({ onTambahMenu }) => {
     </button>
   );
 
+  const renderDynamicItem = (menu) => {
+    const hasSubmenus = menu.submenus && menu.submenus.length > 0;
+    const isExpanded = expandedMenus.includes(menu.id);
+    
+    // Jika dia punya submenu, dia berfungsi sebagai GERBANG (hanya nge-expand)
+    // Jika tidak punya, dan dia tipe Post, kita passing state isPostTanpaSubmenu: true
+    const handleClick = () => {
+      setSelectedId(menu.id);
+      if (hasSubmenus) {
+        toggleExpand(menu.id);
+      } else {
+        if (menu.path) {
+          navigate(menu.path, { 
+            state: { 
+              menuName: menu.label, 
+              isPostTanpaSubmenu: menu.jenis === 'post' 
+            } 
+          });
+        }
+      }
+    };
+
+    return (
+      <React.Fragment key={menu.id}>
+        <button
+          className={`nav-item ${selectedId === menu.id ? 'active' : ''}`}
+          onClick={handleClick}
+        >
+          <i className={menu.icon}></i>
+          <span>{menu.label}</span>
+          {hasSubmenus && (
+            <i 
+              className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`} 
+              style={{ marginLeft: 'auto', fontSize: '12px', opacity: 0.7 }}
+            ></i>
+          )}
+        </button>
+
+        {/* Render Submenu */}
+        {hasSubmenus && isExpanded && (
+          <div style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+            {menu.submenus.map(sub => (
+              <button
+                key={sub.id}
+                className={`nav-item ${selectedId === sub.id ? 'active' : ''}`}
+                style={{ fontSize: '0.9em', padding: '0.6rem 1rem' }}
+                onClick={() => {
+                  setSelectedId(sub.id);
+                  if (sub.path) {
+                    navigate(sub.path, { state: { menuName: sub.label, isPostTanpaSubmenu: false } });
+                  }
+                }}
+              >
+                <i className={sub.icon} style={{ fontSize: '0.9em' }}></i>
+                <span>{sub.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </React.Fragment>
+    );
+  };
+
   return (
     <aside className="admin-sidebar">
       <div className="sidebar-brand">
@@ -89,15 +150,15 @@ const AdminSidebar = ({ onTambahMenu }) => {
       </div>
 
       <nav className="sidebar-nav" data-lenis-prevent="true">
-        {adminMenuItems1.map(renderNavItem)}
+        {adminMenuItems1.map(renderStaticItem)}
 
         <div className="nav-divider"></div>
 
-        {menuItems.map(renderNavItem)}
+        {dynamicMenus.map(renderDynamicItem)}
 
         <div className="nav-divider"></div>
 
-        {adminMenuItems2.map(renderNavItem)}
+        {adminMenuItems2.map(renderStaticItem)}
       </nav>
 
       <button className="btn-tambah-menu" onClick={() => onTambahMenu?.()}>

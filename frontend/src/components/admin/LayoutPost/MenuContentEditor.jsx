@@ -22,6 +22,7 @@ const MenuContentEditor = () => {
 
   const Editor = getLayoutEditor(layout);
   const menuName = location.state?.menuName || '';
+  const isPostTanpaSubmenu = location.state?.isPostTanpaSubmenu === true;
 
   const handleSave = (data) => {
     // `data` bentuknya berbeda per layout: Default → { judul, konten },
@@ -31,6 +32,14 @@ const MenuContentEditor = () => {
   };
 
   const handleCancel = () => navigate(-1); // kembali ke halaman sebelumnya
+
+  if (isPostTanpaSubmenu) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '80vh' }}>
+        <h2 style={{ color: '#888', fontWeight: '500' }}>Silahkan tambah submenu terlebih dahulu</h2>
+      </div>
+    );
+  }
 
   return (
     <Editor
