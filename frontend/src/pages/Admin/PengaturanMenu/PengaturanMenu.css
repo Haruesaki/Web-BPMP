@@ -459,6 +459,24 @@
     background: var(--purple-hover);
 }
 
+/* ---------- Varian MERAH (danger) — untuk konfirmasi hapus ---------- */
+.admin-layout .pm-confirm-danger .pm-confirm-icon {
+    background: rgba(214, 61, 61, 0.16);
+    border-color: rgba(214, 61, 61, 0.5);
+}
+
+.admin-layout .pm-confirm-danger .pm-confirm-icon i {
+    color: #ff8a8a;
+}
+
+.admin-layout .pm-confirm-ok-danger {
+    background: #d63d3d;
+}
+
+.admin-layout .pm-confirm-ok-danger:hover {
+    background: #e04e4e;
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1100px) {
     .admin-layout .pm-row {

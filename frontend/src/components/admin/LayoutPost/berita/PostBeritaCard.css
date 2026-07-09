@@ -7,12 +7,10 @@
    ========================================================================= */
 
 /* Kontainer lebih lebar dari .pd-content (760px) karena tabel 8 kolom.
-   zoom: 0.9 → di layar 100% tampilan tabel & font sudah pas (setara melihat
-   halaman ini pada browser zoom 90%). Diterapkan hanya pada .bc-content (bukan
-   .postdefault) supaya latar gelap tetap mengisi penuh tinggi layar. Karena
-   halaman ini tanpa CKEditor, zoom aman dipakai di sini. */
+   zoom: 1.2 → menyamai tampilan yang menurut pengguna "pas" saat browser 120%,
+   tapi berlaku otomatis di browser 100%. */
 .postdefault .bc-content {
-    zoom: 0.9;
+    zoom: 1.2;
     max-width: 1180px;
     margin: 0 auto;
     padding: 22px;

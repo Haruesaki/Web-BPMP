@@ -393,36 +393,33 @@ const PengaturanMenu = () => {
 
       {/* Modal Konfirmasi Hapus */}
       {confirmDelete.isOpen && (
-        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3>Konfirmasi Hapus</h3>
-              <button className="modal-close" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className="modal-body" style={{ paddingBottom: '30px', textAlign: 'center' }}>
-              <div style={{ color: '#ff4d4d', fontSize: '48px', marginBottom: '15px' }}>
-                <i className="fa-solid fa-triangle-exclamation"></i>
+        <div className="pm-confirm-overlay" data-lenis-prevent="true" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>
+          <div className="pm-confirm-box pm-confirm-danger" onClick={(e) => e.stopPropagation()}>
+            <div className="pm-confirm-body">
+              <div className="pm-confirm-icon">
+                <i className="fa-solid fa-trash-can"></i>
               </div>
-              <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
-                Apakah Anda yakin ingin menghapus <strong>"{confirmDelete.title}"</strong>?<br/>
-                <span style={{ fontSize: '14px', color: '#888', marginTop: '10px', display: 'block' }}>
-                  Tindakan ini permanen dan submenu (jika ada) akan ikut terhapus.
-                </span>
+              <h3 className="pm-confirm-title">Konfirmasi Hapus Menu</h3>
+              <p className="pm-confirm-text">
+                Apakah Anda yakin ingin menghapus menu ini? Tindakan ini bersifat permanen
+                dan menu tidak dapat dikembalikan.
               </p>
             </div>
-            <div className="modal-footer" style={{ justifyContent: 'center', gap: '15px' }}>
-              <button className="btn-batal" onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}>Batal</button>
+            <div className="pm-confirm-footer">
               <button
-                className="btn-simpan"
-                style={{ backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' }}
+                className="pm-confirm-cancel"
+                onClick={() => setConfirmDelete({ isOpen: false, id: null, title: '' })}
+              >
+                Batal
+              </button>
+              <button
+                className="pm-confirm-ok pm-confirm-ok-danger"
                 onClick={() => {
                   hapusMenuApi(confirmDelete.id);
                   setConfirmDelete({ isOpen: false, id: null, title: '' });
                 }}
               >
-                Ya, Hapus
+                Hapus Menu
               </button>
             </div>
           </div>
