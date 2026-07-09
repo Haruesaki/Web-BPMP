@@ -5,10 +5,10 @@ const Footer = () => {
   return (
     <footer className="main-footer">
       <div className="visitor-counter-wrapper">
-        <div className="visitor-counter-box">
+        {/* <div className="visitor-counter-box">
           <i className="fa-solid fa-user visitor-icon"></i>
           <span className="visitor-text">Total Jumlah Pengunjung : 107030</span>
-        </div>
+        </div> */}
       </div>
 
       <div className="footer-content-area">
