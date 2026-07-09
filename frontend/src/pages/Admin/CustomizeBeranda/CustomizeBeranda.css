@@ -8,7 +8,7 @@
 /* ---------- HEADING + AKSI ---------- */
 .admin-layout .cb-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 28px;
@@ -33,7 +33,6 @@
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
-    margin-top: 6px;
 }
 
 .admin-layout .cb-btn {
@@ -584,14 +583,22 @@
     background: var(--bg-card-soft);
 }
 
-.admin-layout .cb-section-box .cb-field-label:first-of-type {
-    margin-top: 0;
+/* Baris atas box section: label "Menu" (kiri) + tombol hapus (kanan),
+   sejajar dalam satu baris agar tombol tidak menabrak dropdown di bawahnya. */
+.admin-layout .cb-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.admin-layout .cb-section-head .cb-field-label {
+    margin: 0;
 }
 
 .admin-layout .cb-section-delete {
-    position: absolute;
-    top: 14px;
-    right: 14px;
+    flex-shrink: 0;
 }
 
 /* ---------- FOOTER ---------- */

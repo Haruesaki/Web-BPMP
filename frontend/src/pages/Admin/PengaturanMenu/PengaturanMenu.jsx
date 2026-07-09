@@ -42,6 +42,9 @@ const PengaturanMenu = () => {
   const [dragIndex, setDragIndex] = useState(null);
   const [subDrag, setSubDrag] = useState(null); // { parentId, index } | null
   const [expandedIds, setExpandedIds] = useState([]); // menu utama yang terbuka
+  // Popup konfirmasi aktif/nonaktif. null = tertutup.
+  // { kind: 'menu'|'sub', id, parentId, willActivate, label }
+  const [confirm, setConfirm] = useState(null);
 
   // --- Expand/collapse dropdown submenu ---
   const toggleExpand = (id) =>
@@ -125,6 +128,19 @@ const PengaturanMenu = () => {
           : m
       )
     );
+
+  // --- Konfirmasi aktif/nonaktif (popup) ---
+  const askConfirm = (kind, id, willActivate, label, parentId = null) =>
+    setConfirm({ kind, id, willActivate, label, parentId });
+
+  const cancelConfirm = () => setConfirm(null);
+
+  const runConfirm = () => {
+    if (!confirm) return;
+    if (confirm.kind === 'menu') toggleActive(confirm.id);
+    else toggleSubActive(confirm.parentId, confirm.id);
+    setConfirm(null);
+  };
 
   return (
     <main className="admin-content">
@@ -214,14 +230,14 @@ const PengaturanMenu = () => {
                     {menu.active ? (
                       <button
                         className="pm-btn pm-btn-nonaktif"
-                        onClick={() => toggleActive(menu.id)}
+                        onClick={() => askConfirm('menu', menu.id, false, menu.label)}
                       >
                         Nonaktifkan
                       </button>
                     ) : (
                       <button
                         className="pm-btn pm-btn-aktif"
-                        onClick={() => toggleActive(menu.id)}
+                        onClick={() => askConfirm('menu', menu.id, true, menu.label)}
                       >
                         Aktifkan
                       </button>
@@ -279,14 +295,14 @@ const PengaturanMenu = () => {
                         {sub.active ? (
                           <button
                             className="pm-btn pm-btn-nonaktif"
-                            onClick={() => toggleSubActive(menu.id, sub.id)}
+                            onClick={() => askConfirm('sub', sub.id, false, sub.label, menu.id)}
                           >
                             Nonaktifkan
                           </button>
                         ) : (
                           <button
                             className="pm-btn pm-btn-aktif"
-                            onClick={() => toggleSubActive(menu.id, sub.id)}
+                            onClick={() => askConfirm('sub', sub.id, true, sub.label, menu.id)}
                           >
                             Aktifkan
                           </button>
@@ -311,6 +327,35 @@ const PengaturanMenu = () => {
               <button className="pm-save">Simpan Perubahan</button>
             </div>
       </section>
+
+      {/* ---------- POPUP KONFIRMASI AKTIVASI MENU ---------- */}
+      {confirm && (
+        <div className="pm-confirm-overlay" data-lenis-prevent="true" onClick={cancelConfirm}>
+          <div className="pm-confirm-box" onClick={(e) => e.stopPropagation()}>
+            <div className="pm-confirm-body">
+              <div className="pm-confirm-icon">
+                <i className="fa-solid fa-circle-info"></i>
+              </div>
+              <h3 className="pm-confirm-title">Konfirmasi Aktivasi Menu</h3>
+              <p className="pm-confirm-text">
+                Apakah Anda yakin ingin{' '}
+                <strong>{confirm.willActivate ? 'mengaktifkan' : 'nonaktifkan'}</strong> menu ini?{' '}
+                {confirm.willActivate
+                  ? 'Menu yang aktif akan langsung terlihat oleh pengguna di halaman utama.'
+                  : 'Menu yang nonaktif tidak akan terlihat oleh pengguna di halaman utama.'}
+              </p>
+            </div>
+            <div className="pm-confirm-footer">
+              <button className="pm-confirm-cancel" onClick={cancelConfirm}>
+                Batal
+              </button>
+              <button className="pm-confirm-ok" onClick={runConfirm}>
+                {confirm.willActivate ? 'Aktifkan Menu' : 'Nonaktifkan Menu'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

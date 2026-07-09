@@ -18,15 +18,12 @@ const THEMES = [
   { id: 'forest-green', label: 'Forest Green', hex: '#2B5748' },
 ];
 
-// Opsi menu untuk dropdown "Tampilkan Logo" & "Menu" pada Sections.
+// Opsi menu untuk dropdown "Menu" pada Sections Halaman Beranda.
 const MENU_OPTIONS = [
   'Berita',
   'Logo Mitra',
   'Preview Media Sosial Instagram',
   'Preview Media Sosial YouTube',
-  'Program',
-  'Profil',
-  'Reformasi Birokrasi',
 ];
 
 const LOGO_UTAMA_OPTIONS = ['Pilih Logo Utama', 'Kemendikdasmen', 'BPMP Lampung', 'Dinas Pendidikan'];
@@ -437,7 +434,7 @@ const CustomizeBeranda = () => {
                   className="cb-input"
                   value={social.label}
                   onChange={(e) => updateSocial(social.id, 'label', e.target.value)}
-                  placeholder="Instagram"
+                  placeholder="Isi Label Disini..."
                 />
               </div>
 
@@ -478,15 +475,17 @@ const CustomizeBeranda = () => {
         <div className="cb-section-grid">
           {sections.map((section) => (
             <div className="cb-section-box" key={section.id}>
-              <button
-                className="cb-icon-btn cb-icon-btn-danger cb-section-delete"
-                title="Hapus section"
-                onClick={() => hapusSection(section.id)}
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
+              <div className="cb-section-head">
+                <label className="cb-field-label">Menu</label>
+                <button
+                  className="cb-icon-btn cb-icon-btn-danger cb-section-delete"
+                  title="Hapus section"
+                  onClick={() => hapusSection(section.id)}
+                >
+                  <i className="fa-solid fa-trash"></i>
+                </button>
+              </div>
 
-              <label className="cb-field-label">Menu</label>
               <div className="cb-select-wrap">
                 <select
                   className="cb-select"
@@ -507,6 +506,7 @@ const CustomizeBeranda = () => {
                 type="text"
                 className="cb-input"
                 value={section.judul}
+                placeholder="Isi Judul Section Disini..."
                 onChange={(e) => updateSection(section.id, 'judul', e.target.value)}
               />
             </div>
@@ -583,6 +583,7 @@ const CustomizeBeranda = () => {
                   <label className="cb-field-label">Label</label>
                   <input
                     type="text"
+                    placeholder="Isi Label Disini..."
                     className="cb-input"
                     value={item.label}
                     onChange={(e) => updateTautan(item.id, 'label', e.target.value)}
