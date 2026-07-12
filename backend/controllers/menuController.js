@@ -69,6 +69,47 @@ class MenuController {
       res.status(500).json({ pesan: 'Gagal mengubah urutan menu' });
     }
   }
+
+  // PATCH /api/menus/:id
+  static async updateMenu(req, res) {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const updatedMenu = await MenuModel.update(id, data);
+      res.json({ pesan: 'Menu berhasil diperbarui', data: updatedMenu });
+    } catch (error) {
+      console.error('Error updateMenu:', error);
+      res.status(500).json({ pesan: 'Gagal memperbarui menu' });
+    }
+  }
+
+  // POST /api/menus/convert-to-submenu
+  static async convertToSubmenu(req, res) {
+    try {
+      const { idMenuUtama, namaSubmenuBaru, ikonSubmenuBaru } = req.body;
+      if (!idMenuUtama || !namaSubmenuBaru || !ikonSubmenuBaru) {
+        return res.status(400).json({ pesan: 'Data tidak lengkap' });
+      }
+
+      const menuUtama = await MenuModel.getById(idMenuUtama);
+      if (!menuUtama) {
+        return res.status(404).json({ pesan: 'Menu utama tidak ditemukan' });
+      }
+
+      const newSubmenu = await MenuModel.convertToSubmenu(
+        idMenuUtama, 
+        namaSubmenuBaru, 
+        ikonSubmenuBaru, 
+        menuUtama.jenis_menu, 
+        menuUtama.slug_atau_tautan
+      );
+      
+      res.status(201).json({ pesan: 'Konten berhasil dipindahkan ke submenu', data: newSubmenu });
+    } catch (error) {
+      console.error('Error convertToSubmenu:', error);
+      res.status(500).json({ pesan: 'Gagal memindahkan konten ke submenu' });
+    }
+  }
 }
 
 module.exports = MenuController;

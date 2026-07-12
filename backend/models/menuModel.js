@@ -41,6 +41,11 @@ class MenuModel {
     }
   }
 
+  // Ambil menu berdasarkan ID
+  static async getById(id) {
+    return await db('menu').where('id', id).first();
+  }
+
   // Hapus menu beserta sub-menunya
   static async delete(id) {
     const trx = await db.transaction();
@@ -51,6 +56,38 @@ class MenuModel {
       await trx('menu').where('id', id).del();
       await trx.commit();
       return true;
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  // Mengubah konten menu utama menjadi submenu pertama
+  static async convertToSubmenu(idMenuUtama, namaSubmenuBaru, ikonSubmenuBaru, jenisMenuUtama, slugAtauTautanUtama) {
+    const trx = await db.transaction();
+    try {
+      // 1. Buat submenu baru
+      const [newSubmenu] = await trx('menu').insert({
+        nama_menu: namaSubmenuBaru,
+        ikon_menu: ikonSubmenuBaru,
+        jenis_menu: jenisMenuUtama,
+        slug_atau_tautan: slugAtauTautanUtama,
+        induk_id: idMenuUtama
+      }).returning('*');
+
+      const idSubmenu = newSubmenu.id;
+
+      // 2. Transfer kepemilikan konten di 3 tabel yang terikat menu_id
+      await trx('halaman_konten').where('menu_id', idMenuUtama).update({ menu_id: idSubmenu });
+      
+      // Jika migrasi belum ada/error, abaikan saja tabel lain dengan try catch per query opsional, 
+      // tetapi asumsi tabel profil_pegawai & berita sudah ada
+      await trx('profil_pegawai').where('menu_id', idMenuUtama).update({ menu_id: idSubmenu });
+      await trx('berita').where('menu_id', idMenuUtama).update({ menu_id: idSubmenu });
+
+      // Menu Utama tetap seperti semula (masih memiliki tipe post/link), tapi di frontend ia akan di-render sbg gerbang krn sdh punya submenu.
+      await trx.commit();
+      return newSubmenu;
     } catch (error) {
       await trx.rollback();
       throw error;

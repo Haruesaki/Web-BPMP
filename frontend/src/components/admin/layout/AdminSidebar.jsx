@@ -95,6 +95,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
           navigate(menu.path, { 
             state: { 
               menuName: menu.label, 
+              menuId: menu.id,
               isPostTanpaSubmenu: menu.jenis === 'post' 
             } 
           });
@@ -129,7 +130,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
                 onClick={() => {
                   setSelectedId(sub.id);
                   if (sub.path) {
-                    navigate(sub.path, { state: { menuName: sub.label, isPostTanpaSubmenu: false } });
+                    navigate(sub.path, { state: { menuName: sub.label, menuId: sub.id, isPostTanpaSubmenu: false } });
                   }
                 }}
               >

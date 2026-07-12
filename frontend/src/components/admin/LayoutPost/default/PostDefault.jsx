@@ -209,6 +209,8 @@ const PostDefault = ({
   subheading,   // override teks bantu di bawah judul
   onSave,
   onCancel,
+  saveStatus,
+  setSaveStatus,
 }) => {
   // Normalisasi sekali: pastikan tiap konten awal punya id yang stabil, agar
   // id di daftar konten cocok dengan editingId form saat autoEditFirst.
@@ -354,6 +356,14 @@ const PostDefault = ({
         ? contents.map((c) => (c.id === editingId ? { ...c, ...entry } : c))
         : [...contents, { id: makeId(), ...entry }];
     }
+
+    if (finalContents.length === 0) {
+      if (setSaveStatus) {
+        setSaveStatus({ error: true, message: 'Form harus diisi minimal 1 konten untuk bisa menyimpan ke database.' });
+      }
+      return;
+    }
+
     const data = { contents: finalContents };
     if (onSave) onSave(data);
     else console.log(data); // fallback standalone
@@ -405,7 +415,7 @@ const PostDefault = ({
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
           <h1>{heading || (menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru')}</h1>
-          <p>{subheading || 'Tambahkan satu atau beberapa konten untuk ditampilkan di halaman user.'}</p>
+          <p>{subheading || 'Tambahkan satu konten untuk ditampilkan di halaman user.'}</p>
         </div>
 
         {/* ---------- FORM: TAMBAH / EDIT SATU KONTEN ---------- */}
@@ -464,6 +474,21 @@ const PostDefault = ({
               {editingId ? 'Perbarui Konten' : '+ Tambah Konten'}
             </button>
           </div>
+
+          {/* RENDER saveStatus DI BAWAH BUTTON */}
+          {saveStatus?.message && (
+            <div style={{
+              marginTop: '20px',
+              padding: '12px 16px',
+              backgroundColor: saveStatus.error ? '#441111' : '#114411',
+              color: saveStatus.error ? '#ff5555' : '#55ff55',
+              border: `1px solid ${saveStatus.error ? '#ff5555' : '#55ff55'}`,
+              borderRadius: '6px',
+              fontWeight: '500'
+            }}>
+              {saveStatus.message}
+            </div>
+          )}
         </section>
 
         {/* ---------- DATA KONTEN ---------- */}
