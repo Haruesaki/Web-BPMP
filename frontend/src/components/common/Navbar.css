@@ -128,7 +128,7 @@ body.body-no-scroll {
     top: 0;
     left: 0;
     background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     border-radius: 30px;
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -145,7 +145,7 @@ body.body-no-scroll {
     color: #ffffff;
     text-decoration: none;
     font-size: clamp(12px, 1vw, 15px);
-    font-weight: 300;
+    font-weight: 500;
     font-family: 'Poppins', Arial, Helvetica, sans-serif;
     display: flex;
     align-items: center;
@@ -177,7 +177,8 @@ body.body-no-scroll {
     position: relative;
 }
 
-.nav-item:hover .dropdown-icon {
+/* REVISI: Putar ikon saat hover ATAU saat menu desktop aktif via JS */
+.nav-item:hover .dropdown-icon, .nav-item.desktop-dropdown-open .dropdown-icon {
     transform: rotate(180deg);
 }
 
@@ -187,12 +188,10 @@ body.body-no-scroll {
     left: 0;
     margin-top: 0;
     padding-top: 14px;
-    min-width: 220px;
+    min-width: 250px;
     max-height: 0;
-    overflow: hidden;
-    background: rgba(11, 19, 43, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden; /* REVISI: Latar belakang solid untuk kontras maksimal */
+    background: rgb(11, 19, 43);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     display: flex;
@@ -200,12 +199,12 @@ body.body-no-scroll {
     padding: 14px 0 10px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px) scaleY(0.95);
+    transform: scale(0.95) translateY(-20px);
     transform-origin: top center;
     transition:
-        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0s linear 0.3s;
+        opacity 0.1s ease-out,
+        transform 0.25s ease-out,
+        visibility 0s linear 0.25s;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -221,14 +220,15 @@ body.body-no-scroll {
     pointer-events: auto;
 }
 
-.nav-item.has-dropdown:hover .dropdown-menu {
+/* REVISI: Ganti trigger dari :hover ke class .desktop-dropdown-open yang dikontrol JS */
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu {
     max-height: 500px;
     opacity: 1;
     visibility: visible;
-    transform: translateY(0) scaleY(1);
+    transform: scale(1) translateY(0);
     transition:
-        opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.2s ease-in,
+        transform 0.6s cubic-bezier(0.2, 1.8, 0.4, 1),
         visibility 0s linear 0s;
 }
 
@@ -239,29 +239,41 @@ body.body-no-scroll {
     font-size: 13px;
     font-weight: 300;
     font-family: 'Poppins', Arial, Helvetica, sans-serif;
-    transition: background-color 0.25s ease, padding-left 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+    /* REVISI: Percepat transisi penutupan item untuk menghilangkan efek "wadah kosong" */
+    transition: background-color 0.25s ease, padding-left 0.25s ease, opacity 0.15s ease-out, transform 0.15s ease-out;
     opacity: 0;
     transform: translateY(-8px);
 }
 
-.nav-item.has-dropdown:hover .dropdown-menu a {
+/* PENAMBAHAN BARU: Garis pemisah antar submenu */
+.dropdown-menu a + a {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* REVISI: Ganti trigger dari :hover ke class .desktop-dropdown-open */
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Staggered reveal per item when dropdown opens */
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(1) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(2) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(3) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(4) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(5) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(6) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(7) { transition-delay: 0.02s; }
-.nav-item.has-dropdown:hover .dropdown-menu a:nth-child(8) { transition-delay: 0.02s; }
+/* REVISI: Ganti trigger dari :hover ke class .desktop-dropdown-open */
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(1) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(2) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(3) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(4) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(5) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(6) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(7) { transition-delay: 0.02s; }
+.nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a:nth-child(8) { transition-delay: 0.02s; }
 
 .dropdown-menu a:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    padding-left: 26px;
+    background-color: rgba(147, 147, 147, 0.211);
+    padding-left: 30px; /* PENAMBAHAN BARU: Highlight warna teks saat hover */
+    color: #ffffff;
+    text-shadow: 0 2px 5px rgb(61, 61, 61);
+    font-weight: 600;
 }
 
 /* =========================================
@@ -406,7 +418,7 @@ body.body-no-scroll {
    7. RESPONSIVE BREAKPOINT: TABLET & LAPTOP KECIL (<= 1277px)
    (Sidebar Kiri & Sistem onClick Menu)
    ========================================= */
-@media (max-width: 1277px) {
+@media (max-width: 1290px) {
     .hamburger-btn {
         display: block;
     }
@@ -454,7 +466,7 @@ body.body-no-scroll {
         overflow-x: hidden; /* Cegah scroll horizontal yang tidak diinginkan */
         scrollbar-width:thin;
         scrollbar-color: rgba(255, 255, 255, 0.351) transparent; /* thumb & track color */
-        
+
     }
 
     
@@ -507,7 +519,6 @@ body.body-no-scroll {
         cursor: pointer;
         padding: 0;
         margin: 0;
-        transition: color 0.3s ease;
     }
 
     .nav-selector {
@@ -518,12 +529,22 @@ body.body-no-scroll {
         width: 100%;
     }
 
+    .nav-link:hover {
+    color: #ffffff;
+    font-weight: 600;
+    padding-left: 15px;
+    background-color: #7373731d;
+    }
+
     .nav-link {
         width: 100%;
         padding: 15px 0; /* REVISI: Hapus padding horizontal, sudah ditangani parent */
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 8px;
         justify-content: space-between;
+        transition: color 0.3s ease,
+                    background-color 0.5s ease,
+                    padding 0.2s ease;
     }
 
     /* 1. Matikan efek hover otomatis pada mobile */
@@ -542,7 +563,7 @@ body.body-no-scroll {
     .dropdown-menu {
         position: static;
         width: 100%;
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.044);
         box-shadow: none;
         border: none;
         border-radius: 0;
@@ -562,6 +583,8 @@ body.body-no-scroll {
     .nav-item.has-dropdown.dropdown-open .dropdown-menu {
         max-height: 1000px; /* Beri nilai yang cukup besar */
         padding: 20px 0;
+        margin-bottom: 20px;
+
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
@@ -577,6 +600,11 @@ body.body-no-scroll {
         transform: translateY(0);
         padding: 12px 0 12px 20px; /* REVISI: Hapus padding luar, pertahankan indentasi */
     }
+
+    /* PENAMBAHAN BARU: Pastikan tidak ada border pemisah di mobile */
+    /* .dropdown-menu a + a {
+        border-top: none;
+    } */
 }
 
 /* =========================================

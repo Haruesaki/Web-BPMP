@@ -20,6 +20,7 @@ const Navbar = ({ lenisRef }) => {
 
   // --- STATE BARU: Mengendalikan Dropdown Aktif (onClick) ---
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [activeDesktopDropdown, setActiveDesktopDropdown] = useState(null);
 
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -29,6 +30,27 @@ const Navbar = ({ lenisRef }) => {
   const handleSearchToggle = (e) => {
     e.preventDefault();
     setIsSearchActive(!isSearchActive);
+  };
+
+  // --- FUNGSI BARU: Mengendalikan hover dropdown di desktop ---
+  const handleMouseEnter = (menuName) => {
+    if (window.innerWidth > 1277) {
+      setActiveDesktopDropdown(menuName);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (window.innerWidth > 1277) {
+      setActiveDesktopDropdown(null);
+    }
+  };
+
+  // --- FUNGSI BARU: Menutup menu setelah link di-klik ---
+  const handleLinkClick = () => {
+    // Menutup dropdown di desktop
+    setActiveDesktopDropdown(null);
+    // Menutup sidebar di mobile (jika sedang terbuka)
+    if (isMobileMenuOpen) toggleMobileMenu();
   };
 
   // --- FUNGSI BARU: Klik Dropdown Menu ---
@@ -231,93 +253,117 @@ const Navbar = ({ lenisRef }) => {
           </button>
         </div>
 
-        <Link to="/" className="nav-link" data-path-group="beranda" onClick={toggleMobileMenu}>Beranda</Link>
+        <Link to="/" className="nav-link" data-path-group="beranda" onClick={handleLinkClick}>Beranda</Link>
 
         {/* --- IMPLEMENTASI KELAS 'dropdown-open' & ONCLICK --- */}
-        <div className={`nav-item has-dropdown ${activeDropdown === 'profil' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'profil' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'profil' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('profil')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="profil" onClick={(e) => handleDropdownClick(e, 'profil')}>
             Profil <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>Sejarah</a>
-            <Link to="/profil/visi-misi" onClick={toggleMobileMenu}>Visi & Misi</Link>
-            <a href="#" onClick={toggleMobileMenu}>Tugas & Fungsi</a>
-            <a href="#" onClick={toggleMobileMenu}>Struktur Organisasi</a>
-            <a href="#" onClick={toggleMobileMenu}>Pejabat</a>
-            <a href="#" onClick={toggleMobileMenu}>Informasi Pegawai</a>
-            <a href="#" onClick={toggleMobileMenu}>Sarana dan Prasarana</a>
+            <a href="#" onClick={handleLinkClick}>Sejarah</a>
+            <Link to="/profil/visi-misi" onClick={handleLinkClick}>Visi & Misi</Link>
+            <a href="#" onClick={handleLinkClick}>Tugas & Fungsi</a>
+            <a href="#" onClick={handleLinkClick}>Struktur Organisasi</a>
+            <a href="#" onClick={handleLinkClick}>Pejabat</a>
+            <a href="#" onClick={handleLinkClick}>Informasi Pegawai</a>
+            <a href="#" onClick={handleLinkClick}>Sarana dan Prasarana</a>
           </div>
         </div>
 
-        <div className={`nav-item has-dropdown ${activeDropdown === 'rb' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'rb' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'rb' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('rb')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="rb" onClick={(e) => handleDropdownClick(e, 'rb')}>
             Reformasi Birokrasi <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>Manajemen Perubahan</a>
-            <a href="#" onClick={toggleMobileMenu}>Penataan Tata Laksana</a>
-            <a href="#" onClick={toggleMobileMenu}>Penataan Manajemen SDM</a>
-            <a href="#" onClick={toggleMobileMenu}>Penguatan Akuntabilitas</a>
-            <a href="#" onClick={toggleMobileMenu}>Penguatan Pengawasan</a>
-            <a href="#" onClick={toggleMobileMenu}>Peningkatan Kualitas Pelayanan Publik</a>
-            <a href="#" onClick={toggleMobileMenu}>Aktivitas RBI</a>
+            <a href="#" onClick={handleLinkClick}>Manajemen Perubahan</a>
+            <a href="#" onClick={handleLinkClick}>Penataan Tata Laksana</a>
+            <a href="#" onClick={handleLinkClick}>Penataan Manajemen SDM</a>
+            <a href="#" onClick={handleLinkClick}>Penguatan Akuntabilitas</a>
+            <a href="#" onClick={handleLinkClick}>Penguatan Pengawasan</a>
+            <a href="#" onClick={handleLinkClick}>Peningkatan Kualitas Pelayanan Publik</a>
+            <a href="#" onClick={handleLinkClick}>Aktivitas RBI</a>
           </div>
         </div>
 
-        <div className={`nav-item has-dropdown ${activeDropdown === 'kinerja' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'kinerja' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'kinerja' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('kinerja')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="kinerja" onClick={(e) => handleDropdownClick(e, 'kinerja')}>
             Dok. Kinerja <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>Perjanjian Kinerja</a>
-            <a href="#" onClick={toggleMobileMenu}>Renstra</a>
-            <a href="#" onClick={toggleMobileMenu}>Lakin 2024</a>
-            <a href="#" onClick={toggleMobileMenu}>Lakin 2025</a>
+            <a href="#" onClick={handleLinkClick}>Perjanjian Kinerja</a>
+            <a href="#" onClick={handleLinkClick}>Renstra</a>
+            <a href="#" onClick={handleLinkClick}>Lakin 2024</a>
+            <a href="#" onClick={handleLinkClick}>Lakin 2025</a>
           </div>
         </div>
 
-        <div className={`nav-item has-dropdown ${activeDropdown === 'pelayanan' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'pelayanan' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'pelayanan' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('pelayanan')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="pelayanan" onClick={(e) => handleDropdownClick(e, 'pelayanan')}>
             Pelayanan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>Maklumat Pelayanan</a>
-            <a href="#" onClick={toggleMobileMenu}>Standar Pelayanan</a>
-            <a href="#" onClick={toggleMobileMenu}>Unit Layanan Terpadu</a>
-            <a href="#" onClick={toggleMobileMenu}>Hasil Survey SKM</a>
-            <a href="#" onClick={toggleMobileMenu}>Layanan Inovatif</a>
-            <a href="#" onClick={toggleMobileMenu}>Peminjaman Sarana dan Prasarana</a>
+            <a href="#" onClick={handleLinkClick}>Maklumat Pelayanan</a>
+            <a href="#" onClick={handleLinkClick}>Standar Pelayanan</a>
+            <a href="#" onClick={handleLinkClick}>Unit Layanan Terpadu</a>
+            <a href="#" onClick={handleLinkClick}>Hasil Survey SKM</a>
+            <a href="#" onClick={handleLinkClick}>Layanan Inovatif</a>
+            <a href="#" onClick={handleLinkClick}>Peminjaman Sarana dan Prasarana</a>
           </div>
         </div>
 
-        <div className={`nav-item has-dropdown ${activeDropdown === 'program' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'program' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'program' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('program')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="program" onClick={(e) => handleDropdownClick(e, 'program')}>
             Program <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>Digitalisasi Pembelajaran</a>
-            <a href="#" onClick={toggleMobileMenu}>Wajar 13 Tahun</a>
-            <a href="#" onClick={toggleMobileMenu}>Revitalisasi Sekolah</a>
-            <a href="#" onClick={toggleMobileMenu}>SPMB</a>
-            <a href="#" onClick={toggleMobileMenu}>Penguatan Karakter</a>
-            <a href="#" onClick={toggleMobileMenu}>Makan Bergizi Gratis</a>
-            <a href="#" onClick={toggleMobileMenu}>Pembelajaran dan Penilaian</a>
-            <a href="#" onClick={toggleMobileMenu}>Penjaminan Mutu</a>
+            <a href="#" onClick={handleLinkClick}>Digitalisasi Pembelajaran</a>
+            <a href="#" onClick={handleLinkClick}>Wajar 13 Tahun</a>
+            <a href="#" onClick={handleLinkClick}>Revitalisasi Sekolah</a>
+            <a href="#" onClick={handleLinkClick}>SPMB</a>
+            <a href="#" onClick={handleLinkClick}>Penguatan Karakter</a>
+            <a href="#" onClick={handleLinkClick}>Makan Bergizi Gratis</a>
+            <a href="#" onClick={handleLinkClick}>Pembelajaran dan Penilaian</a>
+            <a href="#" onClick={handleLinkClick}>Penjaminan Mutu</a>
           </div>
         </div>
 
-        <a href="#" className="nav-link" data-path-group="ppid" onClick={toggleMobileMenu}>PPID</a>
-        <a href="#" className="nav-link" data-path-group="sipers" onClick={toggleMobileMenu}>Sipers</a>
-        <a href="#" className="nav-link" data-path-group="spab" onClick={toggleMobileMenu}>SPAB</a>
+        <a href="#" className="nav-link" data-path-group="ppid" onClick={handleLinkClick}>PPID</a>
+        <a href="#" className="nav-link" data-path-group="sipers" onClick={handleLinkClick}>Sipers</a>
+        <a href="#" className="nav-link" data-path-group="spab" onClick={handleLinkClick}>SPAB</a>
 
-        <div className={`nav-item has-dropdown ${activeDropdown === 'pengaduan' ? 'dropdown-open' : ''}`}>
+        <div 
+          className={`nav-item has-dropdown ${activeDropdown === 'pengaduan' ? 'dropdown-open' : ''} ${activeDesktopDropdown === 'pengaduan' ? 'desktop-dropdown-open' : ''}`}
+          onMouseEnter={() => handleMouseEnter('pengaduan')}
+          onMouseLeave={handleMouseLeave}
+        >
           <a href="#" className="nav-link" data-path-group="pengaduan" onClick={(e) => handleDropdownClick(e, 'pengaduan')}>
             Pengaduan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#" onClick={toggleMobileMenu}>WBS</a>
-            <a href="#" onClick={toggleMobileMenu}>SP4N Lapor</a>
-            <a href="#" onClick={toggleMobileMenu}>Lapor Gratifikasi</a>
+            <a href="#" onClick={handleLinkClick}>WBS</a>
+            <a href="#" onClick={handleLinkClick}>SP4N Lapor</a>
+            <a href="#" onClick={handleLinkClick}>Lapor Gratifikasi</a>
           </div>
         </div>
       </nav>
