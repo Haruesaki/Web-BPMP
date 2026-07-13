@@ -191,6 +191,14 @@
     background: rgba(255, 255, 255, 0.02);
 }
 
+.admin-layout .mu-clickable-row {
+    cursor: pointer;
+}
+
+.admin-layout .mu-clickable-row:hover td {
+    background: rgba(91, 95, 232, 0.08);
+}
+
 .admin-layout .mu-col-no {
     width: 70px;
     color: var(--text-sub);
@@ -338,6 +346,24 @@
     gap: 6px;
 }
 
+.admin-layout .mu-detail-modal-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-layout .mu-detail-modal-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-layout .mu-detail-modal-close {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
 .admin-layout .mu-modal-sub {
     margin: 0;
     font-size: 13.5px;
@@ -409,6 +435,123 @@
     background: var(--bg-elevated);
     color: var(--text-faint);
     cursor: not-allowed;
+}
+
+/* =========================================================================
+   MODAL: DETAIL AKUN USER
+   ========================================================================= */
+.admin-layout .mu-detail-box {
+    max-width: 560px;
+}
+
+.admin-layout .mu-detail-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(91, 95, 232, 0.18), rgba(255, 255, 255, 0.04));
+    margin-bottom: 18px;
+}
+
+.admin-layout .mu-detail-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.admin-layout .mu-detail-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-layout .mu-detail-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.admin-layout .mu-detail-identity h4 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.admin-layout .mu-detail-identity p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-sub);
+}
+
+.admin-layout .mu-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-layout .mu-status-admin {
+    background: rgba(91, 95, 232, 0.16);
+    color: var(--purple-soft);
+}
+
+.admin-layout .mu-status-superadmin {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.admin-layout .mu-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-layout .mu-detail-info-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    background: var(--bg-card-soft);
+}
+
+.admin-layout .mu-detail-info-card-wide {
+    grid-column: 1 / -1;
+}
+
+.admin-layout .mu-detail-info-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.admin-layout .mu-detail-info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    word-break: break-word;
 }
 
 /* =========================================================================
