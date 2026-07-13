@@ -41,13 +41,13 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
             label: p.nama_menu,
             icon: p.ikon_menu,
             jenis: p.jenis_menu,
-            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}` : (p.slug_atau_tautan || '#'),
+            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}` : (p.jenis_menu === 'link' ? '/admin/link' : (p.slug_atau_tautan || '#')),
             submenus: subs.map(s => ({
               id: s.id.toString(),
               label: s.nama_menu,
               icon: s.ikon_menu,
               jenis: s.jenis_menu,
-              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}` : (s.slug_atau_tautan || '#')
+              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}` : (s.jenis_menu === 'link' ? '/admin/link' : (s.slug_atau_tautan || '#'))
             }))
           };
         });

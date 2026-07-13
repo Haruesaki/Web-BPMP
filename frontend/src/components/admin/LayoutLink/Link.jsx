@@ -15,12 +15,10 @@ import './Link.css';
 //  Kolom `slug_atau_tautan` di tabel `menu` MEMANG dipakai untuk menyimpan URL
 //  tujuan saat jenis_menu = 'link' (lihat migrasi create_menu_table & form
 //  Tambah Menu di AdminLayout.jsx) — jadi TIDAK ADA kolom baru yang dibutuhkan
-//  untuk menampilkan data ini.
+//  untuk menampilkan/menyimpan data ini.
 //
-//  Yang BELUM ada di backend: endpoint untuk meng-update menu (lihat
-//  database.md). Tombol "Simpan" di halaman ini sudah menampung perubahan
-//  di state, tapi belum benar-benar mengirim ke backend sampai endpoint
-//  tsb tersedia.
+//  Endpoint PATCH /api/menus/:id SUDAH tersedia di backend, dipakai oleh
+//  tombol "Simpan" di bawah untuk benar-benar menyimpan perubahan link.
 // =========================================================================
 
 // Ratakan menu utama + submenu jadi satu list datar, HANYA yang jenis_menu
@@ -69,6 +67,8 @@ const Link = () => {
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const fetchMenus = async () => {
     try {
@@ -119,12 +119,38 @@ const Link = () => {
   const updateLink = (id, value) =>
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, link: value } : row)));
 
-  const handleSimpan = () => {
-    // TODO: kirim seluruh { id, slug_atau_tautan: link } di `rows` ke backend,
-    // misalnya PUT /api/menus/:id satu-satu, atau endpoint bulk-update kalau
-    // backend menyediakannya nanti. Lihat database.md untuk detail endpoint
-    // yang masih dibutuhkan.
-    navigate('/admin/pengaturan-menu');
+  const triggerSidebarRefresh = () => {
+    window.dispatchEvent(new Event('refreshSidebar'));
+  };
+
+  const handleSimpan = async () => {
+    setSaveError('');
+    setSaving(true);
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+
+      // Endpoint PATCH /api/menus/:id sudah tersedia di backend, kirim
+      // slug_atau_tautan (kolom yang menyimpan URL untuk menu tipe 'link')
+      // untuk setiap baris yang ditampilkan di halaman ini.
+      await Promise.all(
+        rows.map((row) =>
+          axiosInstance.patch(
+            `/api/menus/${row.id}`,
+            { slug_atau_tautan: row.link },
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+        )
+      );
+
+      triggerSidebarRefresh();
+      navigate('/admin/pengaturan-menu');
+    } catch (error) {
+      console.error('Gagal menyimpan link menu', error);
+      setSaveError(error.response?.data?.pesan || 'Gagal menyimpan perubahan link. Coba lagi.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -143,10 +169,12 @@ const Link = () => {
           <h1>Kelola Link Menu</h1>
           <p>Atur tautan (URL) tujuan untuk setiap menu bertipe Link yang sudah dibuat.</p>
         </div>
-        <button className="lk-btn-simpan" onClick={handleSimpan}>
-          Simpan
+        <button className="lk-btn-simpan" onClick={handleSimpan} disabled={saving}>
+          {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
       </div>
+
+      {saveError && <div className="lk-error">{saveError}</div>}
 
       {/* ---------- CARD DAFTAR LINK MENU ---------- */}
       <section className="lk-card">
