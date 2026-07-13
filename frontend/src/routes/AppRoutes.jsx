@@ -12,6 +12,7 @@ import LupaPassword from '../pages/Admin/Login/LupaPassword';
 import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
+import CustomizeBeranda from '../pages/Admin/CustomizeBeranda/CustomizeBeranda';
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -39,21 +40,21 @@ const AppRoutes = ({ lenisRef }) => {
             <Route element={<ProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<DashboardAdmin />} />
+                    <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+                    {/* Editor konten menu — route DINAMIS per layout (:layout).
+                        Contoh: /admin/post/default → editor layout Default.
+                        Dimasukkan ke dalam AdminLayout agar Sidebar tetap terlihat! */}
+                    <Route
+                        path="/admin/post/:layout"
+                        element={
+                            <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', minHeight: '100vh' }}>Memuat editor…</div>}>
+                                <MenuContentEditor />
+                            </Suspense>
+                        }
+                    />
                 </Route>
-
-                {/* Editor konten menu — route DINAMIS per layout (:layout).
-                    Contoh: /admin/post/default → editor layout Default.
-                    Halaman fokus penuh (tema sendiri), tetap diproteksi login. */}
-                <Route
-                    path="/admin/post/:layout"
-                    element={
-                        <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', background: '#0B1326', minHeight: '100vh' }}>Memuat editor…</div>}>
-                            <MenuContentEditor />
-                        </Suspense>
-                    }
-                />
             </Route>
         </Routes>
     );

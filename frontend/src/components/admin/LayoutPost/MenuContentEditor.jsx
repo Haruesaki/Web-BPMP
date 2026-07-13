@@ -22,22 +22,69 @@ const MenuContentEditor = () => {
 
   const Editor = getLayoutEditor(layout);
   const menuName = location.state?.menuName || '';
+  const menuId = location.state?.menuId || null;
 
-  const handleSave = (data) => {
-    // `data` bentuknya berbeda per layout: Default → { judul, konten },
-    // Profile Card → { profiles: [...] }. Diteruskan apa adanya.
-    // TODO: sambungkan ke backend (mis. PUT /api/menus/:slug/konten)
-    console.log('Simpan konten menu:', { layout, menuName, ...data });
+  const [saveStatus, setSaveStatus] = React.useState({ error: false, message: '' });
+
+  const handleSave = async (data) => {
+    setSaveStatus({ error: false, message: '' });
+    if (!menuId) {
+      setSaveStatus({ error: true, message: 'ID Menu tidak ditemukan. Silakan pilih ulang menu dari sidebar.' });
+      return;
+    }
+
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession') || '{}');
+      const token = session?.token;
+      
+      // Jika layout adalah Default (halaman_konten)
+      if (layout === 'default') {
+        // Asumsi data dari PostDefault: { contents: [{ judul, konten, ... }] }
+        const firstContent = data.contents && data.contents.length > 0 ? data.contents[0] : {};
+        const res = await fetch(`/api/halaman-konten/${menuId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            kunci_halaman: menuName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            judul: firstContent.judul || 'Tanpa Judul',
+            deskripsi_kaya: firstContent.konten || '' // isi dari CKEditor
+          })
+        });
+        
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.pesan || 'Gagal menyimpan konten ke server.');
+        }
+        
+        setSaveStatus({ error: false, message: 'Konten berhasil disimpan!' });
+      } 
+      // TODO: tambah layout lain jika diperlukan (profil_pegawai, berita)
+      else {
+        console.log('Menyimpan konten layout', layout, data);
+        setSaveStatus({ error: true, message: `Penyimpanan untuk layout '${layout}' belum diimplementasikan.` });
+      }
+
+    } catch (error) {
+      console.error(error);
+      setSaveStatus({ error: true, message: error.message || 'Terjadi kesalahan jaringan.' });
+    }
   };
 
   const handleCancel = () => navigate(-1); // kembali ke halaman sebelumnya
 
   return (
-    <Editor
-      menuName={menuName}
-      onSave={handleSave}
-      onCancel={handleCancel}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Editor
+        menuName={menuName}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        saveStatus={saveStatus}
+        setSaveStatus={setSaveStatus}
+      />
+    </div>
   );
 };
 

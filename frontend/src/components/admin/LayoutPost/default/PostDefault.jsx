@@ -68,7 +68,7 @@ import {
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
-import { CustomUploadAdapterPlugin } from '../../../utils/CustomUploadAdapter';
+import { CustomUploadAdapterPlugin } from '../../../../utils/CustomUploadAdapter';
 import './PostDefault.css';
 
 // =========================================================================
@@ -204,18 +204,32 @@ const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/a
 const PostDefault = ({
   menuName = '',
   initialContents = [],
+  autoEditFirst = false, // muat konten pertama LANGSUNG ke form (untuk edit 1 item)
+  heading,      // override judul halaman (mis. PostBeritaCard: "Tambah Berita")
+  subheading,   // override teks bantu di bawah judul
   onSave,
   onCancel,
+  saveStatus,
+  setSaveStatus,
 }) => {
-  // Daftar konten yang sudah ditambahkan.
-  const [contents, setContents] = useState(() =>
-    initialContents.map((c) => ({ id: c.id || makeId(), ...c }))
+  // Normalisasi sekali: pastikan tiap konten awal punya id yang stabil, agar
+  // id di daftar konten cocok dengan editingId form saat autoEditFirst.
+  const normalizedInitial = useMemo(
+    () => initialContents.map((c) => ({ id: c.id || makeId(), ...c })),
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  // Daftar konten yang sudah ditambahkan.
+  const [contents, setContents] = useState(normalizedInitial);
+
+  // Saat autoEditFirst, form langsung menampilkan konten pertama (mode edit
+  // item) sehingga CKEditor tampil sudah terisi judul + konten.
+  const firstContent = autoEditFirst ? normalizedInitial[0] : null;
+
   // --- STATE FORM (untuk menambah / mengedit satu konten) ---
-  const [judul, setJudul] = useState('');
-  const [konten, setKonten] = useState('');
-  const [editingId, setEditingId] = useState(null); // null = mode tambah
+  const [judul, setJudul] = useState(firstContent ? firstContent.judul || '' : '');
+  const [konten, setKonten] = useState(firstContent ? firstContent.konten || '' : '');
+  const [editingId, setEditingId] = useState(firstContent ? firstContent.id : null);
   const [formError, setFormError] = useState('');
   const [compressMsg, setCompressMsg] = useState('');
 
@@ -332,7 +346,25 @@ const PostDefault = ({
   };
 
   const handleSimpan = () => {
-    const data = { contents };
+    // Commit isi form yang belum di-"Tambah/Perbarui" agar tidak hilang saat
+    // admin langsung klik Simpan (mis. saat mengedit satu konten). Bila judul
+    // form kosong, tidak ada yang di-commit.
+    let finalContents = contents;
+    if (judul.trim()) {
+      const entry = { judul: judul.trim(), konten };
+      finalContents = editingId
+        ? contents.map((c) => (c.id === editingId ? { ...c, ...entry } : c))
+        : [...contents, { id: makeId(), ...entry }];
+    }
+
+    if (finalContents.length === 0) {
+      if (setSaveStatus) {
+        setSaveStatus({ error: true, message: 'Form harus diisi minimal 1 konten untuk bisa menyimpan ke database.' });
+      }
+      return;
+    }
+
+    const data = { contents: finalContents };
     if (onSave) onSave(data);
     else console.log(data); // fallback standalone
   };
@@ -382,8 +414,8 @@ const PostDefault = ({
       <main className="pd-content">
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
-          <h1>{menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru'}</h1>
-          <p>Tambahkan satu atau beberapa konten untuk ditampilkan di halaman user.</p>
+          <h1>{heading || (menuName ? `Edit Konten — ${menuName}` : 'Buat Post Baru')}</h1>
+          <p>{subheading || 'Tambahkan satu konten untuk ditampilkan di halaman user.'}</p>
         </div>
 
         {/* ---------- FORM: TAMBAH / EDIT SATU KONTEN ---------- */}
@@ -442,6 +474,21 @@ const PostDefault = ({
               {editingId ? 'Perbarui Konten' : '+ Tambah Konten'}
             </button>
           </div>
+
+          {/* RENDER saveStatus DI BAWAH BUTTON */}
+          {saveStatus?.message && (
+            <div style={{
+              marginTop: '20px',
+              padding: '12px 16px',
+              backgroundColor: saveStatus.error ? '#441111' : '#114411',
+              color: saveStatus.error ? '#ff5555' : '#55ff55',
+              border: `1px solid ${saveStatus.error ? '#ff5555' : '#55ff55'}`,
+              borderRadius: '6px',
+              fontWeight: '500'
+            }}>
+              {saveStatus.message}
+            </div>
+          )}
         </section>
 
         {/* ---------- DATA KONTEN ---------- */}

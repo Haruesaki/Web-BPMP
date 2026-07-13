@@ -347,6 +347,136 @@
     background: var(--purple-hover);
 }
 
+/* ---------- POPUP KONFIRMASI AKTIVASI MENU ---------- */
+.admin-layout .pm-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 120;
+    padding: 40px 20px;
+}
+
+.admin-layout .pm-confirm-box {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+
+.admin-layout .pm-confirm-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px 32px 24px;
+}
+
+.admin-layout .pm-confirm-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91, 95, 232, 0.16);
+    border: 1px solid rgba(91, 95, 232, 0.5);
+    margin-bottom: 20px;
+}
+
+.admin-layout .pm-confirm-icon i {
+    font-size: 30px;
+    color: var(--purple-soft);
+}
+
+.admin-layout .pm-confirm-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 12px;
+}
+
+.admin-layout .pm-confirm-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-sub);
+    margin: 0;
+    max-width: 340px;
+}
+
+.admin-layout .pm-confirm-text strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.admin-layout .pm-confirm-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.admin-layout .pm-confirm-cancel {
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-layout .pm-confirm-cancel:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-layout .pm-confirm-ok {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 11px 20px;
+    border-radius: 10px;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .pm-confirm-ok:hover {
+    background: var(--purple-hover);
+}
+
+/* ---------- Varian MERAH (danger) — untuk konfirmasi hapus ---------- */
+.admin-layout .pm-confirm-danger .pm-confirm-icon {
+    background: rgba(214, 61, 61, 0.16);
+    border-color: rgba(214, 61, 61, 0.5);
+}
+
+.admin-layout .pm-confirm-danger .pm-confirm-icon i {
+    color: #ff8a8a;
+}
+
+.admin-layout .pm-confirm-ok-danger {
+    background: #d63d3d;
+}
+
+.admin-layout .pm-confirm-ok-danger:hover {
+    background: #e04e4e;
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1100px) {
     .admin-layout .pm-row {

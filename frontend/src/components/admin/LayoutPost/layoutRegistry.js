@@ -12,14 +12,15 @@
 //  Menambah layout baru = tambah 1 baris di sini + buat komponennya.
 // =========================================================================
 
-import PostDefault from './PostDefault';
-import PostProfileCard from './PostProfileCard';
+import PostDefault from './default/PostDefault';
+import PostProfileCard from './profil/PostProfileCard';
+import PostBeritaCard from './berita/PostBeritaCard';
 import { DEFAULT_LAYOUT_KEY } from './layoutMeta';
 
 export const LAYOUT_EDITORS = {
   default: PostDefault,
   'profile-card': PostProfileCard,
-  // 'berita-card': BeritaCard,
+  'berita-card': PostBeritaCard,
 };
 
 // Ambil komponen editor untuk sebuah key layout (fallback ke Default).

@@ -4,6 +4,8 @@ const YoutubeController = require('../controllers/youtubeController');
 const AuthController = require('../controllers/authController');
 const UserController = require('../controllers/userController');
 const UploadController = require('../controllers/uploadController');
+const MenuController = require('../controllers/menuController');
+const HalamanKontenController = require('../controllers/halamanKontenController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
@@ -19,6 +21,17 @@ router.post('/auth/reset-password', AuthController.resetPassword);
 
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
+
+// ================= MENU ROUTES =================
+router.get('/menus', MenuController.getMenus);
+router.post('/menus', authMiddleware, MenuController.createMenu);
+router.patch('/menus/reorder', authMiddleware, MenuController.reorderMenus);
+router.post('/menus/convert-to-submenu', authMiddleware, MenuController.convertToSubmenu);
+router.patch('/menus/:id', authMiddleware, MenuController.updateMenu);
+router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
+
+// ================= HALAMAN KONTEN ROUTES =================
+router.post('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.upsertKonten);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)
