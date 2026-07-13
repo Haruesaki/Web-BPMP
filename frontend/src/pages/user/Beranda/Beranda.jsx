@@ -1,5 +1,6 @@
 import React from 'react';
 import { useYoutube } from '../../../hooks/useYoutube';
+import { useInstagram } from '../../../hooks/useInstagram';
 import './Beranda.css';
 
 // --- IMPORT COMPONENTS KITA ---
@@ -14,6 +15,9 @@ const Beranda = ({ lenisRef }) => {
   // --- YOUTUBE STATE ---
   const { ytVideos, ytChannel } = useYoutube();
 
+  // --- INSTAGRAM STATE ---
+  const { igProfile, loading: igLoading } = useInstagram();
+
 
   return (
     <>
@@ -23,7 +27,7 @@ const Beranda = ({ lenisRef }) => {
 
       <PartnerSection />
 
-      <InstagramSection />
+      <InstagramSection igProfile={igProfile} loading={igLoading} />
 
       <YoutubeSection ytVideos={ytVideos} ytChannel={ytChannel} />
 

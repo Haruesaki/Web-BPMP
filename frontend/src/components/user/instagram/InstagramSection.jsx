@@ -41,7 +41,7 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 }, (prevProps, nextProps) => prevProps.postId === nextProps.postId);
 
 
-const InstagramSection = () => {
+const InstagramSection = ({ igProfile, loading }) => {
     return (
         <section className="instagram-section">
             <div className="ig-banner-wrapper">
@@ -51,30 +51,46 @@ const InstagramSection = () => {
 
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
-                    <img src={Logo} alt="Logo BPMP" className="ig-avatar" />
-                    <span className="ig-username">@bpmplampung</span>
+                    <img 
+                      src={igProfile?.profile_pic_url_hd?.startsWith('/uploads') 
+                             ? `http://localhost:5000${igProfile.profile_pic_url_hd}` 
+                             : (igProfile?.profile_pic_url_hd || Logo)} 
+                      alt="Logo BPMP" 
+                      className="ig-avatar" 
+                      style={{ borderRadius: '50%', objectFit: 'cover' }}
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="ig-username">@{igProfile?.username || 'bpmplampung'}</span>
                 </div>
 
                 <div className="ig-stats">
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Postingan</span>
-                        <span className="ig-stat-value">1865</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.posts_count?.toLocaleString('id-ID') || '1.865')}
+                        </span>
                     </div>
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Pengikut</span>
-                        <span className="ig-stat-value">6,138</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.followers?.toLocaleString('id-ID') || '6.138')}
+                        </span>
                     </div>
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Diikuti</span>
-                        <span className="ig-stat-value">1,151</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.following?.toLocaleString('id-ID') || '1.151')}
+                        </span>
                     </div>
                 </div>
 
                 <div className="ig-profile-right">
-                    <button className="ig-follow-btn">
-                        <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
-                        Follow
-                    </button>
+                    <a href={`https://www.instagram.com/${igProfile?.username || 'bpmplampung'}`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
+                        <button className="ig-follow-btn">
+                            <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
+                            Follow
+                        </button>
+                    </a>
                 </div>
             </div>
 

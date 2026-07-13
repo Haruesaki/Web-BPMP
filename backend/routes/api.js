@@ -6,6 +6,7 @@ const UserController = require('../controllers/userController');
 const UploadController = require('../controllers/uploadController');
 const MenuController = require('../controllers/menuController');
 const HalamanKontenController = require('../controllers/halamanKontenController');
+const InstagramController = require('../controllers/instagramController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
@@ -14,6 +15,7 @@ router.get('/salam', (req, res) => {
 });
 
 router.get('/youtube', YoutubeController.getVideos);
+router.get('/instagram', InstagramController.getInstagramProfile);
 router.post('/auth/login', AuthController.login);
 router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
