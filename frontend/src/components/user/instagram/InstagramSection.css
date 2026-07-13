@@ -49,9 +49,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 35px 8%;
+    padding: 18px 8%;
     background-color: #0B132B;
     color: #ffffff;
+    overflow: hidden;
     border-bottom: 2px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -124,11 +125,13 @@
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: ig-floatAnimation 9s ease-in-out infinite;
 }
 
 .ig-follow-btn:hover {
-    transform: translateY(-3px);
+    /* Transform dihapus agar tidak konflik dengan animasi float dan scroll */
+    background: linear-gradient(135deg, #2a52c7 0%, #0e1533 100%);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.4);
 }
@@ -163,6 +166,25 @@
 
 .ig-post-card:hover {
     transform: translateY(-10px) scale(1.02);
+}
+
+/* --- Keyframes untuk Animasi Tombol --- */
+@keyframes ig-floatAnimation {
+    0% {
+        transform: translateY(0) rotate(4deg);
+    }
+    25% {
+        transform: translateY(8px) rotate(2deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(-4deg);
+    }
+    75% {
+        transform: translateY(5px) rotate(-1deg);
+    }
+    100% {
+        transform: translateY(0) rotate(4deg);
+    }
 }
 
 .ig-post-img {

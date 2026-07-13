@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './InstagramSection.css';
 
 import Logo from "../../../assets/source/Logo.png";
@@ -42,6 +42,65 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 
 
 const InstagramSection = () => {
+    const followBtnWrapperRef = useRef(null);
+    const scrollState = useRef({
+        currentY: 0,
+        targetY: 0,
+        lastScrollY: 0,
+        rafId: null,
+    });
+
+    useEffect(() => {
+        const wrapper = followBtnWrapperRef.current;
+        if (!wrapper) return;
+
+        scrollState.current.lastScrollY = window.scrollY;
+
+        const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+
+        const animate = () => {
+            // Lakukan interpolasi dari posisi saat ini ke posisi target untuk efek lag
+            scrollState.current.currentY = lerp(scrollState.current.currentY, scrollState.current.targetY, 0.075);
+            // Secara bertahap kembalikan posisi target ke 0 agar tombol kembali ke tengah
+            scrollState.current.targetY = lerp(scrollState.current.targetY, 0, 0.075);
+
+            const translateY = scrollState.current.currentY.toFixed(2);
+
+            // Hentikan loop animasi jika sudah sangat dekat dengan posisi awal untuk efisiensi
+            if (Math.abs(translateY) < 0.01 && Math.abs(scrollState.current.targetY) < 0.01) {
+                wrapper.style.transform = '';
+                cancelAnimationFrame(scrollState.current.rafId);
+                scrollState.current.rafId = null;
+            } else {
+                wrapper.style.transform = `translateY(${translateY}px)`;
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            const delta = scrollY - scrollState.current.lastScrollY;
+            scrollState.current.lastScrollY = scrollY;
+
+            // "Dorong" posisi target berlawanan dengan arah scroll
+            scrollState.current.targetY -= delta * 0.8;
+            scrollState.current.targetY = Math.max(-43, Math.min(43, scrollState.current.targetY));
+
+            if (!scrollState.current.rafId) {
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollState.current.rafId) {
+                cancelAnimationFrame(scrollState.current.rafId);
+            }
+        };
+    }, []);
+
     return (
         <section className="instagram-section">
             <div className="ig-banner-wrapper">
@@ -71,10 +130,12 @@ const InstagramSection = () => {
                 </div>
 
                 <div className="ig-profile-right">
-                    <button className="ig-follow-btn">
-                        <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
-                        Follow
-                    </button>
+                    <div ref={followBtnWrapperRef} style={{ willChange: 'transform' }}>
+                        <a href="https://www.instagram.com/bpmplampung/" target="_blank" rel="noopener noreferrer" className="ig-follow-btn" style={{ textDecoration: 'none' }}>
+                            <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
+                            Follow
+                        </a>
+                    </div>
                 </div>
             </div>
 

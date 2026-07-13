@@ -35,7 +35,7 @@ class YoutubeController {
             
             // Mengubah ke endpoint playlistItems agar video yang baru diupload langsung terindeks (Search API mengalami delay server)
             const uploadsPlaylistId = CHANNEL_ID.replace(/^UC/, 'UU');
-            const url = `https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${uploadsPlaylistId}&part=snippet&maxResults=3`;
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${uploadsPlaylistId}&part=snippet&maxResults=10`;
             const response = await axios.get(url);
             
             // Format ulang respons playlistItems agar struktur id.videoId tetap kompatibel dengan frontend lama
@@ -71,8 +71,12 @@ class YoutubeController {
                 };
             }));
             
+            // Saring video untuk hanya menyertakan video horizontal ('video') dan ambil 3 teratas.
+            const horizontalVideos = processedVideos.filter(video => video.videoType === 'video');
+            const finalVideos = horizontalVideos.slice(0, 3);
+
             const finalData = {
-                videos: processedVideos,
+                videos: finalVideos,
                 channel: channelData
             };
             
