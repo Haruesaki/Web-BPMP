@@ -489,11 +489,7 @@ const ManajemenUser = () => {
                 <h3>Informasi Akun</h3>
                 <p className="mu-modal-sub">Detail profil pengguna yang terdaftar pada sistem.</p>
               </div>
-              <button
-                className="modal-close mu-detail-modal-close"
-                onClick={() => setDetailUser(null)}
-                aria-label="Tutup detail akun"
-              >
+              <button className="modal-close mu-detail-modal-close" onClick={() => setDetailUser(null)} aria-label="Tutup detail akun">
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -532,6 +528,7 @@ const ManajemenUser = () => {
                   <strong className="mu-detail-info-value">{getRoleLabel(detailUser)}</strong>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
