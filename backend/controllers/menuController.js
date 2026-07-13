@@ -43,6 +43,36 @@ class MenuController {
     }
   }
 
+  // PUT /api/menus/links
+  static async updateLinks(req, res) {
+    try {
+      const { updates } = req.body;
+
+      if (!Array.isArray(updates) || updates.length === 0) {
+        return res.status(400).json({ pesan: 'Format updates tidak valid' });
+      }
+
+      const results = [];
+
+      for (const item of updates) {
+        if (!item?.id) {
+          continue;
+        }
+
+        const updated = await MenuModel.update(item.id, {
+          slug_atau_tautan: item.link || '',
+        });
+
+        results.push(updated);
+      }
+
+      res.json({ pesan: 'Link menu berhasil diperbarui', data: results });
+    } catch (error) {
+      console.error('Error updateLinks:', error);
+      res.status(500).json({ pesan: 'Gagal memperbarui link menu' });
+    }
+  }
+
   // DELETE /api/menus/:id
   static async deleteMenu(req, res) {
     try {

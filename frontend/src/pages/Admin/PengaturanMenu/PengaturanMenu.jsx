@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import './PengaturanMenu.css';
 import TambahSubmenu from './TambahSubmenu';
 
 const PengaturanMenu = () => {
+  const navigate = useNavigate();
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,15 +38,18 @@ const PengaturanMenu = () => {
         return {
           ...p,
           label: p.nama_menu,
+          jenis_menu: p.jenis_menu, // Pastikan jenis_menu tersedia
+          slug_atau_tautan: p.slug_atau_tautan, // Pastikan slug_atau_tautan tersedia
           active: p.is_aktif,
           submenus: subMenusFlat.filter(s => s.induk_id === p.id).map(s => ({
             ...s,
             label: s.nama_menu,
+            jenis_menu: s.jenis_menu, // Pastikan jenis_menu tersedia
+            slug_atau_tautan: s.slug_atau_tautan, // Pastikan slug_atau_tautan tersedia
             active: s.is_aktif
           }))
         };
       });
-
       setMenus(treeData);
       setLoading(false);
     } catch (err) {
@@ -283,7 +288,20 @@ const PengaturanMenu = () => {
                       Tambah Submenu
                     </button>
 
-                    <button className="pm-btn pm-btn-edit">Edit</button>
+                    <button
+                      className="pm-btn pm-btn-edit"
+                      onClick={() => {
+                        if (menu.jenis_menu === 'post') {
+                          navigate(`/admin/post/${menu.slug_atau_tautan || 'default'}`, {
+                            state: { menuName: menu.label, isPostTanpaSubmenu: menu.submenus.length === 0 },
+                          });
+                        } else if (menu.jenis_menu === 'link') {
+                          navigate('/admin/link', { state: { menuId: menu.id } });
+                        }
+                      }}
+                    >
+                      Edit
+                    </button>
 
                     {menu.active ? (
                       <button
@@ -347,7 +365,20 @@ const PengaturanMenu = () => {
                       </div>
 
                       <div className="pm-actions">
-                        <button className="pm-btn pm-btn-edit">Edit</button>
+                        <button
+                          className="pm-btn pm-btn-edit"
+                          onClick={() => {
+                            if (sub.jenis_menu === 'post') {
+                              navigate(`/admin/post/${sub.slug_atau_tautan || 'default'}`, {
+                                state: { menuName: sub.label, isPostTanpaSubmenu: false },
+                              });
+                            } else if (sub.jenis_menu === 'link') {
+                              navigate('/admin/link', { state: { menuId: sub.id } });
+                            }
+                          }}
+                        >
+                          Edit
+                        </button>
 
                         {sub.active ? (
                           <button

@@ -25,6 +25,7 @@ router.delete('/users/:id', authMiddleware, UserController.deleteUser);
 router.get('/menus', MenuController.getMenus);
 router.post('/menus', authMiddleware, MenuController.createMenu);
 router.patch('/menus/reorder', authMiddleware, MenuController.reorderMenus);
+router.put('/menus/links', authMiddleware, MenuController.updateLinks);
 router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.

@@ -41,13 +41,21 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
             label: p.nama_menu,
             icon: p.ikon_menu,
             jenis: p.jenis_menu,
-            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}` : (p.slug_atau_tautan || '#'),
+            path: p.jenis_menu === 'post'
+              ? `/admin/post/${p.slug_atau_tautan || 'default'}`
+              : p.jenis_menu === 'link'
+                ? '/admin/link'
+                : (p.slug_atau_tautan || '#'),
             submenus: subs.map(s => ({
               id: s.id.toString(),
               label: s.nama_menu,
               icon: s.ikon_menu,
               jenis: s.jenis_menu,
-              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}` : (s.slug_atau_tautan || '#')
+              path: s.jenis_menu === 'post'
+                ? `/admin/post/${s.slug_atau_tautan || 'default'}`
+                : s.jenis_menu === 'link'
+                  ? '/admin/link'
+                  : (s.slug_atau_tautan || '#')
             }))
           };
         });
@@ -88,17 +96,24 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     // Jika tidak punya, dan dia tipe Post, kita passing state isPostTanpaSubmenu: true
     const handleClick = () => {
       setSelectedId(menu.id);
+
       if (hasSubmenus) {
         toggleExpand(menu.id);
-      } else {
-        if (menu.path) {
-          navigate(menu.path, { 
-            state: { 
-              menuName: menu.label, 
-              isPostTanpaSubmenu: menu.jenis === 'post' 
-            } 
-          });
-        }
+        return;
+      }
+
+      if (menu.jenis === 'link') {
+        navigate('/admin/link', { state: { menuId: Number(menu.id) } });
+        return;
+      }
+
+      if (menu.path) {
+        navigate(menu.path, {
+          state: {
+            menuName: menu.label,
+            isPostTanpaSubmenu: menu.jenis === 'post'
+          }
+        });
       }
     };
 
@@ -128,6 +143,12 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
                 style={{ fontSize: '0.9em', padding: '0.6rem 1rem' }}
                 onClick={() => {
                   setSelectedId(sub.id);
+
+                  if (sub.jenis === 'link') {
+                    navigate('/admin/link', { state: { menuId: Number(sub.id) } });
+                    return;
+                  }
+
                   if (sub.path) {
                     navigate(sub.path, { state: { menuName: sub.label, isPostTanpaSubmenu: false } });
                   }
