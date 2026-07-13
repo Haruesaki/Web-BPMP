@@ -20,8 +20,58 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dynamicMenus, setDynamicMenus] = useState([]);
-  const [selectedId, setSelectedId] = useState('beranda');
+  const [selectedId, setSelectedId] = useState(() => {
+    // Saat halaman pertama kali dibuka, ambil menu yang terakhir dipilih agar
+    // highlight sidebar tidak kembali ke Beranda saat user melakukan refresh.
+    const savedSelection = sessionStorage.getItem('adminSidebarSelectedId');
+    return savedSelection || 'beranda';
+  });
   const [expandedMenus, setExpandedMenus] = useState([]); // Array of parent IDs yang sedang di-expand
+
+  // Peta route statis yang memang punya satu halaman tujuan jelas.
+  const staticRouteMap = {
+    '/admin': 'beranda',
+    '/admin/customize-beranda': 'customize',
+    '/admin/pengaturan-menu': 'pengaturan-menu',
+    '/admin/manajemen-user': 'manajemen',
+  };
+
+  // Helper kecil untuk menjaga state aktif tetap sinkron dengan URL saat ini.
+  const persistSelectedId = (menuId) => {
+    setSelectedId(menuId);
+    sessionStorage.setItem('adminSidebarSelectedId', menuId);
+  };
+
+  const resolveActiveIdFromPath = (pathname, menus) => {
+    // Rute yang punya satu page tujuan jelas → cocokkan ID dari peta statis.
+    if (staticRouteMap[pathname]) {
+      return staticRouteMap[pathname];
+    }
+
+    // Untuk dynamic menu, cocokkan berdasarkan path yang sebenarnya dipakai
+    // oleh sidebar (contoh: /admin/post/default atau /admin/post/profil).
+    const flatMenus = menus.flatMap((menu) => [
+      { id: menu.id, path: menu.path },
+      ...(menu.submenus || []).map((sub) => ({ id: sub.id, path: sub.path })),
+    ]);
+
+    const directMatch = flatMenus.find((item) => item.path === pathname);
+    if (directMatch) {
+      return directMatch.id;
+    }
+
+    // Untuk editor konten menu, path dinamis bisa berubah sesuai slug.
+    // Kita pakai prefix /admin/post/ agar item yang sedang dibuka tetap aktif.
+    const postMatch = flatMenus.find((item) => {
+      return item.path?.startsWith('/admin/post/') && pathname.startsWith('/admin/post/');
+    });
+
+    if (postMatch) {
+      return postMatch.id;
+    }
+
+    return null;
+  };
 
   // Fetch menu dinamis dari backend
   useEffect(() => {
@@ -29,7 +79,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
       try {
         const response = await axiosInstance.get('/api/menus');
         const data = response.data;
-        
+
         // Membentuk struktur Tree (Parent-Child)
         const parentMenus = data.filter(m => m.induk_id === null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
         const childMenus = data.filter(m => m.induk_id !== null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
@@ -60,8 +110,20 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     fetchMenus();
   }, [refreshTrigger]);
 
+  // Sinkronisasi state aktif ke rute yang sesungguhnya sedang ditampilkan.
+  // Ini penting karena saat refresh, React akan mount ulang component dan
+  // tanpa sync ini state akan kembali ke default 'beranda'.
+  useEffect(() => {
+    const routeMatchedId = resolveActiveIdFromPath(location.pathname, dynamicMenus);
+    const persistedId = sessionStorage.getItem('adminSidebarSelectedId');
+    const nextSelectedId = routeMatchedId || persistedId || 'beranda';
+
+    setSelectedId(nextSelectedId);
+    sessionStorage.setItem('adminSidebarSelectedId', nextSelectedId);
+  }, [location.pathname, dynamicMenus]);
+
   const toggleExpand = (id) => {
-    setExpandedMenus(prev => 
+    setExpandedMenus(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
@@ -71,7 +133,8 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
       key={item.id}
       className={`nav-item ${selectedId === item.id ? 'active' : ''}`}
       onClick={() => {
-        setSelectedId(item.id);
+        // Klik item statis akan menyimpan ID aktif untuk dipakai lagi saat refresh.
+        persistSelectedId(item.id);
         if (item.path) navigate(item.path);
       }}
     >
@@ -83,21 +146,21 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   const renderDynamicItem = (menu) => {
     const hasSubmenus = menu.submenus && menu.submenus.length > 0;
     const isExpanded = expandedMenus.includes(menu.id);
-    
-    // Jika dia punya submenu, dia berfungsi sebagai GERBANG (hanya nge-expand)
-    // Jika tidak punya, dan dia tipe Post, kita passing state isPostTanpaSubmenu: true
+
+    // Jika dia punya submenu, dia berfungsi sebagai GERBANG (hanya nge-expand).
+    // Untuk item tanpa submenu, klik langsung navigate ke halaman editor / post.
     const handleClick = () => {
-      setSelectedId(menu.id);
+      persistSelectedId(menu.id);
       if (hasSubmenus) {
         toggleExpand(menu.id);
       } else {
         if (menu.path) {
-          navigate(menu.path, { 
-            state: { 
-              menuName: menu.label, 
+          navigate(menu.path, {
+            state: {
+              menuName: menu.label,
               menuId: menu.id,
-              isPostTanpaSubmenu: menu.jenis === 'post' 
-            } 
+              isPostTanpaSubmenu: menu.jenis === 'post'
+            }
           });
         }
       }
@@ -112,8 +175,8 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
           <i className={menu.icon}></i>
           <span>{menu.label}</span>
           {hasSubmenus && (
-            <i 
-              className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`} 
+            <i
+              className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}
               style={{ marginLeft: 'auto', fontSize: '12px', opacity: 0.7 }}
             ></i>
           )}
@@ -128,7 +191,9 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
                 className={`nav-item ${selectedId === sub.id ? 'active' : ''}`}
                 style={{ fontSize: '0.9em', padding: '0.6rem 1rem' }}
                 onClick={() => {
-                  setSelectedId(sub.id);
+                  // Submenu menyimpan ID anaknya sendiri agar highlight tetap tepat
+                  // meskipun halaman yang ditampilkan adalah route generik dari editor.
+                  persistSelectedId(sub.id);
                   if (sub.path) {
                     navigate(sub.path, { state: { menuName: sub.label, menuId: sub.id, isPostTanpaSubmenu: false } });
                   }
