@@ -1,0 +1,46 @@
+.admin-layout .cb-footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-layout .cb-footer-box {
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card-soft);
+    padding: 20px;
+}
+
+.admin-layout .cb-footer-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.admin-layout .cb-footer-box .cb-field-label:first-of-type {
+    margin-top: 16px;
+}
+
+.admin-layout .cb-tautan-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.admin-layout .cb-tautan-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-layout .cb-tautan-field .cb-field-label {
+    margin: 16px 0 8px;
+}
+
+.admin-layout .cb-tautan-delete {
+    margin-bottom: 1px;
+}
+
+.admin-layout .cb-footer-box .cb-btn-dashed {
+    margin-top: 18px;
+}

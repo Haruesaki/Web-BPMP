@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './InstagramSection.css';
 
 import Logo from "../../../assets/source/Logo.png";

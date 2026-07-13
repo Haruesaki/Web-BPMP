@@ -7,6 +7,15 @@ import React, { useState } from 'react';
 import '../DashboardAdmin/dashboard-admin.css';
 import './CustomizeBeranda.css';
 
+// Import subcomponents
+import ThemeSetting from '../../../components/admin/CustomizeBeranda/ThemeSetting';
+import HeaderLogoSetting from '../../../components/admin/CustomizeBeranda/HeaderLogoSetting';
+import LogoDataSetting from '../../../components/admin/CustomizeBeranda/LogoDataSetting';
+import HeroSetting from '../../../components/admin/CustomizeBeranda/HeroSetting';
+import SocialMediaSetting from '../../../components/admin/CustomizeBeranda/SocialMediaSetting';
+import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/SectionOrderSetting';
+import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
+
 // =========================================================================
 //  DATA AWAL
 //  -----------------------------------------------------------------------
@@ -161,460 +170,79 @@ const CustomizeBeranda = () => {
       </div>
 
       {/* ---------- TEMA ---------- */}
-      <section className="cb-card">
-        <div className="cb-card-title">
-          <i className="fa-solid fa-palette"></i>
-          <span>Tema</span>
-        </div>
-        <p className="cb-card-sub">Atur Warna Tema Halaman Beranda</p>
-
-        <div className="cb-theme-grid">
-          {THEMES.map((theme) => (
-            <button
-              key={theme.id}
-              type="button"
-              className={`cb-theme-option ${selectedTheme === theme.id ? 'is-selected' : ''}`}
-              onClick={() => setSelectedTheme(theme.id)}
-            >
-              <span className="cb-theme-swatch" style={{ backgroundColor: theme.hex }}></span>
-              <span className="cb-theme-info">
-                <span className="cb-theme-name">{theme.label}</span>
-                <span className="cb-theme-hex">{theme.hex}</span>
-              </span>
-              <span className={`cb-theme-check ${selectedTheme === theme.id ? 'is-active' : ''}`}>
-                <i className="fa-solid fa-check"></i>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      {/* <ThemeSetting
+        selectedTheme={selectedTheme}
+        setSelectedTheme={setSelectedTheme}
+        themes={THEMES}
+      /> */}
 
       {/* ---------- HEADER & DATA LOGO ---------- */}
-      <div className="cb-grid-2">
-        {/* ===== HEADER ===== */}
-        <section className="cb-card">
-          <div className="cb-card-title">
-            <i className="fa-solid fa-heading"></i>
-            <span>Header</span>
-          </div>
+      {/* <div className="cb-grid-2">
+        <HeaderLogoSetting
+          headerLogoPreview={headerLogoPreview}
+          headerLogoName={headerLogoName}
+          handleHeaderLogoChange={handleHeaderLogoChange}
+        />
 
-          <label className="cb-field-label">Logo Utama Website</label>
-          <label className="cb-logo-drop" htmlFor="header-logo-input">
-            {headerLogoPreview ? (
-              <img src={headerLogoPreview} alt="Preview logo header" className="cb-logo-drop-img" />
-            ) : (
-              <span className="cb-logo-drop-placeholder">
-                <i className="fa-regular fa-file"></i>
-              </span>
-            )}
-            <span className="cb-logo-drop-overlay">
-              <i className="fa-solid fa-pen"></i> Ganti Logo
-            </span>
-          </label>
-          <input
-            id="header-logo-input"
-            type="file"
-            accept="image/*"
-            className="cb-hidden-input"
-            onChange={handleHeaderLogoChange}
-          />
-
-          <div className="cb-upload-row">
-            <label className="cb-btn-upload" htmlFor="header-logo-input-2">
-              Telusuri...
-            </label>
-            <input
-              id="header-logo-input-2"
-              type="file"
-              accept="image/*"
-              className="cb-hidden-input"
-              onChange={handleHeaderLogoChange}
-            />
-            <span className="cb-upload-filename">{headerLogoName || 'Tidak ada berkas dipilih.'}</span>
-          </div>
-        </section>
-
-        {/* ===== DATA LOGO ===== */}
-        <section className="cb-card">
-          <div className="cb-card-header-row">
-            <div className="cb-card-title">
-              <i className="fa-solid fa-gem"></i>
-              <span>Data Logo</span>
-            </div>
-            <div className="cb-card-header-icons">
-              <button className="cb-icon-btn" title="Edit">
-                <i className="fa-solid fa-pen"></i>
-              </button>
-              <button className="cb-icon-btn cb-icon-btn-danger" title="Hapus">
-                <i className="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-
-          <label className="cb-field-label cb-field-label-caps">Tambahkan Logo</label>
-
-          <div className="cb-logo-form-row">
-            <div className="cb-logo-form-fields">
-              <input
-                type="text"
-                className="cb-input"
-                placeholder="Nama Logo"
-                value={logoNama}
-                onChange={(e) => setLogoNama(e.target.value)}
-              />
-
-              <div className="cb-upload-row">
-                <label className="cb-btn-upload" htmlFor="data-logo-input">
-                  Telusuri
-                </label>
-                <input
-                  id="data-logo-input"
-                  type="file"
-                  accept="image/*"
-                  className="cb-hidden-input"
-                  onChange={handleLogoFileChange}
-                />
-                <span className="cb-upload-filename">{logoFileName || 'Upload logo...'}</span>
-              </div>
-            </div>
-
-            <div className="cb-logo-preview-box">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Preview logo" className="cb-logo-preview-img" />
-              ) : (
-                <i className="fa-regular fa-image"></i>
-              )}
-              <span>PREVIEW LOGO</span>
-            </div>
-          </div>
-
-          <button className="cb-btn-simpan-logo" onClick={handleSimpanLogo}>
-            Simpan Logo
-          </button>
-
-          <label className="cb-field-label cb-field-label-caps">Lihat Logo Tersimpan</label>
-          <div className="cb-select-wrap">
-            <select
-              className="cb-select"
-              value={savedLogo}
-              onChange={(e) => setSavedLogo(e.target.value)}
-            >
-              {SAVED_LOGO_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-            <i className="fa-solid fa-chevron-down cb-select-caret"></i>
-          </div>
-        </section>
-      </div>
+        <LogoDataSetting
+          logoNama={logoNama}
+          setLogoNama={setLogoNama}
+          logoFileName={logoFileName}
+          logoPreview={logoPreview}
+          handleLogoFileChange={handleLogoFileChange}
+          handleSimpanLogo={handleSimpanLogo}
+          savedLogo={savedLogo}
+          setSavedLogo={setSavedLogo}
+          savedLogoOptions={SAVED_LOGO_OPTIONS}
+        />
+      </div> */}
 
       {/* ---------- LANDING PAGE ---------- */}
-      <section className="cb-card">
-        <div className="cb-card-title">
-          <i className="fa-solid fa-table-columns"></i>
-          <span>Landing Page</span>
-        </div>
-
-        <label className="cb-field-label">Judul Beranda</label>
-        <input
-          type="text"
-          className="cb-input"
-          placeholder="Masukkan judul utama..."
-          value={judulBeranda}
-          onChange={(e) => setJudulBeranda(e.target.value)}
-        />
-
-        <label className="cb-field-label">Deskripsi</label>
-        <textarea
-          className="cb-textarea"
-          placeholder="Masukkan deskripsi..."
-          rows={3}
-          value={deskripsi}
-          onChange={(e) => setDeskripsi(e.target.value)}
-        />
-
-        <div className="cb-grid-2 cb-grid-2-tight">
-          <div>
-            <label className="cb-field-label">Upload Gambar Background</label>
-            <div className="cb-upload-row">
-              <label className="cb-btn-upload" htmlFor="bg-input">
-                Upload
-              </label>
-              <input
-                id="bg-input"
-                type="file"
-                accept="image/*"
-                className="cb-hidden-input"
-                onChange={handleBackgroundChange}
-              />
-              <span className="cb-upload-filename">{backgroundName || 'Pilih aset latar belakang...'}</span>
-            </div>
-
-            <span className="cb-field-label cb-preview-caption">PREVIEW GAMBAR BACKGROUND</span>
-            <div className="cb-bg-preview">
-              {backgroundPreview ? (
-                <img src={backgroundPreview} alt="Preview background" />
-              ) : (
-                <i className="fa-regular fa-image"></i>
-              )}
-            </div>
-          </div>
-
-          <div className="cb-side-fields">
-            <div>
-              <label className="cb-field-label">Tampilkan Logo 1</label>
-              <div className="cb-select-wrap">
-                <select
-                  className="cb-select"
-                  value={tampilanLogo1}
-                  onChange={(e) => setTampilanLogo1(e.target.value)}
-                >
-                  {LOGO_UTAMA_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                <i className="fa-solid fa-chevron-down cb-select-caret"></i>
-              </div>
-            </div>
-
-            <div>
-              <label className="cb-field-label">Tampilkan Logo 2</label>
-              <div className="cb-select-wrap">
-                <select
-                  className="cb-select"
-                  value={tampilanLogo2}
-                  onChange={(e) => setTampilanLogo2(e.target.value)}
-                >
-                  {LOGO_UTAMA_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                <i className="fa-solid fa-chevron-down cb-select-caret"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* <HeroSetting
+        judulBeranda={judulBeranda}
+        setJudulBeranda={setJudulBeranda}
+        deskripsi={deskripsi}
+        setDeskripsi={setDeskripsi}
+        backgroundName={backgroundName}
+        backgroundPreview={backgroundPreview}
+        handleBackgroundChange={handleBackgroundChange}
+        tampilanLogo1={tampilanLogo1}
+        setTampilanLogo1={setTampilanLogo1}
+        tampilanLogo2={tampilanLogo2}
+        setTampilanLogo2={setTampilanLogo2}
+        logoUtamaOptions={LOGO_UTAMA_OPTIONS}
+      /> */}
 
       {/* ---------- MEDIA SOSIAL ---------- */}
-      <section className="cb-card">
-        <div className="cb-card-title">
-          <i className="fa-solid fa-share-nodes"></i>
-          <span>Media Sosial</span>
-        </div>
-
-        <div className="cb-social-list">
-          {socials.map((social) => (
-            <div className="cb-social-row" key={social.id}>
-              <label className="cb-social-avatar" htmlFor={`social-avatar-${social.id}`}>
-                {social.avatar ? (
-                  <img src={social.avatar} alt={social.label || 'Avatar platform'} />
-                ) : (
-                  <i className="fa-regular fa-image"></i>
-                )}
-              </label>
-              <input
-                id={`social-avatar-${social.id}`}
-                type="file"
-                accept="image/*"
-                className="cb-hidden-input"
-                onChange={(e) => handleSocialAvatarChange(social.id, e)}
-              />
-
-              <div className="cb-social-field">
-                <label className="cb-field-label cb-field-label-caps">Label</label>
-                <input
-                  type="text"
-                  className="cb-input"
-                  value={social.label}
-                  onChange={(e) => updateSocial(social.id, 'label', e.target.value)}
-                  placeholder="Isi Label Disini..."
-                />
-              </div>
-
-              <div className="cb-social-field">
-                <label className="cb-field-label cb-field-label-caps">URL Link</label>
-                <input
-                  type="text"
-                  className="cb-input"
-                  value={social.url}
-                  onChange={(e) => updateSocial(social.id, 'url', e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-
-              <button
-                className="cb-icon-btn cb-icon-btn-danger"
-                title="Hapus"
-                onClick={() => hapusPlatform(social.id)}
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button className="cb-btn-dashed" onClick={tambahPlatform}>
-          <i className="fa-solid fa-plus"></i> Tambah Platform
-        </button>
-      </section>
+      {/* <SocialMediaSetting
+        socials={socials}
+        updateSocial={updateSocial}
+        handleSocialAvatarChange={handleSocialAvatarChange}
+        tambahPlatform={tambahPlatform}
+        hapusPlatform={hapusPlatform}
+      /> */}
 
       {/* ---------- SECTIONS HALAMAN BERANDA ---------- */}
-      <section className="cb-card">
-        <div className="cb-card-title">
-          <i className="fa-solid fa-table-cells"></i>
-          <span>Sections Halaman Beranda</span>
-        </div>
-
-        <div className="cb-section-grid">
-          {sections.map((section) => (
-            <div className="cb-section-box" key={section.id}>
-              <div className="cb-section-head">
-                <label className="cb-field-label">Menu</label>
-                <button
-                  className="cb-icon-btn cb-icon-btn-danger cb-section-delete"
-                  title="Hapus section"
-                  onClick={() => hapusSection(section.id)}
-                >
-                  <i className="fa-solid fa-trash"></i>
-                </button>
-              </div>
-
-              <div className="cb-select-wrap">
-                <select
-                  className="cb-select"
-                  value={section.menu}
-                  onChange={(e) => updateSection(section.id, 'menu', e.target.value)}
-                >
-                  {MENU_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                <i className="fa-solid fa-chevron-down cb-select-caret"></i>
-              </div>
-
-              <label className="cb-field-label">Judul Section</label>
-              <input
-                type="text"
-                className="cb-input"
-                value={section.judul}
-                placeholder="Isi Judul Section Disini..."
-                onChange={(e) => updateSection(section.id, 'judul', e.target.value)}
-              />
-            </div>
-          ))}
-        </div>
-
-        <button className="cb-btn-dashed" onClick={tambahSection}>
-          <i className="fa-solid fa-plus"></i> Tambah Section
-        </button>
-      </section>
+      <SectionOrderSetting
+        sections={sections}
+        setSections={setSections}
+        updateSection={updateSection}
+        tambahSection={tambahSection}
+        hapusSection={hapusSection}
+        menuOptions={MENU_OPTIONS}
+      />
 
       {/* ---------- FOOTER ---------- */}
-      <section className="cb-card">
-        <div className="cb-card-title">
-          <i className="fa-regular fa-comment-dots"></i>
-          <span>Footer</span>
-        </div>
-
-        <div className="cb-grid-2">
-          {/* Hubungi Kami + Lokasi */}
-          <div className="cb-footer-col">
-            <div className="cb-footer-box">
-              <h3 className="cb-footer-title">Hubungi Kami</h3>
-
-              <label className="cb-field-label">Email</label>
-              <input
-                type="email"
-                className="cb-input"
-                placeholder="admin@instansi.go.id"
-                value={footer.email}
-                onChange={(e) => setFooter((prev) => ({ ...prev, email: e.target.value }))}
-              />
-
-              <label className="cb-field-label">No. Telepon</label>
-              <input
-                type="text"
-                className="cb-input"
-                placeholder="(021) 1234567"
-                value={footer.telepon}
-                onChange={(e) => setFooter((prev) => ({ ...prev, telepon: e.target.value }))}
-              />
-
-              <label className="cb-field-label">Alamat</label>
-              <textarea
-                className="cb-textarea"
-                rows={2}
-                placeholder="Jl. Jenderal Sudirman No. 1..."
-                value={footer.alamat}
-                onChange={(e) => setFooter((prev) => ({ ...prev, alamat: e.target.value }))}
-              />
-            </div>
-
-            <div className="cb-footer-box">
-              <h3 className="cb-footer-title">Lokasi</h3>
-
-              <label className="cb-field-label">Link Google Maps</label>
-              <input
-                type="text"
-                className="cb-input"
-                placeholder="https://goo.gl/maps/..."
-                value={googleMaps}
-                onChange={(e) => setGoogleMaps(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Tautan */}
-          <div className="cb-footer-box">
-            <h3 className="cb-footer-title">Tautan</h3>
-
-            {tautan.map((item) => (
-              <div className="cb-tautan-row" key={item.id}>
-                <div className="cb-tautan-field">
-                  <label className="cb-field-label">Label</label>
-                  <input
-                    type="text"
-                    placeholder="Isi Label Disini..."
-                    className="cb-input"
-                    value={item.label}
-                    onChange={(e) => updateTautan(item.id, 'label', e.target.value)}
-                  />
-                </div>
-                <div className="cb-tautan-field">
-                  <label className="cb-field-label">Link</label>
-                  <input
-                    type="text"
-                    className="cb-input"
-                    placeholder="https://tautan..."
-                    value={item.link}
-                    onChange={(e) => updateTautan(item.id, 'link', e.target.value)}
-                  />
-                </div>
-                <button
-                  className="cb-icon-btn cb-icon-btn-danger cb-tautan-delete"
-                  title="Hapus tautan"
-                  onClick={() => hapusTautan(item.id)}
-                >
-                  <i className="fa-solid fa-trash"></i>
-                </button>
-              </div>
-            ))}
-
-            <button className="cb-btn-dashed" onClick={tambahTautan}>
-              <i className="fa-solid fa-plus"></i> Tambah Link
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* <FooterSetting
+        footer={footer}
+        setFooter={setFooter}
+        googleMaps={googleMaps}
+        setGoogleMaps={setGoogleMaps}
+        tautan={tautan}
+        updateTautan={updateTautan}
+        tambahTautan={tambahTautan}
+        hapusTautan={hapusTautan}
+      /> */}
     </main>
   );
 };

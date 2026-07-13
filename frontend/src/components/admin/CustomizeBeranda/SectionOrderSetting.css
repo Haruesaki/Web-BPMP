@@ -1,0 +1,73 @@
+.admin-layout .cb-section-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.admin-layout .cb-section-box {
+    position: relative;
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Hover state on non-dragging card */
+.admin-layout .cb-section-box:not(.dragging):hover {
+    border-color: var(--border-soft-hover, #cbd5e1);
+}
+
+/* Dragging visual effect */
+.admin-layout .cb-section-box.dragging {
+    opacity: 0.5;
+    border-style: dashed;
+    border-color: var(--color-primary, #4f46e5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: scale(0.995);
+}
+
+.admin-layout .cb-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    cursor: grab;
+    padding: 6px 10px;
+    background: var(--bg-body, rgba(0, 0, 0, 0.02));
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .cb-section-head:hover {
+    background: var(--bg-body-hover, rgba(0, 0, 0, 0.05));
+}
+
+.admin-layout .cb-section-head:active {
+    cursor: grabbing;
+}
+
+.admin-layout .cb-section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-layout .cb-section-head .cb-field-label {
+    margin: 0;
+}
+
+.admin-layout .cb-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted, #94a3b8);
+}
+
+.admin-layout .cb-section-delete {
+    flex-shrink: 0;
+}
