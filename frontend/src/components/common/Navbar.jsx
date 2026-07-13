@@ -23,6 +23,8 @@ const Navbar = ({ lenisRef }) => {
 
   const searchWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
+  const sidebarRef = useRef(null);
+  const overlayRef = useRef(null);
 
   const handleSearchToggle = (e) => {
     e.preventDefault();
@@ -70,19 +72,38 @@ const Navbar = ({ lenisRef }) => {
     return () => document.removeEventListener('mousedown', handleClickOutsideDropdown);
   }, [activeDropdown]);
 
-  // Efek Menutup Dropdown saat di-Scroll
+  // EFEK BARU: Mengunci scroll body dan mengisolasi scroll sidebar saat menu mobile terbuka
   useEffect(() => {
-    if (!activeDropdown) return;
-    const lenis = lenisRef?.current;
-    const handleScroll = () => setActiveDropdown(null);
+    const sidebar = sidebarRef.current;
+    const overlay = overlayRef.current;
 
-    if (lenis) {
-      lenis.on('scroll', handleScroll, { passive: true });
-      return () => lenis.off('scroll', handleScroll);
+    // Handler untuk mengizinkan scroll native di dalam sidebar dengan menghentikan
+    // event agar tidak "bocor" dan ditangkap oleh Lenis.
+    const handleWheelSidebar = (e) => {
+      e.stopPropagation();
+    };
+
+    // Handler untuk memblokir total scroll saat kursor berada di atas overlay.
+    const handleWheelOverlay = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    if (isMobileMenuOpen) {
+      document.body.classList.add('body-no-scroll');
+      if (sidebar) sidebar.addEventListener('wheel', handleWheelSidebar);
+      if (overlay) overlay.addEventListener('wheel', handleWheelOverlay);
+    } else {
+      document.body.classList.remove('body-no-scroll');
     }
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeDropdown, lenisRef]);
+
+    // Cleanup: Hapus semua listener dan class saat komponen unmount atau state berubah.
+    return () => {
+      document.body.classList.remove('body-no-scroll');
+      if (sidebar) sidebar.removeEventListener('wheel', handleWheelSidebar);
+      if (overlay) overlay.removeEventListener('wheel', handleWheelOverlay);
+    };
+  }, [isMobileMenuOpen]); // Efek ini bergantung pada status buka/tutup menu.
 
   // EFEK BARU: Logika selector yang sadar akan perubahan rute (URL)
   useEffect(() => {
@@ -195,13 +216,22 @@ const Navbar = ({ lenisRef }) => {
 
       <div
         className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+        ref={overlayRef}
         onClick={toggleMobileMenu}
       ></div>
 
-      <nav className={`main-navbar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+      <nav ref={sidebarRef} className={`main-navbar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="nav-selector"></div>
 
-        <Link to="/" className="nav-link" data-path-group="beranda">Beranda</Link>
+        {/* Tombol untuk menutup menu pada tampilan mobile */}
+        <div className="mobile-nav-header">
+          <button onClick={toggleMobileMenu} className="mobile-nav-close-btn">
+            <i className="fa-solid fa-arrow-left"></i>
+            <span>Kembali</span>
+          </button>
+        </div>
+
+        <Link to="/" className="nav-link" data-path-group="beranda" onClick={toggleMobileMenu}>Beranda</Link>
 
         {/* --- IMPLEMENTASI KELAS 'dropdown-open' & ONCLICK --- */}
         <div className={`nav-item has-dropdown ${activeDropdown === 'profil' ? 'dropdown-open' : ''}`}>
@@ -209,13 +239,13 @@ const Navbar = ({ lenisRef }) => {
             Profil <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">Sejarah</a>
-            <Link to="/profil/visi-misi">Visi & Misi</Link>
-            <a href="#">Tugas & Fungsi</a>
-            <a href="#">Struktur Organisasi</a>
-            <a href="#">Pejabat</a>
-            <a href="#">Informasi Pegawai</a>
-            <a href="#">Sarana dan Prasarana</a>
+            <a href="#" onClick={toggleMobileMenu}>Sejarah</a>
+            <Link to="/profil/visi-misi" onClick={toggleMobileMenu}>Visi & Misi</Link>
+            <a href="#" onClick={toggleMobileMenu}>Tugas & Fungsi</a>
+            <a href="#" onClick={toggleMobileMenu}>Struktur Organisasi</a>
+            <a href="#" onClick={toggleMobileMenu}>Pejabat</a>
+            <a href="#" onClick={toggleMobileMenu}>Informasi Pegawai</a>
+            <a href="#" onClick={toggleMobileMenu}>Sarana dan Prasarana</a>
           </div>
         </div>
 
@@ -224,13 +254,13 @@ const Navbar = ({ lenisRef }) => {
             Reformasi Birokrasi <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">Manajemen Perubahan</a>
-            <a href="#">Penataan Tata Laksana</a>
-            <a href="#">Penataan Manajemen SDM</a>
-            <a href="#">Penguatan Akuntabilitas</a>
-            <a href="#">Penguatan Pengawasan</a>
-            <a href="#">Peningkatan Kualitas Pelayanan Publik</a>
-            <a href="#">Aktivitas RBI</a>
+            <a href="#" onClick={toggleMobileMenu}>Manajemen Perubahan</a>
+            <a href="#" onClick={toggleMobileMenu}>Penataan Tata Laksana</a>
+            <a href="#" onClick={toggleMobileMenu}>Penataan Manajemen SDM</a>
+            <a href="#" onClick={toggleMobileMenu}>Penguatan Akuntabilitas</a>
+            <a href="#" onClick={toggleMobileMenu}>Penguatan Pengawasan</a>
+            <a href="#" onClick={toggleMobileMenu}>Peningkatan Kualitas Pelayanan Publik</a>
+            <a href="#" onClick={toggleMobileMenu}>Aktivitas RBI</a>
           </div>
         </div>
 
@@ -239,10 +269,10 @@ const Navbar = ({ lenisRef }) => {
             Dok. Kinerja <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">Perjanjian Kinerja</a>
-            <a href="#">Renstra</a>
-            <a href="#">Lakin 2024</a>
-            <a href="#">Lakin 2025</a>
+            <a href="#" onClick={toggleMobileMenu}>Perjanjian Kinerja</a>
+            <a href="#" onClick={toggleMobileMenu}>Renstra</a>
+            <a href="#" onClick={toggleMobileMenu}>Lakin 2024</a>
+            <a href="#" onClick={toggleMobileMenu}>Lakin 2025</a>
           </div>
         </div>
 
@@ -251,12 +281,12 @@ const Navbar = ({ lenisRef }) => {
             Pelayanan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">Maklumat Pelayanan</a>
-            <a href="#">Standar Pelayanan</a>
-            <a href="#">Unit Layanan Terpadu</a>
-            <a href="#">Hasil Survey SKM</a>
-            <a href="#">Layanan Inovatif</a>
-            <a href="#">Peminjaman Sarana dan Prasarana</a>
+            <a href="#" onClick={toggleMobileMenu}>Maklumat Pelayanan</a>
+            <a href="#" onClick={toggleMobileMenu}>Standar Pelayanan</a>
+            <a href="#" onClick={toggleMobileMenu}>Unit Layanan Terpadu</a>
+            <a href="#" onClick={toggleMobileMenu}>Hasil Survey SKM</a>
+            <a href="#" onClick={toggleMobileMenu}>Layanan Inovatif</a>
+            <a href="#" onClick={toggleMobileMenu}>Peminjaman Sarana dan Prasarana</a>
           </div>
         </div>
 
@@ -265,29 +295,29 @@ const Navbar = ({ lenisRef }) => {
             Program <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">Digitalisasi Pembelajaran</a>
-            <a href="#">Wajar 13 Tahun</a>
-            <a href="#">Revitalisasi Sekolah</a>
-            <a href="#">SPMB</a>
-            <a href="#">Penguatan Karakter</a>
-            <a href="#">Makan Bergizi Gratis</a>
-            <a href="#">Pembelajaran dan Penilaian</a>
-            <a href="#">Penjaminan Mutu</a>
+            <a href="#" onClick={toggleMobileMenu}>Digitalisasi Pembelajaran</a>
+            <a href="#" onClick={toggleMobileMenu}>Wajar 13 Tahun</a>
+            <a href="#" onClick={toggleMobileMenu}>Revitalisasi Sekolah</a>
+            <a href="#" onClick={toggleMobileMenu}>SPMB</a>
+            <a href="#" onClick={toggleMobileMenu}>Penguatan Karakter</a>
+            <a href="#" onClick={toggleMobileMenu}>Makan Bergizi Gratis</a>
+            <a href="#" onClick={toggleMobileMenu}>Pembelajaran dan Penilaian</a>
+            <a href="#" onClick={toggleMobileMenu}>Penjaminan Mutu</a>
           </div>
         </div>
 
-        <a href="#" className="nav-link" data-path-group="ppid">PPID</a>
-        <a href="#" className="nav-link" data-path-group="sipers">Sipers</a>
-        <a href="#" className="nav-link" data-path-group="spab">SPAB</a>
+        <a href="#" className="nav-link" data-path-group="ppid" onClick={toggleMobileMenu}>PPID</a>
+        <a href="#" className="nav-link" data-path-group="sipers" onClick={toggleMobileMenu}>Sipers</a>
+        <a href="#" className="nav-link" data-path-group="spab" onClick={toggleMobileMenu}>SPAB</a>
 
         <div className={`nav-item has-dropdown ${activeDropdown === 'pengaduan' ? 'dropdown-open' : ''}`}>
           <a href="#" className="nav-link" data-path-group="pengaduan" onClick={(e) => handleDropdownClick(e, 'pengaduan')}>
             Pengaduan <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
           </a>
           <div className="dropdown-menu">
-            <a href="#">WBS</a>
-            <a href="#">SP4N Lapor</a>
-            <a href="#">Lapor Gratifikasi</a>
+            <a href="#" onClick={toggleMobileMenu}>WBS</a>
+            <a href="#" onClick={toggleMobileMenu}>SP4N Lapor</a>
+            <a href="#" onClick={toggleMobileMenu}>Lapor Gratifikasi</a>
           </div>
         </div>
       </nav>

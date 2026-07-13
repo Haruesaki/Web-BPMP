@@ -11,6 +11,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;
 }
 
+/* PENAMBAHAN BARU: Mencegah body scroll saat menu mobile aktif */
+body.body-no-scroll {
+  overflow: hidden;
+}
+
 /* =========================================
    1. HEADER KESATUAN (STICKY HEADER)
    ========================================= */
@@ -198,7 +203,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     transform: translateY(-10px) scaleY(0.95);
     transform-origin: top center;
     transition:
-        max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
         transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
         visibility 0s linear 0.3s;
@@ -223,7 +227,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     visibility: visible;
     transform: translateY(0) scaleY(1);
     transition:
-        max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
         transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
         visibility 0s linear 0s;
@@ -395,6 +398,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     display: none;
 }
 
+.mobile-nav-header {
+    display: none; /* Sembunyikan di desktop secara default */
+}
+
 /* =========================================
    7. RESPONSIVE BREAKPOINT: TABLET & LAPTOP KECIL (<= 1277px)
    (Sidebar Kiri & Sistem onClick Menu)
@@ -434,18 +441,73 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
         width: 320px;
         height: 100vh;
         flex-direction: column;
+        flex-wrap: nowrap; /* KUNCI: Cegah item menu membungkus ke samping */
         justify-content: flex-start;
         align-items: flex-start;
-        background: rgba(11, 19, 43, 0.98);
-        padding: 80px 20px 30px 20px;
-        transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        box-sizing: border-box; /* KUNCI: Pastikan padding dihitung di dalam 100vh */
+        background: rgba(11, 19, 43, 0.98); /* REVISI: Kembalikan padding horizontal untuk konten menu */
+        padding: 0 30px 30px 30px;
+        transition: left 1.1s cubic-bezier(0.25, 1, 0.5, 1);
         box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
         z-index: 9999;
-        overflow-y: auto;
+        overflow-y: auto; /* Pastikan bisa scroll vertikal jika item banyak */
+        overflow-x: hidden; /* Cegah scroll horizontal yang tidak diinginkan */
+        scrollbar-width:thin;
+        scrollbar-color: rgba(255, 255, 255, 0.351) transparent; /* thumb & track color */
+        
+    }
+
+    
+
+    /* REVISI: Gaya scrollbar untuk Chrome, Safari, dll. */
+    .main-navbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .main-navbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .main-navbar::-webkit-scrollbar-thumb {
+        background-color: rgb(255, 255, 255);
+        border-radius: 3px;
+        transition: background-color 0.2s ease;
     }
 
     .main-navbar.mobile-open {
         left: 0;
+    }
+
+    /* Tampilkan dan tata tombol kembali di mobile */
+    .mobile-nav-header {
+        /* REVISI: Buat header ini "lengket" di atas saat di-scroll */
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        background: rgba(0, 9, 34, 0.689);
+        backdrop-filter: blur(15px);
+        display: flex;
+        /* REVISI: Gunakan negative margin untuk "break out" dari padding parent */
+        width: calc(100% + 60px);
+        margin-left: -30px;
+        padding: 40px 20px 15px 20px; /* Padding internal untuk konten tombol */
+        box-sizing: border-box;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav-close-btn {
+        background: transparent;
+        border: none;
+        color: #ffffff;
+        font-size: 15px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        transition: color 0.3s ease;
     }
 
     .nav-selector {
@@ -458,7 +520,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
     .nav-link {
         width: 100%;
-        padding: 15px 20px;
+        padding: 15px 0; /* REVISI: Hapus padding horizontal, sudah ditangani parent */
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 8px;
         justify-content: space-between;
@@ -490,16 +552,19 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
         overflow: hidden;
         opacity: 0;
         visibility: hidden;
-        transform: none;
-        transition: max-height 0.4s ease, opacity 0.3s ease;
+        /* REVISI: Tambahkan transform untuk animasi yang lebih mulus */
+        transform: translateY(-10px);
+        /* REVISI: Hapus transisi max-height yang berat, ganti dengan transform */
+        transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     /* 3. Buka dropdown HANYA jika class 'dropdown-open' aktif (via onClick React) */
     .nav-item.has-dropdown.dropdown-open .dropdown-menu {
-        max-height: 600px;
-        padding: 10px 0;
+        max-height: 1000px; /* Beri nilai yang cukup besar */
+        padding: 20px 0;
         opacity: 1;
         visibility: visible;
+        transform: translateY(0);
     }
 
     /* 4. Putar icon panah hanya saat menu aktif */
@@ -509,8 +574,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
     .dropdown-menu a {
         opacity: 1;
-        transform: none;
-        padding: 12px 20px 12px 40px; /* Indentasi sub-menu */
+        transform: translateY(0);
+        padding: 12px 0 12px 20px; /* REVISI: Hapus padding luar, pertahankan indentasi */
     }
 }
 
@@ -518,33 +583,33 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
    8. RESPONSIVE BREAKPOINT: SMARTPHONE (<= 768px)
    (Menu Dropdown Penuh di Atas)
    ========================================= */
-@media (max-width: 768px) {
+@media (max-width: 370px) {
     /* Ubah Sidebar menjadi Dropdown Atas Penuh (Full Width) */
     .main-navbar {
         left: 0;
         top: -100%;
         width: 100%;
         height: auto;
-        max-height: 85vh;
-        padding-top: 20px;
-        transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        max-height: 55vh; /* REVISI: Hapus padding atas, akan dipindahkan ke header */
+        padding-top: 0;
+        transition: top 1s cubic-bezier(0.25, 1, 0.5, 1);
         border-bottom-left-radius: 20px;
         border-bottom-right-radius: 20px;
         transition-property: top;
     }
 
     .main-navbar.mobile-open {
-        top: 75px; /* Turun tepat di bawah header */
+        top: 0px; /* Turun tepat di bawah header */
         left: 0;
     }
 
-
-    .header-actions .btn-voice {
-        padding: 8px; /* Bentuk jadi lingkaran bulat */
-        gap: 0;
+    .mobile-nav-header {
+        /* REVISI: Sesuaikan padding atas untuk state topbar */
+        padding: 20px 20px 15px 20px;
     }
 
     .header-actions .btn-voice img {
+        /* Pertahankan ukuran ikon yang lebih kecil untuk mobile */
         width: 30px;
     }
 }
@@ -575,35 +640,40 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
         flex-direction: row;
         align-self: flex-end;
         margin-left: 0;
-        gap: 15px;
-    }
-}
-
-/* =========================================
-   BREAKPOINT 4: MOBILE LAYOUT (<= 625px)
-   (Memindahkan Search & Voice Button ke Bawah Logo)
-   ========================================= */
-@media (max-width: 625px) {
-    .header-top {
-        display: flex;
-        flex-direction: column;
-        row-gap: 20px; /* Jarak vertikal antar baris */
-    }
-       
-    .header-actions {
-        display: flex;
-        flex-direction: row;
-        align-self: flex-end;
-        margin-left: 0;
-        gap: 15px;
-
+        /* REVISI: Buat jarak, tombol, dan isinya menjadi fluid untuk transisi yang mulus */
+        gap: clamp(10px, 2vw, 15px);
     }
 
+    /* REVISI: Buat tombol dan isinya menjadi fluid */
     .header-actions .search-wrapper {
-        order: 1; /* Pastikan search-bar muncul di urutan kedua (bawah) */
+        width: clamp(20px, 10vw, 45px);
+        height: clamp(20px, 10vw, 45px);
+    }
+
+    .header-actions .search-wrapper.active {
+        width: clamp(60px, 39vw, 220px);
+    }
+
+    .header-actions .search-trigger {
+        width: clamp(20px, 10vw, 45px);
+        height: clamp(20px, 10vw, 45px);
+    }
+
+    .header-actions .search-trigger i {
+        font-size: clamp(5px, 3.5vw, 20px);
     }
 
     .header-actions .btn-voice {
-        order: 2; /* Pastikan tombol suara di urutan pertama (atas) */
+        padding: 0px;
+        padding-left: 20px;
+        gap: clamp(8px, 1.5vw, 15px);
+    }
+
+    .header-actions .btn-voice .voice-text{
+        font-size: clamp(10px, 2.7vw, 14px);
+    }
+
+    .header-actions .btn-voice img {
+        width: clamp(20px, 10vw, 45px);
     }
 }
