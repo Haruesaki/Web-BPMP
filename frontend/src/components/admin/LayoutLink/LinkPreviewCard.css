@@ -4,7 +4,7 @@
    ========================================================================= */
 
 .lk-preview-wrapper {
-  margin-top: 16px;
+  align-content: center;
   min-height: 110px; /* Beri ruang agar tidak "loncat" saat loading */
 }
 
