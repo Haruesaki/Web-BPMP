@@ -64,6 +64,15 @@ const PengaturanMenu = () => {
 
   useEffect(() => {
     fetchMenus();
+
+    // Menu baru bisa dibuat melalui modal global di AdminLayout, sehingga
+    // halaman ini tidak unmount. Dengarkan event agar list selalu sinkron.
+    const handleRefreshPengaturanMenu = () => fetchMenus();
+    window.addEventListener('refreshPengaturanMenu', handleRefreshPengaturanMenu);
+
+    return () => {
+      window.removeEventListener('refreshPengaturanMenu', handleRefreshPengaturanMenu);
+    };
   }, []);
 
   const triggerSidebarRefresh = () => {

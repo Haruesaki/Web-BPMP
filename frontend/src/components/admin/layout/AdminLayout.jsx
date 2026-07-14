@@ -114,6 +114,9 @@ const AdminLayout = () => {
 
       if (res.status === 200 || res.status === 201) {
         setRefreshSidebarTrigger(prev => prev + 1); // trigger reload sidebar
+        // Pengaturan Menu tetap ter-mount di belakang modal. Beri tahu halaman
+        // tersebut agar mengambil ulang daftar menu yang baru saja dibuat.
+        window.dispatchEvent(new Event('refreshPengaturanMenu'));
         closeModal(); // tutup modal, TIDAK ADA redirect
       }
     } catch (error) {
