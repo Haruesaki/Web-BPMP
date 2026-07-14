@@ -64,6 +64,15 @@ const PengaturanMenu = () => {
 
   useEffect(() => {
     fetchMenus();
+
+    const handleRefresh = () => {
+      fetchMenus();
+    };
+
+    window.addEventListener('refreshSidebar', handleRefresh);
+    return () => {
+      window.removeEventListener('refreshSidebar', handleRefresh);
+    };
   }, []);
 
   const triggerSidebarRefresh = () => {
@@ -149,7 +158,6 @@ const PengaturanMenu = () => {
       await axiosInstance.delete(`/api/menus/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchMenus();
       triggerSidebarRefresh();
     } catch (error) {
       console.error(error);
@@ -172,7 +180,6 @@ const PengaturanMenu = () => {
       });
       setModalConvertOpen({ isOpen: false, menuId: null, menuName: '' });
       setConvertName('');
-      fetchMenus();
       triggerSidebarRefresh();
     } catch (error) {
       console.error(error);

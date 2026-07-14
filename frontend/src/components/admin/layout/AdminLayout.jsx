@@ -114,6 +114,7 @@ const AdminLayout = () => {
 
       if (res.status === 200 || res.status === 201) {
         setRefreshSidebarTrigger(prev => prev + 1); // trigger reload sidebar
+        window.dispatchEvent(new Event('refreshSidebar')); // Beri tahu komponen lain (seperti PengaturanMenu)
         closeModal(); // tutup modal, TIDAK ADA redirect
       }
     } catch (error) {

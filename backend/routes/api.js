@@ -7,12 +7,25 @@ const UploadController = require('../controllers/uploadController');
 const MenuController = require('../controllers/menuController');
 const HalamanKontenController = require('../controllers/halamanKontenController');
 const InstagramController = require('../controllers/instagramController');
+const StatistikPengunjungController = require('../controllers/statistikPengunjungController');
+const AktivitasAdminController = require('../controllers/aktivitasAdminController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
 });
+
+// ================= PENGUNJUNG & AKTIVITAS =================
+router.post('/pengunjung', StatistikPengunjungController.increment);
+router.get('/pengunjung/stats', authMiddleware, (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+}, StatistikPengunjungController.getStats);
+router.get('/aktivitas', authMiddleware, AktivitasAdminController.getAktivitas);
+router.post('/aktivitas', authMiddleware, AktivitasAdminController.recordAktivitas);
 
 router.get('/youtube', YoutubeController.getVideos);
 router.get('/instagram', InstagramController.getInstagramProfile);

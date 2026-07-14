@@ -1,44 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
+import { getAuthHeaders } from '../../../api/userApi';
 import './dashboard-admin.css';
 
 const ACT_PAGE_SIZE = 5;
 
-// Warna badge pelaku (dipilih konsisten berdasarkan nama pelaku).
 const ACTOR_COLORS = ['#5b5fe8', '#7a4fae', '#4cae8e', '#3f5aa8', '#8a6d1f', '#b5642e'];
-const getActorInitials = (nama) => nama.replace(/\s+/g, '').slice(0, 2).toUpperCase();
+const getActorInitials = (nama) => (nama || 'A').replace(/\s+/g, '').slice(0, 2).toUpperCase();
 const getActorColor = (nama) =>
-  ACTOR_COLORS[[...nama].reduce((sum, c) => sum + c.charCodeAt(0), 0) % ACTOR_COLORS.length];
+  ACTOR_COLORS[[...(nama || 'A')].reduce((sum, c) => sum + c.charCodeAt(0), 0) % ACTOR_COLORS.length];
+
+const getWeekOfMonth = (date) => {
+  const startMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  const diff = date.getDate() - 1 + startMonth.getDay();
+  return Math.floor(diff / 7) + 1;
+};
 
 const DashboardAdmin = () => {
-  // --- DATA: STATISTIK PENGUNJUNG (chart) ---
-  const chartData = [
-    { day: 'Mon', value: 38 },
-    { day: 'Tue', value: 70 },
-    { day: 'Wed', value: 45 },
-    { day: 'Thu', value: 88 },
-    { day: 'Fri', value: 98, highlight: true },
-    { day: 'Sat', value: 60 },
-    { day: 'Sun', value: 22 },
-  ];
+  const [pengunjungData, setPengunjungData] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [chartMode, setChartMode] = useState('unik'); // 'unik' | 'hits'
 
-  // --- DATA: AKTIVITAS TERKINI (dummy, nanti diganti fetch backend) ---
-  const recentActivity = [
-    { pelaku: 'Admin', title: 'Admin memperbarui berita "Update Kurikulum 2026".', time: '14 Jun 2026, 13:52 WIB' },
-    { pelaku: 'Admin', title: 'Dokumen "Laporan Keuangan Juni" diunggah ke ZIWBK-WBBM.', time: '14 Jun 2026, 13:42 WIB' },
-    { pelaku: 'Admin', title: 'Admin menerbitkan berita baru: "Pengumuman SPAB".', time: '14 Jun 2026, 13:35 WIB' },
-    { pelaku: 'Super Admin', title: 'Menu "Pelayanan" diaktifkan pada halaman beranda.', time: '14 Jun 2026, 13:34 WIB' },
-    { pelaku: 'Super Admin', title: 'User baru ditambahkan: "Budi Kusuma".', time: '14 Jun 2026, 13:33 WIB' },
-    { pelaku: 'Sistem', title: 'Backup sistem selesai dilakukan.', time: '14 Jun 2026, 13:32 WIB' },
-    { pelaku: 'Super Admin', title: 'Admin mengubah urutan menu navigasi utama.', time: '14 Jun 2026, 11:20 WIB' },
-    { pelaku: 'Admin', title: 'Halaman "Profil" diperbarui.', time: '14 Jun 2026, 10:05 WIB' },
-    { pelaku: 'Super Admin', title: 'Submenu "Standar Pelayanan" dinonaktifkan.', time: '13 Jun 2026, 16:48 WIB' },
-    { pelaku: 'Admin', title: 'Berita "Reformasi Birokrasi 2026" diarsipkan.', time: '13 Jun 2026, 15:12 WIB' },
-    { pelaku: 'Admin', title: 'Admin memperbarui informasi kontak situs.', time: '13 Jun 2026, 14:00 WIB' },
-    { pelaku: 'User', title: 'User "Dewi Putri" mengubah kata sandi.', time: '13 Jun 2026, 09:37 WIB' },
-    { pelaku: 'Admin', title: 'Dokumen kinerja triwulan II dipublikasikan.', time: '12 Jun 2026, 17:22 WIB' },
-  ];
+  const now = new Date();
+  const [filterYear, setFilterYear] = useState(now.getFullYear());
+  const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1);
+  const [filterWeek, setFilterWeek] = useState(0);
 
-  // --- Pagination aktivitas (5 per halaman) ---
+  const fetchStats = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/pengunjung/stats?t=${Date.now()}`, { headers: getAuthHeaders() });
+      if (res.data.success) {
+        setPengunjungData(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetch statistik:', error);
+    }
+  };
+
+  const fetchAktivitas = async () => {
+    try {
+      const res = await axiosInstance.get('/api/aktivitas', { headers: getAuthHeaders() });
+      if (res.data.success) {
+        setRecentActivity(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetch aktivitas:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchAktivitas();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchStats();
+        fetchAktivitas();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Ringkasan untuk periode terfilter
+  const summary = useMemo(() => {
+    const filtered = pengunjungData.filter((item) => {
+      const tStr = typeof item.tanggal === 'string' ? item.tanggal.split('T')[0] : '';
+      const [y, m, d] = (tStr || '2000-01-01').split('-');
+      const date = new Date(y, m - 1, d);
+      const isYearMatch = date.getFullYear() === parseInt(filterYear);
+      const isMonthMatch = (date.getMonth() + 1) === parseInt(filterMonth);
+      const isWeekMatch = filterWeek === 0 ? true : getWeekOfMonth(date) === parseInt(filterWeek);
+      return isYearMatch && isMonthMatch && isWeekMatch;
+    });
+    const totalUnik = filtered.reduce((s, d) => s + parseInt(d.pengunjung_unik || 0), 0);
+    const totalHits = filtered.reduce((s, d) => s + parseInt(d.total_hits || 0), 0);
+    return { totalUnik, totalHits };
+  }, [pengunjungData, filterYear, filterMonth, filterWeek]);
+
+  // Proses Filter Chart
+  const chartData = useMemo(() => {
+    let filtered = pengunjungData.filter((item) => {
+      const tStr = typeof item.tanggal === 'string' ? item.tanggal.split('T')[0] : '';
+      const [y, m, d] = (tStr || '2000-01-01').split('-');
+      const date = new Date(y, m - 1, d);
+
+      const isYearMatch = date.getFullYear() === parseInt(filterYear);
+      const isMonthMatch = (date.getMonth() + 1) === parseInt(filterMonth);
+      const isWeekMatch = filterWeek === 0 ? true : getWeekOfMonth(date) === parseInt(filterWeek);
+      return isYearMatch && isMonthMatch && isWeekMatch;
+    });
+
+    filtered = filtered.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+    const valueKey = chartMode === 'unik' ? 'pengunjung_unik' : 'total_hits';
+    const maxVal = Math.max(...filtered.map(d => parseInt(d[valueKey] || 0)), 100);
+    return filtered.map(d => {
+      const tStr = typeof d.tanggal === 'string' ? d.tanggal.split('T')[0] : '';
+      const [y, m, day] = (tStr || '2000-01-01').split('-');
+      const dateObj = new Date(y, m - 1, day);
+
+      const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+      const dateNum = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      const value = parseInt(d[valueKey] || 0);
+      const percentage = (value / maxVal) * 100;
+      return {
+        label: `${dayName}, ${dateNum}`,
+        value,
+        percentage,
+        highlight: percentage === 100
+      };
+    });
+  }, [pengunjungData, filterYear, filterMonth, filterWeek, chartMode]);
+
+  const yearOptions = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
+  const monthOptions = [
+    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' }, { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' }, { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' }, { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
+  ];
+  const weekOptions = [1, 2, 3, 4, 5, 6];
+
   const [actPage, setActPage] = useState(1);
   const actTotalPages = Math.max(1, Math.ceil(recentActivity.length / ACT_PAGE_SIZE));
   const actPageSafe = Math.min(actPage, actTotalPages);
@@ -59,6 +145,12 @@ const DashboardAdmin = () => {
     return result;
   };
 
+  const formatWaktu = (isoStr) => {
+    const d = new Date(isoStr);
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
+           d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  };
+
   return (
     <main className="admin-content">
       <div className="content-heading">
@@ -77,33 +169,68 @@ const DashboardAdmin = () => {
                 <p>Visitor traffic analysis</p>
               </div>
             </div>
-            <div className="chart-filters">
-              <button className="chart-select">June <i className="fa-solid fa-chevron-down"></i></button>
-              <button className="chart-select">2026 <i className="fa-solid fa-chevron-down"></i></button>
+            <div className="chart-filters" style={{display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center'}}>
+              <select className="chart-select" value={chartMode} onChange={e => setChartMode(e.target.value)}>
+                <option value="unik">Pengunjung Unik</option>
+                <option value="hits">Total Tayangan</option>
+              </select>
+              <select className="chart-select" value={filterWeek} onChange={e => setFilterWeek(Number(e.target.value))}>
+                <option value={0}>Semua Minggu</option>
+                {weekOptions.map(w => <option key={w} value={w}>Minggu ke-{w}</option>)}
+              </select>
+              <select className="chart-select" value={filterMonth} onChange={e => setFilterMonth(Number(e.target.value))}>
+                {monthOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+              <select className="chart-select" value={filterYear} onChange={e => setFilterYear(Number(e.target.value))}>
+                {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
             </div>
           </div>
 
-          <div className="chart-area">
-            <div className="chart-yaxis">
-              <span>100</span><span>75</span><span>50</span><span>25</span><span>0</span>
+          {/* ----- SUMMARY CARD ----- */}
+          <div style={{display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap'}}>
+            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0f4ff', textAlign: 'center'}}>
+              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#3f5aa8'}}>
+                {summary.totalUnik.toLocaleString('id-ID')}
+              </div>
+              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Pengunjung Unik</div>
             </div>
-            <div className="chart-bars">
-              {chartData.map((d) => (
-                <div key={d.day} className="chart-bar-col">
-                  <div className="chart-bar-track">
-                    <div
-                      className={`chart-bar ${d.highlight ? 'highlight' : ''}`}
-                      style={{ height: `${d.value}%` }}
-                    ></div>
+            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0fff4', textAlign: 'center'}}>
+              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#4cae8e'}}>
+                {summary.totalHits.toLocaleString('id-ID')}
+              </div>
+              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Total Tayangan (Hits)</div>
+            </div>
+          </div>
+
+          <div className="chart-area" style={{overflowX: 'auto'}}>
+            {chartData.length === 0 ? (
+               <div style={{padding: '40px', textAlign: 'center', width: '100%'}}>Tidak ada data pengunjung untuk filter yang dipilih.</div>
+            ) : (
+            <>
+              <div className="chart-yaxis">
+                <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+              </div>
+              <div className="chart-bars" style={{minWidth: `${chartData.length * 60}px`}}>
+                {chartData.map((d, i) => (
+                  <div key={i} className="chart-bar-col">
+                    <span style={{fontSize: '11px', fontWeight: 'bold', marginBottom: '4px'}}>{d.value}</span>
+                    <div className="chart-bar-track" title={`${d.value} ${chartMode === 'unik' ? 'Pengunjung Unik' : 'Tayangan'}`}>
+                      <div
+                        className={`chart-bar ${d.highlight ? 'highlight' : ''}`}
+                        style={{ height: `${Math.max(d.percentage, 1)}%`, minHeight: '4px' }}
+                      ></div>
+                    </div>
+                    <span className="chart-bar-label" style={{fontSize: '11px', textAlign:'center'}}>{d.label}</span>
                   </div>
-                  <span className="chart-bar-label">{d.day}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
+            )}
           </div>
         </section>
 
-        {/* ----- CARD: AKTIVITAS TERKINI (tabel, di bawah statistik) ----- */}
+        {/* ----- CARD: AKTIVITAS TERKINI ----- */}
         <section className="card card-activity">
           <h3>Aktivitas Terkini</h3>
           <div className="activity-table-wrap">
@@ -111,33 +238,49 @@ const DashboardAdmin = () => {
               <thead>
                 <tr>
                   <th className="activity-col-actor">PELAKU</th>
+                  <th className="activity-col-role">ROLE</th>
                   <th>DESKRIPSI</th>
                   <th className="activity-col-time">WAKTU (WIB)</th>
                 </tr>
               </thead>
               <tbody>
-                {visibleActivity.map((a, i) => (
-                  <tr key={actStart + i}>
+                {visibleActivity.length === 0 ? (
+                  <tr><td colSpan="4" style={{textAlign: 'center', padding: '20px'}}>Belum ada aktivitas.</td></tr>
+                ) : visibleActivity.map((a, i) => (
+                  <tr key={a.id || i}>
                     <td className="activity-col-actor">
                       <div className="activity-actor">
                         <span
                           className="activity-actor-badge"
-                          style={{ background: getActorColor(a.pelaku) }}
+                          style={{ background: getActorColor(a.nama_admin) }}
                         >
-                          {getActorInitials(a.pelaku)}
+                          {getActorInitials(a.nama_admin)}
                         </span>
-                        <span className="activity-actor-name">{a.pelaku}</span>
+                        <span className="activity-actor-name">{a.nama_admin}</span>
                       </div>
                     </td>
-                    <td>{a.title}</td>
-                    <td className="activity-col-time">{a.time}</td>
+                    <td className="activity-col-role">
+                        <span style={{
+                          fontSize: '12px', 
+                          padding: '4px 10px', 
+                          borderRadius: '20px', 
+                          background: (a.role_admin || '').toLowerCase() === 'superadmin' ? '#ffe1e1' : '#e1f0ff', 
+                          color: (a.role_admin || '').toLowerCase() === 'superadmin' ? '#d32f2f' : '#0277bd',
+                          fontWeight: '600',
+                          border: `1px solid ${(a.role_admin || '').toLowerCase() === 'superadmin' ? '#ffcdd2' : '#bbdefb'}`,
+                          textTransform: 'capitalize'
+                        }}>
+                          {a.role_admin}
+                        </span>
+                    </td>
+                    <td>{a.aksi}</td>
+                    <td className="activity-col-time">{formatWaktu(a.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* ---------- FOOTER / PAGINATION ---------- */}
           <div className="activity-footer">
             <span className="activity-info">
               Menampilkan {recentActivity.length === 0 ? 0 : actStart + 1}-

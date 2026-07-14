@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { logActivityInternal } = require('./aktivitasAdminController');
 
 class HalamanKontenController {
   // POST/PUT /api/halaman-konten/:menu_id
@@ -13,6 +14,9 @@ class HalamanKontenController {
     try {
       // Cek apakah sudah ada konten untuk menu ini
       const existing = await db('halaman_konten').where('menu_id', menu_id).first();
+      
+      const pName = req.user?.nama || 'System';
+      const pRole = req.user?.role || 'Unknown';
 
       if (existing) {
         // Update
@@ -24,6 +28,8 @@ class HalamanKontenController {
             diperbarui_pada: db.fn.now()
           })
           .returning('*');
+          
+        await logActivityInternal(pName, pRole, `Memperbarui halaman konten: "${judul}"`);
         return res.json({ pesan: 'Konten berhasil diperbarui', data: updated });
       } else {
         // Insert
@@ -44,6 +50,8 @@ class HalamanKontenController {
             status: 'terbit'
           })
           .returning('*');
+          
+        await logActivityInternal(pName, pRole, `Menerbitkan halaman konten baru: "${judul}"`);
         return res.status(201).json({ pesan: 'Konten berhasil disimpan', data: inserted });
       }
     } catch (error) {
