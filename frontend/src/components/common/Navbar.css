@@ -368,8 +368,17 @@ body.body-no-scroll {
     padding-right: 0px;
     gap: 15px;
     background: linear-gradient(135deg, rgba(30, 45, 85, 0.8) 0%, rgba(15, 25, 55, 0.6) 100%);
+    /* REVISI: Latar default (non-aktif) menjadi kemerahan */
+    /* background: linear-gradient(135deg, rgba(85, 30, 30, 0.8) 0%, rgba(55, 15, 15, 0.6) 100%); */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    /* REVISI: Tambahkan transisi untuk 'width' agar perubahan ukuran lebih mulus */
+    transition: background 5.4s ease, width 2.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* PENAMBAHAN BARU: Latar menjadi kehijauan saat aktif */
+.btn-voice.active {
+    background: linear-gradient(135deg, rgba(0, 140, 37, 0.9) 0%, rgba(15, 55, 25, 0.8) 100%);
 }
 
 .btn-voice span {
@@ -386,6 +395,13 @@ body.body-no-scroll {
 
 .btn-voice:hover {
     background: linear-gradient(135deg, rgba(42, 60, 105, 0.9) 0%, rgba(30, 45, 85, 0.8) 100%);
+    /* REVISI: Efek hover untuk state non-aktif */
+    /* background: linear-gradient(135deg, rgba(105, 42, 42, 0.9) 0%, rgba(85, 30, 30, 0.8) 100%); */
+}
+
+.btn-voice.active:hover {
+    /* PENAMBAHAN BARU: Efek hover untuk state aktif */
+    background: linear-gradient(135deg, rgba(42, 105, 60, 1) 0%, rgba(30, 85, 45, 0.9) 100%);
 }
 
 /* =========================================
