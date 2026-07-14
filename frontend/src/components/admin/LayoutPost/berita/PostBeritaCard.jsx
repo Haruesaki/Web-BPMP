@@ -283,7 +283,7 @@ const PostBeritaCard = ({ menuName = '', initialBerita = null }) => {
                   <th className="bc-col-desk">Deskripsi</th>
                   <th className="bc-col-pembuat">Pembuat</th>
                   <th className="bc-col-waktu">Waktu Tayang (Otomatis)</th>
-                  <th className="bc-col-status">Status Tayang</th>
+                  <th className="bc-col-status">Tampilkan di Beranda</th>
                   <th className="bc-col-aksi">Aksi</th>
                 </tr>
               </thead>

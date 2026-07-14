@@ -484,7 +484,7 @@ const ManajemenUser = () => {
       {detailUser && (
         <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDetailUser(null)}>
           <div className="modal-box mu-detail-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header mu-modal-header mu-detail-modal-header">
+            <div className="modal-header mu-detail-modal-header">
               <div className="mu-detail-modal-title-wrap">
                 <h3>Informasi Akun</h3>
                 <p className="mu-modal-sub">Detail profil pengguna yang terdaftar pada sistem.</p>
