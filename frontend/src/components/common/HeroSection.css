@@ -126,14 +126,14 @@
     align-items: flex-start;
     justify-content: center;
     flex: 0 0 43%;
-    gap: 1.5rem;
+    gap: 0.3rem;
     color: #ffffff;
     z-index: 222;
 }
 
 .welcome-text {
     font-family: 'Poppins', sans-serif;
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-size: clamp(1.2rem, 3vw, 2.4rem);
     font-weight: 500;
 }
 
@@ -203,7 +203,7 @@
     width: 55vw;
     height: 90vh;
     max-width: 800px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
-    max-height: 950px;
+    max-height: 920px;
 }
 
 @keyframes buildingSlideUp {
@@ -262,8 +262,8 @@
 
     .hero-right-cms {
         max-width: none;
-        width: 100vw;
-        height: 48vh;
+        width: 62vw;
+        height: 52vh;
     }
 
     .cms-dynamic-image {
@@ -279,6 +279,8 @@
 @media (max-width: 900px) {
     .hero-left-content {
         width: 100%;
+        gap: 0.5rem;
+    
     }
 
     /* Pada layar ponsel, gambar lebih dominan di kanan bawah */
@@ -288,7 +290,7 @@
     }
 
     .main-title {
-        font-size: clamp(2.5rem, 6vw, 8rem);
+        font-size: clamp(1.7rem, 6vw, 8rem);
     }
 }
 

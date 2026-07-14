@@ -40,7 +40,7 @@
 }
 
 .yt-stat-label {
-    font-size: clamp(14px, 1.2vw, 16px);
+    font-size: clamp(14px, 1.3vw, 18px);
     font-weight: 700;
     margin-bottom: 2px;
 }
@@ -246,20 +246,22 @@
     font-family: 'Poppins', sans-serif;
     bottom: 0;
     left: 0;
+    top: 0;
+    height: 100%;
     width: 100%;
-    padding: 40px 15px 15px 15px;
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+    padding: 15px;
+    background: linear-gradient(to top, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.584) 35%, transparent 55%);
     z-index: 3;
     pointer-events: none; /* Agar tidak menghalangi klik pada wrapper */
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    display: flex;
+    align-items: flex-end;
+    box-sizing: border-box;
 }
 
 .yt-video-title {
     color: #ffffff;
-    font-size: clamp(14px, 0.9vw, 16px);
-    font-weight: 500;
+    font-size: clamp(14px, 1vw, 20px);
+    font-weight: 600;
     line-height: 1.4;
     margin: 0;
     /* Potong teks jika terlalu panjang */
@@ -270,8 +272,10 @@
 }
 
 .yt-video-title.yt-video-title--main {
-    font-size: clamp(18px, 1.8vw, 22px);
-    font-weight: 600;
+    font-size: clamp(18px, 2vw, 34px);
+    font-weight: 700;
+    margin-left: 20px;
+    margin-bottom: 10px;
     -webkit-line-clamp: 3; /* Beri ruang untuk 3 baris di video utama */
 }
 
@@ -295,6 +299,43 @@
 
 .yt-state-feedback.error {
     color: #ff6b6b;
+}
+
+/* --- Placeholder untuk Video Kosong --- */
+.yt-video-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    height: 100%;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.yt-video-placeholder i {
+    font-size: 40px;
+    opacity: 0.5;
+}
+
+.yt-video-placeholder span {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Ukuran lebih besar untuk placeholder di video utama */
+.main-wrapper .yt-video-placeholder i {
+    font-size: 60px;
+}
+
+.main-wrapper .yt-video-placeholder span {
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* --- Keyframes untuk Animasi Tombol --- */
@@ -325,6 +366,57 @@
     }
 }
 /* --- Responsive YouTube --- */
+@media (max-width: 1020px) {
+    .yt-feed-grid {
+        flex-direction: column;
+    }
+
+    /* Menyamakan ukuran semua video wrapper agar konsisten saat vertikal */
+    .main-wrapper,
+    .side-wrapper {
+        aspect-ratio: 16 / 9;
+        flex: none; /* Hapus flex-grow pada side-wrapper */
+        height: auto; /* Biarkan aspect-ratio yang menentukan tinggi */
+    }
+
+    .yt-video-title {
+    color: #ffffff;
+    font-size: clamp(14px, 2.8vw, 28px);
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+    /* Potong teks jika terlalu panjang */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
+
+    /* Menyamakan style judul video utama dengan video lainnya */
+    .yt-video-title.yt-video-title--main {
+        font-size: clamp(14px, 2.8vw, 28px);
+        font-weight: 600;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        -webkit-line-clamp: 2; /* Samakan batas baris teks dengan video sekunder */
+    }
+
+    /* Menyamakan style placeholder video utama dengan video lainnya */
+    .main-wrapper .yt-video-placeholder i {
+        font-size: 40px;
+    }
+
+    .main-wrapper .yt-video-placeholder span {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Menyamakan ukuran ikon play video utama dengan video lainnya */
+    .main-wrapper .yt-play-overlay i.fa-brands.fa-youtube {
+        font-size: 50px;
+    }
+}
+
 @media (max-width: 960px) {
     .yt-header-bar {
         flex-direction: column;
@@ -338,25 +430,5 @@
 
     .yt-profile-left, .yt-profile-right {
         justify-content: center;
-    }
-
-    .yt-feed-grid {
-        flex-direction: column;
-    }
-
-    .main-wrapper {
-        aspect-ratio: auto;
-        height: 300px;
-    }
-
-    .yt-side-list {
-        height: auto;
-    }
-
-    .side-wrapper {
-        flex: none;
-        aspect-ratio: 16 / 9;
-        width: 100%;
-        height: auto;
     }
 }
