@@ -20,6 +20,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dynamicMenus, setDynamicMenus] = useState([]);
+  const [isMenusLoading, setIsMenusLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(() => {
     // Saat halaman pertama kali dibuka, ambil menu yang terakhir dipilih agar
     // highlight sidebar tidak kembali ke Beranda saat user melakukan refresh.
@@ -77,6 +78,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
+        setIsMenusLoading(true);
         const response = await axiosInstance.get('/api/menus');
         const data = response.data;
 
@@ -105,6 +107,8 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
         setDynamicMenus(tree);
       } catch (error) {
         console.error('Gagal fetch menus:', error);
+      } finally {
+        setIsMenusLoading(false);
       }
     };
     fetchMenus();
@@ -220,7 +224,22 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
 
         <div className="nav-divider"></div>
 
-        {dynamicMenus.map(renderDynamicItem)}
+        {isMenusLoading ? (
+          <div className="sidebar-menu-status" role="status">
+            <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+            <span>Memuat menu...</span>
+          </div>
+        ) : dynamicMenus.length === 0 ? (
+          <div className="sidebar-empty-menu">
+            <div className="sidebar-empty-menu-icon" aria-hidden="true">
+              <i className="fa-solid fa-folder-plus"></i>
+            </div>
+            <p>Belum ada menu tambahan</p>
+            <span>Tambahkan menu baru untuk ditampilkan di sidebar.</span>
+          </div>
+        ) : (
+          dynamicMenus.map(renderDynamicItem)
+        )}
 
         <div className="nav-divider"></div>
 
