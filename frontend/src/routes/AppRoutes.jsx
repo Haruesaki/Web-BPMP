@@ -43,7 +43,7 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin" element={<DashboardAdmin />} />
                     <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
-                    <Route path="/admin/link" element={<Link />} />
+                    <Route path="/admin/link/:menuId?" element={<Link />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                     {/* Editor konten menu — route DINAMIS per layout (:layout).
                         Contoh: /admin/post/default → editor layout Default.
