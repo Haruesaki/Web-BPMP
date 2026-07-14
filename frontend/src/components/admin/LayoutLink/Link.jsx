@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
-// menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
-// <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
 import axiosInstance from '../../../api/axiosInstance';
 import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 import './Link.css';
+import LinkPreviewCard from './LinkPreviewCard';
 
 // =========================================================================
 //  CATATAN
@@ -34,6 +32,11 @@ const Link = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // State untuk Fitur Pratinjau Link
+  const [previewData, setPreviewData] = useState(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState('');
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -88,6 +91,62 @@ const Link = () => {
     }
     hasScrolledRef.current = true;
   }, [loading, focusId]);
+
+  // Debounce effect untuk memicu pengambilan pratinjau link.
+  // Hanya berjalan saat user berhenti mengetik selama 500ms.
+  useEffect(() => {
+    const currentLink = rows[0]?.link;
+
+    // Jangan lakukan apa-apa jika tidak ada link atau menu yang dipilih
+    if (!currentLink || !focusId) {
+      setPreviewData(null);
+      setPreviewError('');
+      setIsPreviewLoading(false);
+      return;
+    }
+
+    const fetchLinkPreview = async (url) => {
+      // Validasi URL sederhana di client-side
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        setPreviewData(null);
+        setPreviewError('URL harus diawali dengan http:// atau https://');
+        return;
+      }
+
+      setIsPreviewLoading(true);
+      setPreviewError('');
+      setPreviewData(null);
+      try {
+        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const token = session?.token;
+
+        if (!token) {
+          setPreviewError('Sesi admin tidak ditemukan. Silakan login ulang.');
+          return;
+        }
+
+        // Panggil endpoint API baru di backend
+        const response = await axiosInstance.get(`/api/link-preview?url=${encodeURIComponent(url)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPreviewData(response.data);
+      } catch (err) {
+        let message = 'Gagal memuat pratinjau. Pastikan URL valid dan dapat diakses publik.';
+        if (err.response?.data?.code === 'CLOUDFLARE_BLOCKED') {
+          message = err.response.data.pesan; // Gunakan pesan spesifik dari backend
+        } else if (err.response?.status === 401 || (err.response?.status === 403 && err.response?.data?.code !== 'CLOUDFLARE_BLOCKED')) {
+          message = 'Autentikasi gagal. Sesi Anda mungkin telah berakhir.';
+        }
+        setPreviewError(message);
+        setPreviewData(null);
+      } finally {
+        setIsPreviewLoading(false);
+      }
+    };
+
+    const handler = setTimeout(() => fetchLinkPreview(currentLink), 500);
+    return () => clearTimeout(handler);
+  }, [rows[0]?.link, focusId]);
 
   const updateLink = (id, value) =>
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, link: value } : row)));
@@ -194,6 +253,15 @@ const Link = () => {
                   onChange={(e) => updateLink(row.id, e.target.value)}
                   ref={(el) => (inputRefs.current[row.id] = el)}
                 />
+
+                {/* Area Pratinjau Link */}
+                <div className="lk-preview-wrapper">
+                  <LinkPreviewCard
+                    loading={isPreviewLoading}
+                    error={previewError}
+                    data={previewData}
+                  />
+                </div>
               </div>
             ))}
           </div>

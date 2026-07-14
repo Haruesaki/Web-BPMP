@@ -9,6 +9,7 @@ const HalamanKontenController = require('../controllers/halamanKontenController'
 const InstagramController = require('../controllers/instagramController');
 const StatistikPengunjungController = require('../controllers/statistikPengunjungController');
 const AktivitasAdminController = require('../controllers/aktivitasAdminController');
+const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
@@ -33,6 +34,9 @@ router.post('/auth/login', AuthController.login);
 router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
 router.post('/auth/reset-password', AuthController.resetPassword);
+
+// ================= LINK PREVIEW =================
+router.get('/link-preview', authMiddleware, getLinkPreview);
 
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
