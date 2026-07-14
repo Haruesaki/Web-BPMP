@@ -12,13 +12,13 @@
 //  Menambah layout baru = tambah 1 baris di sini + buat komponennya.
 // =========================================================================
 
-import PostDefault from './default/PostDefault';
+import Default from './default/Default';
 import PostProfileCard from './profil/PostProfileCard';
 import PostBeritaCard from './berita/PostBeritaCard';
 import { DEFAULT_LAYOUT_KEY } from './layoutMeta';
 
 export const LAYOUT_EDITORS = {
-  default: PostDefault,
+  default: Default,
   'profile-card': PostProfileCard,
   'berita-card': PostBeritaCard,
 };

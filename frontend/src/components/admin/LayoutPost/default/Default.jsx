@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import '../default/PostDefault.css'; // pakai ulang palet gelap + tombol dasar (.pd-*)
-import './PostBeritaCard.css';
+import '../berita/PostBeritaCard.css';
 import PostDefault from '../default/PostDefault';
 
 // =========================================================================
@@ -86,7 +86,7 @@ const makeDummy = () => {
   }));
 };
 
-const PostBeritaCard = ({ menuName = '', initialBerita = null }) => {
+const Default = ({ menuName = '', initialBerita = null }) => {
   const [beritaList, setBeritaList] = useState(() => initialBerita || makeDummy());
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
@@ -248,7 +248,7 @@ const PostBeritaCard = ({ menuName = '', initialBerita = null }) => {
       <main className="bc-content">
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
-          <h1>{menuName ? `Kelola Berita — ${menuName}` : 'Kelola Berita'}</h1>
+          <h1>{menuName ? `Post Default — ${menuName}` : 'Post Default'}</h1>
           <p>Kelola daftar berita yang tampil di halaman user.</p>
         </div>
 
@@ -454,4 +454,4 @@ const PostBeritaCard = ({ menuName = '', initialBerita = null }) => {
   );
 };
 
-export default PostBeritaCard;
+export default Default;

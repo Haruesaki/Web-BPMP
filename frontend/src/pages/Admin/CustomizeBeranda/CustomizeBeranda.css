@@ -66,6 +66,135 @@
     background: var(--purple-hover);
 }
 
+/* ---------- MODAL SUKSES SIMPAN ---------- */
+.admin-layout .cb-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(3px);
+    animation: cb-overlay-in 0.2s ease-out;
+}
+
+.admin-layout .cb-success-modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 36px 32px 32px;
+    overflow: hidden;
+    text-align: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    animation: cb-modal-in 0.24s ease-out;
+}
+
+.admin-layout .cb-success-modal::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    content: '';
+    background: linear-gradient(90deg, var(--purple), #55c79f, var(--purple));
+}
+
+.admin-layout .cb-success-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--text-sub);
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-layout .cb-success-close:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-layout .cb-success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    color: #65d4aa;
+    background: rgba(76, 174, 142, 0.14);
+    border: 1px solid rgba(76, 174, 142, 0.45);
+    border-radius: 50%;
+    box-shadow: 0 0 0 8px rgba(76, 174, 142, 0.05);
+}
+
+.admin-layout .cb-success-icon i {
+    font-size: 31px;
+}
+
+.admin-layout .cb-success-modal h2 {
+    margin: 0 0 10px;
+    color: var(--text-main);
+    font-size: 21px;
+    font-weight: 650;
+}
+
+.admin-layout .cb-success-modal p {
+    max-width: 300px;
+    margin: 0 auto 26px;
+    color: var(--text-sub);
+    font-size: 14.5px;
+    line-height: 1.6;
+}
+
+.admin-layout .cb-success-button {
+    min-width: 142px;
+    padding: 11px 22px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--purple);
+    border: 0;
+    border-radius: 10px;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.admin-layout .cb-success-button:hover {
+    background: var(--purple-hover);
+    transform: translateY(-1px);
+}
+
+@keyframes cb-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes cb-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ---------- CARD BASE ---------- */
 .admin-layout .cb-card {
     background: var(--bg-card);
@@ -334,6 +463,14 @@
 
     .admin-layout .cb-btn {
         flex: 1;
+    }
+
+    .admin-layout .cb-success-overlay {
+        padding: 16px;
+    }
+
+    .admin-layout .cb-success-modal {
+        padding: 34px 24px 26px;
     }
 
 }

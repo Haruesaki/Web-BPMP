@@ -64,6 +64,9 @@ const getInitials = (nama) =>
 const PAGE_SIZE = 10;
 const EMPTY_FORM = { nama: '', email: '', password: '', verify: '', access: [] };
 
+const getRoleLabel = (user) =>
+  user?.role === 'superadmin' || user?.is_superadmin ? 'Super Admin' : 'Admin';
+
 const ManajemenUser = () => {
   const { users, setUsers, loading, error: fetchError, fetchUsers, deleteUser } = useUsers();
   const [search, setSearch] = useState('');
@@ -87,6 +90,9 @@ const ManajemenUser = () => {
   const [formMode, setFormMode] = useState('add'); // 'add' | 'edit'
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+
+  // Modal detail akun (klik baris tabel untuk membuka ringkasan profil singkat).
+  const [detailUser, setDetailUser] = useState(null);
 
   // Modal hapus.
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -141,6 +147,12 @@ const ManajemenUser = () => {
       access: user.access || ['Beranda', 'Berita', 'Dok. Kinerja', 'Pengaduan'],
     });
     setFormModalOpen(true);
+  };
+
+  // Klik baris tabel hanya membuka popup detail, tanpa memunculkan tombol
+  // edit/hapus di dalam modal agar tampilannya lebih clean dan bersih.
+  const openDetail = (user) => {
+    setDetailUser(user);
   };
 
   const closeFormModal = () => {
@@ -278,7 +290,11 @@ const ManajemenUser = () => {
                   </tr>
                 ) : (
                   visibleUsers.map((user, i) => (
-                    <tr key={user.id}>
+                    <tr
+                      key={user.id}
+                      className="mu-clickable-row"
+                      onClick={() => setDetailUser(user)}
+                    >
                       <td className="mu-col-no">{startIdx + i + 1}</td>
                       <td>
                         <div className="mu-user-cell">
@@ -297,7 +313,10 @@ const ManajemenUser = () => {
                           <button
                             className="mu-action-btn"
                             title="Edit"
-                            onClick={() => openEdit(user)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEdit(user);
+                            }}
                           >
                             <i className="fa-solid fa-pen"></i>
                           </button>
@@ -305,7 +324,8 @@ const ManajemenUser = () => {
                             <button
                               className="mu-action-btn"
                               title="Hapus"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setDeleteError(null);
                                 setDeleteTarget(user);
                               }}
@@ -455,6 +475,60 @@ const ManajemenUser = () => {
               >
                 Simpan User
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: DETAIL AKUN ================= */}
+      {detailUser && (
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDetailUser(null)}>
+          <div className="modal-box mu-detail-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header mu-detail-modal-header">
+              <div className="mu-detail-modal-title-wrap">
+                <h3>Informasi Akun</h3>
+                <p className="mu-modal-sub">Detail profil pengguna yang terdaftar pada sistem.</p>
+              </div>
+              <button className="modal-close mu-detail-modal-close" onClick={() => setDetailUser(null)} aria-label="Tutup detail akun">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="mu-detail-hero">
+                <div
+                  className="mu-detail-avatar"
+                  style={{ background: AVATAR_COLORS[(detailUser.id - 1) % AVATAR_COLORS.length] }}
+                >
+                  {getInitials(detailUser.nama)}
+                </div>
+
+                <div className="mu-detail-identity">
+                  <span className="mu-detail-kicker">Akun Terdaftar</span>
+                  <h4>{detailUser.nama}</h4>
+                  <p>{detailUser.email}</p>
+                </div>
+
+                <div className={`mu-status-badge ${detailUser.role === 'superadmin' || detailUser.is_superadmin ? 'mu-status-superadmin' : 'mu-status-admin'}`}>
+                  {getRoleLabel(detailUser)}
+                </div>
+              </div>
+
+              <div className="mu-detail-grid">
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Nama Pengguna</span>
+                  <strong className="mu-detail-info-value">{detailUser.nama}</strong>
+                </div>
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Email</span>
+                  <strong className="mu-detail-info-value">{detailUser.email}</strong>
+                </div>
+                <div className="mu-detail-info-card mu-detail-info-card-wide">
+                  <span className="mu-detail-info-label">Status</span>
+                  <strong className="mu-detail-info-value">{getRoleLabel(detailUser)}</strong>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

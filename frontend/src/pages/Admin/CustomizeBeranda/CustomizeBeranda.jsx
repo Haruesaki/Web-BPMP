@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 // Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
 // menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
 // <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
@@ -42,6 +42,8 @@ let uid = 100; // helper id lokal untuk baris dinamis (social, section, tautan)
 const nextId = () => uid++;
 
 const CustomizeBeranda = () => {
+  const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
+
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
 
@@ -151,6 +153,7 @@ const CustomizeBeranda = () => {
     // TODO: kumpulkan seluruh state di atas dan kirim ke backend
     // (PUT /api/beranda-settings)
     console.log('Simpan perubahan Customize Beranda');
+    setIsSaveSuccessOpen(true);
   };
 
   return (
@@ -170,14 +173,14 @@ const CustomizeBeranda = () => {
       </div>
 
       {/* ---------- TEMA ---------- */}
-      {/* <ThemeSetting
+      <ThemeSetting
         selectedTheme={selectedTheme}
         setSelectedTheme={setSelectedTheme}
         themes={THEMES}
-      /> */}
+      />
 
       {/* ---------- HEADER & DATA LOGO ---------- */}
-      {/* <div className="cb-grid-2">
+      <div className="cb-grid-2">
         <HeaderLogoSetting
           headerLogoPreview={headerLogoPreview}
           headerLogoName={headerLogoName}
@@ -195,10 +198,10 @@ const CustomizeBeranda = () => {
           setSavedLogo={setSavedLogo}
           savedLogoOptions={SAVED_LOGO_OPTIONS}
         />
-      </div> */}
+      </div>
 
       {/* ---------- LANDING PAGE ---------- */}
-      {/* <HeroSetting
+      <HeroSetting
         judulBeranda={judulBeranda}
         setJudulBeranda={setJudulBeranda}
         deskripsi={deskripsi}
@@ -211,16 +214,16 @@ const CustomizeBeranda = () => {
         tampilanLogo2={tampilanLogo2}
         setTampilanLogo2={setTampilanLogo2}
         logoUtamaOptions={LOGO_UTAMA_OPTIONS}
-      /> */}
+      />
 
       {/* ---------- MEDIA SOSIAL ---------- */}
-      {/* <SocialMediaSetting
+      <SocialMediaSetting
         socials={socials}
         updateSocial={updateSocial}
         handleSocialAvatarChange={handleSocialAvatarChange}
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
-      /> */}
+      />
 
       {/* ---------- SECTIONS HALAMAN BERANDA ---------- */}
       <SectionOrderSetting
@@ -233,7 +236,7 @@ const CustomizeBeranda = () => {
       />
 
       {/* ---------- FOOTER ---------- */}
-      {/* <FooterSetting
+      <FooterSetting
         footer={footer}
         setFooter={setFooter}
         googleMaps={googleMaps}
@@ -242,7 +245,47 @@ const CustomizeBeranda = () => {
         updateTautan={updateTautan}
         tambahTautan={tambahTautan}
         hapusTautan={hapusTautan}
-      /> */}
+      />
+
+      {isSaveSuccessOpen && (
+        <div
+          className="cb-success-overlay"
+          data-lenis-prevent="true"
+          onClick={() => setIsSaveSuccessOpen(false)}
+        >
+          <div
+            className="cb-success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cb-success-title"
+            aria-describedby="cb-success-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="cb-success-close"
+              aria-label="Tutup notifikasi"
+              onClick={() => setIsSaveSuccessOpen(false)}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden="true" />
+            </button>
+            <div className="cb-success-icon" aria-hidden="true">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2 id="cb-success-title">Perubahan berhasil disimpan!</h2>
+            <p id="cb-success-description">
+              Pengaturan tampilan beranda Anda telah diperbarui.
+            </p>
+            <button
+              type="button"
+              className="cb-success-button"
+              onClick={() => setIsSaveSuccessOpen(false)}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

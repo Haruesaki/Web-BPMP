@@ -13,6 +13,7 @@ import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
 import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
 import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
 import CustomizeBeranda from '../pages/Admin/CustomizeBeranda/CustomizeBeranda';
+import Link from '../components/admin/LayoutLink/Link';
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -42,6 +43,7 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin" element={<DashboardAdmin />} />
                     <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
+                    <Route path="/admin/link" element={<Link />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                     {/* Editor konten menu — route DINAMIS per layout (:layout).
                         Contoh: /admin/post/default → editor layout Default.
