@@ -87,19 +87,29 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
         const childMenus = data.filter(m => m.induk_id !== null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
 
         const tree = parentMenus.map(p => {
+          const generatePath = (item) => {
+            if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
+            if (item.jenis_menu === 'post') {
+              if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
+              // Di masa depan, layout post lain bisa ditambahkan di sini
+              return `/admin/post/${item.slug_atau_tautan || 'default'}`;
+            }
+            return item.slug_atau_tautan || '#';
+          };
+
           const subs = childMenus.filter(c => c.induk_id === p.id);
           return {
             id: p.id.toString(),
             label: p.nama_menu,
             icon: p.ikon_menu,
             jenis: p.jenis_menu,
-            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}` : (p.jenis_menu === 'link' ? `/admin/link/${p.id}` : (p.slug_atau_tautan || '#')),
+            path: generatePath(p),
             submenus: subs.map(s => ({
               id: s.id.toString(),
               label: s.nama_menu,
               icon: s.ikon_menu,
               jenis: s.jenis_menu,
-              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}` : (s.jenis_menu === 'link' ? `/admin/link/${s.id}` : (s.slug_atau_tautan || '#'))
+              path: generatePath(s)
             }))
           };
         });

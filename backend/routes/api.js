@@ -51,6 +51,7 @@ router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 
 // ================= HALAMAN KONTEN ROUTES =================
 router.post('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.upsertKonten);
+router.get('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.getKontenByMenuId);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)

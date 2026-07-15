@@ -59,6 +59,30 @@ class HalamanKontenController {
       res.status(500).json({ pesan: 'Gagal menyimpan konten ke database' });
     }
   }
+
+  // GET /api/halaman-konten/:menu_id
+  static async getKontenByMenuId(req, res) {
+    const { menu_id } = req.params;
+    try {
+      const konten = await db('halaman_konten').where('menu_id', menu_id).first();
+
+      if (konten && konten.deskripsi_kaya) {
+        // deskripsi_kaya disimpan sebagai string JSON, jadi kita parse
+        const data = JSON.parse(konten.deskripsi_kaya);
+        res.json(data);
+      } else {
+        // Jika tidak ada konten, kembalikan struktur kosong yang diharapkan frontend
+        res.json({ profiles: [] });
+      }
+    } catch (error) {
+      console.error(`Error getKontenByMenuId untuk menu_id ${menu_id}:`, error);
+      // Jika terjadi error saat parsing JSON (mis. data korup), kembalikan juga struktur kosong
+      if (error instanceof SyntaxError) {
+        return res.json({ profiles: [] });
+      }
+      res.status(500).json({ pesan: 'Gagal mengambil data konten' });
+    }
+  }
 }
 
 module.exports = HalamanKontenController;
