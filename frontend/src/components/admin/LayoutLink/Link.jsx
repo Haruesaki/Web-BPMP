@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-// Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
-// menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
-// <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 import './Link.css';
+import LinkPreviewCard from './LinkPreviewCard';
 
 // =========================================================================
 //  CATATAN
@@ -21,46 +19,11 @@ import './Link.css';
 //  tombol "Simpan" di bawah untuk benar-benar menyimpan perubahan link.
 // =========================================================================
 
-// Ratakan menu utama + submenu jadi satu list datar, HANYA yang jenis_menu
-// = 'link'. Tetap simpan level (0 = menu utama, 1 = submenu) untuk tampilan.
-const flattenLinkMenus = (menus) =>
-  menus.flatMap((menu) => {
-    const rows = [];
-    if (menu.jenis_menu === 'link') {
-      rows.push({
-        id: menu.id,
-        label: menu.nama_menu,
-        active: menu.is_aktif,
-        link: menu.slug_atau_tautan || '',
-        level: 0,
-        parentId: null,
-      });
-    }
-    menu.submenus
-      .filter((sub) => sub.jenis_menu === 'link')
-      .forEach((sub) => {
-        rows.push({
-          id: sub.id,
-          label: sub.nama_menu,
-          active: sub.is_aktif,
-          link: sub.slug_atau_tautan || '',
-          level: 1,
-          parentId: menu.id,
-        });
-      });
-    return rows;
-  });
-
 const Link = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Dikirim dari AdminSidebar.jsx saat menu bertipe 'link' diklik:
-  // navigate('/admin/link', { state: { menuId } })
-  // ID menu dari sidebar dikirim sebagai string (lihat AdminSidebar.jsx: p.id.toString()),
-  // sedangkan id dari GET /api/menus di sini masih number. Samakan ke string
-  // supaya perbandingan highlight tidak meleset.
-  const focusId = location.state?.menuId != null ? String(location.state.menuId) : null;
+  const { menuId } = useParams();
+  // ID ada di URL agar menu yang sedang diedit tetap tepat saat browser di-refresh.
+  const focusId = menuId ? String(menuId) : null;
   const hasScrolledRef = useRef(false);
   const rowRefs = useRef({});
   const inputRefs = useRef({});
@@ -69,36 +32,50 @@ const Link = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  const fetchMenus = async () => {
-    try {
-      setLoading(true);
-      const res = await axiosInstance.get('/api/menus');
-      const flatData = res.data;
-
-      const parentMenus = flatData
-        .filter((m) => m.induk_id === null)
-        .sort((a, b) => a.urutan_tampil - b.urutan_tampil);
-      const subMenusFlat = flatData
-        .filter((m) => m.induk_id !== null)
-        .sort((a, b) => a.urutan_tampil - b.urutan_tampil);
-
-      const treeData = parentMenus.map((p) => ({
-        ...p,
-        submenus: subMenusFlat.filter((s) => s.induk_id === p.id),
-      }));
-
-      setRows(flattenLinkMenus(treeData));
-    } catch (err) {
-      console.error('Gagal memuat data menu', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // State untuk Fitur Pratinjau Link
+  const [previewData, setPreviewData] = useState(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState('');
 
   useEffect(() => {
-    fetchMenus();
-  }, []);
+    const fetchMenu = async () => {
+      if (!focusId) {
+        setRows([]);
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        // Meskipun kita hanya butuh satu, API saat ini mengembalikan semua menu.
+        // Kita akan filter di frontend.
+        const res = await axiosInstance.get('/api/menus');
+        const allMenus = res.data;
+        const targetMenu = allMenus.find(m => String(m.id) === focusId);
+
+        if (targetMenu && targetMenu.jenis_menu === 'link') {
+          setRows([{
+            id: targetMenu.id,
+            label: targetMenu.nama_menu,
+            active: targetMenu.is_aktif,
+            link: targetMenu.slug_atau_tautan || '',
+            level: targetMenu.induk_id === null ? 0 : 1,
+            parentId: targetMenu.induk_id,
+          }]);
+        } else {
+          setRows([]); // Menu tidak ditemukan atau bukan tipe 'link'
+        }
+      } catch (err) {
+        console.error('Gagal memuat data menu', err);
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    hasScrolledRef.current = false;
+    fetchMenu();
+  }, [focusId]);
 
   // Setelah data selesai dimuat, scroll ke baris menu yang dituju (kalau ada)
   // dan langsung fokus ke input link-nya. Hanya dijalankan sekali per
@@ -116,6 +93,62 @@ const Link = () => {
     hasScrolledRef.current = true;
   }, [loading, focusId]);
 
+  // Debounce effect untuk memicu pengambilan pratinjau link.
+  // Hanya berjalan saat user berhenti mengetik selama 500ms.
+  useEffect(() => {
+    const currentLink = rows[0]?.link;
+
+    // Jangan lakukan apa-apa jika tidak ada link atau menu yang dipilih
+    if (!currentLink || !focusId) {
+      setPreviewData(null);
+      setPreviewError('');
+      setIsPreviewLoading(false);
+      return;
+    }
+
+    const fetchLinkPreview = async (url) => {
+      // Validasi URL sederhana di client-side
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        setPreviewData(null);
+        setPreviewError('URL harus diawali dengan http:// atau https://');
+        return;
+      }
+
+      setIsPreviewLoading(true);
+      setPreviewError('');
+      setPreviewData(null);
+      try {
+        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const token = session?.token;
+
+        if (!token) {
+          setPreviewError('Sesi admin tidak ditemukan. Silakan login ulang.');
+          return;
+        }
+
+        // Panggil endpoint API baru di backend
+        const response = await axiosInstance.get(`/api/link-preview?url=${encodeURIComponent(url)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPreviewData(response.data);
+      } catch (err) {
+        let message = 'Gagal memuat pratinjau. Pastikan URL valid dan dapat diakses publik.';
+        if (err.response?.data?.code === 'CLOUDFLARE_BLOCKED') {
+          message = err.response.data.pesan; // Gunakan pesan spesifik dari backend
+        } else if (err.response?.status === 401 || (err.response?.status === 403 && err.response?.data?.code !== 'CLOUDFLARE_BLOCKED')) {
+          message = 'Autentikasi gagal. Sesi Anda mungkin telah berakhir.';
+        }
+        setPreviewError(message);
+        setPreviewData(null);
+      } finally {
+        setIsPreviewLoading(false);
+      }
+    };
+
+    const handler = setTimeout(() => fetchLinkPreview(currentLink), 500);
+    return () => clearTimeout(handler);
+  }, [rows[0]?.link, focusId]);
+
   const updateLink = (id, value) =>
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, link: value } : row)));
 
@@ -125,6 +158,10 @@ const Link = () => {
 
   const handleSimpan = async () => {
     setSaveError('');
+    if (!focusId || rows.length === 0) {
+      setSaveError('Menu Link yang akan disimpan tidak ditemukan.');
+      return;
+    }
     setSaving(true);
     try {
       const session = JSON.parse(sessionStorage.getItem('adminSession'));
@@ -144,13 +181,17 @@ const Link = () => {
       );
 
       triggerSidebarRefresh();
-      navigate('/admin/pengaturan-menu');
+      setIsSuccessModalOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan link menu', error);
       setSaveError(error.response?.data?.pesan || 'Gagal menyimpan perubahan link. Coba lagi.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setIsSuccessModalOpen(false);
   };
 
   if (loading) {
@@ -166,10 +207,10 @@ const Link = () => {
       {/* ---------- HEADING + AKSI ---------- */}
       <div className="lk-header">
         <div className="lk-heading">
-          <h1>Kelola Link Menu</h1>
-          <p>Atur tautan (URL) tujuan untuk setiap menu bertipe Link yang sudah dibuat.</p>
+          <h1>{rows[0]?.label ? `Kelola Link - ${rows[0].label}` : 'Kelola Link Menu'}</h1>
+          <p>Atur tautan (URL) tujuan untuk menu Link yang sedang dipilih.</p>
         </div>
-        <button className="lk-btn-simpan" onClick={handleSimpan} disabled={saving}>
+        <button className="lk-btn-simpan" onClick={handleSimpan} disabled={saving || !focusId || rows.length === 0}>
           {saving ? 'Menyimpan...' : 'Simpan'}
         </button>
       </div>
@@ -186,8 +227,10 @@ const Link = () => {
           <span className="lk-card-hint">Isi link tujuan untuk masing-masing menu</span>
         </div>
 
-        {rows.length === 0 ? (
-          <div className="lk-empty">Belum ada menu bertipe Link. Tambahkan lewat "Tambah Menu" di sidebar.</div>
+        {!focusId ? (
+          <div className="lk-empty">Pilih menu bertipe Link dari sidebar untuk mengatur tautannya.</div>
+        ) : rows.length === 0 ? (
+          <div className="lk-empty">Menu Link tidak ditemukan atau tidak lagi bertipe Link.</div>
         ) : (
           <div className="lk-list">
             {rows.map((row) => (
@@ -215,11 +258,41 @@ const Link = () => {
                   onChange={(e) => updateLink(row.id, e.target.value)}
                   ref={(el) => (inputRefs.current[row.id] = el)}
                 />
+
+                {/* Area Pratinjau Link */}
+                <div className="lk-preview-wrapper">
+                  <LinkPreviewCard
+                    loading={isPreviewLoading}
+                    error={previewError}
+                    data={previewData}
+                  />
+                </div>
               </div>
             ))}
           </div>
         )}
       </section>
+
+      {/* Modal Sukses Simpan */}
+      {isSuccessModalOpen && (
+        <div className="lk-success-overlay" data-lenis-prevent="true" onClick={handleCloseSuccessModal}>
+          <div className="lk-success-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="lk-success-icon">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2>Perubahan berhasil disimpan!</h2>
+            <p>
+              Tautan untuk menu <strong>{rows[0]?.label || ''}</strong> telah berhasil diperbarui.
+            </p>
+            <button
+              className="lk-success-button"
+              onClick={handleCloseSuccessModal}
+            >
+              Oke!
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

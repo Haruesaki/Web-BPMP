@@ -1,4 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 import axiosInstance from '../../../api/axiosInstance';
 import { getAuthHeaders } from '../../../api/userApi';
 import './dashboard-admin.css';
@@ -14,6 +24,27 @@ const getWeekOfMonth = (date) => {
   const startMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const diff = date.getDate() - 1 + startMonth.getDay();
   return Math.floor(diff / 7) + 1;
+};
+
+// Warna bar chart statistik pengunjung — disamakan dengan --green & --purple-soft
+// di dashboard-admin.css. Ditulis literal (bukan var(--...)) karena dukungan
+// CSS custom property pada atribut SVG `fill` tidak konsisten di semua browser.
+const CHART_BAR_COLOR = '#4cae8e';
+const CHART_BAR_HIGHLIGHT_COLOR = '#c3c4f7';
+
+// Tooltip custom Recharts, di-styling manual lewat CSS (bukan pakai Tooltip
+// bawaan Recharts yang defaultnya putih) supaya cocok dengan tema gelap.
+const ChartTooltip = ({ active, payload, label, chartMode }) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="chart-tooltip">
+      <p className="chart-tooltip-label">{label}</p>
+      <p className="chart-tooltip-value">
+        {Number(payload[0].value).toLocaleString('id-ID')}{' '}
+        {chartMode === 'unik' ? 'Pengunjung Unik' : 'Tayangan'}
+      </p>
+    </div>
+  );
 };
 
 const DashboardAdmin = () => {
@@ -97,7 +128,7 @@ const DashboardAdmin = () => {
     filtered = filtered.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
     const valueKey = chartMode === 'unik' ? 'pengunjung_unik' : 'total_hits';
-    const maxVal = Math.max(...filtered.map(d => parseInt(d[valueKey] || 0)), 100);
+    const maxVal = Math.max(...filtered.map(d => parseInt(d[valueKey] || 0)), 0);
     return filtered.map(d => {
       const tStr = typeof d.tanggal === 'string' ? d.tanggal.split('T')[0] : '';
       const [y, m, day] = (tStr || '2000-01-01').split('-');
@@ -106,12 +137,10 @@ const DashboardAdmin = () => {
       const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
       const dateNum = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const value = parseInt(d[valueKey] || 0);
-      const percentage = (value / maxVal) * 100;
       return {
         label: `${dayName}, ${dateNum}`,
         value,
-        percentage,
-        highlight: percentage === 100
+        highlight: value === maxVal && maxVal > 0
       };
     });
   }, [pengunjungData, filterYear, filterMonth, filterWeek, chartMode]);
@@ -203,29 +232,42 @@ const DashboardAdmin = () => {
             </div>
           </div>
 
-          <div className="chart-area" style={{overflowX: 'auto'}}>
+          <div className="chart-area">
             {chartData.length === 0 ? (
-               <div style={{padding: '40px', textAlign: 'center', width: '100%'}}>Tidak ada data pengunjung untuk filter yang dipilih.</div>
+              <div className="chart-empty">Tidak ada data pengunjung untuk filter yang dipilih.</div>
             ) : (
-            <>
-              <div className="chart-yaxis">
-                <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+              <div className="chart-scroll" style={{ minWidth: `${Math.max(chartData.length * 60, 480)}px` }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 20, right: 8, left: 0, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fill: '#C7C4D8', fontSize: 11 }}
+                      axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fill: '#5b6478', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={40}
+                    />
+                    <Tooltip
+                      content={<ChartTooltip chartMode={chartMode} />}
+                      cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                    />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={46}>
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.highlight ? CHART_BAR_HIGHLIGHT_COLOR : CHART_BAR_COLOR}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              <div className="chart-bars" style={{minWidth: `${chartData.length * 60}px`}}>
-                {chartData.map((d, i) => (
-                  <div key={i} className="chart-bar-col">
-                    <span style={{fontSize: '11px', fontWeight: 'bold', marginBottom: '4px'}}>{d.value}</span>
-                    <div className="chart-bar-track" title={`${d.value} ${chartMode === 'unik' ? 'Pengunjung Unik' : 'Tayangan'}`}>
-                      <div
-                        className={`chart-bar ${d.highlight ? 'highlight' : ''}`}
-                        style={{ height: `${Math.max(d.percentage, 1)}%`, minHeight: '4px' }}
-                      ></div>
-                    </div>
-                    <span className="chart-bar-label" style={{fontSize: '11px', textAlign:'center'}}>{d.label}</span>
-                  </div>
-                ))}
-              </div>
-            </>
             )}
           </div>
         </section>

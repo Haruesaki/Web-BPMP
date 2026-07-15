@@ -168,66 +168,48 @@
     color: var(--text-sub);
 }
 
-/* ---------- CHART ---------- */
+/* ---------- CHART (Recharts) ---------- */
 .admin-layout .chart-area {
-    display: flex;
-    gap: 16px;
     height: 300px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-.admin-layout .chart-yaxis {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-bottom: 26px;
-    font-size: 12px;
-    color: var(--text-faint);
-    text-align: right;
-    flex-shrink: 0;
-}
-
-.admin-layout .chart-bars {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    border-left: 1px solid var(--border-soft);
-    padding-left: 14px;
-}
-
-.admin-layout .chart-bar-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.admin-layout .chart-scroll {
     height: 100%;
 }
 
-.admin-layout .chart-bar-track {
-    flex: 1;
-    width: 100%;
+.admin-layout .chart-empty {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-}
-
-.admin-layout .chart-bar {
-    width: 60%;
-    max-width: 46px;
-    background: var(--green);
-    border-radius: 6px 6px 0 0;
-    transition: height 0.4s ease;
-}
-
-.admin-layout .chart-bar.highlight {
-    background: var(--purple-soft);
-}
-
-.admin-layout .chart-bar-label {
-    margin-top: 10px;
-    font-size: 12.5px;
+    height: 100%;
     color: var(--text-sub);
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
+}
+
+/* Tooltip custom (menggantikan tooltip putih bawaan Recharts) */
+.admin-layout .chart-tooltip {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.admin-layout .chart-tooltip-label {
+    margin: 0 0 4px;
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.admin-layout .chart-tooltip-value {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
 }
 
 /* ---------- CARD: ACTIVITY ---------- */

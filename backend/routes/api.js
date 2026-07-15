@@ -36,6 +36,9 @@ router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
 router.post('/auth/reset-password', AuthController.resetPassword);
 
+// ================= LINK PREVIEW =================
+router.get('/link-preview', authMiddleware, getLinkPreview);
+
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
 

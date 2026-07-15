@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../default/PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
 import './PostProfileCard.css';
+import axiosInstance from '../../../../api/axiosInstance';
 import { uploadImageToServer } from '../uploadImage';
 
 // =========================================================================
@@ -21,16 +23,14 @@ import { uploadImageToServer } from '../uploadImage';
 const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 const inisialDari = (n) => (n && n.trim() ? n.trim().slice(0, 2).toUpperCase() : '?');
 
-const PostProfileCard = ({
-  menuName = '',
-  initialProfiles = [],
-  onSave,
-  onCancel,
-}) => {
+const PostProfileCard = () => {
+  const navigate = useNavigate();
+  const { menuId } = useParams();
+  const [menuName, setMenuName] = useState('');
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
   // Daftar kartu profil yang sudah ditambahkan.
-  const [cards, setCards] = useState(() =>
-    initialProfiles.map((p) => ({ id: p.id || makeId(), ...p }))
-  );
+  const [cards, setCards] = useState([]);
 
   // --- STATE FORM (untuk menambah / mengedit satu kartu) ---
   const [nama, setNama] = useState('');
@@ -42,6 +42,35 @@ const PostProfileCard = ({
   const [uploadError, setUploadError] = useState('');
   const [formError, setFormError] = useState('');
   const [editingId, setEditingId] = useState(null); // null = mode tambah
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!menuId) {
+        setIsPageLoading(false);
+        return;
+      }
+      try {
+        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const token = session?.token;
+
+        const menuRes = await axiosInstance.get('/api/menus');
+        const currentMenu = menuRes.data.find(m => String(m.id) === menuId);
+        if (currentMenu) setMenuName(currentMenu.nama_menu);
+
+        const contentRes = await axiosInstance.get(`/api/halaman-konten/${menuId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const initialProfiles = contentRes.data.profiles || [];
+        setCards(initialProfiles.map((p) => ({ id: p.id || makeId(), ...p })));
+
+      } catch (err) {
+        console.error('Gagal memuat data awal profil:', err);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+    fetchData();
+  }, [menuId]);
 
   const resetForm = () => {
     setNama('');
@@ -126,19 +155,30 @@ const PostProfileCard = ({
     if (editingId === id) resetForm();
   };
 
-  const handleSimpan = () => {
+  const handleSimpan = async () => {
     const data = { profiles: cards };
-    if (onSave) onSave(data);
-    else console.log(data); // fallback standalone
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+      await axiosInstance.post(`/api/halaman-konten/${menuId}`, {
+        judul: menuName || 'Profil',
+        deskripsi_kaya: JSON.stringify(data),
+        kunci_halaman: `profil-${menuId}`
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      navigate(`/admin/kelola-profil/${menuId}`);
+    } catch (error) {
+      console.error('Gagal menyimpan data profil:', error);
+      alert('Gagal menyimpan data. Silakan coba lagi.');
+    }
   };
 
   const handleBatal = () => {
-    if (onCancel) onCancel();
-    else {
-      setCards([]);
-      resetForm();
-    }
+    navigate(`/admin/kelola-profil/${menuId}`);
   };
+
+  if (isPageLoading) return <div className="postdefault"><main className="pd-content"><p>Memuat editor...</p></main></div>;
 
   return (
     <div className="postdefault">

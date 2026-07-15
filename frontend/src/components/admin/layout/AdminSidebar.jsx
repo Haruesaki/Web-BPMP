@@ -13,7 +13,7 @@ const adminMenuItems1 = [
 // --- DATA: MENU STATIS BAGIAN BAWAH ---
 const adminMenuItems2 = [
   { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: '/admin/manajemen-user' },
-  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear' },
+  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: '/admin/setting' },
 ];
 
 const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
@@ -42,6 +42,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     '/admin/customize-beranda': 'customize',
     '/admin/pengaturan-menu': 'pengaturan-menu',
     '/admin/manajemen-user': 'manajemen',
+    '/admin/setting': 'setting',
   };
 
   // Helper kecil untuk menjaga state aktif tetap sinkron dengan URL saat ini.
@@ -108,6 +109,16 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
         const childMenus = data.filter(m => m.induk_id !== null).sort((a,b) => a.urutan_tampil - b.urutan_tampil);
 
         const tree = parentMenus.map(p => {
+          const generatePath = (item) => {
+            if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
+            if (item.jenis_menu === 'post') {
+              if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
+              // Di masa depan, layout post lain bisa ditambahkan di sini
+              return `/admin/post/${item.slug_atau_tautan || 'default'}`;
+            }
+            return item.slug_atau_tautan || '#';
+          };
+
           const subs = childMenus.filter(c => c.induk_id === p.id);
           return {
             id: p.id.toString(),

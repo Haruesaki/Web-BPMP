@@ -16,6 +16,9 @@ import CustomizeBeranda from '../pages/Admin/CustomizeBeranda/CustomizeBeranda';
 import Link from '../components/admin/LayoutLink/Link';
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
+import PreviewProfilCard from '../components/admin/LayoutPost/profil/PreviewProfilCard';
+import PostProfileCard from '../components/admin/LayoutPost/profil/PostProfileCard';
+import Setting from '../pages/Admin/Setting/Setting';
 
 // Editor konten menu (CKEditor) berukuran besar → lazy-load agar tidak
 // membebani bundle halaman admin lain. Host ini memilih editor sesuai layout.
@@ -43,8 +46,11 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin" element={<DashboardAdmin />} />
                     <Route path="/admin/customize-beranda" element={<CustomizeBeranda />} />
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
-                    <Route path="/admin/link" element={<Link />} />
+                    <Route path="/admin/link/:menuId?" element={<Link />} />
+                    <Route path="/admin/kelola-profil/:menuId" element={<PreviewProfilCard />} />
+                    <Route path="/admin/profil/edit/:menuId" element={<PostProfileCard />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
+                    <Route path="/admin/setting" element={<Setting />} />
                     {/* Editor konten menu — route DINAMIS per layout (:layout).
                         Contoh: /admin/post/default → editor layout Default.
                         Dimasukkan ke dalam AdminLayout agar Sidebar tetap terlihat! */}
