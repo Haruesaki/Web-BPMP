@@ -13,7 +13,7 @@ const adminMenuItems1 = [
 // --- DATA: MENU STATIS BAGIAN BAWAH ---
 const adminMenuItems2 = [
   { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: '/admin/manajemen-user' },
-  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear' },
+  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: '/admin/setting' },
 ];
 
 const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
@@ -35,6 +35,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     '/admin/customize-beranda': 'customize',
     '/admin/pengaturan-menu': 'pengaturan-menu',
     '/admin/manajemen-user': 'manajemen',
+    '/admin/setting': 'setting',
   };
 
   // Helper kecil untuk menjaga state aktif tetap sinkron dengan URL saat ini.
