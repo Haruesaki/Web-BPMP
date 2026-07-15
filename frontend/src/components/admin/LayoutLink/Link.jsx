@@ -32,6 +32,7 @@ const Link = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   // State untuk Fitur Pratinjau Link
   const [previewData, setPreviewData] = useState(null);
@@ -180,13 +181,17 @@ const Link = () => {
       );
 
       triggerSidebarRefresh();
-      navigate('/admin/pengaturan-menu');
+      setIsSuccessModalOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan link menu', error);
       setSaveError(error.response?.data?.pesan || 'Gagal menyimpan perubahan link. Coba lagi.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setIsSuccessModalOpen(false);
   };
 
   if (loading) {
@@ -267,6 +272,27 @@ const Link = () => {
           </div>
         )}
       </section>
+
+      {/* Modal Sukses Simpan */}
+      {isSuccessModalOpen && (
+        <div className="lk-success-overlay" data-lenis-prevent="true" onClick={handleCloseSuccessModal}>
+          <div className="lk-success-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="lk-success-icon">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2>Perubahan berhasil disimpan!</h2>
+            <p>
+              Tautan untuk menu <strong>{rows[0]?.label || ''}</strong> telah berhasil diperbarui.
+            </p>
+            <button
+              className="lk-success-button"
+              onClick={handleCloseSuccessModal}
+            >
+              Oke!
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

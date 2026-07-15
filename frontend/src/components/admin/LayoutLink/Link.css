@@ -243,3 +243,84 @@
         width: 100%;
     }
 }
+
+/* ---------- MODAL SUKSES ---------- */
+.admin-layout .lk-success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.admin-layout .lk-success-modal {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    padding: 32px;
+    text-align: center;
+    animation: lk-success-fade-in 0.3s ease-out;
+}
+
+@keyframes lk-success-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.admin-layout .lk-success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 24px;
+}
+
+.admin-layout .lk-success-modal h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .lk-success-modal p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 12px 0 28px;
+    line-height: 1.6;
+}
+
+.admin-layout .lk-success-button {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .lk-success-button:hover {
+    background: var(--purple-hover);
+}

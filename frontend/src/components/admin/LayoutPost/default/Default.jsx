@@ -249,7 +249,7 @@ const Default = ({ menuName = '', initialBerita = null }) => {
         {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
           <h1>{menuName ? `Post Default — ${menuName}` : 'Post Default'}</h1>
-          <p>Kelola daftar berita yang tampil di halaman user.</p>
+          <p>Kelola daftar Post Menu berikut yang tampil di halaman user.</p>
         </div>
 
         {/* ---------- TOOLBAR: search + tombol tambah ---------- */}
@@ -267,7 +267,7 @@ const Default = ({ menuName = '', initialBerita = null }) => {
             />
           </div>
           <button className="bc-btn-tambah" onClick={handleTambah}>
-            <i className="fa-solid fa-plus"></i> Tambah Berita
+            <i className="fa-solid fa-plus"></i> Tambah Post
           </button>
         </div>
 
