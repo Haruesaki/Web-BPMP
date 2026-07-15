@@ -1,6 +1,14 @@
 /* =========================================
    SECTION INSTAGRAM 
    ========================================= */
+
+.container-instagram-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 100px 0px;
+}
+
 .instagram-section {
     width: 100%;
     display: flex;

@@ -106,6 +106,7 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
     }, []);
 
     return (
+        <section className="container-youtube-section">
         <section className="youtube-section">
             <div className="yt-header-bar">
                 <div className="yt-profile-left">
@@ -210,6 +211,7 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
                     })()}
                 </div>
             </div>
+        </section>
         </section>
     );
 };

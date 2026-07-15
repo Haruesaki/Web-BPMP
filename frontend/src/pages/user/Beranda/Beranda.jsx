@@ -9,6 +9,7 @@ import HeroSection from '../../../components/common/HeroSection';
 import PartnerSection from '../../../components/user/partner/PartnerSection';
 import InstagramSection from '../../../components/user/instagram/InstagramSection';
 import YoutubeSection from '../../../components/user/youtube/YoutubeSection';
+import JumlahPengunjung from '../../../components/user/jumlah-pengunjung/JumlahPengunjung';
 
 
 const Beranda = ({ lenisRef }) => {
@@ -30,6 +31,8 @@ const Beranda = ({ lenisRef }) => {
       <InstagramSection igProfile={igProfile} loading={igLoading} />
 
       <YoutubeSection ytVideos={ytVideos} ytChannel={ytChannel} />
+
+      <JumlahPengunjung/>
 
     </>
   );

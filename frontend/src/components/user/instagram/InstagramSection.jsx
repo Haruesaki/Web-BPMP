@@ -103,12 +103,8 @@ const InstagramSection = ({ igProfile, loading }) => {
     }, []);
 
     return (
+        <section className="container-instagram-section">
         <section className="instagram-section">
-            <div className="ig-banner-wrapper">
-                <div className="ig-banner-oval"></div>
-                <h2 className="ig-banner-text">Ikuti Media Sosial BPMP Lampung</h2>
-            </div>
-
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
                     <img 
@@ -165,6 +161,7 @@ const InstagramSection = ({ igProfile, loading }) => {
                     <InstagramEmbedCard postId="DaKohaEPomy" />
                 </div>
             </div>
+        </section>
         </section>
     );
 };

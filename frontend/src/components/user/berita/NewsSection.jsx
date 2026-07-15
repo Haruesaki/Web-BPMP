@@ -61,11 +61,7 @@ const NewsSection = () => {
 
         setPaginatedNews(currentNews);
 
-        if (currentNews.length > 0) {
-            setFeaturedIndex(0);
-        } else {
-            setFeaturedIndex(0);
-        }
+        setFeaturedIndex(0);
 
         // Cleanup interval saat berpindah halaman
         return () => stopAutoSlide();
@@ -82,6 +78,7 @@ const NewsSection = () => {
         const newIndex = paginatedNews.findIndex(item => item.id === newsItem.id);
         if (newIndex !== -1 && newIndex !== featuredIndex) {
             setFeaturedIndex(newIndex);
+            startAutoSlide(); // Reset timer saat interaksi manual
         }
     };
 
@@ -91,6 +88,7 @@ const NewsSection = () => {
     };
 
     return (
+        <section className="container-news-section"> 
         <section className="news-section">
             <div className="news-header-bar">
                 <h2>BERITA TERKINI</h2>
@@ -119,7 +117,17 @@ const NewsSection = () => {
 
                     <div className="thumbnail-row">
                         {thumbnailNews.map(thumb => (
-                            <img key={thumb.id} src={thumb.image} alt={`Thumbnail: ${thumb.title}`} className="thumb-img" />
+                            <img
+                                key={thumb.id}
+                                src={thumb.image}
+                                alt={`Thumbnail: ${thumb.title}`}
+                                className="thumb-img"
+                                onMouseEnter={() => handleSetFeatured(thumb)}
+                                onClick={() => handleSetFeatured(thumb)}
+                                // onFocus ditambahkan untuk aksesibilitas keyboard
+                                onFocus={() => handleSetFeatured(thumb)} 
+                                tabIndex="0" // Membuat gambar bisa difokus
+                                role="button" />
                         ))}
                     </div>
                 </div>
@@ -131,9 +139,14 @@ const NewsSection = () => {
 
                     <div className="news-list">
                         {paginatedNews.map(news => (
-                            <div key={news.id} onMouseEnter={() => handleSetFeatured(news)}>
-                                <NewsCard category={news.category} title={news.title} date={news.date} />
-                            </div>
+                            <NewsCard
+                                key={news.id}
+                                category={news.category}
+                                title={news.title}
+                                date={news.date}
+                                onMouseEnter={() => handleSetFeatured(news)}
+                                onFocus={() => handleSetFeatured(news)} // Prop onFocus untuk aksesibilitas
+                            />
                         ))}
                     </div>
 
@@ -152,6 +165,7 @@ const NewsSection = () => {
                     </div>
                 </div>
             </div>
+        </section>
         </section>
     );
 };
