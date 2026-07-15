@@ -62,7 +62,7 @@ const PreviewProfilCard = () => {
             <div className="ppc-preview-header">
                 <div className="ppc-preview-heading">
                     <h1>Kelola Profil - {menuName}</h1>
-                    <p>Kelola daftar kartu profil yang akan ditampilkan di halaman ini.</p>
+                    <p>Kelola daftar kartu profil yang akan ditampilkan di halaman pengguna.</p>
                 </div>
                 <button className="ppc-preview-btn-tambah" onClick={handleAddOrEditProfile}>
                     {profiles.length > 0 ? 'Edit Data Profil' : 'Tambah Data Profil'}
