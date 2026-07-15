@@ -11,6 +11,7 @@ const StatistikPengunjungController = require('../controllers/statistikPengunjun
 const AktivitasAdminController = require('../controllers/aktivitasAdminController');
 const ProfilPegawaiController = require('../controllers/profilPegawaiController');
 const BeritaController = require('../controllers/beritaController');
+const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
