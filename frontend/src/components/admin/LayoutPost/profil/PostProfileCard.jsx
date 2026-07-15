@@ -57,11 +57,18 @@ const PostProfileCard = () => {
         const currentMenu = menuRes.data.find(m => String(m.id) === menuId);
         if (currentMenu) setMenuName(currentMenu.nama_menu);
 
-        const contentRes = await axiosInstance.get(`/api/halaman-konten/${menuId}`, {
+        const contentRes = await axiosInstance.get(`/api/profil-pegawai/${menuId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const initialProfiles = contentRes.data.profiles || [];
-        setCards(initialProfiles.map((p) => ({ id: p.id || makeId(), ...p })));
+        
+        const initialProfiles = contentRes.data || [];
+        setCards(initialProfiles.map((p) => ({ 
+          id: p.id || makeId(), 
+          nama: p.nama_lengkap || '', 
+          jabatan: p.jabatan || '', 
+          gambar: p.url_foto || '', 
+          quotes: p.quotes || '' 
+        })));
 
       } catch (err) {
         console.error('Gagal memuat data awal profil:', err);
@@ -155,22 +162,50 @@ const PostProfileCard = () => {
     if (editingId === id) resetForm();
   };
 
+  const [saveError, setSaveError] = useState('');
+
   const handleSimpan = async () => {
-    const data = { profiles: cards };
+    setSaveError(''); // Reset error
     try {
       const session = JSON.parse(sessionStorage.getItem('adminSession'));
       const token = session?.token;
-      await axiosInstance.post(`/api/halaman-konten/${menuId}`, {
-        judul: menuName || 'Profil',
-        deskripsi_kaya: JSON.stringify(data),
-        kunci_halaman: `profil-${menuId}`
-      }, {
+      
+      let finalProfiles = cards.map(c => ({
+        nama: c.nama,
+        jabatan: c.jabatan,
+        gambar: c.gambar,
+        quotes: c.quotes
+      }));
+
+      // Auto-add or update if user typed something but forgot to click the "+ Tambah Profil" button
+      if (nama.trim()) {
+        const currentEntry = {
+          nama: nama.trim(),
+          jabatan: jabatan.trim(),
+          gambar,
+          quotes: quotes.trim()
+        };
+
+        if (editingId) {
+          const index = cards.findIndex(c => c.id === editingId);
+          if (index !== -1) finalProfiles[index] = currentEntry;
+        } else {
+          finalProfiles.push(currentEntry);
+        }
+      }
+
+      const payload = { profiles: finalProfiles };
+
+      await axiosInstance.post(`/api/profil-pegawai/${menuId}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       navigate(`/admin/kelola-profil/${menuId}`);
     } catch (error) {
       console.error('Gagal menyimpan data profil:', error);
-      alert('Gagal menyimpan data. Silakan coba lagi.');
+      const resData = error.response?.data || {};
+      let errorMsg = resData.pesan || resData.message || error.message || 'Terjadi kesalahan jaringan saat menyimpan.';
+      if (resData.detail) errorMsg += ` Detail: ${resData.detail}`;
+      setSaveError(`❌ Gagal menyimpan data: ${errorMsg}`);
     }
   };
 
@@ -321,6 +356,13 @@ const PostProfileCard = () => {
             </div>
           )}
         </section>
+
+        {/* ---------- TAMPILAN ERROR SAAT MENYIMPAN ---------- */}
+        {saveError && (
+          <div className="lk-error" style={{ marginBottom: '20px', padding: '15px', backgroundColor: 'rgba(255,0,0,0.1)', color: '#ff4d4d', borderRadius: '8px', border: '1px solid #ff4d4d' }}>
+            {saveError}
+          </div>
+        )}
 
         {/* ---------- AKSI SIMPAN SELURUH DAFTAR ---------- */}
         <div className="pd-actions">

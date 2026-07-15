@@ -35,6 +35,7 @@ class ProfilPegawaiController {
           nama_lengkap: p.nama || 'Tanpa Nama',
           jabatan: p.jabatan || '',
           url_foto: p.gambar || '',
+          quotes: p.quotes || '',
           urutan_tampil: i
         }));
         await db('profil_pegawai').insert(rows);

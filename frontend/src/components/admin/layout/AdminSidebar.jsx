@@ -113,8 +113,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
             if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
             if (item.jenis_menu === 'post') {
               if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
-              // Di masa depan, layout post lain bisa ditambahkan di sini
-              return `/admin/post/${item.slug_atau_tautan || 'default'}`;
+              return `/admin/post/${item.slug_atau_tautan || 'default'}/${item.id}`;
             }
             return item.slug_atau_tautan || '#';
           };
@@ -125,13 +124,13 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
             label: p.nama_menu,
             icon: p.ikon_menu,
             jenis: p.jenis_menu,
-            path: p.jenis_menu === 'post' ? `/admin/post/${p.slug_atau_tautan || 'default'}/${p.id}` : (p.jenis_menu === 'link' ? '/admin/link' : (p.slug_atau_tautan || '#')),
+            path: generatePath(p),
             submenus: subs.map(s => ({
               id: s.id.toString(),
               label: s.nama_menu,
               icon: s.ikon_menu,
               jenis: s.jenis_menu,
-              path: s.jenis_menu === 'post' ? `/admin/post/${s.slug_atau_tautan || 'default'}/${s.id}` : (s.jenis_menu === 'link' ? '/admin/link' : (s.slug_atau_tautan || '#'))
+              path: generatePath(s)
             }))
           };
         });

@@ -29,9 +29,10 @@ const AppRoutes = ({ lenisRef }) => {
         <Routes>
             <Route element={<Layout lenisRef={lenisRef} />}>
                 <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
+                {/* Rute dinamis untuk menampilkan layout berdasarkan ID menu (CMS) */}
+                <Route path="/halaman/:menuId" element={<GenericPage lenisRef={lenisRef} />} />
+                {/* Rute lama statis untuk testing */}
                 <Route path="/profil/visi-misi" element={<GenericPage lenisRef={lenisRef} />} />
-                {/* <Route path="/profil/visi-misi" element={<VisiDanMisi lenisRef={lenisRef} />} /> */}
-                {/* <Route path="/profil/VisiDanMisi" element={<GenericPage lenisRef={lenisRef} />} /> */}
             </Route>
 
             {/* Rute Admin (tanpa Layout user: punya sidebar/header sendiri) */}
@@ -48,7 +49,7 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/link/:menuId?" element={<Link />} />
                     <Route path="/admin/kelola-profil/:menuId" element={<PreviewProfilCard />} />
-                    <Route path="/admin/profil/edit/:menuId" element={<PostProfileCard />} />
+                    <Route path="/admin/kelola-profil/edit/:menuId" element={<PostProfileCard />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                     <Route path="/admin/setting" element={<Setting />} />
                     {/* Editor konten menu — route DINAMIS per layout (:layout).
