@@ -24,6 +24,13 @@ html.lenis, html.lenis body {
     overflow: hidden;
 }
 
+/* Safety: admin layout must never be locked by Lenis overflow rules.
+   LenisManager removes all .lenis classes on admin routes, but this
+   rule guards against any edge case where classes linger. */
+.admin-layout {
+    overflow: auto !important;
+}
+
 .lenis.lenis-scrolling iframe {
     pointer-events: none;
 }

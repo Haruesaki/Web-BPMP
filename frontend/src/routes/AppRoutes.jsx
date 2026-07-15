@@ -49,7 +49,7 @@ const AppRoutes = ({ lenisRef }) => {
                         Contoh: /admin/post/default → editor layout Default.
                         Dimasukkan ke dalam AdminLayout agar Sidebar tetap terlihat! */}
                     <Route
-                        path="/admin/post/:layout"
+                        path="/admin/post/:layout/*"
                         element={
                             <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', minHeight: '100vh' }}>Memuat editor…</div>}>
                                 <MenuContentEditor />
