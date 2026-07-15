@@ -43,6 +43,7 @@ const nextId = () => uid++;
 
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
+  const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -77,6 +78,7 @@ const CustomizeBeranda = () => {
     setLogoNama('');
     setLogoFileName('');
     setLogoPreview(null);
+    setIsLogoSaveSuccessOpen(true); // Tampilkan modal sukses
   };
 
   // ---------- LANDING PAGE ----------
@@ -280,6 +282,38 @@ const CustomizeBeranda = () => {
               type="button"
               className="cb-success-button"
               onClick={() => setIsSaveSuccessOpen(false)}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Sukses Simpan Logo */}
+      {isLogoSaveSuccessOpen && (
+        <div
+          className="cb-success-overlay"
+          data-lenis-prevent="true"
+          onClick={() => setIsLogoSaveSuccessOpen(false)}
+        >
+          <div
+            className="cb-success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cb-logo-success-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="cb-success-icon" aria-hidden="true">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2 id="cb-logo-success-title">Logo berhasil disimpan!</h2>
+            <p>
+              Logo baru telah berhasil ditambahkan ke dalam daftar logo tersimpan.
+            </p>
+            <button
+              type="button"
+              className="cb-success-button"
+              onClick={() => setIsLogoSaveSuccessOpen(false)}
             >
               Mengerti
             </button>
