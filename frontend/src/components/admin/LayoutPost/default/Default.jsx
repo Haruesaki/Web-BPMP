@@ -74,6 +74,14 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
     navigate(`${currentPath}/edit/${id}`, { state: location.state });
   };
 
+  const handleToggleTampil = (id, currentVal) => {
+    const nextList = kontenList.map((b) =>
+      b.id === id ? { ...b, isTampil: !currentVal } : b
+    );
+    setKontenList(nextList);
+    // For now, this only updates local state since it's a temporary UI
+  };
+
   const handleEditorCancel = () => {
     if (onCancel) onCancel();
     else navigate(-1);
@@ -86,7 +94,7 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
       nextList = [...contents, ...kontenList];
     } else {
       nextList = kontenList.flatMap((b) => {
-        if (b.id !== editId) return [b];
+        if (String(b.id) !== String(editId)) return [b];
         // The first content replaces the edited one, any additional contents are appended
         return contents;
       });
@@ -129,7 +137,7 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
   };
 
   if (isEditorActive) {
-    const editing = isEditMode ? kontenList.find((b) => b.id === editId) : null;
+    const editing = isEditMode ? kontenList.find((b) => String(b.id) === String(editId)) : null;
     const initialForEditor = editing ? [editing] : [];
 
     return (
@@ -184,13 +192,15 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
                   <th className="bc-col-no" style={{width: '60px'}}>No.</th>
                   <th className="bc-col-judul">Judul Konten</th>
                   <th className="bc-col-desk">Deskripsi</th>
+                  <th className="bc-col-pembuat">Pembuat</th>
+                  <th className="bc-col-tampil" style={{width: '180px', textAlign: 'center'}}>Tampilkan di Beranda</th>
                   <th className="bc-col-aksi" style={{width: '120px', textAlign: 'center'}}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {visible.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="bc-empty-row">
+                    <td colSpan={6} className="bc-empty-row">
                       Tidak ada konten yang cocok dengan pencarian.
                     </td>
                   </tr>
@@ -203,6 +213,19 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
                       </td>
                       <td className="bc-col-desk">
                         <span className="bc-desk">{htmlToText(b.konten) || '—'}</span>
+                      </td>
+                      <td className="bc-col-pembuat">
+                        <span className="bc-pembuat">{b.pembuat_nama || b.pembuat_email || 'Sistem'}</span>
+                      </td>
+                      <td className="bc-col-tampil" style={{textAlign: 'center'}}>
+                        <label className="bc-switch">
+                          <input 
+                            type="checkbox" 
+                            checked={b.isTampil || false} 
+                            onChange={() => handleToggleTampil(b.id, b.isTampil || false)} 
+                          />
+                          <span className="bc-slider"></span>
+                        </label>
                       </td>
                       <td className="bc-col-aksi">
                         <div className="bc-actions" style={{justifyContent: 'center'}}>

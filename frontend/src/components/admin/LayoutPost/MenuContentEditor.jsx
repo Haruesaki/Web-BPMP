@@ -55,7 +55,10 @@ const MenuContentEditor = ({ layout: layoutProp }) => {
             initialContents: Array.isArray(data) ? data.map(d => ({
               id: d.id,
               judul: d.judul,
-              konten: d.deskripsi_kaya
+              konten: d.deskripsi_kaya,
+              pembuat_nama: d.pembuat_nama,
+              pembuat_email: d.pembuat_email,
+              status: d.status
             })) : []
           });
         } else if (layout === 'profile-card') {

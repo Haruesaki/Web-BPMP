@@ -10,7 +10,7 @@ class BeritaController {
         .select(
           'berita.*',
           'pengguna.email as pembuat_email',
-          'pengguna.nama as pembuat_nama'
+          'pengguna.nama_pengguna as pembuat_nama'
         )
         .where('berita.menu_id', menu_id)
         .orderBy('berita.waktu_tayang', 'desc');

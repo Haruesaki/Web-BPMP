@@ -7,8 +7,14 @@ class HalamanKontenController {
     const { menu_id } = req.params;
     try {
       const data = await db('halaman_konten')
-        .where('menu_id', menu_id)
-        .orderBy('urutan_tampil', 'asc');
+        .leftJoin('pengguna', 'halaman_konten.dibuat_oleh', 'pengguna.id')
+        .select(
+          'halaman_konten.*',
+          'pengguna.email as pembuat_email',
+          'pengguna.nama_pengguna as pembuat_nama'
+        )
+        .where('halaman_konten.menu_id', menu_id)
+        .orderBy('halaman_konten.urutan_tampil', 'asc');
       res.json(data);
     } catch (error) {
       console.error('Error getKonten:', error);

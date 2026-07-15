@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
 import '../default/PostDefault.css';
 import './PostBeritaCard.css';
@@ -21,9 +21,15 @@ const formatWaktu = (iso) => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 };
 
-const PostBeritaCard = ({ menuName = '', menuId: propMenuId }) => {
+const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const menuId = propMenuId || location.state?.menuId || null;
+
+  const isAddMode = routeAction === 'tambah';
+  const isEditMode = routeAction.startsWith('edit/');
+  const editId = isEditMode ? routeAction.split('/')[1] : null;
+  const isEditorActive = isAddMode || isEditMode;
 
   const [beritaList, setBeritaList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +37,6 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId }) => {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [editor, setEditor] = useState(null);
 
   const fetchBerita = async () => {
     if (!menuId) { setLoading(false); return; }
@@ -88,27 +93,35 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId }) => {
     } catch (err) { console.error(err); }
   };
 
-  const handleTambah = () => setEditor({ mode: 'add' });
-  const handleEdit = (id) => setEditor({ mode: 'edit', id });
+  const handleTambah = () => {
+    const currentPath = location.pathname.replace(/\/$/, '');
+    navigate(`${currentPath}/tambah`, { state: location.state });
+  };
+  const handleEdit = (id) => {
+    const currentPath = location.pathname.replace(/\/$/, '');
+    navigate(`${currentPath}/edit/${id}`, { state: location.state });
+  };
 
   const handleEditorSave = async ({ contents = [] }) => {
     if (!contents.length) return;
     
-    if (editor?.mode === 'add') {
+    if (isAddMode) {
       for (const c of contents) {
         await axiosInstance.post(`/api/berita/${menuId}`, { judul: c.judul, deskripsi_kaya: c.konten, statusTayang: false });
       }
-    } else if (editor?.mode === 'edit') {
+    } else if (isEditMode) {
       const mainContent = contents[0];
-      await axiosInstance.put(`/api/berita/${editor.id}`, { judul: mainContent.judul, deskripsi_kaya: mainContent.konten });
+      await axiosInstance.put(`/api/berita/${editId}`, { judul: mainContent.judul, deskripsi_kaya: mainContent.konten });
       for (let i = 1; i < contents.length; i++) {
         await axiosInstance.post(`/api/berita/${menuId}`, { judul: contents[i].judul, deskripsi_kaya: contents[i].konten, statusTayang: false });
       }
     }
     
-    setEditor(null);
     fetchBerita();
+    navigate(-1);
   };
+
+  const handleEditorCancel = () => navigate(-1);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -133,8 +146,10 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId }) => {
     return result;
   };
 
-  if (editor) {
-    const editing = editor.mode === 'edit' ? beritaList.find((b) => b.id === editor.id) : null;
+  if (loading) return <div style={{ padding: 32, color: '#c7c4d8' }}>Memuat berita...</div>;
+
+  if (isEditorActive) {
+    const editing = isEditMode ? beritaList.find((b) => String(b.id) === String(editId)) : null;
     const initialContents = editing
       ? [{ id: editing.id, judul: editing.judul, konten: editing.konten }]
       : [];
@@ -145,12 +160,10 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId }) => {
         initialContents={initialContents}
         autoEditFirst={!!editing}
         onSave={handleEditorSave}
-        onCancel={() => setEditor(null)}
+        onCancel={handleEditorCancel}
       />
     );
   }
-
-  if (loading) return <div style={{ padding: 32, color: '#c7c4d8' }}>Memuat berita...</div>;
 
   return (
     <div className="postdefault">
