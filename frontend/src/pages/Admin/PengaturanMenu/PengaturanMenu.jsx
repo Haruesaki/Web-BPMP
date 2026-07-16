@@ -383,8 +383,8 @@ const PengaturanMenu = () => {
       {modalConvertOpen.isOpen && (
         <div className="pm-confirm-overlay" data-lenis-prevent="true" onClick={() => setModalConvertOpen({ isOpen: false, menuId: null, menuName: '' })}>
           <div className="pm-confirm-box" onClick={(e) => e.stopPropagation()} style={{ width: '500px', overflow: 'visible' }}>
-            <div className="pm-confirm-body" style={{ textAlign: 'left' }}>
-              <div className="pm-confirm-icon" style={{ justifyContent: 'flex-start', color: '#ffb703' }}>
+            <div className="pm-confirm-body">
+              <div className="pm-confirm-icon" style={{ color: '#ffb703' }}>
                 <i className="fa-solid fa-code-merge"></i>
               </div>
               <h3 className="pm-confirm-title">Jadikan Konten Sebagai Submenu</h3>
