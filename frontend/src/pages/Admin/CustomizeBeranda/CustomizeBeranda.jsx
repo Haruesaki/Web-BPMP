@@ -29,6 +29,7 @@ const THEMES = [
 
 // Opsi menu untuk dropdown "Menu" pada Sections Halaman Beranda.
 const MENU_OPTIONS = [
+  'Kosong',
   'Berita',
   'Logo Mitra',
   'Preview Media Sosial Instagram',
@@ -118,19 +119,20 @@ const CustomizeBeranda = () => {
 
   // ---------- SECTIONS HALAMAN BERANDA ----------
   const [sections, setSections] = useState([
-    { id: nextId(), menu: 'Berita', judul: 'Berita Terkini' },
-    { id: nextId(), menu: 'Logo Mitra', judul: 'Mitra Kami' },
-    { id: nextId(), menu: 'Preview Media Sosial Instagram', judul: 'Instagram' },
-    { id: nextId(), menu: 'Preview Media Sosial YouTube', judul: 'YouTube' },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
   ]);
 
   const updateSection = (id, field, value) =>
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
 
-  const tambahSection = () =>
-    setSections((prev) => [...prev, { id: nextId(), menu: MENU_OPTIONS[0], judul: '' }]);
-
-  const hapusSection = (id) => setSections((prev) => prev.filter((s) => s.id !== id));
+  const toggleSectionVisibility = (id) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, isVisible: !s.isVisible } : s))
+    );
+  };
 
   // ---------- FOOTER ----------
   const [footer, setFooter] = useState({ email: '', telepon: '', alamat: '' });
@@ -202,21 +204,30 @@ const CustomizeBeranda = () => {
         />
       </div>
 
-      {/* ---------- LANDING PAGE ---------- */}
-      <HeroSetting
-        judulBeranda={judulBeranda}
-        setJudulBeranda={setJudulBeranda}
-        deskripsi={deskripsi}
-        setDeskripsi={setDeskripsi}
-        backgroundName={backgroundName}
-        backgroundPreview={backgroundPreview}
-        handleBackgroundChange={handleBackgroundChange}
-        tampilanLogo1={tampilanLogo1}
-        setTampilanLogo1={setTampilanLogo1}
-        tampilanLogo2={tampilanLogo2}
-        setTampilanLogo2={setTampilanLogo2}
-        logoUtamaOptions={LOGO_UTAMA_OPTIONS}
-      />
+      {/* ---------- LANDING PAGE & SECTIONS ---------- */}
+      <div className="cb-grid-2">
+        <HeroSetting
+          judulBeranda={judulBeranda}
+          setJudulBeranda={setJudulBeranda}
+          deskripsi={deskripsi}
+          setDeskripsi={setDeskripsi}
+          backgroundName={backgroundName}
+          backgroundPreview={backgroundPreview}
+          handleBackgroundChange={handleBackgroundChange}
+          tampilanLogo1={tampilanLogo1}
+          setTampilanLogo1={setTampilanLogo1}
+          tampilanLogo2={tampilanLogo2}
+          setTampilanLogo2={setTampilanLogo2}
+          logoUtamaOptions={LOGO_UTAMA_OPTIONS}
+        />
+        <SectionOrderSetting
+          sections={sections}
+          setSections={setSections}
+          updateSection={updateSection}
+          toggleSectionVisibility={toggleSectionVisibility}
+          menuOptions={MENU_OPTIONS}
+        />
+      </div>
 
       {/* ---------- MEDIA SOSIAL ---------- */}
       <SocialMediaSetting
@@ -225,16 +236,6 @@ const CustomizeBeranda = () => {
         handleSocialAvatarChange={handleSocialAvatarChange}
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
-      />
-
-      {/* ---------- SECTIONS HALAMAN BERANDA ---------- */}
-      <SectionOrderSetting
-        sections={sections}
-        setSections={setSections}
-        updateSection={updateSection}
-        tambahSection={tambahSection}
-        hapusSection={hapusSection}
-        menuOptions={MENU_OPTIONS}
       />
 
       {/* ---------- FOOTER ---------- */}
