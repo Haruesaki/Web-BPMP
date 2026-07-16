@@ -170,14 +170,14 @@ const CustomizeBeranda = () => {
       </div>
 
       {/* ---------- TEMA ---------- */}
-      {/* <ThemeSetting
+      <ThemeSetting
         selectedTheme={selectedTheme}
         setSelectedTheme={setSelectedTheme}
         themes={THEMES}
-      /> */}
+      />
 
       {/* ---------- HEADER & DATA LOGO ---------- */}
-      {/* <div className="cb-grid-2">
+      <div className="cb-grid-2">
         <HeaderLogoSetting
           headerLogoPreview={headerLogoPreview}
           headerLogoName={headerLogoName}
@@ -195,10 +195,10 @@ const CustomizeBeranda = () => {
           setSavedLogo={setSavedLogo}
           savedLogoOptions={SAVED_LOGO_OPTIONS}
         />
-      </div> */}
+      </div>
 
       {/* ---------- LANDING PAGE ---------- */}
-      {/* <HeroSetting
+      <HeroSetting
         judulBeranda={judulBeranda}
         setJudulBeranda={setJudulBeranda}
         deskripsi={deskripsi}
@@ -211,16 +211,16 @@ const CustomizeBeranda = () => {
         tampilanLogo2={tampilanLogo2}
         setTampilanLogo2={setTampilanLogo2}
         logoUtamaOptions={LOGO_UTAMA_OPTIONS}
-      /> */}
+      />
 
       {/* ---------- MEDIA SOSIAL ---------- */}
-      {/* <SocialMediaSetting
+      <SocialMediaSetting
         socials={socials}
         updateSocial={updateSocial}
         handleSocialAvatarChange={handleSocialAvatarChange}
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
-      /> */}
+      />
 
       {/* ---------- SECTIONS HALAMAN BERANDA ---------- */}
       <SectionOrderSetting
@@ -233,7 +233,7 @@ const CustomizeBeranda = () => {
       />
 
       {/* ---------- FOOTER ---------- */}
-      {/* <FooterSetting
+      <FooterSetting
         footer={footer}
         setFooter={setFooter}
         googleMaps={googleMaps}
@@ -242,7 +242,7 @@ const CustomizeBeranda = () => {
         updateTautan={updateTautan}
         tambahTautan={tambahTautan}
         hapusTautan={hapusTautan}
-      /> */}
+      />
     </main>
   );
 };

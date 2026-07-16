@@ -27,6 +27,11 @@ class UploadController {
   static async uploadImage(req, res) {
     // CKEditor SimpleUploadAdapter mengharapkan error dalam bentuk
     // { error: { message } } agar pesannya tampil di notifikasi editor.
+    if (req.fileValidationError) {
+      return res.status(400).json({ error: { message: req.fileValidationError } });
+    }
+
+    // { error: { message } } agar pesannya tampil di notifikasi editor.
     if (!req.file) {
       return res
         .status(400)

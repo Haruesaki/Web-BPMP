@@ -19,7 +19,9 @@ const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new Error('Hanya berkas gambar yang diperbolehkan.'), false);
+    // Tandai request dengan error validasi, jangan lempar error agar bisa ditangani di controller
+    req.fileValidationError = 'Hanya berkas gambar yang diperbolehkan.';
+    cb(null, false);
   }
 };
 
