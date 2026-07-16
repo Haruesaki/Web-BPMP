@@ -71,7 +71,7 @@ const SectionOrderSetting = ({
     <section className="cb-card">
       <div className="cb-card-title">
         <i className="fa-solid fa-table-cells"></i>
-        <span>Sections Halaman Beranda</span>
+        <span>Urutan Sections Beranda</span>
       </div>
 
       <div className="cb-section-grid">
