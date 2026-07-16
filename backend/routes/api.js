@@ -7,6 +7,11 @@ const UploadController = require('../controllers/uploadController');
 const MenuController = require('../controllers/menuController');
 const HalamanKontenController = require('../controllers/halamanKontenController');
 const InstagramController = require('../controllers/instagramController');
+const StatistikPengunjungController = require('../controllers/statistikPengunjungController');
+const AktivitasAdminController = require('../controllers/aktivitasAdminController');
+const ProfilPegawaiController = require('../controllers/profilPegawaiController');
+const BeritaController = require('../controllers/beritaController');
+const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
@@ -14,12 +19,26 @@ router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
 });
 
+// ================= PENGUNJUNG & AKTIVITAS =================
+router.post('/pengunjung', StatistikPengunjungController.increment);
+router.get('/pengunjung/stats', authMiddleware, (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+}, StatistikPengunjungController.getStats);
+router.get('/aktivitas', authMiddleware, AktivitasAdminController.getAktivitas);
+router.post('/aktivitas', authMiddleware, AktivitasAdminController.recordAktivitas);
+
 router.get('/youtube', YoutubeController.getVideos);
 router.get('/instagram', InstagramController.getInstagramProfile);
 router.post('/auth/login', AuthController.login);
 router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
 router.post('/auth/reset-password', AuthController.resetPassword);
+
+// ================= LINK PREVIEW =================
+router.get('/link-preview', authMiddleware, getLinkPreview);
 
 router.get('/users', authMiddleware, UserController.getUsers);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
@@ -33,7 +52,18 @@ router.patch('/menus/:id', authMiddleware, MenuController.updateMenu);
 router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 
 // ================= HALAMAN KONTEN ROUTES =================
+router.get('/halaman-konten/:menu_id', HalamanKontenController.getKonten);
 router.post('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.upsertKonten);
+
+// ================= PROFIL PEGAWAI ROUTES =================
+router.get('/profil-pegawai/:menu_id', ProfilPegawaiController.getProfilByMenu);
+router.post('/profil-pegawai/:menu_id', authMiddleware, ProfilPegawaiController.upsertProfil);
+
+// ================= BERITA ROUTES =================
+router.get('/berita/:menu_id', BeritaController.getBeritaByMenu);
+router.post('/berita/:menu_id', authMiddleware, BeritaController.createBerita);
+router.put('/berita/:id', authMiddleware, BeritaController.updateBerita);
+router.delete('/berita/:id', authMiddleware, BeritaController.deleteBerita);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)

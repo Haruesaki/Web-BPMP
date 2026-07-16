@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 // Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
 // menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
 // <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
@@ -42,6 +42,9 @@ let uid = 100; // helper id lokal untuk baris dinamis (social, section, tautan)
 const nextId = () => uid++;
 
 const CustomizeBeranda = () => {
+  const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
+  const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
+
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
 
@@ -75,6 +78,7 @@ const CustomizeBeranda = () => {
     setLogoNama('');
     setLogoFileName('');
     setLogoPreview(null);
+    setIsLogoSaveSuccessOpen(true); // Tampilkan modal sukses
   };
 
   // ---------- LANDING PAGE ----------
@@ -151,6 +155,7 @@ const CustomizeBeranda = () => {
     // TODO: kumpulkan seluruh state di atas dan kirim ke backend
     // (PUT /api/beranda-settings)
     console.log('Simpan perubahan Customize Beranda');
+    setIsSaveSuccessOpen(true);
   };
 
   return (
@@ -243,6 +248,78 @@ const CustomizeBeranda = () => {
         tambahTautan={tambahTautan}
         hapusTautan={hapusTautan}
       />
+
+      {isSaveSuccessOpen && (
+        <div
+          className="cb-success-overlay"
+          data-lenis-prevent="true"
+          onClick={() => setIsSaveSuccessOpen(false)}
+        >
+          <div
+            className="cb-success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cb-success-title"
+            aria-describedby="cb-success-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="cb-success-close"
+              aria-label="Tutup notifikasi"
+              onClick={() => setIsSaveSuccessOpen(false)}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden="true" />
+            </button>
+            <div className="cb-success-icon" aria-hidden="true">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2 id="cb-success-title">Perubahan berhasil disimpan!</h2>
+            <p id="cb-success-description">
+              Pengaturan tampilan beranda Anda telah diperbarui.
+            </p>
+            <button
+              type="button"
+              className="cb-success-button"
+              onClick={() => setIsSaveSuccessOpen(false)}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Sukses Simpan Logo */}
+      {isLogoSaveSuccessOpen && (
+        <div
+          className="cb-success-overlay"
+          data-lenis-prevent="true"
+          onClick={() => setIsLogoSaveSuccessOpen(false)}
+        >
+          <div
+            className="cb-success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cb-logo-success-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="cb-success-icon" aria-hidden="true">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2 id="cb-logo-success-title">Logo berhasil disimpan!</h2>
+            <p>
+              Logo baru telah berhasil ditambahkan ke dalam daftar logo tersimpan.
+            </p>
+            <button
+              type="button"
+              className="cb-success-button"
+              onClick={() => setIsLogoSaveSuccessOpen(false)}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

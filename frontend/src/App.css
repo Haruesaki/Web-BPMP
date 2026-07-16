@@ -15,7 +15,6 @@ html.lenis, html.lenis body { height: auto; }
 
   position: relative;
   min-height: 100svh;
-  overflow-x: hidden;
   color: #ffffff;
   background:
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),

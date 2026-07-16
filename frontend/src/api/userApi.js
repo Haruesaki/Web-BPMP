@@ -1,6 +1,6 @@
 import axiosInstance from './axiosInstance';
 
-const getAuthHeaders = () => {
+export const getAuthHeaders = () => {
     const session = sessionStorage.getItem('adminSession');
     if (session) {
         try {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 
 import AdminSidebar from './AdminSidebar';
@@ -8,9 +8,19 @@ import { useAuth } from '../../../hooks/useAuth';
 import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
 import axiosInstance from '../../../api/axiosInstance';
 
+import DashboardAdmin from '../../../pages/Admin/DashboardAdmin/dashboard-admin';
+import CustomizeBeranda from '../../../pages/Admin/CustomizeBeranda/CustomizeBeranda';
+import PengaturanMenu from '../../../pages/Admin/PengaturanMenu/PengaturanMenu';
+import ManajemenUser from '../../../pages/Admin/ManajemenUser/ManajemenUser';
+import Link from '../LayoutLink/Link';
+const MenuContentEditor = lazy(() => import('../LayoutPost/MenuContentEditor'));
+
 const AdminLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Kita akan menggunakan <Outlet /> bawaan React Router untuk render konten.
 
   // --- STATE: MODAL TAMBAH MENU ---
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -114,6 +124,7 @@ const AdminLayout = () => {
 
       if (res.status === 200 || res.status === 201) {
         setRefreshSidebarTrigger(prev => prev + 1); // trigger reload sidebar
+        window.dispatchEvent(new Event('refreshSidebar')); // Beri tahu komponen lain (seperti PengaturanMenu)
         closeModal(); // tutup modal, TIDAK ADA redirect
       }
     } catch (error) {
@@ -135,7 +146,9 @@ const AdminLayout = () => {
           logout();
           navigate('/admin/login');
         }} />
-        <Outlet />
+        <div key={location.pathname}>
+          <Outlet />
+        </div>
       </div>
 
       {/* ================= MODAL: TAMBAH MENU BARU ================= */}

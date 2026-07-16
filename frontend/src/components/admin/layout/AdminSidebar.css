@@ -104,6 +104,61 @@
     margin: 10px 6px;
 }
 
+/* ---------- STATUS & EMPTY STATE MENU DINAMIS ---------- */
+.admin-layout .sidebar-menu-status,
+.admin-layout .sidebar-empty-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 6px 6px;
+    color: var(--text-sub);
+    text-align: center;
+}
+
+.admin-layout .sidebar-menu-status {
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    min-height: 60px;
+    font-size: 13px;
+}
+
+.admin-layout .sidebar-menu-status i {
+    color: var(--purple-soft);
+}
+
+.admin-layout .sidebar-empty-menu {
+    padding: 20px 14px 16px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px dashed var(--border-mid);
+    border-radius: 12px;
+}
+
+.admin-layout .sidebar-empty-menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+    color: var(--purple-soft);
+    background: rgba(91, 95, 232, 0.12);
+    border: 1px solid rgba(91, 95, 232, 0.28);
+    border-radius: 12px;
+}
+
+.admin-layout .sidebar-empty-menu p {
+    margin: 0 0 5px;
+    color: var(--text-main);
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.admin-layout .sidebar-empty-menu > span {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .admin-layout .btn-tambah-menu {
     margin-top: 16px;
     width: 100%;

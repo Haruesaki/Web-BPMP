@@ -1,74 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import {
-  ClassicEditor,
-  // Inti
-  Essentials,
-  Paragraph,
-  Autoformat,
-  Clipboard,
-  PasteFromOffice,
-  SelectAll,
-  Undo,
-  // Sumber / HTML
-  SourceEditing,
-  GeneralHtmlSupport,
-  FindAndReplace,
-  // Format teks
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  Subscript,
-  Superscript,
-  Code,
-  RemoveFormat,
-  // Font
-  FontSize,
-  FontFamily,
-  FontColor,
-  FontBackgroundColor,
-  // Paragraf / heading / gaya
-  Heading,
-  Style,
-  Alignment,
-  // List & indent
-  List,
-  TodoList,
-  ListProperties,
-  Indent,
-  IndentBlock,
-  // Blok
-  BlockQuote,
-  CodeBlock,
-  HorizontalLine,
-  PageBreak,
-  SpecialCharacters,
-  SpecialCharactersEssentials,
-  // Tautan & media
-  Link,
-  AutoLink,
-  LinkImage,
-  Image,
-  ImageToolbar,
-  ImageCaption,
-  ImageStyle,
-  ImageResize,
-  ImageInsert,
-  AutoImage,
-  ImageUpload,
-  MediaEmbed,
-  // Tabel
-  Table,
-  TableToolbar,
-  TableProperties,
-  TableCellProperties,
-  TableColumnResize,
-  TableCaption,
-} from 'ckeditor5';
-
-import 'ckeditor5/ckeditor5.css';
-import { CustomUploadAdapterPlugin } from '../../../../utils/CustomUploadAdapter';
+import CKEditorComponent from '../../../ckEditor/CKEditorComponent';
 import './PostDefault.css';
 
 // =========================================================================
@@ -92,114 +23,7 @@ const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).sl
 const stripHtml = (html) =>
   html ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
 
-// Konfigurasi editor lengkap (menyerupai toolbar penuh CKEditor).
-const editorConfig = {
-  licenseKey: 'GPL', // penggunaan open-source (GPL)
-  plugins: [
-    Essentials, Paragraph, Autoformat, Clipboard, PasteFromOffice, SelectAll, Undo,
-    SourceEditing, GeneralHtmlSupport, FindAndReplace,
-    Bold, Italic, Underline, Strikethrough, Subscript, Superscript, Code, RemoveFormat,
-    FontSize, FontFamily, FontColor, FontBackgroundColor,
-    Heading, Style, Alignment,
-    List, TodoList, ListProperties, Indent, IndentBlock,
-    BlockQuote, CodeBlock, HorizontalLine, PageBreak, SpecialCharacters, SpecialCharactersEssentials,
-    Link, AutoLink, LinkImage,
-    Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload,
-    MediaEmbed,
-    Table, TableToolbar, TableProperties, TableCellProperties, TableColumnResize, TableCaption,
-  ],
-  toolbar: {
-    items: [
-      'sourceEditing', 'findAndReplace', 'selectAll',
-      '|', 'undo', 'redo',
-      '|', 'heading', 'style',
-      '|', 'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor',
-      '-', // baris baru
-      'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'removeFormat',
-      '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
-      '|', 'alignment', 'blockQuote', 'codeBlock',
-      '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed',
-      '|', 'horizontalLine', 'specialCharacters', 'pageBreak',
-    ],
-    shouldNotGroupWhenFull: true, // izinkan pembungkusan multi-baris (pakai '-')
-  },
-  heading: {
-    options: [
-      { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-      { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-      { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-      { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
-      { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
-    ],
-  },
-  fontSize: {
-    options: [10, 12, 14, 'default', 18, 20, 24, 28, 32],
-    supportAllValues: true,
-  },
-  fontFamily: { supportAllValues: true },
-  style: {
-    // Meniru set gaya web BPMP lama (CKEditor 4). CKEditor 5 hanya mendukung
-    // element + class, jadi tampilannya dibuat setara lewat CSS (lihat
-    // "GAYA STYLE KONTEN" di PostDefault.css & DefaultContent.css).
-    definitions: [
-      // --- Block styles ---
-      // Diarahkan ke 'p' (blok default) agar bisa langsung diterapkan ke teks
-      // biasa. Di CKEditor 5 block style hanya aktif bila elemen blok terpilih
-      // cocok dengan elemen style-nya; memakai h2/h3/div membuatnya hanya aktif
-      // saat sudah jadi heading/div. Tampilan judul/kotak diberikan via CSS.
-      { name: 'Italic Title', element: 'p', classes: ['article-italic-title'] },
-      { name: 'Subtitle', element: 'p', classes: ['article-subtitle'] },
-      { name: 'Special Container', element: 'p', classes: ['article-special-container'] },
-      // --- Text (inline) styles ---
-      { name: 'Marker', element: 'span', classes: ['article-marker'] },
-      { name: 'Big', element: 'span', classes: ['article-big'] },
-      { name: 'Small', element: 'span', classes: ['article-small'] },
-      { name: 'Computer Code', element: 'span', classes: ['article-code'] },
-      { name: 'Keyboard Phrase', element: 'span', classes: ['article-kbd'] },
-      { name: 'Cited Work', element: 'span', classes: ['article-cite'] },
-      { name: 'Inline Quotation', element: 'span', classes: ['article-quote'] },
-    ],
-  },
-  image: {
-    toolbar: [
-      'imageTextAlternative', 'toggleImageCaption',
-      '|', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side',
-      '|', 'resizeImage',
-    ],
-  },
-  table: {
-    contentToolbar: [
-      'tableColumn', 'tableRow', 'mergeTableCells',
-      'tableProperties', 'tableCellProperties',
-    ],
-  },
-  link: {
-    addTargetToExternalLinks: true,
-    defaultProtocol: 'https://',
-  },
-  // Izinkan HTML bebas agar mode "Source" bisa menyimpan markup apa pun.
-  htmlSupport: {
-    allow: [{ name: /.*/, attributes: true, classes: true, styles: true }],
-  },
-  placeholder: 'Tulis isi konten di sini...',
-  // Catatan: konfigurasi `simpleUpload` (URL + token) TIDAK ditaruh di sini
-  // karena butuh token yang baru tersedia saat runtime. Lihat useMemo di
-  // dalam komponen — di sana editorConfig digabung dengan simpleUpload.
-};
 
-// Ambil header Authorization dari sesi admin (disimpan saat login).
-// Endpoint upload diproteksi authMiddleware, jadi token wajib disertakan.
-const getAuthToken = () => {
-  try {
-    const session = sessionStorage.getItem('adminSession');
-    return session ? JSON.parse(session)?.token || '' : '';
-  } catch {
-    return '';
-  }
-};
-
-// URL endpoint upload gambar di backend (samakan dengan axiosInstance).
-const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/gambar`;
 
 const PostDefault = ({
   menuName = '',
@@ -231,82 +55,9 @@ const PostDefault = ({
   const [konten, setKonten] = useState(firstContent ? firstContent.konten || '' : '');
   const [editingId, setEditingId] = useState(firstContent ? firstContent.id : null);
   const [formError, setFormError] = useState('');
-  const [compressMsg, setCompressMsg] = useState('');
 
-  // Config final = editorConfig statis + customUpload (butuh token runtime).
-  // Menggunakan CustomUploadAdapterPlugin untuk kompresi frontend jika gambar >2MB.
-  // Gambar yang disisipkan admin dikirim ke backend lalu URL nya yang disimpan.
-  const finalEditorConfig = useMemo(
-    () => ({
-      ...editorConfig,
-      extraPlugins: [
-        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg)
-      ]
-    }),
-    []
-  );
 
-  // --- Auto-scroll halaman saat menyeret (mis. gambar) ke tepi atas/bawah ---
-  // CKEditor tidak menggulir window secara otomatis saat drag; ini menutup
-  // celah itu agar gambar mudah dipindah ke posisi yang sedang di luar layar.
-  // Zona bawah dibuat lebih lebar dari atas karena di bawah viewport ada
-  // taskbar OS — scroll harus mulai lebih awal sebelum kursor keluar browser.
-  useEffect(() => {
-    const EDGE_TOP = 110; // px zona pemicu dari tepi atas
-    const EDGE_BOTTOM = 190; // px zona pemicu dari tepi bawah (lebih lebar)
-    const MIN_SPEED = 8; // langsung bergerak begitu masuk zona
-    const MAX_SPEED = 28; // saat mepet tepi
-    let pointerY = 0;
-    let active = false;
-    let raf = null;
 
-    const ramp = (t) => MIN_SPEED + (MAX_SPEED - MIN_SPEED) * Math.max(0, Math.min(1, t));
-
-    const step = () => {
-      if (!active) {
-        raf = null;
-        return;
-      }
-      const h = window.innerHeight;
-      let dy = 0;
-      const distTop = pointerY;
-      const distBottom = h - pointerY;
-      if (distTop < EDGE_TOP) {
-        dy = -ramp(1 - distTop / EDGE_TOP); // makin dekat tepi → makin cepat
-      } else if (distBottom < EDGE_BOTTOM) {
-        dy = ramp(1 - distBottom / EDGE_BOTTOM);
-      }
-      if (dy !== 0) window.scrollBy(0, dy);
-      raf = requestAnimationFrame(step);
-    };
-
-    const onDragOver = (e) => {
-      // Batasi ke posisi valid dalam viewport; bila kursor mepet/melewati
-      // tepi bawah, anggap tepat di tepi agar tetap scroll kecepatan penuh.
-      pointerY = Math.max(0, Math.min(e.clientY, window.innerHeight));
-      if (!active) {
-        active = true;
-        if (!raf) raf = requestAnimationFrame(step);
-      }
-    };
-    const stop = () => {
-      active = false;
-      if (raf) {
-        cancelAnimationFrame(raf);
-        raf = null;
-      }
-    };
-
-    window.addEventListener('dragover', onDragOver, true);
-    window.addEventListener('drop', stop, true);
-    window.addEventListener('dragend', stop, true);
-    return () => {
-      window.removeEventListener('dragover', onDragOver, true);
-      window.removeEventListener('drop', stop, true);
-      window.removeEventListener('dragend', stop, true);
-      stop();
-    };
-  }, []);
 
   const resetForm = () => {
     setJudul('');
@@ -337,7 +88,7 @@ const PostDefault = ({
     setKonten(c.konten || '');
     setEditingId(id);
     setFormError('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0 });
   };
 
   const handleHapusItem = (id) => {
@@ -377,37 +128,7 @@ const PostDefault = ({
     }
   };
 
-  // Penyesuaian saat editor siap: memperbaiki dua perilaku panel/dialog CKEditor.
-  const handleEditorReady = (editor) => {
-    // CKEditor menaruh dropdown/dialog di ".ck-body-wrapper" (level <body>).
-    // Tandai dengan data-lenis-prevent agar Lenis (smooth-scroll global) tidak
-    // membajak wheel → grid Special Characters bisa di-scroll sendiri, bukan
-    // halaman. Pola ini sama seperti sidebar/modal admin lain.
-    const markLenisPrevent = () =>
-      document
-        .querySelectorAll('.ck-body-wrapper')
-        .forEach((el) => el.setAttribute('data-lenis-prevent', 'true'));
-    markLenisPrevent();
 
-    if (editor.plugins.has('Dialog')) {
-      const dialog = editor.plugins.get('Dialog');
-
-      // Wrapper bisa baru dibuat saat dialog pertama kali muncul → tandai ulang.
-      dialog.on('change:id', (evt, name, id) => {
-        if (id) markLenisPrevent();
-      });
-
-      // Tutup dialog (mis. Special Characters) begitu dropdown toolbar lain
-      // dibuka — CKEditor tidak menutupnya otomatis.
-      editor.ui.view.toolbar.items.forEach((item) => {
-        if (item && item.panelView && typeof item.on === 'function') {
-          item.on('change:isOpen', (evt, name, isOpen) => {
-            if (isOpen && dialog.id) dialog.hide();
-          });
-        }
-      });
-    }
-  };
 
   return (
     <div className="postdefault">
@@ -438,24 +159,7 @@ const PostDefault = ({
           {/* Editor Konten */}
           <div className="pd-field" style={{ position: 'relative' }}>
             <label>Konten</label>
-            {compressMsg && (
-              <div style={{ position: 'absolute', top: '30px', right: '15px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 14px', borderRadius: '6px', fontSize: '13px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 2s linear infinite' }}>
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-                </svg>
-                {compressMsg}
-                <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-              </div>
-            )}
-            <div className="pd-editor">
-              <CKEditor
-                editor={ClassicEditor}
-                config={finalEditorConfig}
-                data={konten}
-                onReady={handleEditorReady}
-                onChange={(event, editor) => setKonten(editor.getData())}
-              />
-            </div>
+            <CKEditorComponent data={konten} onChange={setKonten} />
           </div>
 
           {formError && <p className="pd-error">{formError}</p>}
