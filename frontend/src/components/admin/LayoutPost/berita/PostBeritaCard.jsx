@@ -189,7 +189,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
               <thead>
                 <tr>
                   <th className="bc-col-no">No.</th>
-                  <th className="bc-col-foto">Foto</th>
+                  <th className="bc-col-foto">Thumbnail</th>
                   <th className="bc-col-judul">Judul Berita</th>
                   <th className="bc-col-desk">Deskripsi</th>
                   <th className="bc-col-pembuat">Pembuat</th>
