@@ -12,7 +12,7 @@ const SocialMediaSetting = ({
     <section className="cb-card">
       <div className="cb-card-title">
         <i className="fa-solid fa-share-nodes"></i>
-        <span>Media Sosial</span>
+        <span>Floating Media Sosial</span>
       </div>
 
       <div className="cb-social-list">
