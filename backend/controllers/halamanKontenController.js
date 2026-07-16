@@ -2,61 +2,64 @@ const db = require('../config/database');
 const { logActivityInternal } = require('./aktivitasAdminController');
 
 class HalamanKontenController {
+  // GET /api/halaman-konten/:menu_id
+  static async getKonten(req, res) {
+    const { menu_id } = req.params;
+    try {
+      const data = await db('halaman_konten')
+        .leftJoin('pengguna', 'halaman_konten.dibuat_oleh', 'pengguna.id')
+        .select(
+          'halaman_konten.*',
+          'pengguna.email as pembuat_email',
+          'pengguna.nama_pengguna as pembuat_nama'
+        )
+        .where('halaman_konten.menu_id', menu_id)
+        .orderBy('halaman_konten.urutan_tampil', 'asc');
+      res.json(data);
+    } catch (error) {
+      console.error('Error getKonten:', error);
+      res.status(500).json({ pesan: 'Gagal mengambil konten' });
+    }
+  }
+
   // POST/PUT /api/halaman-konten/:menu_id
   static async upsertKonten(req, res) {
     const { menu_id } = req.params;
-    const { judul, deskripsi_kaya, kunci_halaman } = req.body;
+    const { contents, kunci_halaman } = req.body; // contents expects an array
 
-    if (!judul || !deskripsi_kaya || !kunci_halaman) {
-      return res.status(400).json({ pesan: 'Judul, konten, dan kunci halaman wajib diisi' });
+    if (!Array.isArray(contents)) {
+      return res.status(400).json({ pesan: 'Data konten tidak valid (harus array)' });
     }
 
     try {
-      // Cek apakah sudah ada konten untuk menu ini
-      const existing = await db('halaman_konten').where('menu_id', menu_id).first();
-      
       const pName = req.user?.nama || 'System';
       const pRole = req.user?.role || 'Unknown';
 
-      if (existing) {
-        // Update
-        const [updated] = await db('halaman_konten')
-          .where('id', existing.id)
-          .update({
-            judul,
-            deskripsi_kaya,
-            diperbarui_pada: db.fn.now()
-          })
-          .returning('*');
-          
-        await logActivityInternal(pName, pRole, `Memperbarui halaman konten: "${judul}"`);
-        return res.json({ pesan: 'Konten berhasil diperbarui', data: updated });
-      } else {
-        // Insert
-        // Cek unik kunci_halaman, jika sudah ada tambahkan random string
-        let validKunci = kunci_halaman;
-        const checkKunci = await db('halaman_konten').where('kunci_halaman', validKunci).first();
-        if (checkKunci) {
-          validKunci = `${kunci_halaman}-${Math.floor(Math.random() * 10000)}`;
-        }
+      // Delete old contents for this menu
+      await db('halaman_konten').where('menu_id', menu_id).del();
 
-        const [inserted] = await db('halaman_konten')
-          .insert({
+      if (contents.length > 0) {
+        const newRows = contents.map((c, index) => {
+          // Generate unique kunci_halaman
+          let finalKunci = kunci_halaman ? `${kunci_halaman}-${index}` : `post-${menu_id}-${index}`;
+          return {
             menu_id,
-            judul,
-            deskripsi_kaya,
-            kunci_halaman: validKunci,
-            dibuat_oleh: req.user?.id || null, // req.user dari authMiddleware jika ada
-            status: 'terbit'
-          })
-          .returning('*');
-          
-        await logActivityInternal(pName, pRole, `Menerbitkan halaman konten baru: "${judul}"`);
-        return res.status(201).json({ pesan: 'Konten berhasil disimpan', data: inserted });
+            judul: c.judul || 'Tanpa Judul',
+            deskripsi_kaya: c.konten || '',
+            kunci_halaman: finalKunci,
+            dibuat_oleh: req.user?.id || null,
+            status: 'terbit',
+            urutan_tampil: index
+          };
+        });
+        await db('halaman_konten').insert(newRows);
       }
+
+      await logActivityInternal(pName, pRole, `Memperbarui daftar halaman konten untuk menu ID ${menu_id}`);
+      return res.status(200).json({ pesan: 'Konten berhasil disimpan' });
     } catch (error) {
       console.error('Error upsertKonten:', error);
-      res.status(500).json({ pesan: 'Gagal menyimpan konten ke database' });
+      res.status(500).json({ pesan: 'Gagal menyimpan konten ke database', detail: error.message, stack: error.stack });
     }
   }
 

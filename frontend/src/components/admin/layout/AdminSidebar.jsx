@@ -27,7 +27,14 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     const savedSelection = sessionStorage.getItem('adminSidebarSelectedId');
     return savedSelection || 'beranda';
   });
-  const [expandedMenus, setExpandedMenus] = useState([]); // Array of parent IDs yang sedang di-expand
+  const [expandedMenus, setExpandedMenus] = useState(() => {
+    // Restore expanded menus from sessionStorage agar tetap terbuka
+    // setelah AdminLayout remount (key pada ProtectedRoute Outlet).
+    try {
+      const saved = sessionStorage.getItem('adminSidebarExpandedMenus');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
 
   // Peta route statis yang memang punya satu halaman tujuan jelas.
   const staticRouteMap = {
@@ -45,31 +52,45 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   };
 
   const resolveActiveIdFromPath = (pathname, menus) => {
-    // Rute yang punya satu page tujuan jelas → cocokkan ID dari peta statis.
+    // 1. Rute statis (peta route)
     if (staticRouteMap[pathname]) {
       return staticRouteMap[pathname];
     }
 
-    // Untuk dynamic menu, cocokkan berdasarkan path yang sebenarnya dipakai
-    // oleh sidebar (contoh: /admin/post/default atau /admin/post/profil).
-    const flatMenus = menus.flatMap((menu) => [
-      { id: menu.id, path: menu.path },
-      ...(menu.submenus || []).map((sub) => ({ id: sub.id, path: sub.path })),
-    ]);
-
-    const directMatch = flatMenus.find((item) => item.path === pathname);
-    if (directMatch) {
-      return directMatch.id;
+    // 2. Jika ada state navigasi yang membawa menuId, itu adalah sumber kebenaran paling akurat
+    if (location.state?.menuId) {
+      return location.state.menuId.toString();
     }
 
-    // Untuk editor konten menu, path dinamis bisa berubah sesuai slug.
-    // Kita pakai prefix /admin/post/ agar item yang sedang dibuka tetap aktif.
-    const postMatch = flatMenus.find((item) => {
-      return item.path?.startsWith('/admin/post/') && pathname.startsWith('/admin/post/');
-    });
+    // 3. Cari dari dynamic menus
+    const flatMenus = menus.flatMap((menu) => [
+      { id: menu.id.toString(), path: menu.path },
+      ...(menu.submenus || []).map((sub) => ({ id: sub.id.toString(), path: sub.path })),
+    ]);
 
-    if (postMatch) {
-      return postMatch.id;
+    // Cari semua menu yang path-nya sama persis dengan pathname saat ini
+    const exactMatches = flatMenus.filter((item) => item.path === pathname);
+    
+    if (exactMatches.length > 0) {
+      const persistedId = sessionStorage.getItem('adminSidebarSelectedId');
+      // Jika ada beberapa menu dengan path yang sama (misal /admin/post/default),
+      // kita cek apakah salah satunya adalah yang saat ini sedang disimpan di session.
+      // Jika ya, prioritaskan itu agar tidak lompat ke menu lain.
+      const matchPersisted = exactMatches.find((item) => item.id === persistedId);
+      if (matchPersisted) {
+        return matchPersisted.id;
+      }
+      return exactMatches[0].id;
+    }
+
+    // 4. Jika pathname adalah prefix editor (misal /admin/post/...) tapi belum exact match
+    if (pathname.startsWith('/admin/post/')) {
+       const postMatches = flatMenus.filter(item => item.path?.startsWith('/admin/post/'));
+       if (postMatches.length > 0) {
+         const persistedId = sessionStorage.getItem('adminSidebarSelectedId');
+         const matchPersisted = postMatches.find(item => item.id === persistedId);
+         if (matchPersisted) return matchPersisted.id;
+       }
     }
 
     return null;
@@ -92,8 +113,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
             if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
             if (item.jenis_menu === 'post') {
               if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
-              // Di masa depan, layout post lain bisa ditambahkan di sini
-              return `/admin/post/${item.slug_atau_tautan || 'default'}`;
+              return `/admin/post/${item.slug_atau_tautan || 'default'}/${item.id}`;
             }
             return item.slug_atau_tautan || '#';
           };
@@ -135,12 +155,14 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
 
     setSelectedId(nextSelectedId);
     sessionStorage.setItem('adminSidebarSelectedId', nextSelectedId);
-  }, [location.pathname, dynamicMenus]);
+  }, [location.pathname, location.state, dynamicMenus]);
 
   const toggleExpand = (id) => {
-    setExpandedMenus(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setExpandedMenus(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      sessionStorage.setItem('adminSidebarExpandedMenus', JSON.stringify(next));
+      return next;
+    });
   };
 
   const renderStaticItem = (item) => (

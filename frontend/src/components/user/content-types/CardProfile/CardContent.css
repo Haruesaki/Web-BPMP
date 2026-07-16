@@ -319,3 +319,14 @@
     transform: translate(0px, 0px) scale(1);
   }
 }
+
+
+.profile-layout-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 40px 20px;
+}

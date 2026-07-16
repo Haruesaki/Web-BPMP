@@ -34,10 +34,10 @@ const PreviewProfilCard = () => {
                     throw new Error('Menu tidak ditemukan.');
                 }
 
-                const contentRes = await axiosInstance.get(`/api/halaman-konten/${menuId}`, {
+                const contentRes = await axiosInstance.get(`/api/profil-pegawai/${menuId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setProfiles(contentRes.data.profiles || []);
+                setProfiles(contentRes.data || []);
 
             } catch (err) {
                 console.error('Gagal memuat data profil:', err);
@@ -50,7 +50,7 @@ const PreviewProfilCard = () => {
     }, [menuId]);
 
     const handleAddOrEditProfile = () => {
-        navigate(`/admin/profil/edit/${menuId}`);
+        navigate(`/admin/kelola-profil/edit/${menuId}`);
     };
 
     if (loading) {
@@ -74,8 +74,8 @@ const PreviewProfilCard = () => {
             <section className="ppc-preview-grid">
                 {profiles.length > 0 ? (
                     profiles.map(profile => (
-                        <div key={profile.id || profile.nama} className="ppc-preview-card-wrapper">
-                            <CardContent name={profile.nama} role={profile.jabatan} quote={profile.quotes} imageSrc={profile.gambar} />
+                        <div key={profile.id || profile.nama_lengkap} className="ppc-preview-card-wrapper">
+                            <CardContent name={profile.nama_lengkap} role={profile.jabatan} quote={profile.quotes} imageSrc={profile.url_foto} />
                         </div>
                     ))
                 ) : (

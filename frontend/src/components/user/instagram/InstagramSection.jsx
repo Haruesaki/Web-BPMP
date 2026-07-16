@@ -42,6 +42,66 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 
 
 const InstagramSection = ({ igProfile, loading }) => {
+    const followBtnWrapperRef = useRef(null);
+    const scrollState = useRef({
+        currentY: 0,
+        targetY: 0,
+        lastScrollY: 0,
+        rafId: null,
+    });
+
+    useEffect(() => {
+        const wrapper = followBtnWrapperRef.current;
+        if (!wrapper) return;
+
+        scrollState.current.lastScrollY = window.scrollY;
+
+        const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+
+        const animate = () => {
+            // Lakukan interpolasi dari posisi saat ini ke posisi target untuk efek lag
+            scrollState.current.currentY = lerp(scrollState.current.currentY, scrollState.current.targetY, 0.075);
+            // Secara bertahap kembalikan posisi target ke 0 agar tombol kembali ke tengah
+            scrollState.current.targetY = lerp(scrollState.current.targetY, 0, 0.075);
+
+            const translateY = scrollState.current.currentY.toFixed(2);
+
+            // Hentikan loop animasi jika sudah sangat dekat dengan posisi awal untuk efisiensi
+            if (Math.abs(translateY) < 0.01 && Math.abs(scrollState.current.targetY) < 0.01) {
+                wrapper.style.transform = '';
+                cancelAnimationFrame(scrollState.current.rafId);
+                scrollState.current.rafId = null;
+            } else {
+                wrapper.style.transform = `translateY(${translateY}px)`;
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            const delta = scrollY - scrollState.current.lastScrollY;
+            scrollState.current.lastScrollY = scrollY;
+
+            // "Dorong" posisi target berdasarkan pergerakan scroll
+            scrollState.current.targetY -= delta * 0.8; // Faktor intensitas dibalik agar berlawanan arah
+            // Batasi nilai target agar tidak terlalu ekstrim saat scroll cepat
+            scrollState.current.targetY = Math.max(-45, Math.min(45, scrollState.current.targetY));
+
+            if (!scrollState.current.rafId) {
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollState.current.rafId) {
+                cancelAnimationFrame(scrollState.current.rafId);
+            }
+        };
+    }, []);
+
     return (
         <section className="instagram-section">
             <div className="ig-banner-wrapper">
@@ -85,12 +145,14 @@ const InstagramSection = ({ igProfile, loading }) => {
                 </div>
 
                 <div className="ig-profile-right">
-                    <a href={`https://www.instagram.com/${igProfile?.username || 'bpmplampung'}`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
-                        <button className="ig-follow-btn">
-                            <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
-                            Follow
-                        </button>
-                    </a>
+                    <div ref={followBtnWrapperRef} style={{ willChange: 'transform' }}>
+                        <a href={`https://www.instagram.com/${igProfile?.username || 'bpmplampung'}`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
+                            <button className="ig-follow-btn">
+                                <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
+                                Follow
+                            </button>
+                        </a>
+                    </div>
                 </div>
             </div>
 

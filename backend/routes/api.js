@@ -9,6 +9,8 @@ const HalamanKontenController = require('../controllers/halamanKontenController'
 const InstagramController = require('../controllers/instagramController');
 const StatistikPengunjungController = require('../controllers/statistikPengunjungController');
 const AktivitasAdminController = require('../controllers/aktivitasAdminController');
+const ProfilPegawaiController = require('../controllers/profilPegawaiController');
+const BeritaController = require('../controllers/beritaController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
@@ -50,8 +52,18 @@ router.patch('/menus/:id', authMiddleware, MenuController.updateMenu);
 router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 
 // ================= HALAMAN KONTEN ROUTES =================
+router.get('/halaman-konten/:menu_id', HalamanKontenController.getKonten);
 router.post('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.upsertKonten);
-router.get('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.getKontenByMenuId);
+
+// ================= PROFIL PEGAWAI ROUTES =================
+router.get('/profil-pegawai/:menu_id', ProfilPegawaiController.getProfilByMenu);
+router.post('/profil-pegawai/:menu_id', authMiddleware, ProfilPegawaiController.upsertProfil);
+
+// ================= BERITA ROUTES =================
+router.get('/berita/:menu_id', BeritaController.getBeritaByMenu);
+router.post('/berita/:menu_id', authMiddleware, BeritaController.createBerita);
+router.put('/berita/:id', authMiddleware, BeritaController.updateBerita);
+router.delete('/berita/:id', authMiddleware, BeritaController.deleteBerita);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)

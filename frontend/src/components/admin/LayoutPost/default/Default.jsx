@@ -1,31 +1,21 @@
-import React, { useMemo, useState } from 'react';
-import '../default/PostDefault.css'; // pakai ulang palet gelap + tombol dasar (.pd-*)
+import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import '../default/PostDefault.css'; 
 import '../berita/PostBeritaCard.css';
 import PostDefault from '../default/PostDefault';
 
 // =========================================================================
-//  POST BERITA CARD — halaman KELOLA BERITA (layout "Berita Card").
+//  DEFAULT CARD — halaman KELOLA KONTEN (layout "Default").
 //  -----------------------------------------------------------------------
-//  Muncul saat Super Admin membuat menu bertipe Post dengan layout
-//  "Berita Card". Menampilkan tabel daftar berita: Nomor, Foto (cover),
-//  Judul, Deskripsi, Pembuat, Waktu Tayang (otomatis), switch Status Tayang,
-//  dan aksi (edit/hapus). Dilengkapi search di atas tabel + tombol Tambah
-//  Berita, serta footer "Menampilkan X-Y dari N data" + pagination.
-//  Dirender oleh MenuContentEditor via layoutRegistry (key: 'berita-card').
-//
-//  Props (opsional supaya tetap bisa dipakai standalone):
-//    - menuName        : nama menu yang sedang diedit (untuk judul halaman)
-//    - initialBerita   : array berita awal (kalau kosong → pakai dummy)
-//    - onSave / onCancel : disediakan agar kompatibel dengan host editor
-//
-//  CATATAN: data masih DUMMY. Nanti diganti fetch ke backend
-//  (mis. GET /api/berita) dan aksi CRUD disambungkan ke API.
+//  Muncul saat Super Admin membuat menu bertipe Post dengan layout Default.
+//  Menampilkan tabel daftar konten: Nomor, Judul, Deskripsi, dan Aksi.
+//  Setiap penambahan, pengeditan, atau penghapusan akan langsung memicu
+//  penyimpanan ke server melalui onSave prop.
 // =========================================================================
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-// Ubah HTML (dari CKEditor) → teks polos untuk pratinjau kolom Deskripsi.
-// Konten HTML lengkapnya tetap disimpan di field `konten` tiap berita.
+// Ubah HTML (dari CKEditor) -> teks polos untuk pratinjau kolom Deskripsi.
 const htmlToText = (html) => {
   if (!html) return '';
   const tmp = document.createElement('div');
@@ -33,88 +23,38 @@ const htmlToText = (html) => {
   return (tmp.textContent || '').replace(/\s+/g, ' ').trim();
 };
 
-// Format tanggal → "YYYY-MM-DD HH:mm:ss" (menyerupai kolom Waktu Tayang).
-const formatWaktu = (iso) => {
-  if (!iso) return null;
-  const d = new Date(iso);
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-};
+const EMPTY_ARRAY = [];
 
-// --- DATA DUMMY: 24 berita (menyerupai contoh) ---
-const PEMBUAT = 'bpmp_lampung@smail.co.id';
-
-// Contoh cover (data-URI SVG) supaya jalur <img> terlihat tanpa file eksternal.
-// Nanti diganti URL asli dari upload (uploadImageToServer).
-const SAMPLE_COVER =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="108" height="80"><rect width="108" height="80" fill="#5b5fe8"/><text x="54" y="46" font-family="Arial" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">SM</text></svg>'
-  );
-
-const makeDummy = () => {
-  const seed = [
-    { judul: 'test 1 - sm', deskripsi: 'testing logo sm', tayang: true, waktu: '2026-05-04T09:09:29', cover: true, coverUrl: SAMPLE_COVER },
-    { judul: 'test', deskripsi: 'test', tayang: false, waktu: null },
-    { judul: 'Testing judul berita 1', deskripsi: '', tayang: true, waktu: '2026-03-11T13:21:24' },
-    { judul: 'tes judul berita 1', deskripsi: 'Judul Berita Judul Berita', tayang: true, waktu: '2026-03-11T09:01:10' },
-    { judul: 'tess', deskripsi: '', tayang: true, waktu: '2026-03-08T13:07:36' },
-    { judul: 'test', deskripsi: '', tayang: true, waktu: '2026-03-06T14:57:18' },
-    { judul: 'Hindari Kecurangan, BPMP Lampung Gencar Sosialisasikan SPMB Tahun 2026', deskripsi: 'Bandar Lampung, 30 Januari 2026 - BPMP Lampung menggencarkan sosialisasi SPMB.', tayang: false, waktu: null },
-    { judul: 'Mendikdasmen Salurkan Bantuan ke Sekolah-sekolah terdampak Bencana di Aceh', deskripsi: 'Mendikdasmen melakukan kunjungan langsung ke sekolah terdampak bencana.', tayang: true, waktu: '2026-02-06T14:37:23' },
-    { judul: 'Darma Wanita Persatuan BPMP Lampung Adakan Pelatihan Kreasi Garnish Cantik', deskripsi: 'Bandar Lampung, 23 Januari 2026. Darmawanita Persatuan menggelar pelatihan.', tayang: false, waktu: null },
-  ];
-
-  const extra = [];
-  for (let i = seed.length; i < 24; i++) {
-    const on = i % 3 !== 0;
-    extra.push({
-      judul: `Berita contoh nomor ${i + 1}`,
-      deskripsi: `Ringkasan singkat untuk berita contoh nomor ${i + 1} sebagai data uji.`,
-      tayang: on,
-      waktu: on ? `2026-01-${String((i % 28) + 1).padStart(2, '0')}T10:15:00` : null,
-    });
-  }
-
-  return [...seed, ...extra].map((b, i) => ({
-    id: i + 1,
-    pembuat: PEMBUAT,
-    cover: b.cover || false,
-    statusTayang: b.tayang,
-    waktuTayang: b.waktu,
-    ...b,
-  }));
-};
-
-const Default = ({ menuName = '', initialBerita = null }) => {
-  const [beritaList, setBeritaList] = useState(() => initialBerita || makeDummy());
+const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRAY, onSave, onCancel, saveStatus, setSaveStatus }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [kontenList, setKontenList] = useState(initialContents || []);
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  // Editor PostDefault: null = tabel; { mode:'add' } atau { mode:'edit', id }.
-  const [editor, setEditor] = useState(null);
+  
+  // Deteksi mode editor dari routeAction
+  const isAddMode = routeAction === 'tambah';
+  const isEditMode = routeAction.startsWith('edit/');
+  const editId = isEditMode ? routeAction.split('/')[1] : null;
+  const isEditorActive = isAddMode || isEditMode;
 
-  // Email admin yang sedang login → mengisi kolom Pembuat berita baru.
-  const adminEmail = useMemo(() => {
-    try {
-      return JSON.parse(sessionStorage.getItem('adminSession'))?.email || PEMBUAT;
-    } catch {
-      return PEMBUAT;
-    }
-  }, []);
+  // Sync state if initialContents changes from parent fetch
+  useEffect(() => {
+    setKontenList(initialContents || []);
+  }, [initialContents]);
 
   // --- Filter + pagination ---
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return beritaList;
-    return beritaList.filter(
+    if (!q) return kontenList;
+    return kontenList.filter(
       (b) =>
         b.judul.toLowerCase().includes(q) ||
-        (b.deskripsi || '').toLowerCase().includes(q) ||
-        b.pembuat.toLowerCase().includes(q)
+        htmlToText(b.konten).toLowerCase().includes(q)
     );
-  }, [beritaList, search]);
+  }, [kontenList, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const page = Math.min(currentPage, totalPages);
@@ -122,78 +62,66 @@ const Default = ({ menuName = '', initialBerita = null }) => {
   const visible = filtered.slice(startIdx, startIdx + pageSize);
 
   // --- Aksi ---
-  // Toggle status tayang. Saat DIAKTIFKAN dan belum punya waktu, waktu tayang
-  // di-set otomatis ke sekarang (meniru "Waktu Tayang (Otomatis)").
-  const toggleTayang = (id) =>
-    setBeritaList((prev) =>
-      prev.map((b) => {
-        if (b.id !== id) return b;
-        const nyala = !b.statusTayang;
-        return {
-          ...b,
-          statusTayang: nyala,
-          waktuTayang: nyala ? b.waktuTayang || new Date().toISOString() : b.waktuTayang,
-        };
-      })
+  const handleTambah = () => {
+    // Arahkan ke rute tambah konten dengan mempertahankan state menu
+    const currentPath = location.pathname.replace(/\/$/, '');
+    navigate(`${currentPath}/tambah`, { state: location.state });
+  };
+  
+  const handleEdit = (id) => {
+    // Arahkan ke rute edit dengan mempertahankan state menu
+    const currentPath = location.pathname.replace(/\/$/, '');
+    navigate(`${currentPath}/edit/${id}`, { state: location.state });
+  };
+
+  const handleToggleTampil = (id, currentVal) => {
+    const nextList = kontenList.map((b) =>
+      b.id === id ? { ...b, isTampil: !currentVal } : b
     );
+    setKontenList(nextList);
+    // For now, this only updates local state since it's a temporary UI
+  };
 
-  // Buka editor konten (PostDefault) untuk membuat berita baru.
-  const handleTambah = () => setEditor({ mode: 'add' });
+  const handleEditorCancel = () => {
+    if (onCancel) onCancel();
+    else navigate(-1);
+  };
 
-  // Buka editor dalam mode edit, ter-prefill data baris berita terpilih.
-  const handleEdit = (id) => setEditor({ mode: 'edit', id });
-
-  // Dipanggil saat admin klik "Simpan" di editor PostDefault.
-  // PostDefault mengembalikan { contents: [{ id, judul, konten }, ...] }.
-  // Tiap item konten = SATU baris berita: judul→Judul, konten (HTML) disimpan
-  // penuh + versi teks polos untuk kolom Deskripsi.
-  const buildRow = (c, base = {}) => ({
-    cover: false,
-    statusTayang: false,
-    waktuTayang: null,
-    pembuat: adminEmail,
-    ...base, // saat edit: pertahankan metadata baris lama (status tayang, dsb.)
-    judul: c.judul,
-    deskripsi: htmlToText(c.konten),
-    konten: c.konten,
-  });
-
-  const handleEditorSave = ({ contents = [] }) => {
-    setBeritaList((prev) => {
-      let nextId = (prev.length ? Math.max(...prev.map((b) => b.id)) : 0) + 1;
-
-      // --- MODE TAMBAH: semua konten jadi baris baru di paling atas ---
-      if (editor?.mode === 'add') {
-        const rows = contents.map((c) => ({ id: nextId++, ...buildRow(c) }));
-        return [...rows, ...prev];
-      }
-
-      // --- MODE EDIT: ganti baris yang diedit dengan hasil konten ---
-      // Konten pertama memperbarui baris itu (metadata lama dipertahankan:
-      // pembuat, status tayang, waktu tayang, cover). Konten tambahan (bila
-      // admin menambah lebih dari satu) menjadi baris baru tepat setelahnya.
-      // Bila semua konten dihapus, baris berita ikut terhapus.
-      return prev.flatMap((b) => {
-        if (b.id !== editor.id) return [b];
-        return contents.map((c, i) =>
-          i === 0
-            ? { ...buildRow(c, b), id: b.id }
-            : { ...buildRow(c), id: nextId++ }
-        );
+  const handleEditorSave = async ({ contents = [] }) => {
+    let nextList;
+    if (isAddMode) {
+      // Append new contents
+      nextList = [...contents, ...kontenList];
+    } else {
+      nextList = kontenList.flatMap((b) => {
+        if (String(b.id) !== String(editId)) return [b];
+        // The first content replaces the edited one, any additional contents are appended
+        return contents;
       });
-    });
+    }
 
-    if (editor?.mode === 'add') setCurrentPage(1);
-    setEditor(null);
+    if (onSave) {
+      const success = await onSave({ contents: nextList }); // Simpan ke backend
+      if (success) {
+        setKontenList(nextList);
+        if (isAddMode) setCurrentPage(1);
+        navigate(-1); // Kembali ke tabel setelah sukses
+      }
+    } else {
+      setKontenList(nextList);
+      if (isAddMode) setCurrentPage(1);
+      navigate(-1); // Kembali ke tabel
+    }
   };
 
   const confirmDelete = () => {
     if (!deleteTarget) return;
-    setBeritaList((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+    const nextList = kontenList.filter((b) => b.id !== deleteTarget.id);
+    setKontenList(nextList);
+    if (onSave) onSave({ contents: nextList }); // Simpan ke backend
     setDeleteTarget(null);
   };
 
-  // Nomor halaman dengan "…" saat terlalu banyak (sama seperti Manajemen User).
   const buildPageList = () => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
     const pages = new Set([1, totalPages, page, page - 1, page + 1]);
@@ -208,37 +136,24 @@ const Default = ({ menuName = '', initialBerita = null }) => {
     return result;
   };
 
-  // Mode editor: tampilkan komponen PostDefault (CKEditor). Saat Simpan →
-  // konten yang dibuat ditambah/menimpa baris berita (handleEditorSave).
-  if (editor) {
-    const editing =
-      editor.mode === 'edit' ? beritaList.find((b) => b.id === editor.id) : null;
-
-    // Prefill: judul + konten HTML baris terpilih. Baris dummy lama yang tak
-    // punya `konten` HTML → pakai teks Deskripsi-nya, dibungkus paragraf.
-    const initialContents = editing
-      ? [
-          {
-            id: editing.id,
-            judul: editing.judul,
-            konten:
-              editing.konten || (editing.deskripsi ? `<p>${editing.deskripsi}</p>` : ''),
-          },
-        ]
-      : [];
+  if (isEditorActive) {
+    const editing = isEditMode ? kontenList.find((b) => String(b.id) === String(editId)) : null;
+    const initialForEditor = editing ? [editing] : [];
 
     return (
       <PostDefault
-        heading={editing ? 'Edit Berita' : 'Tambah Berita'}
+        heading={editing ? 'Edit Konten' : 'Tambah Konten'}
         subheading={
           editing
-            ? 'Perbarui judul & isi konten berita ini, lalu klik Simpan.'
-            : 'Tulis judul & isi konten berita. Tiap konten yang ditambahkan menjadi satu baris berita.'
+            ? 'Perbarui judul & isi konten ini, lalu klik Simpan.'
+            : 'Tulis judul & isi konten.'
         }
-        initialContents={initialContents}
+        initialContents={initialForEditor}
         autoEditFirst={!!editing}
         onSave={handleEditorSave}
-        onCancel={() => setEditor(null)}
+        onCancel={handleEditorCancel}
+        saveStatus={saveStatus}
+        setSaveStatus={setSaveStatus}
       />
     );
   }
@@ -246,13 +161,11 @@ const Default = ({ menuName = '', initialBerita = null }) => {
   return (
     <div className="postdefault">
       <main className="bc-content">
-        {/* ---------- HEADING ---------- */}
         <div className="pd-heading">
-          <h1>{menuName ? `Post Default — ${menuName}` : 'Post Default'}</h1>
-          <p>Kelola daftar Post Menu berikut yang tampil di halaman user.</p>
+          <h1>{menuName ? `Kelola Konten — ${menuName}` : 'Kelola Konten'}</h1>
+          <p>Kelola daftar konten yang tampil di halaman user.</p>
         </div>
 
-        {/* ---------- TOOLBAR: search + tombol tambah ---------- */}
         <div className="bc-toolbar">
           <div className="bc-search">
             <i className="fa-solid fa-magnifying-glass"></i>
@@ -267,89 +180,55 @@ const Default = ({ menuName = '', initialBerita = null }) => {
             />
           </div>
           <button className="bc-btn-tambah" onClick={handleTambah}>
-            <i className="fa-solid fa-plus"></i> Tambah Post
+            <i className="fa-solid fa-plus"></i> Tambah Konten
           </button>
         </div>
 
-        {/* ---------- TABLE ---------- */}
         <section className="bc-table-card">
           <div className="bc-table-scroll">
             <table className="bc-table">
               <thead>
                 <tr>
-                  <th className="bc-col-no">No.</th>
-                  <th className="bc-col-foto">Foto</th>
-                  <th className="bc-col-judul">Judul Berita</th>
+                  <th className="bc-col-no" style={{width: '60px'}}>No.</th>
+                  <th className="bc-col-judul">Judul Konten</th>
                   <th className="bc-col-desk">Deskripsi</th>
                   <th className="bc-col-pembuat">Pembuat</th>
-                  <th className="bc-col-waktu">Waktu Tayang (Otomatis)</th>
-                  <th className="bc-col-status">Tampilkan di Beranda</th>
-                  <th className="bc-col-aksi">Aksi</th>
+                  <th className="bc-col-tampil" style={{width: '180px', textAlign: 'center'}}>Tampilkan di Beranda</th>
+                  <th className="bc-col-aksi" style={{width: '120px', textAlign: 'center'}}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {visible.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="bc-empty-row">
-                      Tidak ada berita yang cocok dengan pencarian.
+                    <td colSpan={6} className="bc-empty-row">
+                      Tidak ada konten yang cocok dengan pencarian.
                     </td>
                   </tr>
                 ) : (
                   visible.map((b, i) => (
                     <tr key={b.id}>
                       <td className="bc-col-no">{startIdx + i + 1}</td>
-
-                      {/* Foto / cover */}
-                      <td>
-                        <div className="bc-thumb">
-                          {b.cover ? (
-                            <img src={b.coverUrl || ''} alt={b.judul} />
-                          ) : (
-                            <div className="bc-thumb-empty">
-                              <i className="fa-regular fa-image"></i>
-                              <span>No Image</span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Judul (dipotong bila kepanjangan) */}
                       <td className="bc-col-judul">
                         <span className="bc-judul" title={b.judul}>{b.judul}</span>
                       </td>
-
-                      {/* Deskripsi (truncate) */}
                       <td className="bc-col-desk">
-                        <span className="bc-desk">{b.deskripsi || '—'}</span>
+                        <span className="bc-desk">{htmlToText(b.konten) || '—'}</span>
                       </td>
-
-                      {/* Pembuat */}
-                      <td className="bc-col-pembuat bc-pembuat">{b.pembuat}</td>
-
-                      {/* Waktu Tayang (otomatis) */}
-                      <td className="bc-col-waktu">
-                        {b.statusTayang && b.waktuTayang ? (
-                          <span className="bc-waktu">{formatWaktu(b.waktuTayang)}</span>
-                        ) : (
-                          <span className="bc-waktu-off">Belum diaktifkan</span>
-                        )}
+                      <td className="bc-col-pembuat">
+                        <span className="bc-pembuat">{b.pembuat_nama || b.pembuat_email || 'Sistem'}</span>
                       </td>
-
-                      {/* Status Tayang (switch) */}
-                      <td className="bc-col-status">
-                        <label className="bc-switch" title={b.statusTayang ? 'Tayang' : 'Tidak tayang'}>
-                          <input
-                            type="checkbox"
-                            checked={b.statusTayang}
-                            onChange={() => toggleTayang(b.id)}
+                      <td className="bc-col-tampil" style={{textAlign: 'center'}}>
+                        <label className="bc-switch">
+                          <input 
+                            type="checkbox" 
+                            checked={b.isTampil || false} 
+                            onChange={() => handleToggleTampil(b.id, b.isTampil || false)} 
                           />
                           <span className="bc-slider"></span>
                         </label>
                       </td>
-
-                      {/* Aksi */}
                       <td className="bc-col-aksi">
-                        <div className="bc-actions">
+                        <div className="bc-actions" style={{justifyContent: 'center'}}>
                           <button className="bc-action-btn" title="Edit" onClick={() => handleEdit(b.id)}>
                             <i className="fa-solid fa-pen"></i>
                           </button>
@@ -369,11 +248,10 @@ const Default = ({ menuName = '', initialBerita = null }) => {
             </table>
           </div>
 
-          {/* ---------- FOOTER: info + per-halaman + pagination ---------- */}
           <div className="bc-table-footer">
             <span className="bc-footer-info">
               Menampilkan {filtered.length === 0 ? 0 : startIdx + 1}-
-              {Math.min(startIdx + pageSize, filtered.length)} dari {filtered.length} data berita
+              {Math.min(startIdx + pageSize, filtered.length)} dari {filtered.length} data konten
             </span>
 
             <div className="bc-footer-right">
@@ -430,13 +308,12 @@ const Default = ({ menuName = '', initialBerita = null }) => {
         </section>
       </main>
 
-      {/* ================= MODAL: HAPUS BERITA ================= */}
       {deleteTarget && (
         <div className="bc-modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="bc-modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3 className="bc-modal-title">Hapus Berita</h3>
+            <h3 className="bc-modal-title">Hapus Konten</h3>
             <p className="bc-modal-desc">
-              Apakah Anda yakin ingin menghapus berita <b>“{deleteTarget.judul}”</b>? Tindakan ini
+              Apakah Anda yakin ingin menghapus konten <b>“{deleteTarget.judul}”</b>? Tindakan ini
               tidak dapat dibatalkan.
             </p>
             <div className="bc-modal-actions">
