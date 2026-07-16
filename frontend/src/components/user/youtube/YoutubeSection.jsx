@@ -1,24 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './YoutubeSection.css';
 
 import Youtube from "../../../assets/source/youtube.png";
-
-// Komponen Fasad Video (Thumbnail + Tombol Play)
-const VideoPlayer = ({ video, isMain, onPlay }) => {
-    const thumbnailUrl = video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url;
-
-    return (
-        <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`} onClick={() => onPlay(video.id.videoId)}>
-            <img src={thumbnailUrl} alt={video.snippet.title} className="yt-thumbnail" loading="lazy" />
-            <div className={`yt-play-overlay ${!isMain ? 'small' : ''}`}>
-                <i className="fa-brands fa-youtube"></i>
-            </div>
-            <div className="yt-video-title-overlay">
-                <h4 className={`yt-video-title ${isMain ? 'yt-video-title--main' : ''}`}>{video.snippet.title}</h4>
-            </div>
-        </div>
-    );
-};
 
 // Komponen Iframe Player
 const IframePlayer = ({ videoId, isMain }) => (
@@ -26,7 +9,7 @@ const IframePlayer = ({ videoId, isMain }) => (
         <iframe
             width="100%"
             height="100%"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            src={`https://www.youtube.com/embed/${videoId}`}
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -44,7 +27,6 @@ const VideoPlaceholder = () => (
 );
 
 const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
-    const [playingVideoId, setPlayingVideoId] = useState(null);
     const subscribeBtnWrapperRef = useRef(null);
     const scrollState = useRef({
         currentY: 0,
@@ -173,29 +155,20 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
                                 {/* Kolom Kiri: Video Utama */}
                                 <div className="yt-main-column">
                                     {ytVideos && ytVideos[0] ? (
-                                        playingVideoId === ytVideos[0].id.videoId ? (
-                                            <IframePlayer videoId={ytVideos[0].id.videoId} isMain={true} />
-                                        ) : (
-                                            <VideoPlayer video={ytVideos[0]} isMain={true} onPlay={setPlayingVideoId} />
-                                        )
+                                        <IframePlayer videoId={ytVideos[0].id.videoId} isMain={true} />
                                     ) : (
                                         <div className="yt-video-wrapper main-wrapper">
                                             <VideoPlaceholder />
                                         </div>
                                     )}
                                 </div>
-
                                 {/* Kolom Kanan: Daftar Video Terbaru */}
                                 <div className="yt-side-column">
                                     <div className="yt-side-list">
                                         {[...Array(2)].map((_, index) => {
                                             const video = ytVideos && ytVideos[index + 1];
                                             if (video) {
-                                                return playingVideoId === video.id.videoId ? (
-                                                    <IframePlayer key={video.id.videoId} videoId={video.id.videoId} isMain={false} />
-                                                ) : (
-                                                    <VideoPlayer key={video.id.videoId} video={video} isMain={false} onPlay={setPlayingVideoId} />
-                                                );
+                                                return <IframePlayer key={video.id.videoId} videoId={video.id.videoId} isMain={false} />;
                                             } else {
                                                 return (
                                                     <div key={`placeholder-${index}`} className="yt-video-wrapper side-wrapper">

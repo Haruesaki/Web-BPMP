@@ -257,10 +257,37 @@
   
   }
 
+  .news-header-bar h2 {
+    /* Ukuran font yang lebih dinamis untuk mobile, menggantikan nilai desktop */
+    font-size: clamp(15px, 5vw, 28px);
+  }
+
   .right-title {
   font-size: clamp(17px, 2.4vw, 22px);
   font-weight: 600;
   margin-bottom: clamp(20px, 3vw, 30px);
   letter-spacing: 0.5px;
 }
+
+  .featured-overlay {
+    /* Kurangi padding vertikal & horizontal agar lebih pas di mobile */
+    padding: clamp(20px, 8vw, 40px) 20px 20px;
+  }
+
+  .featured-overlay h3 {
+    /* Ukuran font judul yang lebih dinamis dan responsif untuk mobile */
+    font-size: clamp(9px, 3vw, 20px);
+    line-height: 1.3;
+  }
+
+  .thumb-img {
+    /* Hapus batasan lebar maks & buat tinggi lebih responsif di mobile */
+    max-width: none;
+    /* KUNCI: Hapus tinggi eksplisit. Biarkan browser menghitung tinggi
+       secara otomatis untuk menjaga rasio aspek asli gambar. */
+    height: auto;
+    /* KUNCI: Izinkan gambar untuk menyusut di bawah ukuran aslinya.
+       Tanpa ini, gambar akan "tertahan" pada lebar minimumnya di dalam flex container. */
+    min-width: 0;
+  }
 }

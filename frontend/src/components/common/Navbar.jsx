@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
 
-import Logo from "../../assets/source/Logo.png";
+import Logo from "../../assets/source/logo.png";
 import Dropdown from "../../assets/source/Dropdown.png";
 import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
 import Profile from "../../assets/source/WOWOK.jpg";

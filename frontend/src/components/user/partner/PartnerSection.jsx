@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react';
 import './PartnerSection.css';
 
 // --- IMPORT ASSETS ---
-import Mitra1Jpg from "../../../assets/source/Mitra (1).jpg";
-import Mitra1Png from "../../../assets/source/Mitra (1).png";
-import Mitra2 from "../../../assets/source/Mitra (2).png";
-import Mitra3 from "../../../assets/source/Mitra (3).png";
-import Mitra4 from "../../../assets/source/Mitra (4).png";
-import Mitra5 from "../../../assets/source/Mitra (5).png";
+import Mitra1Jpg from "../../../assets/source/Unila.jpeg";
+import Mitra1Png from "../../../assets/source/Unila.jpeg";
+import Mitra2 from "../../../assets/source/Unila.jpeg";
+import Mitra3 from "../../../assets/source/Unila.jpeg";
+import Mitra4 from "../../../assets/source/Unila.jpeg";
+import Mitra5 from "../../../assets/source/Unila.jpeg";
 
 const LOOP_COPIES = 8;
 
