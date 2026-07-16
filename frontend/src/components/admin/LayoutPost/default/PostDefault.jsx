@@ -106,11 +106,16 @@ const PostDefault = ({
             <label htmlFor="pd-judul">Judul Konten</label>
             <input
               id="pd-judul"
+              name="pd-judul-konten"
               type="text"
               className="pd-input"
               placeholder="Masukkan judul post..."
               value={judul}
               onChange={(e) => setJudul(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
             />
           </div>
 

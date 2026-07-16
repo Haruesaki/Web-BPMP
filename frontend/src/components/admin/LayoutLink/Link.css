@@ -117,7 +117,7 @@
 
 .admin-layout .lk-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 24px;
     padding: 16px 24px;
     border-bottom: 1px solid var(--border-soft);
@@ -163,6 +163,7 @@
     gap: 10px;
     width: 280px;
     flex-shrink: 0;
+    padding-top: 10px;
     font-size: 15px;
     color: var(--text-main);
 }
@@ -188,9 +189,16 @@
     background: var(--text-faint);
 }
 
-.admin-layout .lk-input {
+.admin-layout .lk-form-preview {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-width: 0;
+    gap: 12px;
+}
+
+.admin-layout .lk-input {
+    width: 100%;
     padding: 11px 14px;
     border: 1px solid var(--border-soft);
     border-radius: 9px;
@@ -210,6 +218,11 @@
     color: var(--text-faint);
 }
 
+/* Preview kini di bawah input, lebarnya mengikuti wrapper (sejajar dengan form) */
+.admin-layout .lk-preview-wrapper {
+    width: 100%;
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px) {
     .admin-layout .lk-row {
@@ -219,9 +232,10 @@
 
     .admin-layout .lk-menu-label {
         width: 100%;
+        padding-top: 0;
     }
 
-    .admin-layout .lk-input {
+    .admin-layout .lk-form-preview {
         width: 100%;
     }
 
