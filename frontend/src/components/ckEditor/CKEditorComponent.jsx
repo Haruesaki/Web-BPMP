@@ -69,6 +69,7 @@ import {
 
 import 'ckeditor5/ckeditor5.css';
 import { CustomUploadAdapterPlugin } from '../../utils/CustomUploadAdapter';
+import axiosInstance from '../../api/axiosInstance';
 import './CKEditorComponent.css';
 
 const editorConfig = {
@@ -163,9 +164,57 @@ const getAuthToken = () => {
 
 const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/gambar`;
 
-const CKEditorComponent = ({ data, onChange }) => {
+const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) => {
   const editorRef = useRef(null);
   const [compressMsg, setCompressMsg] = useState('');
+  const [thumbUploading, setThumbUploading] = useState(false);
+  const [thumbError, setThumbError] = useState('');
+  const thumbInputRef = useRef(null);
+
+  const handleThumbnailPick = () => {
+    if (thumbInputRef.current) thumbInputRef.current.click();
+  };
+
+  const handleThumbnailFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // reset supaya bisa pilih file yang sama lagi
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setThumbError('Berkas yang dipilih bukan gambar.');
+      return;
+    }
+
+    setThumbError('');
+    setThumbUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('upload', file);
+
+      const res = await axiosInstance.post('/api/upload/gambar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const url = res?.data?.url;
+      if (url && onThumbnailChange) {
+        onThumbnailChange(url);
+      } else {
+        setThumbError('Server tidak mengembalikan URL gambar.');
+      }
+    } catch (err) {
+      console.error('Gagal upload thumbnail:', err);
+      const message = err?.response?.data?.error?.message || 'Gagal mengunggah gambar thumbnail.';
+      setThumbError(message);
+    } finally {
+      setThumbUploading(false);
+    }
+  };
+
+  const handleThumbnailRemove = () => {
+    setThumbError('');
+    if (onThumbnailChange) onThumbnailChange('');
+  };
 
   const finalEditorConfig = useMemo(
     () => ({
@@ -286,6 +335,38 @@ const CKEditorComponent = ({ data, onChange }) => {
           <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
         </div>
       )}
+      <div className="pd-thumbnail-uploader">
+        <label className="pd-thumbnail-label">Thumbnail Berita</label>
+        <input
+          ref={thumbInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleThumbnailFileChange}
+        />
+
+        {thumbnailUrl ? (
+          <div className="pd-thumbnail-preview">
+            <img src={thumbnailUrl} alt="Preview thumbnail berita" />
+            <div className="pd-thumbnail-preview-actions">
+              <button type="button" className="pd-thumbnail-btn" onClick={handleThumbnailPick} disabled={thumbUploading}>
+                {thumbUploading ? 'Mengunggah...' : 'Ganti Gambar'}
+              </button>
+              <button type="button" className="pd-thumbnail-btn pd-thumbnail-btn-danger" onClick={handleThumbnailRemove} disabled={thumbUploading}>
+                Hapus
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="pd-thumbnail-dropzone" onClick={handleThumbnailPick} disabled={thumbUploading}>
+            <i className="fa-regular fa-image" style={{ fontSize: 22 }}></i>
+            <span>{thumbUploading ? 'Mengunggah gambar...' : 'Klik untuk unggah gambar thumbnail'}</span>
+          </button>
+        )}
+
+        {thumbError && <p className="pd-thumbnail-error">{thumbError}</p>}
+      </div>
+
       <div className="pd-editor">
         <CKEditor
           editor={ClassicEditor}

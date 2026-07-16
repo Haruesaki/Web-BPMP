@@ -35,6 +35,7 @@ const PostDefault = ({
   // --- STATE FORM (untuk menambah / mengedit satu konten) ---
   const [judul, setJudul] = useState('');
   const [konten, setKonten] = useState('');
+  const [coverUrl, setCoverUrl] = useState('');
   const [formError, setFormError] = useState('');
 
   // Efek untuk memuat data awal ke dalam form saat komponen dimuat
@@ -44,6 +45,7 @@ const PostDefault = ({
     if (initialContent) {
       setJudul(initialContent.judul || '');
       setKonten(initialContent.konten || '');
+      setCoverUrl(initialContent.coverUrl || '');
     }
   }, [initialContents]);
 
@@ -62,6 +64,7 @@ const PostDefault = ({
     const currentContent = {
       judul: judul.trim(),
       konten: konten,
+      coverUrl: coverUrl || null,
       id: initialContents?.[0]?.id || null, // Sertakan ID asli jika ini mode edit
     };
 
@@ -114,7 +117,12 @@ const PostDefault = ({
           {/* Editor Konten */}
           <div className="pd-field" style={{ position: 'relative' }}>
             <label>Konten</label>
-            <CKEditorComponent data={konten} onChange={setKonten} />
+            <CKEditorComponent
+              data={konten}
+              onChange={setKonten}
+              thumbnailUrl={coverUrl}
+              onThumbnailChange={setCoverUrl}
+            />
           </div>
 
           {formError && <p className="pd-error">{formError}</p>}
