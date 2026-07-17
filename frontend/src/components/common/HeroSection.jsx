@@ -1,26 +1,83 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
+import axiosInstance from '../../api/axiosInstance';
 
 // Import assets
+import Logo from '../../assets/source/Logo.png';
 import Mitra4 from '../../assets/source/Mitra (4).png';
 import Mitra5 from '../../assets/source/Mitra (5).png';
-import Background from '../../assets/source/section-landing.png';
+
+const DEFAULT_HERO = {
+    judul: 'Judul Website',
+    subjudul: 'Deskripsi Website',
+    url_gambar: null,
+    logo_1: 'Kemendikdasmen',
+    logo_2: 'BPMP Lampung',
+};
+
+const LOGO_ASSETS = {
+    Kemendikdasmen: Mitra5,
+    'BPMP Lampung': Logo,
+    'Dinas Pendidikan': Mitra4,
+};
+
+const pseudoRandom = (seed) => {
+    const value = Math.sin(seed) * 10000;
+    return value - Math.floor(value);
+};
 
 const HeroSection = () => {
+    const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
     const [showSubtitle, setShowSubtitle] = useState(false);
-    const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
     const heroImageRef = useRef(null);
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
+    const fullText = heroContent.judul || DEFAULT_HERO.judul;
+    const subtitle = heroContent.subjudul || DEFAULT_HERO.subjudul;
+    const heroImage = heroContent.url_gambar || null;
+    const selectedLogos = [heroContent.logo_1, heroContent.logo_2]
+        .filter((logoName) => logoName && logoName !== 'Pilih Logo Utama')
+        .map((logoName, index) => ({
+            id: `${logoName}-${index}`,
+            name: logoName,
+            src: LOGO_ASSETS[logoName],
+        }))
+        .filter((logo) => logo.src);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadHeroContent = async () => {
+            try {
+                const response = await axiosInstance.get('/api/beranda/hero');
+                const hero = response.data?.data;
+                if (!hero || !isMounted) return;
+
+                setHeroContent({
+                    ...DEFAULT_HERO,
+                    ...hero,
+                    url_gambar: hero.url_gambar || null,
+                });
+            } catch (error) {
+                console.error('Gagal mengambil Hero Beranda:', error);
+            }
+        };
+
+        loadHeroContent();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     // EFEK PARTIKEL
     const particles = useMemo(() => {
         const particleCount = 50;
         return Array.from({ length: particleCount }).map((_, i) => {
-            const size = Math.random() * 1 + 4; // Ukuran antara 1px dan 4px
-            const duration = Math.random() * 8 + 3; // Durasi antara 10s dan 20s
-            const delay = Math.random() * 3; // Delay hingga 20s
-            const left = Math.random() * 120; // Posisi horizontal acak
+            const size = pseudoRandom(i + 1) * 1 + 4; // Ukuran antara 1px dan 4px
+            const duration = pseudoRandom(i + 101) * 8 + 3; // Durasi antara 10s dan 20s
+            const delay = pseudoRandom(i + 201) * 3; // Delay hingga 20s
+            const left = pseudoRandom(i + 301) * 120; // Posisi horizontal acak
 
             return (
                 <div
@@ -44,6 +101,9 @@ const HeroSection = () => {
         let typingInterval;
 
         const startDelay = setTimeout(() => {
+            setTypedText('');
+            setShowSubtitle(false);
+
             typingInterval = setInterval(() => {
                 if (i < fullText.length) {
                     setTypedText(fullText.substring(0, i + 1));
@@ -92,14 +152,14 @@ const HeroSection = () => {
             const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
 
             // Gabungkan X dan Y untuk menciptakan gerakan diagonal
-            leftContent.style.transform = `translate(${leftTranslateX}px`;
+            leftContent.style.transform = `translate(${leftTranslateX}px, ${leftTranslateY}px)`;
             leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, []);
+    }, [heroImage]);
 
     return (
         <div className="landing-wrapper">
@@ -116,34 +176,32 @@ const HeroSection = () => {
                         </h1>
 
                         <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
-                            Kementerian Pendidikan Dasar dan Menengah
+                            {subtitle}
                         </p>
 
                         {/* Pembungkus terluar untuk menjaga tata letak agar tetap terkunci */}
                         <div className="hero-logos-wrapper-cms">
                             {/* Kontainer untuk daftar logo mitra, akan menjadi wadah dinamis */}
                             <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
-                                {/* Setiap logo dibungkus dalam div-nya sendiri untuk pengelolaan CMS yang lebih baik */}
-                                <div className="logo-item-cms">
-                                    {/* Gambar logo mitra pertama */}
-                                    <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
-                                </div>
-                                <div className="logo-item-cms">
-                                    {/* Gambar logo mitra kedua */}
-                                    <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
-                                </div>
+                                {selectedLogos.map((logo) => (
+                                    <div className="logo-item-cms" key={logo.id}>
+                                        <img src={logo.src} alt={logo.name} className="bottom-logo" />
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
 
-                    <div className="hero-right-cms">
-                        <img
-                            ref={heroImageRef}
-                            src={Background}
-                            alt="Visual Gedung dan Latar Belakang BPMP"
-                            className="cms-dynamic-image"
-                        />
-                    </div>
+                    {heroImage && (
+                        <div className="hero-right-cms">
+                            <img
+                                ref={heroImageRef}
+                                src={heroImage}
+                                alt="Visual Gedung dan Latar Belakang BPMP"
+                                className="cms-dynamic-image"
+                            />
+                        </div>
+                    )}
                 </div>
             </section>
         </div>

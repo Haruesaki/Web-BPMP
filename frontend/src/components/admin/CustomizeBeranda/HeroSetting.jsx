@@ -1,4 +1,3 @@
-import React from 'react';
 import './HeroSetting.css';
 
 const HeroSetting = ({
@@ -8,7 +7,9 @@ const HeroSetting = ({
   setDeskripsi,
   backgroundName,
   backgroundPreview,
+  backgroundInputKey,
   handleBackgroundChange,
+  handleBackgroundRemove,
   tampilanLogo1,
   setTampilanLogo1,
   tampilanLogo2,
@@ -26,7 +27,7 @@ const HeroSetting = ({
       <input
         type="text"
         className="cb-input"
-        placeholder="Masukkan judul utama..."
+        placeholder="Masukan Teks"
         value={judulBeranda}
         onChange={(e) => setJudulBeranda(e.target.value)}
       />
@@ -34,7 +35,7 @@ const HeroSetting = ({
       <label className="cb-field-label">Deskripsi</label>
       <textarea
         className="cb-textarea"
-        placeholder="Masukkan deskripsi..."
+        placeholder="Masukan Teks"
         rows={3}
         value={deskripsi}
         onChange={(e) => setDeskripsi(e.target.value)}
@@ -48,6 +49,7 @@ const HeroSetting = ({
               Upload
             </label>
             <input
+              key={backgroundInputKey}
               id="bg-input"
               type="file"
               accept="image/*"
@@ -60,7 +62,18 @@ const HeroSetting = ({
           <span className="cb-field-label cb-preview-caption">PREVIEW GAMBAR BACKGROUND</span>
           <div className="cb-bg-preview">
             {backgroundPreview ? (
-              <img src={backgroundPreview} alt="Preview background" />
+              <>
+                <button
+                  type="button"
+                  className="cb-bg-remove"
+                  aria-label="Hapus gambar background"
+                  title="Hapus gambar background"
+                  onClick={handleBackgroundRemove}
+                >
+                  <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+                <img src={backgroundPreview} alt="Preview background" />
+              </>
             ) : (
               <i className="fa-regular fa-image"></i>
             )}

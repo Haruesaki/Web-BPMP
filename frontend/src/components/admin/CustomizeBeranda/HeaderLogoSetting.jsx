@@ -1,7 +1,12 @@
-import React from 'react';
 import './HeaderLogoSetting.css';
 
-const HeaderLogoSetting = ({ headerLogoPreview, headerLogoName, handleHeaderLogoChange }) => {
+const HeaderLogoSetting = ({
+  headerLogoPreview,
+  headerLogoName,
+  headerLogoInputKey,
+  handleHeaderLogoChange,
+  handleHeaderLogoRemove,
+}) => {
   return (
     <section className="cb-card">
       <div className="cb-card-title">
@@ -12,7 +17,21 @@ const HeaderLogoSetting = ({ headerLogoPreview, headerLogoName, handleHeaderLogo
       <label className="cb-field-label">Logo Utama Website</label>
       <label className="cb-logo-drop" htmlFor="header-logo-input">
         {headerLogoPreview ? (
-          <img src={headerLogoPreview} alt="Preview logo header" className="cb-logo-drop-img" />
+          <>
+            <button
+              type="button"
+              className="cb-logo-remove"
+              aria-label="Hapus logo header"
+              title="Hapus logo header"
+              onClick={(event) => {
+                event.preventDefault();
+                handleHeaderLogoRemove();
+              }}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+            <img src={headerLogoPreview} alt="Preview logo header" className="cb-logo-drop-img" />
+          </>
         ) : (
           <span className="cb-logo-drop-placeholder">
             <i className="fa-regular fa-file"></i>
@@ -23,6 +42,7 @@ const HeaderLogoSetting = ({ headerLogoPreview, headerLogoName, handleHeaderLogo
         </span>
       </label>
       <input
+        key={`drop-${headerLogoInputKey}`}
         id="header-logo-input"
         type="file"
         accept="image/*"
@@ -35,6 +55,7 @@ const HeaderLogoSetting = ({ headerLogoPreview, headerLogoName, handleHeaderLogo
           Telusuri...
         </label>
         <input
+          key={`row-${headerLogoInputKey}`}
           id="header-logo-input-2"
           type="file"
           accept="image/*"

@@ -11,6 +11,8 @@ const StatistikPengunjungController = require('../controllers/statistikPengunjun
 const AktivitasAdminController = require('../controllers/aktivitasAdminController');
 const ProfilPegawaiController = require('../controllers/profilPegawaiController');
 const BeritaController = require('../controllers/beritaController');
+const BerandaHeroController = require('../controllers/berandaHeroController');
+const BerandaHeaderController = require('../controllers/berandaHeaderController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
@@ -36,6 +38,12 @@ router.post('/auth/login', AuthController.login);
 router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
 router.post('/auth/reset-password', AuthController.resetPassword);
+
+// ================= BERANDA CMS ROUTES =================
+router.get('/beranda/header', BerandaHeaderController.getHeader);
+router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHeader);
+router.get('/beranda/hero', BerandaHeroController.getHero);
+router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
 
 // ================= LINK PREVIEW =================
 router.get('/link-preview', authMiddleware, getLinkPreview);
