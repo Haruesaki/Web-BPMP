@@ -14,7 +14,7 @@ const HeaderLogoSetting = ({
         <span>Header</span>
       </div>
 
-      <label className="cb-field-label">Logo Utama Website</label>
+      <label className="cb-field-label">Logo Utama Website (rasio 1:1)</label>
       <label className="cb-logo-drop" htmlFor="header-logo-input">
         {headerLogoPreview ? (
           <>

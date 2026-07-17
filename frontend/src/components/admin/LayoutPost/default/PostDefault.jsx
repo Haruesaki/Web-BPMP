@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import CKEditorComponent from '../../../ckEditor/CKEditorComponent';
 import './PostDefault.css';
 
@@ -19,10 +19,6 @@ import './PostDefault.css';
 // =========================================================================
 
 const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-// Buang tag HTML untuk pratinjau ringkas di daftar konten.
-const stripHtml = (html) =>
-  html ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
-
 
 
 const PostDefault = ({
@@ -36,96 +32,58 @@ const PostDefault = ({
   saveStatus,
   setSaveStatus,
 }) => {
-  // Normalisasi sekali: pastikan tiap konten awal punya id yang stabil, agar
-  // id di daftar konten cocok dengan editingId form saat autoEditFirst.
-  const normalizedInitial = useMemo(
-    () => initialContents.map((c) => ({ id: c.id || makeId(), ...c })),
-    [] // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  // Daftar konten yang sudah ditambahkan.
-  const [contents, setContents] = useState(normalizedInitial);
-
-  // Saat autoEditFirst, form langsung menampilkan konten pertama (mode edit
-  // item) sehingga CKEditor tampil sudah terisi judul + konten.
-  const firstContent = autoEditFirst ? normalizedInitial[0] : null;
-
   // --- STATE FORM (untuk menambah / mengedit satu konten) ---
-  const [judul, setJudul] = useState(firstContent ? firstContent.judul || '' : '');
-  const [konten, setKonten] = useState(firstContent ? firstContent.konten || '' : '');
-  const [editingId, setEditingId] = useState(firstContent ? firstContent.id : null);
+  const [judul, setJudul] = useState('');
+  const [konten, setKonten] = useState('');
+  const [coverUrl, setCoverUrl] = useState('');
   const [formError, setFormError] = useState('');
 
+  // Efek untuk memuat data awal ke dalam form saat komponen dimuat
+  // (terutama untuk mode edit).
+  useEffect(() => {
+    const initialContent = initialContents?.[0];
+    if (initialContent) {
+      setJudul(initialContent.judul || '');
+      setKonten(initialContent.konten || '');
+      setCoverUrl(initialContent.coverUrl || '');
+    }
+  }, [initialContents]);
 
-
-
-  const resetForm = () => {
-    setJudul('');
-    setKonten('');
-    setEditingId(null);
+  const handleSimpan = () => {
     setFormError('');
-  };
+    if (setSaveStatus) {
+      setSaveStatus({ error: false, message: '' });
+    }
 
-  // Tambah konten baru ATAU perbarui konten yang sedang diedit.
-  const handleTambahAtauPerbarui = () => {
     if (!judul.trim()) {
       setFormError('Judul wajib diisi.');
       return;
     }
-    const entry = { judul: judul.trim(), konten };
-    if (editingId) {
-      setContents((prev) => prev.map((c) => (c.id === editingId ? { ...c, ...entry } : c)));
-    } else {
-      setContents((prev) => [...prev, { id: makeId(), ...entry }]);
-    }
-    resetForm();
-  };
 
-  const handleEditItem = (id) => {
-    const c = contents.find((x) => x.id === id);
-    if (!c) return;
-    setJudul(c.judul || '');
-    setKonten(c.konten || '');
-    setEditingId(id);
-    setFormError('');
-    window.scrollTo({ top: 0 });
-  };
+    // Buat payload konten tunggal dari state form saat ini.
+    const currentContent = {
+      judul: judul.trim(),
+      konten: konten,
+      coverUrl: coverUrl || null,
+      id: initialContents?.[0]?.id || null, // Sertakan ID asli jika ini mode edit
+    };
 
-  const handleHapusItem = (id) => {
-    setContents((prev) => prev.filter((c) => c.id !== id));
-    if (editingId === id) resetForm();
-  };
-
-  const handleSimpan = () => {
-    // Commit isi form yang belum di-"Tambah/Perbarui" agar tidak hilang saat
-    // admin langsung klik Simpan (mis. saat mengedit satu konten). Bila judul
-    // form kosong, tidak ada yang di-commit.
-    let finalContents = contents;
-    if (judul.trim()) {
-      const entry = { judul: judul.trim(), konten };
-      finalContents = editingId
-        ? contents.map((c) => (c.id === editingId ? { ...c, ...entry } : c))
-        : [...contents, { id: makeId(), ...entry }];
-    }
-
-    if (finalContents.length === 0) {
+    if (!currentContent.judul && !currentContent.konten) {
       if (setSaveStatus) {
         setSaveStatus({ error: true, message: 'Form harus diisi minimal 1 konten untuk bisa menyimpan ke database.' });
       }
       return;
     }
 
-    const data = { contents: finalContents };
+    // Kirim data sebagai array dengan satu item untuk menjaga kompatibilitas
+    // dengan komponen induk (MenuContentEditor, PostBeritaCard).
+    const data = { contents: [currentContent] };
     if (onSave) onSave(data);
     else console.log(data); // fallback standalone
   };
 
   const handleBatal = () => {
     if (onCancel) onCancel();
-    else {
-      setContents([]);
-      resetForm();
-    }
   };
 
 
@@ -141,43 +99,38 @@ const PostDefault = ({
 
         {/* ---------- FORM: TAMBAH / EDIT SATU KONTEN ---------- */}
         <section className="pd-card">
-          <h2 className="pd-section-title">{editingId ? 'Edit Konten' : 'Tambah Konten'}</h2>
+          <h2 className="pd-section-title">Isi Konten</h2>
 
           {/* Judul Konten */}
           <div className="pd-field">
             <label htmlFor="pd-judul">Judul Konten</label>
             <input
               id="pd-judul"
+              name="pd-judul-konten"
               type="text"
               className="pd-input"
               placeholder="Masukkan judul post..."
               value={judul}
               onChange={(e) => setJudul(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
             />
           </div>
 
           {/* Editor Konten */}
           <div className="pd-field" style={{ position: 'relative' }}>
             <label>Konten</label>
-            <CKEditorComponent data={konten} onChange={setKonten} />
+            <CKEditorComponent
+              data={konten}
+              onChange={setKonten}
+              thumbnailUrl={coverUrl}
+              onThumbnailChange={setCoverUrl}
+            />
           </div>
 
           {formError && <p className="pd-error">{formError}</p>}
-
-          <div className="pd-form-actions">
-            {editingId && (
-              <button type="button" className="pd-btn pd-btn-batal" onClick={resetForm}>
-                Batal Edit
-              </button>
-            )}
-            <button
-              type="button"
-              className="pd-btn pd-btn-simpan"
-              onClick={handleTambahAtauPerbarui}
-            >
-              {editingId ? 'Perbarui Konten' : '+ Tambah Konten'}
-            </button>
-          </div>
 
           {/* RENDER saveStatus DI BAWAH BUTTON */}
           {saveStatus?.message && (
@@ -191,42 +144,6 @@ const PostDefault = ({
               fontWeight: '500'
             }}>
               {saveStatus.message}
-            </div>
-          )}
-        </section>
-
-        {/* ---------- DATA KONTEN ---------- */}
-        <section className="pd-card pd-list-card">
-          <h2 className="pd-section-title">Data Konten ({contents.length})</h2>
-          {contents.length === 0 ? (
-            <p className="pd-empty">Belum ada konten. Tambahkan lewat form di atas.</p>
-          ) : (
-            <div className="pd-list">
-              {contents.map((c, i) => {
-                const preview = stripHtml(c.konten);
-                return (
-                  <div className="pd-list-item" key={c.id}>
-                    <div className="pd-list-item-main">
-                      <div className="pd-list-item-title">
-                        {i + 1}. {c.judul}
-                      </div>
-                      {preview && <div className="pd-list-item-preview">{preview}</div>}
-                    </div>
-                    <div className="pd-list-actions">
-                      <button type="button" className="pd-icon-btn" onClick={() => handleEditItem(c.id)}>
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="pd-icon-btn pd-icon-btn-danger"
-                        onClick={() => handleHapusItem(c.id)}
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           )}
         </section>

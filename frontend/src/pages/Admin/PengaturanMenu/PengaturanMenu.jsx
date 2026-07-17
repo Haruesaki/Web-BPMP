@@ -280,10 +280,15 @@ const PengaturanMenu = () => {
 
                   <span className="pm-number">{index + 1}</span>
 
-                  <div className={`pm-label ${hasSub ? 'pm-label-clickable' : ''}`} onClick={hasSub ? () => toggleExpand(menu.id) : undefined}>
-                    <i className={menu.ikon_menu} style={{ marginRight: '8px' }}></i>
-                    <span>{menu.label}</span>
-                    <span className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`} title={menu.active ? 'Aktif' : 'Non-aktif'}></span>
+                  <div className="pm-label">
+                    <span
+                      className={`pm-label-inner ${hasSub ? 'pm-label-clickable' : ''}`}
+                      onClick={hasSub ? () => toggleExpand(menu.id) : undefined}
+                    >
+                      <i className={menu.ikon_menu} style={{ marginRight: '8px' }}></i>
+                      <span>{menu.label}</span>
+                      <span className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`} title={menu.active ? 'Aktif' : 'Non-aktif'}></span>
+                    </span>
                   </div>
 
                   <div className="pm-actions">
@@ -383,8 +388,8 @@ const PengaturanMenu = () => {
       {modalConvertOpen.isOpen && (
         <div className="pm-confirm-overlay" data-lenis-prevent="true" onClick={() => setModalConvertOpen({ isOpen: false, menuId: null, menuName: '' })}>
           <div className="pm-confirm-box" onClick={(e) => e.stopPropagation()} style={{ width: '500px', overflow: 'visible' }}>
-            <div className="pm-confirm-body" style={{ textAlign: 'left' }}>
-              <div className="pm-confirm-icon" style={{ justifyContent: 'flex-start', color: '#ffb703' }}>
+            <div className="pm-confirm-body">
+              <div className="pm-confirm-icon" style={{ color: '#ffb703' }}>
                 <i className="fa-solid fa-code-merge"></i>
               </div>
               <h3 className="pm-confirm-title">Jadikan Konten Sebagai Submenu</h3>

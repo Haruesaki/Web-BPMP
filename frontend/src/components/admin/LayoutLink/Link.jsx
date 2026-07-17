@@ -250,22 +250,24 @@ const Link = () => {
                   ></span>
                 </div>
 
-                <input
-                  type="text"
-                  className="lk-input"
-                  value={row.link}
-                  placeholder="https://contoh.com/halaman"
-                  onChange={(e) => updateLink(row.id, e.target.value)}
-                  ref={(el) => (inputRefs.current[row.id] = el)}
-                />
-
-                {/* Area Pratinjau Link */}
-                <div className="lk-preview-wrapper">
-                  <LinkPreviewCard
-                    loading={isPreviewLoading}
-                    error={previewError}
-                    data={previewData}
+                <div className="lk-form-preview">
+                  <input
+                    type="text"
+                    className="lk-input"
+                    value={row.link}
+                    placeholder="https://contoh.com/halaman"
+                    onChange={(e) => updateLink(row.id, e.target.value)}
+                    ref={(el) => (inputRefs.current[row.id] = el)}
                   />
+
+                  {/* Area Pratinjau Link — kini di bawah form, lebar sejajar dengan input */}
+                  <div className="lk-preview-wrapper">
+                    <LinkPreviewCard
+                      loading={isPreviewLoading}
+                      error={previewError}
+                      data={previewData}
+                    />
+                  </div>
                 </div>
               </div>
             ))}

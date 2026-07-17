@@ -107,13 +107,13 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
     
     if (isAddMode) {
       for (const c of contents) {
-        await axiosInstance.post(`/api/berita/${menuId}`, { judul: c.judul, deskripsi_kaya: c.konten, statusTayang: false });
+        await axiosInstance.post(`/api/berita/${menuId}`, { judul: c.judul, deskripsi_kaya: c.konten, coverUrl: c.coverUrl || null, statusTayang: false });
       }
     } else if (isEditMode) {
       const mainContent = contents[0];
-      await axiosInstance.put(`/api/berita/${editId}`, { judul: mainContent.judul, deskripsi_kaya: mainContent.konten });
+      await axiosInstance.put(`/api/berita/${editId}`, { judul: mainContent.judul, deskripsi_kaya: mainContent.konten, coverUrl: mainContent.coverUrl || null });
       for (let i = 1; i < contents.length; i++) {
-        await axiosInstance.post(`/api/berita/${menuId}`, { judul: contents[i].judul, deskripsi_kaya: contents[i].konten, statusTayang: false });
+        await axiosInstance.post(`/api/berita/${menuId}`, { judul: contents[i].judul, deskripsi_kaya: contents[i].konten, coverUrl: contents[i].coverUrl || null, statusTayang: false });
       }
     }
     
@@ -151,7 +151,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
   if (isEditorActive) {
     const editing = isEditMode ? beritaList.find((b) => String(b.id) === String(editId)) : null;
     const initialContents = editing
-      ? [{ id: editing.id, judul: editing.judul, konten: editing.konten }]
+      ? [{ id: editing.id, judul: editing.judul, konten: editing.konten, coverUrl: editing.coverUrl }]
       : [];
     return (
       <PostDefault
@@ -189,7 +189,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
               <thead>
                 <tr>
                   <th className="bc-col-no">No.</th>
-                  <th className="bc-col-foto">Foto</th>
+                  <th className="bc-col-foto">Thumbnail</th>
                   <th className="bc-col-judul">Judul Berita</th>
                   <th className="bc-col-desk">Deskripsi</th>
                   <th className="bc-col-pembuat">Pembuat</th>
