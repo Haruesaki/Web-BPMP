@@ -280,10 +280,15 @@ const PengaturanMenu = () => {
 
                   <span className="pm-number">{index + 1}</span>
 
-                  <div className={`pm-label ${hasSub ? 'pm-label-clickable' : ''}`} onClick={hasSub ? () => toggleExpand(menu.id) : undefined}>
-                    <i className={menu.ikon_menu} style={{ marginRight: '8px' }}></i>
-                    <span>{menu.label}</span>
-                    <span className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`} title={menu.active ? 'Aktif' : 'Non-aktif'}></span>
+                  <div className="pm-label">
+                    <span
+                      className={`pm-label-inner ${hasSub ? 'pm-label-clickable' : ''}`}
+                      onClick={hasSub ? () => toggleExpand(menu.id) : undefined}
+                    >
+                      <i className={menu.ikon_menu} style={{ marginRight: '8px' }}></i>
+                      <span>{menu.label}</span>
+                      <span className={`pm-dot ${menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`} title={menu.active ? 'Aktif' : 'Non-aktif'}></span>
+                    </span>
                   </div>
 
                   <div className="pm-actions">
