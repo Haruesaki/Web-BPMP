@@ -1,22 +1,39 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
-import '../../pages/Admin/DashboardAdmin/dashboard-admin.css';
+import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import { useAuth } from '../../../hooks/useAuth';
+import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
+import axiosInstance from '../../../api/axiosInstance';
+
+import DashboardAdmin from '../../../pages/Admin/DashboardAdmin/dashboard-admin';
+import CustomizeBeranda from '../../../pages/Admin/CustomizeBeranda/CustomizeBeranda';
+import PengaturanMenu from '../../../pages/Admin/PengaturanMenu/PengaturanMenu';
+import ManajemenUser from '../../../pages/Admin/ManajemenUser/ManajemenUser';
+import Link from '../LayoutLink/Link';
+const MenuContentEditor = lazy(() => import('../LayoutPost/MenuContentEditor'));
 
 const AdminLayout = () => {
-  // --- 1. STATE: MENU AKTIF (dipakai AdminSidebar) ---
-  const [activeMenu, setActiveMenu] = useState('beranda');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // --- 2. STATE: MODAL TAMBAH MENU ---
+  // Kita akan menggunakan <Outlet /> bawaan React Router untuk render konten.
+
+  // --- STATE: MODAL TAMBAH MENU ---
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [refreshSidebarTrigger, setRefreshSidebarTrigger] = useState(0); // trigger untuk refresh sidebar
+  const [formError, setFormError] = useState(''); // state untuk error message di form
 
   // --- 3. STATE: FORM TAMBAH MENU ---
   const [menuName, setMenuName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedPostLayout, setSelectedPostLayout] = useState('');
+  const [selectedPostView, setSelectedPostView] = useState('Vertikal'); // orientasi card berita di halaman user
+  const [menuLink, setMenuLink] = useState(''); // diisi bila jenis menu = Link
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const iconDropdownRef = useRef(null);
@@ -24,15 +41,25 @@ const AdminLayout = () => {
 
   // --- 4. DATA: PILIHAN IKON DROPDOWN (FORM TAMBAH MENU) ---
   const iconOptions = [
-    { value: 'dashboard', label: 'Dashboard', fa: 'fa-solid fa-table-cells-large' },
-    { value: 'berita', label: 'Berita', fa: 'fa-solid fa-newspaper' },
-    { value: 'profil', label: 'Profil', fa: 'fa-solid fa-circle-user' },
-    { value: 'setting', label: 'Setting', fa: 'fa-solid fa-gear' },
+    { value: 'fa-solid fa-table-cells-large', label: 'Menu utama', fa: 'fa-solid fa-table-cells-large' },
+    { value: 'fa-solid fa-pen-to-square', label: 'Customize', fa: 'fa-solid fa-pen-to-square' },
+    { value: 'fa-solid fa-sliders', label: 'Preferensi', fa: 'fa-solid fa-sliders' },
+    { value: 'fa-solid fa-file-lines', label: 'Dokumen', fa: 'fa-solid fa-file-lines' },
+    { value: 'fa-solid fa-circle-user', label: 'Profil', fa: 'fa-solid fa-circle-user' },
+    { value: 'fa-solid fa-building-columns', label: 'Institusi', fa: 'fa-solid fa-building-columns' },
+    { value: 'fa-solid fa-hands-holding-circle', label: 'Layanan', fa: 'fa-solid fa-hands-holding-circle' },
+    { value: 'fa-solid fa-calendar-check', label: 'Agenda / Tugas', fa: 'fa-solid fa-calendar-check' },
+    { value: 'fa-solid fa-circle-info', label: 'Informasi', fa: 'fa-solid fa-circle-info' },
+    { value: 'fa-solid fa-shield-halved', label: 'Privasi', fa: 'fa-solid fa-shield-halved' },
+    { value: 'fa-solid fa-comments', label: 'Pesan / Forum', fa: 'fa-solid fa-comments' },
+    { value: 'fa-solid fa-users', label: 'Daftar Pengguna', fa: 'fa-solid fa-users' },
+    { value: 'fa-solid fa-gear', label: 'Pengaturan', fa: 'fa-solid fa-gear' },
   ];
 
   // --- 5. DATA: JENIS MENU ---
   const typeOptions = ['Post', 'Link'];
   const postLayoutOptions = ['Default', 'Profile Card', 'Berita Card'];
+  const postViewOptions = ['Vertikal', 'Horizontal']; // orientasi tampilan card berita
 
   // --- EFFECT: Klik di luar dropdown form untuk menutup ---
   useEffect(() => {
@@ -48,33 +75,80 @@ const AdminLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- EFFECT: Listen to custom event for sidebar refresh ---
+  useEffect(() => {
+    const handleRefreshSidebar = () => {
+      setRefreshSidebarTrigger(prev => prev + 1);
+    };
+    window.addEventListener('refreshSidebar', handleRefreshSidebar);
+    return () => window.removeEventListener('refreshSidebar', handleRefreshSidebar);
+  }, []);
+
   // --- HANDLER: Tutup modal & reset form ---
   const closeModal = () => {
     setIsMenuModalOpen(false);
     setIsIconDropdownOpen(false);
     setIsTypeDropdownOpen(false);
+    setFormError('');
+    setMenuName('');
+    setSelectedIcon('');
+    setSelectedType('');
     setSelectedPostLayout('');
+    setSelectedPostView('Vertikal');
+    setMenuLink('');
   };
 
-  const handleSaveMenu = () => {
-    console.log({ menuName, selectedIcon, selectedType });
-    closeModal();
+  const handleSaveMenu = async () => {
+    setFormError(''); // Reset error message
+    // Validasi
+    if (!menuName || !selectedIcon || !selectedType) {
+      setFormError("Nama menu, ikon, dan jenis menu wajib diisi!");
+      return;
+    }
+
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+
+      // POST data ke backend menggunakan axiosInstance
+      const res = await axiosInstance.post('/api/menus', {
+        nama_menu: menuName,
+        ikon_menu: selectedIcon,
+        jenis_menu: selectedType.toLowerCase(), // post / link
+        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default')
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.status === 200 || res.status === 201) {
+        setRefreshSidebarTrigger(prev => prev + 1); // trigger reload sidebar
+        window.dispatchEvent(new Event('refreshSidebar')); // Beri tahu komponen lain (seperti PengaturanMenu)
+        closeModal(); // tutup modal, TIDAK ADA redirect
+      }
+    } catch (error) {
+      console.error(error);
+      const errMsg = error.response?.data?.pesan || "Terjadi kesalahan jaringan. Gagal menyimpan menu.";
+      setFormError(errMsg);
+    }
   };
 
   const selectedIconLabel = iconOptions.find((o) => o.value === selectedIcon)?.label;
 
   return (
     <div className="admin-layout">
-      <AdminSidebar
-        activeMenu={activeMenu}
-        onMenuClick={setActiveMenu}
-        onTambahMenu={() => setIsMenuModalOpen(true)}
-      />
+      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} refreshTrigger={refreshSidebarTrigger} />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
-        <AdminHeader />
-        <Outlet context={{ activeMenu, setActiveMenu }} />
+        <AdminHeader onLogout={() => {
+          logout();
+          navigate('/admin/login');
+        }} />
+        <div key={location.pathname}>
+          <Outlet />
+        </div>
       </div>
 
       {/* ================= MODAL: TAMBAH MENU BARU ================= */}
@@ -89,6 +163,14 @@ const AdminLayout = () => {
             </div>
 
             <div className="modal-body">
+              {/* Notifikasi Error jika ada */}
+              {formError && (
+                <div style={{ color: '#ff4d4d', backgroundColor: '#331111', padding: '10px 14px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', border: '1px solid #ff4d4d', display: 'flex', alignItems: 'center' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '10px', fontSize: '16px' }}></i>
+                  <span>{formError}</span>
+                </div>
+              )}
+
               {/* Nama Menu */}
               <div className="form-group">
                 <label>Nama Menu</label>
@@ -188,6 +270,41 @@ const AdminLayout = () => {
                       </label>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Sub-pilihan Tampilan Post: orientasi card berita di halaman user */}
+              {selectedType === 'Post' && (
+                <div className="form-group">
+                  <label>Tampilan Post</label>
+                  <div className="form-radio-group">
+                    {postViewOptions.map((opt) => (
+                      <label key={opt} className="form-radio-item">
+                        <input
+                          type="radio"
+                          name="postView"
+                          value={opt}
+                          checked={selectedPostView === opt}
+                          onChange={() => setSelectedPostView(opt)}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Jika jenis menu = Link, tampilkan form isian URL */}
+              {selectedType === 'Link' && (
+                <div className="form-group">
+                  <label>URL / Link Tujuan</label>
+                  <input
+                    type="url"
+                    className="form-input"
+                    placeholder="https://contoh.com/halaman"
+                    value={menuLink}
+                    onChange={(e) => setMenuLink(e.target.value)}
+                  />
                 </div>
               )}
             </div>

@@ -1,0 +1,340 @@
+/* =========================================================================
+   LINK MENU
+   Catatan: variabel warna (--bg-card, --text-sub, dst.) berasal dari scope
+   ".admin-layout" yang dideklarasikan di dashboard-admin.css. Halaman ini
+   WAJIB dibungkus <div className="admin-layout"> (disediakan oleh AdminLayout).
+   ========================================================================= */
+
+/* ---------- HEADING + AKSI ---------- */
+.admin-layout .lk-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.admin-layout .lk-heading h1 {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .lk-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 8px 0 0;
+    max-width: 640px;
+}
+
+.admin-layout .lk-btn-simpan {
+    flex-shrink: 0;
+    margin-top: 6px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .lk-btn-simpan:hover {
+    background: var(--purple-hover);
+}
+
+.admin-layout .lk-btn-simpan:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-layout .lk-error {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 9px;
+    border: 1px solid rgba(214, 90, 90, 0.4);
+    background: rgba(214, 90, 90, 0.1);
+    color: #e57373;
+    font-size: 13.5px;
+}
+
+/* ---------- CARD ---------- */
+.admin-layout .lk-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.admin-layout .lk-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.admin-layout .lk-card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.admin-layout .lk-card-title i {
+    color: var(--text-sub);
+    font-size: 16px;
+}
+
+.admin-layout .lk-card-hint {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-sub);
+}
+
+/* ---------- STATE KOSONG ---------- */
+.admin-layout .lk-empty {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 14.5px;
+}
+
+/* ---------- LIST ---------- */
+.admin-layout .lk-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-layout .lk-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 0.15s ease;
+}
+
+.admin-layout .lk-row:last-child {
+    border-bottom: none;
+}
+
+.admin-layout .lk-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-layout .lk-row-sub {
+    background: rgba(255, 255, 255, 0.015);
+    padding-left: 48px;
+}
+
+.admin-layout .lk-row-sub:hover {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+/* Baris yang dituju langsung dari klik menu tipe Link di sidebar */
+.admin-layout .lk-row-highlight {
+    background: rgba(91, 95, 232, 0.14);
+    box-shadow: inset 3px 0 0 var(--purple);
+    animation: lk-highlight-fade 2.2s ease-out;
+}
+
+@keyframes lk-highlight-fade {
+    0% {
+        background: rgba(91, 95, 232, 0.32);
+    }
+    100% {
+        background: rgba(91, 95, 232, 0.14);
+    }
+}
+
+.admin-layout .lk-menu-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 280px;
+    flex-shrink: 0;
+    padding-top: 10px;
+    font-size: 15px;
+    color: var(--text-main);
+}
+
+.admin-layout .lk-sub-icon {
+    font-size: 12px;
+    color: var(--text-faint);
+    transform: rotate(90deg);
+}
+
+.admin-layout .lk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.admin-layout .lk-dot-active {
+    background: #4cae8e;
+}
+
+.admin-layout .lk-dot-inactive {
+    background: var(--text-faint);
+}
+
+.admin-layout .lk-form-preview {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: 12px;
+}
+
+.admin-layout .lk-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 9px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.admin-layout .lk-input:focus {
+    border-color: var(--purple);
+}
+
+.admin-layout .lk-input::placeholder {
+    color: var(--text-faint);
+}
+
+/* Preview kini di bawah input, lebarnya mengikuti wrapper (sejajar dengan form) */
+.admin-layout .lk-preview-wrapper {
+    width: 100%;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+    .admin-layout .lk-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .admin-layout .lk-menu-label {
+        width: 100%;
+        padding-top: 0;
+    }
+
+    .admin-layout .lk-form-preview {
+        width: 100%;
+    }
+
+    .admin-layout .lk-row-sub {
+        padding-left: 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-layout .lk-heading h1 {
+        font-size: 28px;
+    }
+
+    .admin-layout .lk-header {
+        flex-direction: column;
+    }
+
+    .admin-layout .lk-btn-simpan {
+        width: 100%;
+    }
+}
+
+/* ---------- MODAL SUKSES ---------- */
+.admin-layout .lk-success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.admin-layout .lk-success-modal {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    padding: 32px;
+    text-align: center;
+    animation: lk-success-fade-in 0.3s ease-out;
+}
+
+@keyframes lk-success-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.admin-layout .lk-success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 24px;
+}
+
+.admin-layout .lk-success-modal h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .lk-success-modal p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 12px 0 28px;
+    line-height: 1.6;
+}
+
+.admin-layout .lk-success-button {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .lk-success-button:hover {
+    background: var(--purple-hover);
+}

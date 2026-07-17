@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 // Reuse tema & layout dari dashboard-admin (variabel CSS --bg-app, dst.
 // dideklarasikan di scope ".admin-layout" pada dashboard-admin.css).
 import '../DashboardAdmin/dashboard-admin.css';
 import './ManajemenUser.css';
+import { useUsers } from '../../../hooks/useUsers';
 
 // =========================================================================
 //  DATA DUMMY
@@ -63,10 +64,26 @@ const getInitials = (nama) =>
 const PAGE_SIZE = 10;
 const EMPTY_FORM = { nama: '', email: '', password: '', verify: '', access: [] };
 
+const getRoleLabel = (user) =>
+  user?.role === 'superadmin' || user?.is_superadmin ? 'Super Admin' : 'Admin';
+
 const ManajemenUser = () => {
-  const [users, setUsers] = useState(buildUsers);
+  const { users, setUsers, loading, error: fetchError, fetchUsers, deleteUser } = useUsers();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Ambil data session admin saat ini
+  const currentUser = useMemo(() => {
+    const session = sessionStorage.getItem('adminSession');
+    if (session) {
+      try {
+        return JSON.parse(session);
+      } catch (e) {
+        console.error("Gagal membaca session admin", e);
+      }
+    }
+    return null;
+  }, []);
 
   // Modal form (dipakai untuk mode "add" dan "edit").
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -74,8 +91,17 @@ const ManajemenUser = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  // Modal detail akun (klik baris tabel untuk membuka ringkasan profil singkat).
+  const [detailUser, setDetailUser] = useState(null);
+
   // Modal hapus.
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+
+  // Ambil data user dari database saat komponen dimuat
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // --- Filter + pagination ---
   const filtered = useMemo(() => {
@@ -123,6 +149,12 @@ const ManajemenUser = () => {
     setFormModalOpen(true);
   };
 
+  // Klik baris tabel hanya membuka popup detail, tanpa memunculkan tombol
+  // edit/hapus di dalam modal agar tampilannya lebih clean dan bersih.
+  const openDetail = (user) => {
+    setDetailUser(user);
+  };
+
   const closeFormModal = () => {
     setFormModalOpen(false);
     setForm(EMPTY_FORM);
@@ -145,11 +177,16 @@ const ManajemenUser = () => {
     closeFormModal();
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget) {
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setDeleteError(null);
+      const result = await deleteUser(deleteTarget.id);
+      if (result.success) {
+        setDeleteTarget(null);
+      } else {
+        setDeleteError(result.error);
+      }
     }
-    setDeleteTarget(null);
   };
 
   // Simpan dinonaktifkan bila belum ada menu tersedia (empty state).
@@ -233,7 +270,19 @@ const ManajemenUser = () => {
                 </tr>
               </thead>
               <tbody>
-                {visibleUsers.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row">
+                      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i> Memuat data pengguna...
+                    </td>
+                  </tr>
+                ) : fetchError ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row" style={{ color: '#ef4444' }}>
+                      <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '8px' }}></i> {fetchError}
+                    </td>
+                  </tr>
+                ) : visibleUsers.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="mu-empty-row">
                       Tidak ada user yang cocok dengan pencarian.
@@ -241,7 +290,11 @@ const ManajemenUser = () => {
                   </tr>
                 ) : (
                   visibleUsers.map((user, i) => (
-                    <tr key={user.id}>
+                    <tr
+                      key={user.id}
+                      className="mu-clickable-row"
+                      onClick={() => setDetailUser(user)}
+                    >
                       <td className="mu-col-no">{startIdx + i + 1}</td>
                       <td>
                         <div className="mu-user-cell">
@@ -260,17 +313,26 @@ const ManajemenUser = () => {
                           <button
                             className="mu-action-btn"
                             title="Edit"
-                            onClick={() => openEdit(user)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEdit(user);
+                            }}
                           >
                             <i className="fa-solid fa-pen"></i>
                           </button>
-                          <button
-                            className="mu-action-btn"
-                            title="Hapus"
-                            onClick={() => setDeleteTarget(user)}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
+                          {currentUser && currentUser.role === 'superadmin' && Number(user.id) !== Number(currentUser.id) && (
+                            <button
+                              className="mu-action-btn"
+                              title="Hapus"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteError(null);
+                                setDeleteTarget(user);
+                              }}
+                            >
+                              <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -418,6 +480,60 @@ const ManajemenUser = () => {
         </div>
       )}
 
+      {/* ================= MODAL: DETAIL AKUN ================= */}
+      {detailUser && (
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDetailUser(null)}>
+          <div className="modal-box mu-detail-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header mu-detail-modal-header">
+              <div className="mu-detail-modal-title-wrap">
+                <h3>Informasi Akun</h3>
+                <p className="mu-modal-sub">Detail profil pengguna yang terdaftar pada sistem.</p>
+              </div>
+              <button className="modal-close mu-detail-modal-close" onClick={() => setDetailUser(null)} aria-label="Tutup detail akun">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="mu-detail-hero">
+                <div
+                  className="mu-detail-avatar"
+                  style={{ background: AVATAR_COLORS[(detailUser.id - 1) % AVATAR_COLORS.length] }}
+                >
+                  {getInitials(detailUser.nama)}
+                </div>
+
+                <div className="mu-detail-identity">
+                  <span className="mu-detail-kicker">Akun Terdaftar</span>
+                  <h4>{detailUser.nama}</h4>
+                  <p>{detailUser.email}</p>
+                </div>
+
+                <div className={`mu-status-badge ${detailUser.role === 'superadmin' || detailUser.is_superadmin ? 'mu-status-superadmin' : 'mu-status-admin'}`}>
+                  {getRoleLabel(detailUser)}
+                </div>
+              </div>
+
+              <div className="mu-detail-grid">
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Nama Pengguna</span>
+                  <strong className="mu-detail-info-value">{detailUser.nama}</strong>
+                </div>
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Email</span>
+                  <strong className="mu-detail-info-value">{detailUser.email}</strong>
+                </div>
+                <div className="mu-detail-info-card mu-detail-info-card-wide">
+                  <span className="mu-detail-info-label">Status</span>
+                  <strong className="mu-detail-info-value">{getRoleLabel(detailUser)}</strong>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ================= MODAL: HAPUS AKUN USER ================= */}
       {deleteTarget && (
         <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDeleteTarget(null)}>
@@ -441,6 +557,25 @@ const ManajemenUser = () => {
                   <span className="mu-user-name">{deleteTarget.nama}</span>
                 </div>
               </div>
+
+              {deleteError && (
+                <div className="mu-delete-error" style={{
+                  color: '#ef4444',
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginTop: '16px',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  <span>{deleteError}</span>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">

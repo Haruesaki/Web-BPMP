@@ -24,6 +24,10 @@ html.lenis, html.lenis body {
     overflow: hidden;
 }
 
+.admin-layout {
+    /* safety override if needed, but DO NOT use overflow: auto here */
+}
+
 .lenis.lenis-scrolling iframe {
     pointer-events: none;
 }

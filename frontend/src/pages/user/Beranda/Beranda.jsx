@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
 import { useYoutube } from '../../../hooks/useYoutube';
+import { useInstagram } from '../../../hooks/useInstagram';
 import './Beranda.css';
 
 // --- IMPORT COMPONENTS KITA ---
@@ -9,10 +11,20 @@ import PartnerSection from '../../../components/user/partner/PartnerSection';
 import InstagramSection from '../../../components/user/instagram/InstagramSection';
 import YoutubeSection from '../../../components/user/youtube/YoutubeSection';
 
-
 const Beranda = ({ lenisRef }) => {
   // --- YOUTUBE STATE ---
   const { ytVideos, ytChannel } = useYoutube();
+
+  // --- INSTAGRAM STATE ---
+  const { igProfile, loading: igLoading } = useInstagram();
+
+  // --- VISITOR TRACKING ---
+  useEffect(() => {
+    // Mencatat kunjungan
+    axiosInstance.post('/api/pengunjung')
+      .then(res => console.log('Visitor recorded:', res.data))
+      .catch(err => console.error('Visitor track error', err));
+  }, []);
 
 
   return (
@@ -23,7 +35,7 @@ const Beranda = ({ lenisRef }) => {
 
       <PartnerSection />
 
-      <InstagramSection />
+      <InstagramSection igProfile={igProfile} loading={igLoading} />
 
       <YoutubeSection ytVideos={ytVideos} ytChannel={ytChannel} />
 

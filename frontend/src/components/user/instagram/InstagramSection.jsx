@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './InstagramSection.css';
 
 import Logo from "../../../assets/source/Logo.png";
@@ -41,7 +41,67 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 }, (prevProps, nextProps) => prevProps.postId === nextProps.postId);
 
 
-const InstagramSection = () => {
+const InstagramSection = ({ igProfile, loading }) => {
+    const followBtnWrapperRef = useRef(null);
+    const scrollState = useRef({
+        currentY: 0,
+        targetY: 0,
+        lastScrollY: 0,
+        rafId: null,
+    });
+
+    useEffect(() => {
+        const wrapper = followBtnWrapperRef.current;
+        if (!wrapper) return;
+
+        scrollState.current.lastScrollY = window.scrollY;
+
+        const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+
+        const animate = () => {
+            // Lakukan interpolasi dari posisi saat ini ke posisi target untuk efek lag
+            scrollState.current.currentY = lerp(scrollState.current.currentY, scrollState.current.targetY, 0.075);
+            // Secara bertahap kembalikan posisi target ke 0 agar tombol kembali ke tengah
+            scrollState.current.targetY = lerp(scrollState.current.targetY, 0, 0.075);
+
+            const translateY = scrollState.current.currentY.toFixed(2);
+
+            // Hentikan loop animasi jika sudah sangat dekat dengan posisi awal untuk efisiensi
+            if (Math.abs(translateY) < 0.01 && Math.abs(scrollState.current.targetY) < 0.01) {
+                wrapper.style.transform = '';
+                cancelAnimationFrame(scrollState.current.rafId);
+                scrollState.current.rafId = null;
+            } else {
+                wrapper.style.transform = `translateY(${translateY}px)`;
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            const delta = scrollY - scrollState.current.lastScrollY;
+            scrollState.current.lastScrollY = scrollY;
+
+            // "Dorong" posisi target berdasarkan pergerakan scroll
+            scrollState.current.targetY -= delta * 0.8; // Faktor intensitas dibalik agar berlawanan arah
+            // Batasi nilai target agar tidak terlalu ekstrim saat scroll cepat
+            scrollState.current.targetY = Math.max(-45, Math.min(45, scrollState.current.targetY));
+
+            if (!scrollState.current.rafId) {
+                scrollState.current.rafId = requestAnimationFrame(animate);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollState.current.rafId) {
+                cancelAnimationFrame(scrollState.current.rafId);
+            }
+        };
+    }, []);
+
     return (
         <section className="instagram-section">
             <div className="ig-banner-wrapper">
@@ -51,30 +111,48 @@ const InstagramSection = () => {
 
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
-                    <img src={Logo} alt="Logo BPMP" className="ig-avatar" />
-                    <span className="ig-username">@bpmplampung</span>
+                    <img 
+                      src={igProfile?.profile_pic_url_hd?.startsWith('/uploads') 
+                             ? `http://localhost:5000${igProfile.profile_pic_url_hd}` 
+                             : (igProfile?.profile_pic_url_hd || Logo)} 
+                      alt="Logo BPMP" 
+                      className="ig-avatar" 
+                      style={{ borderRadius: '50%', objectFit: 'cover' }}
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="ig-username">@{igProfile?.username || 'bpmplampung'}</span>
                 </div>
 
                 <div className="ig-stats">
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Postingan</span>
-                        <span className="ig-stat-value">1865</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.posts_count?.toLocaleString('id-ID') || '1.865')}
+                        </span>
                     </div>
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Pengikut</span>
-                        <span className="ig-stat-value">6,138</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.followers?.toLocaleString('id-ID') || '6.138')}
+                        </span>
                     </div>
                     <div className="ig-stat-item">
                         <span className="ig-stat-label">Diikuti</span>
-                        <span className="ig-stat-value">1,151</span>
+                        <span className="ig-stat-value">
+                           {loading ? '...' : (igProfile?.following?.toLocaleString('id-ID') || '1.151')}
+                        </span>
                     </div>
                 </div>
 
                 <div className="ig-profile-right">
-                    <button className="ig-follow-btn">
-                        <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
-                        Follow
-                    </button>
+                    <div ref={followBtnWrapperRef} style={{ willChange: 'transform' }}>
+                        <a href={`https://www.instagram.com/${igProfile?.username || 'bpmplampung'}`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
+                            <button className="ig-follow-btn">
+                                <img src={Instagram} alt="IG Icon" className="ig-btn-icon" />
+                                Follow
+                            </button>
+                        </a>
+                    </div>
                 </div>
             </div>
 

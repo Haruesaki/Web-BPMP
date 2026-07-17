@@ -1,0 +1,25 @@
+.admin-layout .cb-preview-caption {
+    margin-top: 20px;
+}
+
+.admin-layout .cb-bg-preview {
+    height: 200px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.admin-layout .cb-bg-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admin-layout .cb-bg-preview i {
+    font-size: 30px;
+    color: var(--text-faint);
+}
