@@ -210,9 +210,6 @@ const Link = () => {
           <h1>{rows[0]?.label ? `Kelola Link - ${rows[0].label}` : 'Kelola Link Menu'}</h1>
           <p>Atur tautan (URL) tujuan untuk menu Link yang sedang dipilih.</p>
         </div>
-        <button className="lk-btn-simpan" onClick={handleSimpan} disabled={saving || !focusId || rows.length === 0}>
-          {saving ? 'Menyimpan...' : 'Simpan'}
-        </button>
       </div>
 
       {saveError && <div className="lk-error">{saveError}</div>}
@@ -251,14 +248,19 @@ const Link = () => {
                 </div>
 
                 <div className="lk-form-preview">
-                  <input
-                    type="text"
-                    className="lk-input"
-                    value={row.link}
-                    placeholder="https://contoh.com/halaman"
-                    onChange={(e) => updateLink(row.id, e.target.value)}
-                    ref={(el) => (inputRefs.current[row.id] = el)}
-                  />
+                  <div className="lk-input-wrapper">
+                    <input
+                      type="text"
+                      className="lk-input"
+                      value={row.link}
+                      placeholder="https://contoh.com/halaman"
+                      onChange={(e) => updateLink(row.id, e.target.value)}
+                      ref={(el) => (inputRefs.current[row.id] = el)}
+                    />
+                    <button className="lk-btn-simpan-inline" onClick={handleSimpan} disabled={saving || !focusId || rows.length === 0}>
+                      {saving ? '...' : 'Simpan'}
+                    </button>
+                  </div>
 
                   {/* Area Pratinjau Link — kini di bawah form, lebar sejajar dengan input */}
                   <div className="lk-preview-wrapper">

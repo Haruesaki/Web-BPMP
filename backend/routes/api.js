@@ -49,7 +49,9 @@ router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
 router.get('/link-preview', authMiddleware, getLinkPreview);
 
 router.get('/users', authMiddleware, UserController.getUsers);
+router.get('/users/me', authMiddleware, UserController.getMe);
 router.post('/users', authMiddleware, UserController.createUser);
+router.put('/users/me/password', authMiddleware, UserController.updateMyPassword);
 router.put('/users/:id', authMiddleware, UserController.updateUser);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
 

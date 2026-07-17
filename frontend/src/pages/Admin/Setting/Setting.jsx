@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import { getAuthHeaders } from '../../../api/userApi';
 import '../DashboardAdmin/dashboard-admin.css';
@@ -30,8 +30,27 @@ const Setting = () => {
   // ---------- PROFIL SAYA ----------
   const [nama, setNama] = useState(session.nama || '');
   const [email, setEmail] = useState(session.email || '');
+  const [role, setRole] = useState(session.role || '-');
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    // Ambil profil asli dari database saat komponen dimuat
+    const fetchMe = async () => {
+      try {
+        const res = await axiosInstance.get('/api/users/me', { headers: getAuthHeaders() });
+        const data = res.data?.data;
+        if (data) {
+          setNama(data.nama || '');
+          setEmail(data.email || '');
+          setRole(data.role || '-');
+        }
+      } catch (error) {
+        console.error('Gagal mengambil profil asli dari database:', error);
+      }
+    };
+    fetchMe();
+  }, []);
 
   const handleSimpanProfil = async (e) => {
     e.preventDefault();
@@ -46,7 +65,7 @@ const Setting = () => {
     try {
       await axiosInstance.put(
         '/api/users/me',
-        { nama_pengguna: nama, email },
+        { nama, email },
         { headers: getAuthHeaders() }
       );
 
@@ -155,7 +174,7 @@ const Setting = () => {
                 <input
                   type="text"
                   className="st-input st-input-readonly"
-                  value={session.role || '-'}
+                  value={role}
                   readOnly
                 />
                 <span className="st-field-hint">Role hanya bisa diubah oleh Super Admin lewat Manajemen User.</span>

@@ -2,6 +2,23 @@ const UserModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 
 class UserController {
+    static async getMe(req, res) {
+        try {
+            const userId = req.user.id;
+            const targetUser = await UserModel.getUserById(userId);
+            if (!targetUser) {
+                return res.status(404).json({ status: 'error', message: 'Pengguna tidak ditemukan.' });
+            }
+            const formattedUser = {
+                ...targetUser,
+                access: typeof targetUser.access === 'string' ? JSON.parse(targetUser.access) : (targetUser.access || [])
+            };
+            return res.status(200).json({ status: 'success', data: formattedUser });
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            return res.status(500).json({ status: 'error', message: 'Terjadi kesalahan saat mengambil data pengguna.' });
+        }
+    }
     static async getUsers(req, res) {
         try {
             const users = await UserModel.getAllUsers();
@@ -61,7 +78,7 @@ class UserController {
             }
             return res.status(500).json({
                 status: 'error',
-                message: error.message || 'Terjadi kesalahan saat menambahkan pengguna.'
+                message: 'Terjadi kesalahan saat menambahkan pengguna.'
             });
         }
     }
@@ -71,7 +88,11 @@ class UserController {
             const { id } = req.params;
             const { nama, email, role, password, access } = req.body;
             
-            const targetId = parseInt(id, 10);
+            const targetId = id === 'me' ? req.user.id : parseInt(id, 10);
+            if (isNaN(targetId)) {
+                return res.status(400).json({ status: 'error', message: 'ID pengguna tidak valid.' });
+            }
+            
             const targetUser = await UserModel.getUserById(targetId);
             
             if (!targetUser) {
@@ -106,7 +127,7 @@ class UserController {
             }
             return res.status(500).json({
                 status: 'error',
-                message: error.message || 'Terjadi kesalahan saat memperbarui pengguna.'
+                message: 'Terjadi kesalahan saat memperbarui pengguna.'
             });
         }
     }
@@ -158,6 +179,38 @@ class UserController {
                 status: 'error',
                 message: 'Terjadi kesalahan saat menghapus pengguna.'
             });
+        }
+    }
+
+    static async updateMyPassword(req, res) {
+        try {
+            const userId = req.user.id;
+            const { oldPassword, newPassword } = req.body;
+
+            const targetUser = await UserModel.getUserById(userId);
+            if (!targetUser) {
+                return res.status(404).json({ status: 'error', message: 'Pengguna tidak ditemukan.' });
+            }
+
+            const AuthModel = require('../models/authModel');
+            const authUser = await AuthModel.findUserByEmail(targetUser.email);
+            
+            if (!authUser) {
+                return res.status(404).json({ status: 'error', message: 'Data autentikasi pengguna tidak ditemukan.' });
+            }
+
+            const isMatch = await bcrypt.compare(oldPassword, authUser.kata_sandi_hash);
+            if (!isMatch) {
+                return res.status(400).json({ status: 'error', message: 'Password lama tidak cocok.' });
+            }
+
+            const password_hash = await bcrypt.hash(newPassword, 10);
+            await UserModel.updateUser(userId, { password_hash });
+
+            return res.status(200).json({ status: 'success', message: 'Password berhasil diperbarui.' });
+        } catch (error) {
+            console.error('Error updating password:', error);
+            return res.status(500).json({ status: 'error', message: 'Terjadi kesalahan internal saat memperbarui password.' });
         }
     }
 }

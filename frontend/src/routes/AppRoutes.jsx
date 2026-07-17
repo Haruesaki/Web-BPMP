@@ -49,7 +49,8 @@ const AppRoutes = ({ lenisRef }) => {
                     <Route path="/admin/pengaturan-menu" element={<PengaturanMenu />} />
                     <Route path="/admin/link/:menuId?" element={<Link />} />
                     <Route path="/admin/kelola-profil/:menuId" element={<PreviewProfilCard />} />
-                    <Route path="/admin/kelola-profil/edit/:menuId" element={<PostProfileCard />} />
+                    <Route path="/admin/kelola-profil/tambah/:menuId" element={<PostProfileCard />} />
+                    <Route path="/admin/kelola-profil/edit/:menuId/:profileId" element={<PostProfileCard />} />
                     <Route path="/admin/manajemen-user" element={<ManajemenUser />} />
                     <Route path="/admin/setting" element={<Setting />} />
                     {/* Editor konten menu — route DINAMIS per layout (:layout).

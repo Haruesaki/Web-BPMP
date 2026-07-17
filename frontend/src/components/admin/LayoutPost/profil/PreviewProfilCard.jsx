@@ -49,8 +49,8 @@ const PreviewProfilCard = () => {
         fetchData();
     }, [menuId]);
 
-    const handleAddOrEditProfile = () => {
-        navigate(`/admin/kelola-profil/edit/${menuId}`);
+    const handleAddProfile = () => {
+        navigate(`/admin/kelola-profil/tambah/${menuId}`);
     };
 
     if (loading) {
@@ -64,8 +64,8 @@ const PreviewProfilCard = () => {
                     <h1>Kelola Profil - {menuName}</h1>
                     <p>Kelola daftar kartu profil yang akan ditampilkan di halaman pengguna.</p>
                 </div>
-                <button className="ppc-preview-btn-tambah" onClick={handleAddOrEditProfile}>
-                    {profiles.length > 0 ? 'Edit Data Profil' : 'Tambah Data Profil'}
+                <button className="ppc-preview-btn-tambah" onClick={handleAddProfile}>
+                    Tambah Profil
                 </button>
             </div>
 
@@ -74,7 +74,15 @@ const PreviewProfilCard = () => {
             <section className="ppc-preview-grid">
                 {profiles.length > 0 ? (
                     profiles.map(profile => (
-                        <div key={profile.id || profile.nama_lengkap} className="ppc-preview-card-wrapper">
+                        <div 
+                            key={profile.id || profile.nama_lengkap} 
+                            className="ppc-preview-card-wrapper"
+                            onClick={() => navigate(`/admin/kelola-profil/edit/${menuId}/${profile.id}`)}
+                            style={{ cursor: 'pointer', transition: 'transform 0.2s ease', position: 'relative' }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            title="Klik untuk mengedit profil ini"
+                        >
                             <CardContent name={profile.nama_lengkap} role={profile.jabatan} quote={profile.quotes} imageSrc={profile.url_foto} />
                         </div>
                     ))

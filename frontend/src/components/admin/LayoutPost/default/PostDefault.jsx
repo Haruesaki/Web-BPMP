@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import CKEditorComponent from '../../../ckEditor/CKEditorComponent';
+import CKEditorDefault from '../../ckEditor-default/CKEditorComponent';
+import CKEditorBerita from '../../ckEditor-berita/CKEditorComponent';
 import './PostDefault.css';
 
 // =========================================================================
@@ -24,6 +25,7 @@ const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).sl
 const PostDefault = ({
   menuName = '',
   initialContents = [],
+  editorType = 'default', // 'default' atau 'berita'
   autoEditFirst = false, // muat konten pertama LANGSUNG ke form (untuk edit 1 item)
   heading,      // override judul halaman (mis. PostBeritaCard: "Tambah Berita")
   subheading,   // override teks bantu di bawah judul
@@ -122,12 +124,21 @@ const PostDefault = ({
           {/* Editor Konten */}
           <div className="pd-field" style={{ position: 'relative' }}>
             <label>Konten</label>
-            <CKEditorComponent
-              data={konten}
-              onChange={setKonten}
-              thumbnailUrl={coverUrl}
-              onThumbnailChange={setCoverUrl}
-            />
+            {editorType === 'berita' ? (
+              <CKEditorBerita
+                data={konten}
+                onChange={setKonten}
+                thumbnailUrl={coverUrl}
+                onThumbnailChange={setCoverUrl}
+              />
+            ) : (
+              <CKEditorDefault
+                data={konten}
+                onChange={setKonten}
+                thumbnailUrl={coverUrl}
+                onThumbnailChange={setCoverUrl}
+              />
+            )}
           </div>
 
           {formError && <p className="pd-error">{formError}</p>}

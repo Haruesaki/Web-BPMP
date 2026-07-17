@@ -158,6 +158,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
         heading={editing ? 'Edit Berita' : 'Tambah Berita'}
         subheading={editing ? 'Perbarui judul & isi konten berita ini, lalu klik Simpan.' : 'Tulis judul & isi konten berita.'}
         initialContents={initialContents}
+        editorType="berita"
         autoEditFirst={!!editing}
         onSave={handleEditorSave}
         onCancel={handleEditorCancel}
