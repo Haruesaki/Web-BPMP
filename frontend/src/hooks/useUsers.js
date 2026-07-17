@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { getAllUsers, deleteUserById } from '../api/userApi';
+import { getAllUsers, deleteUserById, createUser, updateUserById } from '../api/userApi';
 
 export const useUsers = () => {
     const [users, setUsers] = useState([]);
@@ -25,7 +25,6 @@ export const useUsers = () => {
         try {
             const result = await deleteUserById(id);
             if (result.status === 'success') {
-                // Update state lokal
                 setUsers(prev => prev.filter(u => u.id !== id));
                 return { success: true, message: result.message };
             }
@@ -35,5 +34,31 @@ export const useUsers = () => {
         }
     };
 
-    return { users, setUsers, loading, error, fetchUsers, deleteUser };
+    const addUser = async (userData) => {
+        try {
+            const result = await createUser(userData);
+            if (result.status === 'success') {
+                await fetchUsers(); // Re-fetch to get complete data
+                return { success: true, message: result.message };
+            }
+            return { success: false, error: result.message || 'Gagal menambahkan pengguna.' };
+        } catch (err) {
+            return { success: false, error: err.message || 'Terjadi kesalahan saat menambahkan pengguna.' };
+        }
+    };
+
+    const editUser = async (id, userData) => {
+        try {
+            const result = await updateUserById(id, userData);
+            if (result.status === 'success') {
+                await fetchUsers(); // Re-fetch to get complete data
+                return { success: true, message: result.message };
+            }
+            return { success: false, error: result.message || 'Gagal memperbarui pengguna.' };
+        } catch (err) {
+            return { success: false, error: err.message || 'Terjadi kesalahan saat memperbarui pengguna.' };
+        }
+    };
+
+    return { users, setUsers, loading, error, fetchUsers, deleteUser, addUser, editUser };
 };

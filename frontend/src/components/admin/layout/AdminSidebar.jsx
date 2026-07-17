@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import './AdminSidebar.css';
@@ -35,6 +35,25 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
+
+  const currentUser = useMemo(() => {
+    const session = sessionStorage.getItem('adminSession');
+    if (session) {
+      try {
+        const parsed = JSON.parse(session);
+        return parsed || null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }, []);
+
+  const hasAccess = (label) => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'superadmin' || currentUser.is_superadmin) return true;
+    return currentUser.access?.includes(label) || false;
+  };
 
   // Peta route statis yang memang punya satu halaman tujuan jelas.
   const staticRouteMap = {
@@ -153,9 +172,36 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     const persistedId = sessionStorage.getItem('adminSidebarSelectedId');
     const nextSelectedId = routeMatchedId || persistedId || 'beranda';
 
+    // -- URL PROTECTION LOGIC --
+    // Jika current route terdeteksi di sidebar, cek apakah punya akses.
+    if (routeMatchedId && routeMatchedId !== 'beranda' && routeMatchedId !== 'setting') {
+      let matchedLabel = null;
+      const staticItem = [...adminMenuItems1, ...adminMenuItems2].find(m => m.id === routeMatchedId);
+      
+      if (staticItem) {
+        matchedLabel = staticItem.label;
+      } else {
+        for (const m of dynamicMenus) {
+          if (m.id === routeMatchedId) {
+            matchedLabel = m.label; break;
+          }
+          if (m.submenus) {
+            const sub = m.submenus.find(s => s.id === routeMatchedId);
+            if (sub) { matchedLabel = sub.label; break; }
+          }
+        }
+      }
+
+      if (matchedLabel && !hasAccess(matchedLabel)) {
+        // Akses ditolak karena URL diketik manual, lemparkan kembali ke Beranda!
+        navigate('/admin', { replace: true });
+        return;
+      }
+    }
+
     setSelectedId(nextSelectedId);
     sessionStorage.setItem('adminSidebarSelectedId', nextSelectedId);
-  }, [location.pathname, location.state, dynamicMenus]);
+  }, [location.pathname, location.state, dynamicMenus, navigate]);
 
   const toggleExpand = (id) => {
     setExpandedMenus(prev => {
@@ -165,28 +211,46 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     });
   };
 
-  const renderStaticItem = (item) => (
-    <button
-      key={item.id}
-      className={`nav-item ${selectedId === item.id ? 'active' : ''}`}
-      onClick={() => {
-        // Klik item statis akan menyimpan ID aktif untuk dipakai lagi saat refresh.
-        persistSelectedId(item.id);
-        if (item.path) navigate(item.path);
-      }}
-    >
-      <i className={item.icon}></i>
-      <span>{item.label}</span>
-    </button>
-  );
+  const renderStaticItem = (item) => {
+    // Bypass 'Beranda' and 'Setting' since they are always accessible
+    const isAlwaysAccessible = item.label === 'Beranda' || item.label === 'Setting';
+    const accessible = isAlwaysAccessible || hasAccess(item.label);
+
+    return (
+      <button
+        key={item.id}
+        className={`nav-item ${selectedId === item.id ? 'active' : ''} ${!accessible ? 'locked' : ''}`}
+        onClick={(e) => {
+          if (!accessible) {
+            e.preventDefault();
+            return;
+          }
+          // Klik item statis akan menyimpan ID aktif untuk dipakai lagi saat refresh.
+          persistSelectedId(item.id);
+          if (item.path) navigate(item.path);
+        }}
+        style={{ opacity: accessible ? 1 : 0.6, cursor: accessible ? 'pointer' : 'not-allowed' }}
+        title={!accessible ? "Anda tidak memiliki hak akses" : ""}
+      >
+        <i className={item.icon}></i>
+        <span>{item.label}</span>
+        {!accessible && <i className="fa-solid fa-lock" style={{ marginLeft: 'auto', fontSize: '12px', color: '#ff4d4f' }}></i>}
+      </button>
+    );
+  };
 
   const renderDynamicItem = (menu) => {
     const hasSubmenus = menu.submenus && menu.submenus.length > 0;
     const isExpanded = expandedMenus.includes(menu.id);
+    const accessible = hasAccess(menu.label);
 
     // Jika dia punya submenu, dia berfungsi sebagai GERBANG (hanya nge-expand).
     // Untuk item tanpa submenu, klik langsung navigate ke halaman editor / post.
-    const handleClick = () => {
+    const handleClick = (e) => {
+      if (!accessible) {
+        e.preventDefault();
+        return;
+      }
       persistSelectedId(menu.id);
       if (hasSubmenus) {
         toggleExpand(menu.id);
@@ -206,40 +270,53 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
     return (
       <React.Fragment key={menu.id}>
         <button
-          className={`nav-item ${selectedId === menu.id ? 'active' : ''}`}
+          className={`nav-item ${selectedId === menu.id ? 'active' : ''} ${!accessible ? 'locked' : ''}`}
           onClick={handleClick}
+          style={{ opacity: accessible ? 1 : 0.6, cursor: accessible ? 'pointer' : 'not-allowed' }}
+          title={!accessible ? "Anda tidak memiliki hak akses" : ""}
         >
           <i className={menu.icon}></i>
           <span>{menu.label}</span>
-          {hasSubmenus && (
+          {!accessible ? (
+            <i className="fa-solid fa-lock" style={{ marginLeft: 'auto', fontSize: '12px', color: '#ff4d4f' }}></i>
+          ) : hasSubmenus ? (
             <i
               className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}
               style={{ marginLeft: 'auto', fontSize: '12px', opacity: 0.7 }}
             ></i>
-          )}
+          ) : null}
         </button>
 
         {/* Render Submenu */}
         {hasSubmenus && isExpanded && (
           <div style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            {menu.submenus.map(sub => (
-              <button
-                key={sub.id}
-                className={`nav-item ${selectedId === sub.id ? 'active' : ''}`}
-                style={{ fontSize: '0.9em', padding: '0.6rem 1rem' }}
-                onClick={() => {
-                  // Submenu menyimpan ID anaknya sendiri agar highlight tetap tepat
-                  // meskipun halaman yang ditampilkan adalah route generik dari editor.
-                  persistSelectedId(sub.id);
-                  if (sub.path) {
-                    navigate(sub.path, { state: { menuName: sub.label, menuId: sub.id, isPostTanpaSubmenu: false } });
-                  }
-                }}
-              >
-                <i className={sub.icon} style={{ fontSize: '0.9em' }}></i>
-                <span>{sub.label}</span>
-              </button>
-            ))}
+            {menu.submenus.map(sub => {
+              const subAccessible = hasAccess(sub.label);
+              return (
+                <button
+                  key={sub.id}
+                  className={`nav-item ${selectedId === sub.id ? 'active' : ''} ${!subAccessible ? 'locked' : ''}`}
+                  style={{ fontSize: '0.9em', padding: '0.6rem 1rem', opacity: subAccessible ? 1 : 0.6, cursor: subAccessible ? 'pointer' : 'not-allowed' }}
+                  onClick={(e) => {
+                    if (!subAccessible) {
+                      e.preventDefault();
+                      return;
+                    }
+                    // Submenu menyimpan ID anaknya sendiri agar highlight tetap tepat
+                    // meskipun halaman yang ditampilkan adalah route generik dari editor.
+                    persistSelectedId(sub.id);
+                    if (sub.path) {
+                      navigate(sub.path, { state: { menuName: sub.label, menuId: sub.id, isPostTanpaSubmenu: false } });
+                    }
+                  }}
+                  title={!subAccessible ? "Anda tidak memiliki hak akses" : ""}
+                >
+                  <i className={sub.icon} style={{ fontSize: '0.9em' }}></i>
+                  <span>{sub.label}</span>
+                  {!subAccessible && <i className="fa-solid fa-lock" style={{ marginLeft: 'auto', fontSize: '12px', color: '#ff4d4f' }}></i>}
+                </button>
+              );
+            })}
           </div>
         )}
       </React.Fragment>

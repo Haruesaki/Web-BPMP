@@ -17,6 +17,7 @@ export const useAuth = () => {
                     nama: result.data.user.nama,
                     role: result.data.user.role,
                     email: result.data.user.email,
+                    access: result.data.user.access,
                     token: result.data.token
                 };
                 sessionStorage.setItem('adminSession', JSON.stringify(sessionData));

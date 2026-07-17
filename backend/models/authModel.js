@@ -10,6 +10,7 @@ class AuthModel {
                 'pengguna.email',
                 'pengguna.kata_sandi_hash',
                 'pengguna.is_aktif',
+                'pengguna.akses_menu',
                 'peran.nama_peran',
                 'peran.is_superadmin'
             )

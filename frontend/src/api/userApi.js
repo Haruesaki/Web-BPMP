@@ -42,3 +42,31 @@ export const deleteUserById = async (id) => {
         throw new Error('Terjadi kesalahan saat menghapus pengguna.');
     }
 };
+
+export const createUser = async (userData) => {
+    try {
+        const response = await axiosInstance.post('/api/users', userData, {
+            headers: getAuthHeaders()
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            throw error.response.data;
+        }
+        throw new Error('Terjadi kesalahan saat menambahkan pengguna.');
+    }
+};
+
+export const updateUserById = async (id, userData) => {
+    try {
+        const response = await axiosInstance.put(`/api/users/${id}`, userData, {
+            headers: getAuthHeaders()
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            throw error.response.data;
+        }
+        throw new Error('Terjadi kesalahan saat memperbarui pengguna.');
+    }
+};

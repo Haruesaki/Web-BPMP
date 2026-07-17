@@ -43,8 +43,9 @@ class AuthController {
 
             // 5. Generate token JWT
             const secretKey = process.env.JWT_SECRET || 'fallback_secret_key';
+            const accessArray = typeof user.akses_menu === 'string' ? JSON.parse(user.akses_menu) : (user.akses_menu || []);
             const token = jwt.sign(
-                { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran },
+                { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran, access: accessArray },
                 secretKey,
                 { expiresIn: '1d' }
             );
@@ -58,7 +59,8 @@ class AuthController {
                         id: user.id,
                         nama: user.nama_pengguna,
                         email: user.email,
-                        role: user.nama_peran
+                        role: user.nama_peran,
+                        access: accessArray
                     },
                     token: token
                 }

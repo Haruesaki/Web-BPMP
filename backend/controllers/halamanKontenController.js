@@ -35,10 +35,15 @@ class HalamanKontenController {
       const pName = req.user?.nama || 'System';
       const pRole = req.user?.role || 'Unknown';
 
+      // Ambil jumlah konten lama untuk membandingkan aksi
+      const oldContents = await db('halaman_konten').where('menu_id', menu_id).count('id as cnt').first();
+      const oldCount = parseInt(oldContents?.cnt || 0, 10);
+      const newCount = contents.length;
+
       // Delete old contents for this menu
       await db('halaman_konten').where('menu_id', menu_id).del();
 
-      if (contents.length > 0) {
+      if (newCount > 0) {
         const newRows = contents.map((c, index) => {
           // Generate unique kunci_halaman
           let finalKunci = kunci_halaman ? `${kunci_halaman}-${index}` : `post-${menu_id}-${index}`;
@@ -55,7 +60,16 @@ class HalamanKontenController {
         await db('halaman_konten').insert(newRows);
       }
 
-      await logActivityInternal(pName, pRole, `Memperbarui daftar halaman konten untuk menu ID ${menu_id}`);
+      const menuInfo = await db('menu').select('nama_menu').where('id', menu_id).first();
+      const namaMenu = menuInfo ? menuInfo.nama_menu : `ID ${menu_id}`;
+      
+      let aksiKata = 'Memperbarui';
+      if (oldCount === 0 && newCount > 0) aksiKata = 'Membuat';
+      else if (oldCount > 0 && newCount === 0) aksiKata = 'Menghapus seluruh';
+      else if (oldCount < newCount) aksiKata = 'Menambahkan';
+      else if (oldCount > newCount) aksiKata = 'Menghapus beberapa';
+
+      await logActivityInternal(pName, pRole, `${aksiKata} halaman konten pada menu "${namaMenu}"`);
       return res.status(200).json({ pesan: 'Konten berhasil disimpan' });
     } catch (error) {
       console.error('Error upsertKonten:', error);

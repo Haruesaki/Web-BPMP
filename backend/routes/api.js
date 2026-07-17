@@ -41,6 +41,8 @@ router.post('/auth/reset-password', AuthController.resetPassword);
 router.get('/link-preview', authMiddleware, getLinkPreview);
 
 router.get('/users', authMiddleware, UserController.getUsers);
+router.post('/users', authMiddleware, UserController.createUser);
+router.put('/users/:id', authMiddleware, UserController.updateUser);
 router.delete('/users/:id', authMiddleware, UserController.deleteUser);
 
 // ================= MENU ROUTES =================
