@@ -11,7 +11,17 @@
     border: 1px solid var(--border-soft);
     border-radius: 12px;
     background: var(--bg-card-soft);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+/* Style for hidden sections */
+.admin-layout .cb-section-box.is-hidden {
+    opacity: 0.4;
+    background-color: rgb(0, 0, 0);
+}
+
+.admin-layout .cb-section-box.is-hidden:hover {
+    opacity: 0.75;
 }
 
 /* Hover state on non-dragging card */
@@ -53,10 +63,48 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-grow: 1;
+    min-width: 0; /* Prevents overflow with long titles */
 }
 
-.admin-layout .cb-section-head .cb-field-label {
-    margin: 0;
+/* Styles for the new editable title in the header */
+.admin-layout .cb-section-title-display {
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: text;
+    padding: 4px 6px 5px 6px; /* Extra space for the border */
+    /* border-radius: 6px; */ /* Removed for clean underline */
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    width: 100%;
+    line-height: 1.5;
+    border-bottom: 1px dashed var(--text-muted);
+}
+
+.admin-layout .cb-section-title-display:hover {
+    background-color: var(--bg-card-soft);
+    border-bottom-color: var(--text-main);
+    border-bottom-style: solid;
+}
+
+.admin-layout .cb-section-title-display.placeholder {
+    color: var(--text-muted);
+    font-size: medium;
+    font-style: italic;
+    font-weight: 200;
+}
+
+.admin-layout .cb-section-title-input {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    background-color: var(--bg-card-soft);
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+    padding: 3px 5px;
+    outline: none;
+    width: 100%;
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
 .admin-layout .cb-drag-handle {
@@ -68,6 +116,36 @@
     color: var(--text-muted, #94a3b8);
 }
 
-.admin-layout .cb-section-delete {
+.admin-layout .cb-section-visibility {
+    flex-shrink: 0;
+    color: var(--text-subtle);
+}
+
+.admin-layout .cb-section-visibility:hover {
+    color: var(--text-main);
+    background-color: var(--bg-card-soft);
+}
+
+.admin-layout .cb-section-visibility.is-off {
+    color: var(--color-danger);
+}
+
+.admin-layout .cb-section-visibility.is-off:hover {
+    color: var(--color-danger-strong);
+    background-color: var(--color-danger-soft);
+}
+
+.admin-layout .cb-section-order-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    color: var(--text-subtle);
+    font-weight: 600;
+    font-size: 0.8rem;
     flex-shrink: 0;
 }

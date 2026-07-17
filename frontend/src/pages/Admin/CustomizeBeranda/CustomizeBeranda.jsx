@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
 // menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
 // <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
@@ -15,6 +15,7 @@ import HeroSetting from '../../../components/admin/CustomizeBeranda/HeroSetting'
 import SocialMediaSetting from '../../../components/admin/CustomizeBeranda/SocialMediaSetting';
 import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/SectionOrderSetting';
 import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
+import axiosInstance from '../../../api/axiosInstance';
 
 // =========================================================================
 //  DATA AWAL
@@ -29,6 +30,7 @@ const THEMES = [
 
 // Opsi menu untuk dropdown "Menu" pada Sections Halaman Beranda.
 const MENU_OPTIONS = [
+  'Kosong',
   'Berita',
   'Logo Mitra',
   'Preview Media Sosial Instagram',
@@ -44,6 +46,7 @@ const nextId = () => uid++;
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
+  const [isSavingHero, setIsSavingHero] = useState(false);
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -51,12 +54,36 @@ const CustomizeBeranda = () => {
   // ---------- HEADER (Logo Utama Website) ----------
   const [headerLogoPreview, setHeaderLogoPreview] = useState(null);
   const [headerLogoName, setHeaderLogoName] = useState('');
+  const [headerLogoFile, setHeaderLogoFile] = useState(null);
+  const [savedHeaderLogoUrl, setSavedHeaderLogoUrl] = useState(null);
+  const [headerLogoInputKey, setHeaderLogoInputKey] = useState(0);
+  const [savedHeaderForm, setSavedHeaderForm] = useState(null);
+
+  const currentHeaderForm = useMemo(() => ({
+    logoUrl: savedHeaderLogoUrl,
+  }), [savedHeaderLogoUrl]);
+
+  const hasHeaderChanges = Boolean(
+    savedHeaderForm && (
+      headerLogoFile ||
+      currentHeaderForm.logoUrl !== savedHeaderForm.logoUrl
+    )
+  );
 
   const handleHeaderLogoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setHeaderLogoName(file.name);
+    setHeaderLogoFile(file);
     setHeaderLogoPreview(URL.createObjectURL(file));
+  };
+
+  const handleHeaderLogoRemove = () => {
+    setHeaderLogoName('');
+    setHeaderLogoPreview(null);
+    setHeaderLogoFile(null);
+    setSavedHeaderLogoUrl(null);
+    setHeaderLogoInputKey((prev) => prev + 1);
   };
 
   // ---------- DATA LOGO ----------
@@ -86,14 +113,120 @@ const CustomizeBeranda = () => {
   const [deskripsi, setDeskripsi] = useState('');
   const [backgroundName, setBackgroundName] = useState('');
   const [backgroundPreview, setBackgroundPreview] = useState(null);
+  const [backgroundFile, setBackgroundFile] = useState(null);
+  const [savedBackgroundUrl, setSavedBackgroundUrl] = useState(null);
+  const [backgroundInputKey, setBackgroundInputKey] = useState(0);
   const [tampilanLogo1, setTampilanLogo1] = useState(LOGO_UTAMA_OPTIONS[0]);
   const [tampilanLogo2, setTampilanLogo2] = useState(LOGO_UTAMA_OPTIONS[0]);
+  const [savedHeroForm, setSavedHeroForm] = useState(null);
+
+  const currentHeroForm = useMemo(() => ({
+    judul: judulBeranda,
+    deskripsi,
+    backgroundUrl: savedBackgroundUrl,
+    logo1: tampilanLogo1,
+    logo2: tampilanLogo2,
+  }), [judulBeranda, deskripsi, savedBackgroundUrl, tampilanLogo1, tampilanLogo2]);
+
+  const hasHeroChanges = Boolean(
+    savedHeroForm && (
+      backgroundFile ||
+      currentHeroForm.judul !== savedHeroForm.judul ||
+      currentHeroForm.deskripsi !== savedHeroForm.deskripsi ||
+      currentHeroForm.backgroundUrl !== savedHeroForm.backgroundUrl ||
+      currentHeroForm.logo1 !== savedHeroForm.logo1 ||
+      currentHeroForm.logo2 !== savedHeroForm.logo2
+    )
+  );
+
+  const hasPageChanges = hasHeaderChanges || hasHeroChanges;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBerandaSettings = async () => {
+      try {
+        const [headerResponse, heroResponse] = await Promise.all([
+          axiosInstance.get('/api/beranda/header'),
+          axiosInstance.get('/api/beranda/hero'),
+        ]);
+        const header = headerResponse.data?.data;
+        const hero = heroResponse.data?.data;
+        if (!hero || !isMounted) return;
+
+        const loadedHeaderForm = {
+          logoUrl: header?.url_logo_header || null,
+        };
+        const loadedHeroForm = {
+          judul: hero.judul || '',
+          deskripsi: hero.subjudul || '',
+          backgroundUrl: hero.url_gambar || null,
+          logo1: hero.logo_1 || LOGO_UTAMA_OPTIONS[0],
+          logo2: hero.logo_2 || LOGO_UTAMA_OPTIONS[0],
+        };
+
+        setSavedHeaderLogoUrl(loadedHeaderForm.logoUrl);
+        setHeaderLogoPreview(loadedHeaderForm.logoUrl);
+        setHeaderLogoName(loadedHeaderForm.logoUrl ? loadedHeaderForm.logoUrl.split('/').pop() : '');
+        setSavedHeaderForm(loadedHeaderForm);
+
+        setJudulBeranda(loadedHeroForm.judul);
+        setDeskripsi(loadedHeroForm.deskripsi);
+        setSavedBackgroundUrl(loadedHeroForm.backgroundUrl);
+        setBackgroundPreview(loadedHeroForm.backgroundUrl);
+        setBackgroundName(loadedHeroForm.backgroundUrl ? loadedHeroForm.backgroundUrl.split('/').pop() : '');
+        setTampilanLogo1(loadedHeroForm.logo1);
+        setTampilanLogo2(loadedHeroForm.logo2);
+        setSavedHeroForm(loadedHeroForm);
+      } catch (error) {
+        console.error('Gagal mengambil pengaturan Customize Beranda:', error);
+      }
+    };
+
+    loadBerandaSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleBackgroundChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setBackgroundName(file.name);
+    setBackgroundFile(file);
     setBackgroundPreview(URL.createObjectURL(file));
+  };
+
+  const handleBackgroundRemove = () => {
+    setBackgroundName('');
+    setBackgroundPreview(null);
+    setBackgroundFile(null);
+    setSavedBackgroundUrl(null);
+    setBackgroundInputKey((prev) => prev + 1);
+  };
+
+  const handleBatalPerubahan = () => {
+    if ((!savedHeroForm && !savedHeaderForm) || isSavingHero) return;
+
+    if (savedHeaderForm) {
+      setSavedHeaderLogoUrl(savedHeaderForm.logoUrl);
+      setHeaderLogoPreview(savedHeaderForm.logoUrl);
+      setHeaderLogoName(savedHeaderForm.logoUrl ? savedHeaderForm.logoUrl.split('/').pop() : '');
+      setHeaderLogoFile(null);
+      setHeaderLogoInputKey((prev) => prev + 1);
+    }
+
+    if (!savedHeroForm) return;
+
+    setJudulBeranda(savedHeroForm.judul);
+    setDeskripsi(savedHeroForm.deskripsi);
+    setSavedBackgroundUrl(savedHeroForm.backgroundUrl);
+    setBackgroundPreview(savedHeroForm.backgroundUrl);
+    setBackgroundName(savedHeroForm.backgroundUrl ? savedHeroForm.backgroundUrl.split('/').pop() : '');
+    setBackgroundFile(null);
+    setTampilanLogo1(savedHeroForm.logo1);
+    setTampilanLogo2(savedHeroForm.logo2);
   };
 
   // ---------- MEDIA SOSIAL ----------
@@ -118,19 +251,20 @@ const CustomizeBeranda = () => {
 
   // ---------- SECTIONS HALAMAN BERANDA ----------
   const [sections, setSections] = useState([
-    { id: nextId(), menu: 'Berita', judul: 'Berita Terkini' },
-    { id: nextId(), menu: 'Logo Mitra', judul: 'Mitra Kami' },
-    { id: nextId(), menu: 'Preview Media Sosial Instagram', judul: 'Instagram' },
-    { id: nextId(), menu: 'Preview Media Sosial YouTube', judul: 'YouTube' },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
   ]);
 
   const updateSection = (id, field, value) =>
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
 
-  const tambahSection = () =>
-    setSections((prev) => [...prev, { id: nextId(), menu: MENU_OPTIONS[0], judul: '' }]);
-
-  const hapusSection = (id) => setSections((prev) => prev.filter((s) => s.id !== id));
+  const toggleSectionVisibility = (id) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, isVisible: !s.isVisible } : s))
+    );
+  };
 
   // ---------- FOOTER ----------
   const [footer, setFooter] = useState({ email: '', telepon: '', alamat: '' });
@@ -151,11 +285,87 @@ const CustomizeBeranda = () => {
 
   const hapusTautan = (id) => setTautan((prev) => prev.filter((t) => t.id !== id));
 
-  const handleSimpanPerubahan = () => {
-    // TODO: kumpulkan seluruh state di atas dan kirim ke backend
-    // (PUT /api/beranda-settings)
-    console.log('Simpan perubahan Customize Beranda');
-    setIsSaveSuccessOpen(true);
+  const uploadHeroBackground = async () => {
+    if (!backgroundFile) return savedBackgroundUrl;
+
+    const formData = new FormData();
+    formData.append('upload', backgroundFile);
+
+    const response = await axiosInstance.post('/api/upload/gambar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    return response.data?.url || savedBackgroundUrl;
+  };
+
+  const uploadHeaderLogo = async () => {
+    if (!headerLogoFile) return savedHeaderLogoUrl;
+
+    const formData = new FormData();
+    formData.append('upload', headerLogoFile);
+
+    const response = await axiosInstance.post('/api/upload/gambar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    return response.data?.url || savedHeaderLogoUrl;
+  };
+
+  const handleSimpanPerubahan = async () => {
+    if (isSavingHero) return;
+
+    setIsSavingHero(true);
+    try {
+      const headerLogoUrl = await uploadHeaderLogo();
+      const backgroundUrl = await uploadHeroBackground();
+
+      const [headerResponse, heroResponse] = await Promise.all([
+        axiosInstance.put('/api/beranda/header', {
+          url_logo_header: headerLogoUrl,
+        }),
+        axiosInstance.put('/api/beranda/hero', {
+          judul: judulBeranda,
+          subjudul: deskripsi,
+          url_gambar: backgroundUrl,
+          logo_1: tampilanLogo1,
+          logo_2: tampilanLogo2,
+          is_aktif: true,
+        }),
+      ]);
+
+      const savedHeader = headerResponse.data?.data;
+      const nextHeaderLogoUrl = savedHeader?.url_logo_header ?? headerLogoUrl ?? null;
+      const nextHeaderForm = {
+        logoUrl: nextHeaderLogoUrl,
+      };
+      setSavedHeaderLogoUrl(nextHeaderLogoUrl);
+      setHeaderLogoPreview(nextHeaderLogoUrl);
+      setHeaderLogoName(nextHeaderLogoUrl ? nextHeaderLogoUrl.split('/').pop() : '');
+      setHeaderLogoFile(null);
+      setSavedHeaderForm(nextHeaderForm);
+
+      const savedHero = heroResponse.data?.data;
+      const nextBackgroundUrl = savedHero?.url_gambar || backgroundUrl || null;
+      const nextHeroForm = {
+        judul: savedHero?.judul ?? judulBeranda,
+        deskripsi: savedHero?.subjudul ?? deskripsi,
+        backgroundUrl: nextBackgroundUrl,
+        logo1: savedHero?.logo_1 ?? tampilanLogo1,
+        logo2: savedHero?.logo_2 ?? tampilanLogo2,
+      };
+
+      setSavedBackgroundUrl(nextBackgroundUrl);
+      setBackgroundPreview(nextBackgroundUrl);
+      setBackgroundName(nextBackgroundUrl ? nextBackgroundUrl.split('/').pop() : '');
+      setBackgroundFile(null);
+      setSavedHeroForm(nextHeroForm);
+      setIsSaveSuccessOpen(true);
+    } catch (error) {
+      console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
+      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
+    } finally {
+      setIsSavingHero(false);
+    }
   };
 
   return (
@@ -167,9 +377,22 @@ const CustomizeBeranda = () => {
           <p>Kelola tampilan menu di halaman beranda.</p>
         </div>
         <div className="cb-header-actions">
-          <button className="cb-btn cb-btn-batal">Batal</button>
-          <button className="cb-btn cb-btn-simpan" onClick={handleSimpanPerubahan}>
-            Simpan Perubahan
+          {hasPageChanges && (
+            <button
+              type="button"
+              className="cb-btn cb-btn-batal"
+              onClick={handleBatalPerubahan}
+              disabled={isSavingHero}
+            >
+              Batal
+            </button>
+          )}
+          <button
+            className="cb-btn cb-btn-simpan"
+            onClick={handleSimpanPerubahan}
+            disabled={isSavingHero || !hasPageChanges}
+          >
+            {isSavingHero ? 'Menyimpan...' : hasPageChanges ? 'Simpan Perubahan' : 'Simpan'}
           </button>
         </div>
       </div>
@@ -186,7 +409,9 @@ const CustomizeBeranda = () => {
         <HeaderLogoSetting
           headerLogoPreview={headerLogoPreview}
           headerLogoName={headerLogoName}
+          headerLogoInputKey={headerLogoInputKey}
           handleHeaderLogoChange={handleHeaderLogoChange}
+          handleHeaderLogoRemove={handleHeaderLogoRemove}
         />
 
         <LogoDataSetting
@@ -202,21 +427,32 @@ const CustomizeBeranda = () => {
         />
       </div>
 
-      {/* ---------- LANDING PAGE ---------- */}
-      <HeroSetting
-        judulBeranda={judulBeranda}
-        setJudulBeranda={setJudulBeranda}
-        deskripsi={deskripsi}
-        setDeskripsi={setDeskripsi}
-        backgroundName={backgroundName}
-        backgroundPreview={backgroundPreview}
-        handleBackgroundChange={handleBackgroundChange}
-        tampilanLogo1={tampilanLogo1}
-        setTampilanLogo1={setTampilanLogo1}
-        tampilanLogo2={tampilanLogo2}
-        setTampilanLogo2={setTampilanLogo2}
-        logoUtamaOptions={LOGO_UTAMA_OPTIONS}
-      />
+      {/* ---------- LANDING PAGE & SECTIONS ---------- */}
+      <div className="cb-grid-2">
+        <HeroSetting
+          judulBeranda={judulBeranda}
+          setJudulBeranda={setJudulBeranda}
+          deskripsi={deskripsi}
+          setDeskripsi={setDeskripsi}
+          backgroundName={backgroundName}
+          backgroundPreview={backgroundPreview}
+          backgroundInputKey={backgroundInputKey}
+          handleBackgroundChange={handleBackgroundChange}
+          handleBackgroundRemove={handleBackgroundRemove}
+          tampilanLogo1={tampilanLogo1}
+          setTampilanLogo1={setTampilanLogo1}
+          tampilanLogo2={tampilanLogo2}
+          setTampilanLogo2={setTampilanLogo2}
+          logoUtamaOptions={LOGO_UTAMA_OPTIONS}
+        />
+        <SectionOrderSetting
+          sections={sections}
+          setSections={setSections}
+          updateSection={updateSection}
+          toggleSectionVisibility={toggleSectionVisibility}
+          menuOptions={MENU_OPTIONS}
+        />
+      </div>
 
       {/* ---------- MEDIA SOSIAL ---------- */}
       <SocialMediaSetting
@@ -225,16 +461,6 @@ const CustomizeBeranda = () => {
         handleSocialAvatarChange={handleSocialAvatarChange}
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
-      />
-
-      {/* ---------- SECTIONS HALAMAN BERANDA ---------- */}
-      <SectionOrderSetting
-        sections={sections}
-        setSections={setSections}
-        updateSection={updateSection}
-        tambahSection={tambahSection}
-        hapusSection={hapusSection}
-        menuOptions={MENU_OPTIONS}
       />
 
       {/* ---------- FOOTER ---------- */}

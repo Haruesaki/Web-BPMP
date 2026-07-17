@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
+import axiosInstance from '../../api/axiosInstance';
 
-import Logo from "../../assets/source/Logo.png";
 import Dropdown from "../../assets/source/Dropdown.png";
 import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
-import Profile from "../../assets/source/WOWOK.jpg";
 import { useTTS } from "../../context/TTSContext";
-import Mitra5 from '../../assets/source/Mitra (5).png';
 
 // --- DATA NAVIGASI (CMS-READY) ---
 // Struktur menu dipusatkan di sini agar mudah dikelola atau diganti dengan data dari CMS.
@@ -90,7 +88,7 @@ const navData = [
   },
 ];
 
-const Navbar = ({ lenisRef }) => {
+const Navbar = () => {
   const { isActive, toggle } = useTTS();
   const location = useLocation(); // Hook untuk mendapatkan info URL saat ini
 
@@ -98,6 +96,7 @@ const Navbar = ({ lenisRef }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState(null);
+  const [headerLogoUrl, setHeaderLogoUrl] = useState(null);
 
   // --- STATE BARU: Untuk panel submenu di Tampilan Tablet ---
   const [isSubmenuPanelOpen, setIsSubmenuPanelOpen] = useState(false);
@@ -109,6 +108,26 @@ const Navbar = ({ lenisRef }) => {
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadHeaderLogo = async () => {
+      try {
+        const response = await axiosInstance.get('/api/beranda/header');
+        const logoUrl = response.data?.data?.url_logo_header || null;
+        if (isMounted) setHeaderLogoUrl(logoUrl);
+      } catch (error) {
+        console.error('Gagal mengambil logo header:', error);
+      }
+    };
+
+    loadHeaderLogo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSearchToggle = (e) => {
     e.preventDefault();
@@ -417,9 +436,11 @@ const Navbar = ({ lenisRef }) => {
           </button>
 
           <div className="header-logo">
-            <div className="logo-container">
-              <img src={Logo} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
-            </div>
+            {headerLogoUrl && (
+              <div className="logo-container">
+                <img src={headerLogoUrl} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+              </div>
+            )}
           </div>
         </div>
 

@@ -8,45 +8,6 @@
     flex-direction: column;
 }
 
-
-/* Area Putih Konter Pengunjung */
-.visitor-counter-wrapper {
-    background-color: #ffffff;
-    padding: 50px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Desain Tombol Konter */
-.visitor-counter-box {
-    background-color: #23356A;
-    /* Biru keabu-abuan persis desain */
-    padding: 16px 45px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease;
-}
-
-.visitor-counter-box:hover {
-    transform: translateY(-3px);
-}
-
-.visitor-icon {
-    color: #ffffff;
-    font-size: 26px;
-}
-
-.visitor-text {
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(16px, 1.5vw, 18px);
-    font-weight: 600;
-}
-
 /* --- Area Utama Footer (3 Kolom) --- */
 .footer-content-area {
     background-color: #0B132B;
@@ -131,12 +92,6 @@
         grid-template-columns: 1fr;
         /* Berubah menjadi 1 kolom (atas-bawah) */
         gap: 50px;
-    }
-
-    .visitor-counter-box {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px 30px;
     }
 
     .footer-col {

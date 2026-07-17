@@ -1,14 +1,15 @@
 .news-item {
     position: relative;
     display: flex;
-    height: auto;
+    width: 100%;
+    height: clamp(110px, 8.6vw, 130px);
     align-items: center;
     background: linear-gradient(90deg, #1A3C87 0%, #10255A 100%);
     border: 1.5px solid #3498DB;
     border-radius: 12px;
-    padding: 16px 20px 16px 40px;
+    padding: clamp(12px, 1.5vw, 16px) 10px clamp(12px, 1.5vw, 16px) clamp(24px, 1.6vw, 45px);
     text-decoration: none;
-    transition: transfor5m 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .news-item:hover {
@@ -22,7 +23,7 @@
     left: 0;
     top: 10px;
     bottom: 10px;
-    width: 16px;
+    width: clamp(7px, 1vw, 16px);
     background-color: #ffffff;
     border-top-right-radius: 50px;
     border-bottom-right-radius: 50px;
@@ -32,28 +33,58 @@
 .news-text {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: clamp(4px, 0.5vw, 6px);
     z-index: 1;
 }
 
-.news-category {
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 300;
-}
 
 .news-title {
     color: #ffffff;
-    font-size: 14.5px;
+    font-size: clamp(6px, 1vw, 15px);
     font-weight: 600;
     margin: 0;
     line-height: 1.4;
+    /* KUNCI: Menambahkan ellipsis (...) jika judul melebihi 3 baris */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .news-date {
     color: #A9CCE3;
-    font-size: 11px;
+    font-size: clamp(8px, 0.8vw, 13px);
     display: flex;
     align-items: center;
-    margin-top: 4px;
+    margin-top: clamp(2px, 0.4vw, 4px);
+}
+
+@media (max-width: 1020px) {
+
+.news-item {
+    width: 100%;
+    height: clamp(100px, 13vw, 140px);
+    align-items: center;
+    padding: clamp(12px, 1.5vw, 16px) 10px clamp(12px, 1.5vw, 16px) clamp(24px, 1.6vw, 45px);
+}
+
+.news-title {
+    font-size: clamp(11.5px, 1.59vw, 16px);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+    /* KUNCI: Menambahkan ellipsis (...) jika judul melebihi 3 baris */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.news-date {
+    font-size: clamp(10px, 1.344vw, 14px);
+    margin-top: clamp(2px, 0.4vw, 4px);
+}
 }

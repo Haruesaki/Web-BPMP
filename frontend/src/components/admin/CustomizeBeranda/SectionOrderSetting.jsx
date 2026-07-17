@@ -1,24 +1,36 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './SectionOrderSetting.css';
 
 const SectionOrderSetting = ({
   sections,
   setSections,
   updateSection,
-  tambahSection,
-  hapusSection,
+  toggleSectionVisibility,
   menuOptions,
 }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isDraggable, setIsDraggable] = useState(false);
+  const [editingId, setEditingId] = useState(null); // State to track which title is being edited
+  const titleInputRef = useRef(null); // Ref to focus the input
+
+  // Effect to auto-focus the input when editing starts
+  useEffect(() => {
+    if (editingId !== null && titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [editingId]);
 
   const handleDragStart = (e, index) => {
+    if (editingId !== null) {
+      e.preventDefault();
+      return;
+    }
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e) => {
-    e.preventDefault(); // Diperlukan agar event drop bisa terpicu
+    e.preventDefault();
   };
 
   const handleDrop = (e, targetIndex) => {
@@ -39,21 +51,41 @@ const SectionOrderSetting = ({
     setDraggedIndex(null);
   };
 
+  // Handlers for the editable title
+  const handleTitleClick = (sectionId) => {
+    setIsDraggable(false); // Prevent dragging when trying to click
+    setEditingId(sectionId);
+  };
+
+  const handleTitleBlur = () => {
+    setEditingId(null);
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      setEditingId(null);
+    }
+  };
+
   return (
     <section className="cb-card">
       <div className="cb-card-title">
         <i className="fa-solid fa-table-cells"></i>
-        <span>Sections Halaman Beranda</span>
+        <span>Urutan Sections Beranda</span>
       </div>
 
       <div className="cb-section-grid">
         {sections.map((section, index) => {
           const isDragging = index === draggedIndex;
+          const isEditingTitle = editingId === section.id;
+
           return (
             <div
-              className={`cb-section-box ${isDragging ? 'dragging' : ''}`}
+              className={`cb-section-box ${isDragging ? 'dragging' : ''} ${
+                !section.isVisible ? 'is-hidden' : ''
+              }`}
               key={section.id}
-              draggable={isDraggable}
+              draggable={isDraggable && !isEditingTitle}
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
@@ -61,30 +93,52 @@ const SectionOrderSetting = ({
             >
               <div
                 className="cb-section-head"
-                title="Seret untuk memindahkan"
-                onMouseEnter={() => setIsDraggable(true)}
+                title={!isEditingTitle ? 'Seret untuk memindahkan' : ''}
+                onMouseEnter={() => !isEditingTitle && setIsDraggable(true)}
                 onMouseLeave={() => setIsDraggable(false)}
               >
                 <div className="cb-section-title-wrap">
+                  <div className="cb-section-order-label">{index + 1}</div>
                   <div className="cb-drag-handle">
                     <i className="fa-solid fa-grip-vertical"></i>
                   </div>
-                  <label className="cb-field-label">Menu</label>
+                  {/* --- EDITABLE TITLE LOGIC --- */}
+                  {isEditingTitle ? (
+                    <input
+                      ref={titleInputRef}
+                      type="text"
+                      className="cb-section-title-input"
+                      value={section.judul}
+                      placeholder="Masukan Judul Section"
+                      onChange={(e) => updateSection(section.id, 'judul', e.target.value)}
+                      onBlur={handleTitleBlur}
+                      onKeyDown={handleTitleKeyDown}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span
+                      className={`cb-section-title-display ${!section.judul ? 'placeholder' : ''}`}
+                      onClick={() => handleTitleClick(section.id)}
+                    >
+                      {section.judul || 'Masukan Judul Section'}
+                    </span>
+                  )}
                 </div>
                 <button
-                  className="cb-icon-btn cb-icon-btn-danger cb-section-delete"
-                  title="Hapus section"
+                  className={`cb-icon-btn cb-section-visibility ${!section.isVisible ? 'is-off' : ''}`}
+                  title={section.isVisible ? 'Sembunyikan section' : 'Tampilkan section'}
                   onMouseEnter={(e) => {
                     e.stopPropagation();
                     setIsDraggable(false);
                   }}
-                  onMouseLeave={() => setIsDraggable(true)}
-                  onClick={() => hapusSection(section.id)}
+                  onMouseLeave={() => !isEditingTitle && setIsDraggable(true)}
+                  onClick={() => toggleSectionVisibility(section.id)}
                 >
-                  <i className="fa-solid fa-trash"></i>
+                  <i className={`fa-solid ${section.isVisible ? 'fa-eye' : 'fa-eye-slash'}`}></i>
                 </button>
               </div>
 
+              <label className="cb-field-label">Menu</label>
               <div className="cb-select-wrap">
                 <select
                   className="cb-select"
@@ -99,23 +153,10 @@ const SectionOrderSetting = ({
                 </select>
                 <i className="fa-solid fa-chevron-down cb-select-caret"></i>
               </div>
-
-              <label className="cb-field-label">Judul Section</label>
-              <input
-                type="text"
-                className="cb-input"
-                value={section.judul}
-                placeholder="Isi Judul Section Disini..."
-                onChange={(e) => updateSection(section.id, 'judul', e.target.value)}
-              />
             </div>
           );
         })}
       </div>
-
-      <button className="cb-btn-dashed" onClick={tambahSection}>
-        <i className="fa-solid fa-plus"></i> Tambah Section
-      </button>
     </section>
   );
 };

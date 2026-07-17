@@ -1,24 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './YoutubeSection.css';
 
 import Youtube from "../../../assets/source/youtube.png";
-
-// Komponen Fasad Video (Thumbnail + Tombol Play)
-const VideoPlayer = ({ video, isMain, onPlay }) => {
-    const thumbnailUrl = video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url;
-
-    return (
-        <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`} onClick={() => onPlay(video.id.videoId)}>
-            <img src={thumbnailUrl} alt={video.snippet.title} className="yt-thumbnail" loading="lazy" />
-            <div className={`yt-play-overlay ${!isMain ? 'small' : ''}`}>
-                <i className="fa-brands fa-youtube"></i>
-            </div>
-            <div className="yt-video-title-overlay">
-                <h4 className={`yt-video-title ${isMain ? 'yt-video-title--main' : ''}`}>{video.snippet.title}</h4>
-            </div>
-        </div>
-    );
-};
 
 // Komponen Iframe Player
 const IframePlayer = ({ videoId, isMain }) => (
@@ -26,7 +9,7 @@ const IframePlayer = ({ videoId, isMain }) => (
         <iframe
             width="100%"
             height="100%"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            src={`https://www.youtube.com/embed/${videoId}`}
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -35,8 +18,15 @@ const IframePlayer = ({ videoId, isMain }) => (
     </div>
 );
 
+// Komponen Placeholder untuk saat tidak ada video
+const VideoPlaceholder = () => (
+    <div className="yt-video-placeholder">
+        <i className="fa-solid fa-video-slash"></i>
+        <span>Tidak ada video untuk ditampilkan.</span>
+    </div>
+);
+
 const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
-    const [playingVideoId, setPlayingVideoId] = useState(null);
     const subscribeBtnWrapperRef = useRef(null);
     const scrollState = useRef({
         currentY: 0,
@@ -98,6 +88,7 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
     }, []);
 
     return (
+        <section className="container-youtube-section">
         <section className="youtube-section">
             <div className="yt-header-bar">
                 <div className="yt-profile-left">
@@ -119,9 +110,9 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
                     <div className="yt-stat-item">
                         <span className="yt-stat-label">Rata-rata Views</span>
                         <span className="yt-stat-value">
-                            {ytChannel?.statistics?.viewCount && ytChannel?.statistics?.videoCount
+                            {ytChannel?.statistics?.viewCount && ytChannel?.statistics?.videoCount && Number(ytChannel.statistics.videoCount) > 0
                                 ? Math.round(Number(ytChannel.statistics.viewCount) / Number(ytChannel.statistics.videoCount)).toLocaleString('id-ID')
-                                : '-'}
+                                : (ytChannel?.statistics?.videoCount === '0' ? '0' : '-')}
                         </span>
                     </div>
                 </div>
@@ -159,38 +150,33 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
                             );
                         }
 
-                        if (!ytVideos || ytVideos.length === 0) {
-                            return (
-                                <div className="yt-state-feedback">
-                                    <i className="fa-solid fa-video-slash"></i>
-                                    <span>Tidak ada video untuk ditampilkan.</span>
-                                </div>
-                            );
-                        }
-
                         return (
                             <div className="yt-feed-grid">
                                 {/* Kolom Kiri: Video Utama */}
-                                {ytVideos.length > 0 && (
-                                    <div className="yt-main-column">
-                                        {playingVideoId === ytVideos[0].id.videoId ? (
-                                            <IframePlayer videoId={ytVideos[0].id.videoId} isMain={true} />
-                                        ) : (
-                                            <VideoPlayer video={ytVideos[0]} isMain={true} onPlay={setPlayingVideoId} />
-                                        )}
-                                    </div>
-                                )}
-
+                                <div className="yt-main-column">
+                                    {ytVideos && ytVideos[0] ? (
+                                        <IframePlayer videoId={ytVideos[0].id.videoId} isMain={true} />
+                                    ) : (
+                                        <div className="yt-video-wrapper main-wrapper">
+                                            <VideoPlaceholder />
+                                        </div>
+                                    )}
+                                </div>
                                 {/* Kolom Kanan: Daftar Video Terbaru */}
                                 <div className="yt-side-column">
                                     <div className="yt-side-list">
-                                        {ytVideos.slice(1, 3).map((video, idx) => (
-                                            playingVideoId === video.id.videoId ? (
-                                                <IframePlayer key={video.id.videoId} videoId={video.id.videoId} isMain={false} />
-                                            ) : (
-                                                <VideoPlayer key={video.id.videoId} video={video} isMain={false} onPlay={setPlayingVideoId} />
-                                            )
-                                        ))}
+                                        {[...Array(2)].map((_, index) => {
+                                            const video = ytVideos && ytVideos[index + 1];
+                                            if (video) {
+                                                return <IframePlayer key={video.id.videoId} videoId={video.id.videoId} isMain={false} />;
+                                            } else {
+                                                return (
+                                                    <div key={`placeholder-${index}`} className="yt-video-wrapper side-wrapper">
+                                                        <VideoPlaceholder />
+                                                    </div>
+                                                );
+                                            }
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -198,6 +184,7 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
                     })()}
                 </div>
             </div>
+        </section>
         </section>
     );
 };

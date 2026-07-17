@@ -66,6 +66,16 @@
     background: var(--purple-hover);
 }
 
+.admin-layout .cb-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+}
+
+.admin-layout .cb-btn-simpan:disabled,
+.admin-layout .cb-btn-simpan:disabled:hover {
+    background: var(--purple);
+}
+
 /* ---------- MODAL SUKSES SIMPAN ---------- */
 .admin-layout .cb-success-overlay {
     position: fixed;
