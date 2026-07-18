@@ -445,16 +445,8 @@ const CustomizeBeranda = () => {
           setTampilanLogo2={setTampilanLogo2}
           logoUtamaOptions={LOGO_UTAMA_OPTIONS}
         />
-        <SectionOrderSetting
-          sections={sections}
-          setSections={setSections}
-          updateSection={updateSection}
-          toggleSectionVisibility={toggleSectionVisibility}
-          menuOptions={MENU_OPTIONS}
-        />
-      </div>
 
-      {/* ---------- MEDIA SOSIAL ---------- */}
+              {/* ---------- MEDIA SOSIAL ---------- */}
       <SocialMediaSetting
         socials={socials}
         updateSocial={updateSocial}
@@ -462,6 +454,17 @@ const CustomizeBeranda = () => {
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
       />
+
+      </div>
+
+        <SectionOrderSetting
+          sections={sections}
+          setSections={setSections}
+          updateSection={updateSection}
+          toggleSectionVisibility={toggleSectionVisibility}
+          menuOptions={MENU_OPTIONS}
+        />
+
 
       {/* ---------- FOOTER ---------- */}
       <FooterSetting
