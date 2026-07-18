@@ -498,12 +498,18 @@
     border: 1px solid var(--border-soft);
     border-radius: 12px;
     background: var(--bg-card-soft);
+    /* Kolom butuh jarak antar-baris ekstra karena beberapa kotak bisa
+       "tumbuh" ke bawah (dropdown submenu). align-items start mencegah
+       kotak setinggi baris tertinggi ikut meregangkan kotak lain di
+       baris yang sama. */
+    align-items: start;
 }
 
 .admin-layout .mu-access-item {
     display: flex;
     align-items: center;
     gap: 11px;
+    min-width: 0;
     font-size: 14px;
     color: var(--text-main);
     cursor: pointer;
@@ -515,6 +521,21 @@
     accent-color: var(--purple);
     cursor: pointer;
     flex-shrink: 0;
+}
+
+.admin-layout .mu-access-item span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+/* Header grup menu (checkbox utama + chevron). Hanya diberi cursor & efek
+   hover ringan bila grup itu memang punya submenu (bisa diklik untuk
+   dibuka/ditutup) — dan efeknya SELALU pas sebesar kotak headernya
+   sendiri, tidak pernah melebar/mengecil tak terduga seperti sebelumnya. */
+.admin-layout .mu-access-group-header-clickable:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .admin-layout .mu-access-empty {
