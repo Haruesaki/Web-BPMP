@@ -1,17 +1,30 @@
 const axios = require('axios');
 const instagramModel = require('../models/instagramModel');
 
-const INSTAGRAM_USERNAME = 'bpmplampung';
-
 /**
- * Fetch profil dari RapidAPI dan simpan ke database (digunakan oleh cron job)
+ * Fetch profil dari RapidAPI dan simpan ke database (digunakan oleh cron job dan update admin)
  */
-const fetchAndCacheInstagramProfile = async () => {
+const fetchAndCacheInstagramProfile = async (targetUsername = null) => {
   try {
     const apiKey = process.env.RAPIDAPI_KEY; // Harus ditambahkan ke .env
     if (!apiKey) {
       console.error('RAPIDAPI_KEY tidak dikonfigurasi di .env');
       return false;
+    }
+
+    // Jika targetUsername kosong (dipanggil dari cron), ambil dari cache yang ada
+    let usernameToFetch = targetUsername;
+    if (!usernameToFetch) {
+      const existingCache = await instagramModel.getCache();
+      if (existingCache && existingCache.profile_data) {
+        const parsed = typeof existingCache.profile_data === 'string' ? JSON.parse(existingCache.profile_data) : existingCache.profile_data;
+        usernameToFetch = parsed.username;
+      }
+    }
+    
+    // Fallback jika database masih kosong dan tidak ada input
+    if (!usernameToFetch) {
+      usernameToFetch = 'bpmplampung';
     }
 
     const options = {
@@ -23,7 +36,7 @@ const fetchAndCacheInstagramProfile = async () => {
         'Content-Type': 'application/json'
       },
       data: {
-        username: INSTAGRAM_USERNAME
+        username: usernameToFetch
       }
     };
 
@@ -84,11 +97,15 @@ const fetchAndCacheInstagramProfile = async () => {
     // Simpan ke database
     await instagramModel.updateCache(profileData);
     console.log('[Instagram Cron] Berhasil memperbarui cache profil instagram');
-    return true;
+    return { success: true };
 
   } catch (error) {
     console.error('[Instagram Cron] Error fetching instagram API:', error.message);
-    return false;
+    let errorMessage = 'Gagal mengambil data dari API eksternal.';
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage = `RapidAPI: ${error.response.data.message}`;
+    }
+    return { success: false, message: errorMessage };
   }
 };
 
@@ -109,9 +126,9 @@ const getInstagramProfile = async (req, res) => {
 
     // Jika belum ada di DB (cron belum jalan), panggil API manual pertama kali
     console.log('[Instagram] Cache kosong, melakukan penarikan pertama kali...');
-    const success = await fetchAndCacheInstagramProfile();
+    const result = await fetchAndCacheInstagramProfile();
     
-    if (success) {
+    if (result.success) {
       const newCache = await instagramModel.getCache();
       return res.status(200).json({
         success: true,
@@ -131,7 +148,64 @@ const getInstagramProfile = async (req, res) => {
   }
 };
 
+/**
+ * Endpoint untuk Admin memperbarui username Instagram yang di-scrape
+ */
+const updateInstagramUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ success: false, pesan: 'Username wajib diisi' });
+    }
+
+    const result = await fetchAndCacheInstagramProfile(username);
+    
+    if (result.success) {
+      const newCache = await instagramModel.getCache();
+      return res.status(200).json({
+        success: true,
+        pesan: 'Data Instagram berhasil ditarik',
+        data: newCache.profile_data
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        pesan: result.message || 'Gagal menarik data dari Instagram. Pastikan username valid atau periksa koneksi RapidAPI.'
+      });
+    }
+  } catch (error) {
+    console.error('Error updateInstagramUsername:', error);
+    res.status(500).json({ success: false, pesan: 'Terjadi kesalahan pada server' });
+  }
+};
+
+/**
+ * Endpoint untuk Admin memperbarui link embed postingan Instagram
+ */
+const updateEmbedLinks = async (req, res) => {
+  try {
+    const { links } = req.body;
+    if (!Array.isArray(links)) {
+      return res.status(400).json({ success: false, pesan: 'Format links tidak valid' });
+    }
+    
+    await instagramModel.updateEmbedLinks(links);
+    
+    const newCache = await instagramModel.getCache();
+    return res.status(200).json({
+      success: true,
+      pesan: 'Link embed Instagram berhasil disimpan',
+      data: newCache.profile_data
+    });
+  } catch (error) {
+    console.error('Error updateEmbedLinks:', error);
+    res.status(500).json({ success: false, pesan: 'Terjadi kesalahan pada server' });
+  }
+};
+
 module.exports = {
   fetchAndCacheInstagramProfile,
-  getInstagramProfile
+  getInstagramProfile,
+  updateInstagramUsername,
+  updateEmbedLinks
 };

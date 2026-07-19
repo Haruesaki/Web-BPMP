@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
 import './PartnerSection.css';
 
-// --- IMPORT ASSETS ---
+// --- IMPORT ASSETS (Fallback) ---
 import Mitra1Jpg from "../../../assets/source/Unila.jpeg";
 import Mitra1Png from "../../../assets/source/Unila.jpeg";
 import Mitra2 from "../../../assets/source/Unila.jpeg";
@@ -10,14 +11,41 @@ import Mitra4 from "../../../assets/source/Unila.jpeg";
 import Mitra5 from "../../../assets/source/Unila.jpeg";
 
 const LOOP_COPIES = 8;
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getFullUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('blob:') || url.startsWith('http')) return url;
+  return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
-const PartnerSection = () => {
+const fallbackMitra = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
+
+const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
     const trackRef = useRef(null);
     const partnersSectionRef = useRef(null);
+    const [fetchedMitra, setFetchedMitra] = useState([]);
 
-    const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
+    useEffect(() => {
+      // Jika diberikan custom list (misal dari Preview Admin), tidak perlu fetch
+      if (customMitraList) return;
 
-    // GABUNGAN EFEK: 3D LENS, 3D CURVE, & MARQUEE VELOCITY
+      const fetchMitra = async () => {
+        try {
+          const res = await axiosInstance.get('/api/beranda/mitra');
+          const data = res.data?.data || [];
+          if (data.length > 0) {
+            setFetchedMitra(data.map(m => getFullUrl(m.url_logo)));
+          }
+        } catch (error) {
+          console.error("Gagal mengambil logo mitra:", error);
+        }
+      };
+      fetchMitra();
+    }, [customMitraList]);
+
+    const activeMitraList = customMitraList 
+      ? customMitraList 
+      : (fetchedMitra.length > 0 ? fetchedMitra : fallbackMitra);
     useEffect(() => {
         const track = trackRef.current;
         const partnersSection = partnersSectionRef.current;
@@ -42,7 +70,7 @@ const PartnerSection = () => {
         let lastTime = 0; // Untuk kalkulasi deltaTime
 
         const getAnimationSettings = () => {
-            const screenWidth = window.innerWidth;
+            const screenWidth = isPreviewMode ? (partnersSectionRef.current?.clientWidth || window.innerWidth) : window.innerWidth;
 
             if (screenWidth <= 370) {
                 return {
@@ -292,7 +320,7 @@ const PartnerSection = () => {
                     {/* Duplikasi grup untuk buffer loop. Reset animasi memakai jarak antar grup. */}
                     {Array.from({ length: LOOP_COPIES }).map((_, groupIndex) => (
                         <div className="partner-logo-group" key={groupIndex}>
-                            {mitraList.map((mitra, index) => (
+                            {activeMitraList.map((mitra, index) => (
                                 <span className="partner-logo-frame" key={`${groupIndex}-${index}`}>
                                     <img
                                         src={mitra}

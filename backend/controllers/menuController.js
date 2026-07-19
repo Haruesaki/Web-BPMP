@@ -27,6 +27,14 @@ class MenuController {
         finalSlug = nama_menu.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
       }
 
+      if (!induk_id) {
+        const allMenus = await MenuModel.getAll();
+        const mainMenus = allMenus.filter(m => !m.induk_id);
+        if (mainMenus.length >= 9) {
+          return res.status(400).json({ pesan: 'Batas maksimum menu utama (9 menu) telah tercapai.' });
+        }
+      }
+
       const newMenu = await MenuModel.create({
         nama_menu,
         ikon_menu,

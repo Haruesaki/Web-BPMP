@@ -4,6 +4,13 @@ import './InstagramSection.css';
 import Logo from "../../../assets/source/Logo.png";
 import Instagram from "../../../assets/source/instagram.png";
 
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getFullUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('blob:') || url.startsWith('http')) return url;
+  return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const InstagramEmbedCard = React.memo(({ postId }) => {
     useEffect(() => {
         // Fungsi untuk memicu proses embed dari script Instagram
@@ -41,7 +48,7 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
 }, (prevProps, nextProps) => prevProps.postId === nextProps.postId);
 
 
-const InstagramSection = ({ igProfile, loading }) => {
+const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
     const followBtnWrapperRef = useRef(null);
     const scrollState = useRef({
         currentY: 0,
@@ -108,9 +115,7 @@ const InstagramSection = ({ igProfile, loading }) => {
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
                     <img 
-                      src={igProfile?.profile_pic_url_hd?.startsWith('/uploads') 
-                             ? `http://localhost:5000${igProfile.profile_pic_url_hd}` 
-                             : (igProfile?.profile_pic_url_hd || Logo)} 
+                      src={igProfile?.profile_pic_url_hd ? getFullUrl(igProfile.profile_pic_url_hd) : Logo} 
                       alt="Logo BPMP" 
                       className="ig-avatar" 
                       style={{ borderRadius: '50%', objectFit: 'cover' }}
@@ -155,10 +160,18 @@ const InstagramSection = ({ igProfile, loading }) => {
             <div className="ig-feed-section">
                 <div className="ig-feed-grid">
                     {/* Dynamic Instagram Embed Component */}
-                    <InstagramEmbedCard postId="DaMGvRKAb7z" />
-                    <InstagramEmbedCard postId="DZR9Hdfh9Zs" />
-                    <InstagramEmbedCard postId="DaNwf5vyIYn" />
-                    <InstagramEmbedCard postId="DaKohaEPomy" />
+                    {igProfile && igProfile.embed_links && igProfile.embed_links.length > 0 ? (
+                        igProfile.embed_links.map((linkId, index) => (
+                            linkId ? <InstagramEmbedCard key={index} postId={linkId} /> : null
+                        ))
+                    ) : (
+                        <>
+                            <InstagramEmbedCard postId="DaMGvRKAb7z" />
+                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" />
+                            <InstagramEmbedCard postId="DaNwf5vyIYn" />
+                            <InstagramEmbedCard postId="DaKohaEPomy" />
+                        </>
+                    )}
                 </div>
             </div>
         </section>

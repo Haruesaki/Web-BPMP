@@ -87,6 +87,10 @@ const Setting = () => {
   const [passwordForm, setPasswordForm] = useState(EMPTY_PASSWORD_FORM);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
+  
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const updatePasswordField = (field, value) =>
     setPasswordForm((prev) => ({ ...prev, [field]: value }));
@@ -203,35 +207,59 @@ const Setting = () => {
             <div className="st-form-grid">
               <div className="st-field">
                 <label>Password Lama</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.oldPassword}
-                  onChange={(e) => updatePasswordField('oldPassword', e.target.value)}
-                  placeholder="Masukkan password saat ini"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => updatePasswordField('oldPassword', e.target.value)}
+                    placeholder="Masukkan password saat ini"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showOldPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                  ></i>
+                </div>
               </div>
 
               <div className="st-field">
                 <label>Password Baru</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.newPassword}
-                  onChange={(e) => updatePasswordField('newPassword', e.target.value)}
-                  placeholder="Minimal 8 karakter"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => updatePasswordField('newPassword', e.target.value)}
+                    placeholder="Minimal 8 karakter"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showNewPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  ></i>
+                </div>
               </div>
 
               <div className="st-field">
                 <label>Konfirmasi Password Baru</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
-                  placeholder="Ulangi password baru"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
+                    placeholder="Ulangi password baru"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  ></i>
+                </div>
               </div>
             </div>
 

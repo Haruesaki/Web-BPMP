@@ -201,7 +201,7 @@ class UserController {
 
             const isMatch = await bcrypt.compare(oldPassword, authUser.kata_sandi_hash);
             if (!isMatch) {
-                return res.status(400).json({ status: 'error', message: 'Password lama tidak cocok.' });
+                return res.status(400).json({ status: 'error', message: 'Kata sandi sebelumnya salah' });
             }
 
             const password_hash = await bcrypt.hash(newPassword, 10);

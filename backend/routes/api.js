@@ -13,6 +13,9 @@ const ProfilPegawaiController = require('../controllers/profilPegawaiController'
 const BeritaController = require('../controllers/beritaController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
+const LogoMitraController = require('../controllers/logoMitraController');
+const InfoKontakController = require('../controllers/infoKontakController');
+const TautanFooterController = require('../controllers/tautanFooterController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
@@ -34,6 +37,8 @@ router.post('/aktivitas', authMiddleware, AktivitasAdminController.recordAktivit
 
 router.get('/youtube', YoutubeController.getVideos);
 router.get('/instagram', InstagramController.getInstagramProfile);
+router.put('/instagram/update-username', authMiddleware, InstagramController.updateInstagramUsername);
+router.put('/instagram/update-embeds', authMiddleware, InstagramController.updateEmbedLinks);
 router.post('/auth/login', AuthController.login);
 router.post('/auth/forgot-password', AuthController.requestOtp);
 router.post('/auth/verify-otp', AuthController.verifyOtp);
@@ -44,6 +49,31 @@ router.get('/beranda/header', BerandaHeaderController.getHeader);
 router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHeader);
 router.get('/beranda/hero', BerandaHeroController.getHero);
 router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
+
+router.get('/beranda/mitra', LogoMitraController.getLogoMitra);
+router.post(
+  '/beranda/mitra',
+  authMiddleware,
+  (req, res, next) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err) return res.status(400).json({ error: { message: err.message } });
+      next();
+    });
+  },
+  LogoMitraController.createLogoMitra
+);
+router.put(
+  '/beranda/mitra/:id',
+  authMiddleware,
+  (req, res, next) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err) return res.status(400).json({ error: { message: err.message } });
+      next();
+    });
+  },
+  LogoMitraController.updateLogoMitra
+);
+router.delete('/beranda/mitra/:id', authMiddleware, LogoMitraController.deleteLogoMitra);
 
 // ================= LINK PREVIEW =================
 router.get('/link-preview', authMiddleware, getLinkPreview);
@@ -76,6 +106,12 @@ router.get('/berita/:menu_id', BeritaController.getBeritaByMenu);
 router.post('/berita/:menu_id', authMiddleware, BeritaController.createBerita);
 router.put('/berita/:id', authMiddleware, BeritaController.updateBerita);
 router.delete('/berita/:id', authMiddleware, BeritaController.deleteBerita);
+
+// Footer (Hubungi Kami)
+router.get('/beranda/footer', InfoKontakController.getFooterInfo);
+router.put('/beranda/footer', authMiddleware, InfoKontakController.updateFooterInfo);
+router.get('/beranda/tautan-footer', TautanFooterController.getTautanFooter);
+router.put('/beranda/tautan-footer', authMiddleware, TautanFooterController.updateTautanFooter);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)
