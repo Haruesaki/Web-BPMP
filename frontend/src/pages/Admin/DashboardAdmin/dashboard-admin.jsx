@@ -32,6 +32,32 @@ const getWeekOfMonth = (date) => {
 const CHART_BAR_COLOR = '#4cae8e';
 const CHART_BAR_HIGHLIGHT_COLOR = '#c3c4f7';
 
+// Bulatkan nilai maksimum sumbu-Y ke angka "cantik" + sisakan ruang di atas
+// bar tertinggi. Efeknya: sumbu ikut membesar mengikuti data (mis. 78 → 80,
+// bahkan ratusan) sehingga bar bernilai kecil tampak rendah — tidak lagi
+// mentok di angka 4 saat datanya masih sedikit.
+const niceCeil = (v) => {
+  if (!v || v <= 0) return 5;
+  const step = v <= 10 ? 2 : v <= 20 ? 5 : v <= 50 ? 10 : v <= 100 ? 20 : v <= 500 ? 50 : 100;
+  let top = Math.ceil(v / step) * step;
+  if (top <= v) top += step; // pastikan bar tertinggi tak menyentuh atas
+  return top;
+};
+
+// Sumbu-Y SELALU minimal mencapai nilai ini (skala 0–80 tampil penuh walau
+// data masih kecil → bar terlihat rendah). Bila data melebihi 80, sumbu tetap
+// membesar otomatis (via niceCeil) supaya bar tak pernah terpotong.
+const Y_AXIS_MIN_TOP = 80;
+
+// Langkah antar-tick sumbu-Y agar label rapi (~8 pembagian, mis. 80 → tiap 10).
+const niceStep = (max) => {
+  const rough = (max || 1) / 8;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const n = rough / pow;
+  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return nice * pow;
+};
+
 // Tooltip custom Recharts, di-styling manual lewat CSS (bukan pakai Tooltip
 // bawaan Recharts yang defaultnya putih) supaya cocok dengan tema gelap.
 const ChartTooltip = ({ active, payload, label, chartMode }) => {
@@ -145,6 +171,21 @@ const DashboardAdmin = () => {
     });
   }, [pengunjungData, filterYear, filterMonth, filterWeek, chartMode]);
 
+  // Batas atas sumbu-Y: minimal 80 (skala penuh selalu tampil), membesar
+  // otomatis bila nilai tertinggi periode melebihi 80.
+  const yMax = useMemo(
+    () => Math.max(niceCeil(Math.max(...chartData.map((d) => d.value), 0)), Y_AXIS_MIN_TOP),
+    [chartData]
+  );
+
+  // Daftar tick sumbu-Y (0, step, 2·step, … , yMax) agar labelnya rapi.
+  const yTicks = useMemo(() => {
+    const step = niceStep(yMax);
+    const arr = [];
+    for (let v = 0; v <= yMax; v += step) arr.push(v);
+    return arr;
+  }, [yMax]);
+
   const yearOptions = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
   const monthOptions = [
     { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
@@ -216,22 +257,6 @@ const DashboardAdmin = () => {
             </div>
           </div>
 
-          {/* ----- SUMMARY CARD ----- */}
-          <div style={{display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap'}}>
-            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0f4ff', textAlign: 'center'}}>
-              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#3f5aa8'}}>
-                {summary.totalUnik.toLocaleString('id-ID')}
-              </div>
-              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Pengunjung Unik</div>
-            </div>
-            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0fff4', textAlign: 'center'}}>
-              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#4cae8e'}}>
-                {summary.totalHits.toLocaleString('id-ID')}
-              </div>
-              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Total Tayangan (Hits)</div>
-            </div>
-          </div>
-
           <div className="chart-area">
             {chartData.length === 0 ? (
               <div className="chart-empty">Tidak ada data pengunjung untuk filter yang dipilih.</div>
@@ -248,6 +273,8 @@ const DashboardAdmin = () => {
                     />
                     <YAxis
                       allowDecimals={false}
+                      domain={[0, yMax]}
+                      ticks={yTicks}
                       tick={{ fill: '#5b6478', fontSize: 11 }}
                       axisLine={false}
                       tickLine={false}
@@ -269,6 +296,23 @@ const DashboardAdmin = () => {
                 </ResponsiveContainer>
               </div>
             )}
+          </div>
+
+          {/* ----- SUMMARY CARD (di bawah chart, tanpa pembungkus/background) ----- */}
+          <div className="chart-summary">
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-unik">
+                {summary.totalUnik.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Pengunjung Unik</div>
+            </div>
+            <div className="chart-summary-divider"></div>
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-hits">
+                {summary.totalHits.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Total Tayangan (Hits)</div>
+            </div>
           </div>
         </section>
 
