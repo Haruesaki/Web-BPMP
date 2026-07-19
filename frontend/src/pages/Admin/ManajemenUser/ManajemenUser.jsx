@@ -668,19 +668,9 @@ const ManajemenUser = () => {
                             transition: 'all 0.2s ease',
                             zIndex: isExpanded ? 50 : 1, // Naikkan z-index agar bayangannya menutupi elemen sekitar
                           }}
-                          onMouseEnter={() => {
-                            if (hasSubmenus) {
-                              setExpandedAccessGroups(prev => prev.includes(menuObj.label) ? prev : [...prev, menuObj.label]);
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            if (hasSubmenus) {
-                              setExpandedAccessGroups(prev => prev.filter(l => l !== menuObj.label));
-                            }
-                          }}
                         >
                           <div 
-                            className="mu-access-group-header"
+                            className={`mu-access-group-header${hasSubmenus ? ' mu-access-group-header-clickable' : ''}`}
                             style={{ 
                               display: 'flex', 
                               alignItems: 'center', 
@@ -688,9 +678,13 @@ const ManajemenUser = () => {
                               padding: '12px 14px',
                               background: isChecked ? 'rgba(91, 95, 232, 0.08)' : 'transparent',
                               borderRadius: isExpanded ? '9px 9px 0 0' : '9px',
-                              cursor: hasSubmenus ? 'default' : 'default',
+                              cursor: hasSubmenus ? 'pointer' : 'default',
                               transition: 'all 0.2s ease'
                             }}
+                            // Dropdown submenu sekarang dibuka/ditutup lewat KLIK yang eksplisit
+                            // (fungsi toggleExpandGroup), bukan hover — supaya tidak berkedip
+                            // atau terbuka sendiri hanya karena kursor melintas di atas kotaknya.
+                            onClick={(e) => hasSubmenus && toggleExpandGroup(menuObj.label, e)}
                           >
                             <label 
                               className="mu-access-item" 
