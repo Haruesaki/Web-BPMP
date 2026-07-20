@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LogoMitraSectionForm from './LogoMitraSectionForm';
 import InstagramSectionForm from './InstagramSectionForm';
 import YouTubeSectionNotice from './YouTubeSectionNotice';
+import BeritaSectionForm from './BeritaSectionForm';
 import './SectionOrderSetting.css';
 
 const SectionOrderSetting = ({
@@ -97,6 +98,10 @@ const SectionOrderSetting = ({
               
               {/* --- KONDISIONAL FORM --- */}
               <div className="cb-section-form-wrapper">
+                {section.menu === 'Berita' && (
+                  <BeritaSectionForm />
+                )}
+
                 {section.menu === 'Logo Mitra' && (
                   <LogoMitraSectionForm 
                     mitraList={mitraList} 

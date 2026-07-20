@@ -15,6 +15,7 @@ import HeroSetting from '../../../components/admin/CustomizeBeranda/HeroSetting'
 import SocialMediaSetting from '../../../components/admin/CustomizeBeranda/SocialMediaSetting';
 import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/SectionOrderSetting';
 import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
+import CustomAlert from '../../../components/admin/CustomAlert';
 import axiosInstance from '../../../api/axiosInstance';
 
 // =========================================================================
@@ -46,7 +47,18 @@ const nextId = () => uid++;
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
-  const [isSavingHero, setIsSavingHero] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -237,7 +249,7 @@ const CustomizeBeranda = () => {
   };
 
   const handleBatalPerubahan = () => {
-    if ((!savedHeroForm && !savedHeaderForm) || isSavingHero) return;
+    if ((!savedHeroForm && !savedHeaderForm) || isSaving) return;
 
     if (savedHeaderForm) {
       setSavedHeaderLogoUrl(savedHeaderForm.logoUrl);
@@ -322,9 +334,9 @@ const CustomizeBeranda = () => {
       if (res.data?.success) {
         setIsSaveSuccessOpen(true);
       }
-    } catch (error) {
-      console.error('Gagal menyimpan pengaturan footer:', error);
-      alert('Terjadi kesalahan saat menyimpan pengaturan footer.');
+    } catch (err) {
+      console.error('Gagal memperbarui footer:', err);
+      showAlert('error', 'Terjadi kesalahan saat menyimpan pengaturan footer.', 'Simpan Gagal');
     }
   };
 
@@ -335,9 +347,9 @@ const CustomizeBeranda = () => {
       if (res.data?.success) {
         setIsSaveSuccessOpen(true);
       }
-    } catch (error) {
-      console.error('Gagal menyimpan tautan footer:', error);
-      alert('Terjadi kesalahan saat menyimpan tautan footer.');
+    } catch (err) {
+      console.error('Gagal memperbarui tautan footer:', err);
+      showAlert('error', 'Terjadi kesalahan saat menyimpan tautan footer.', 'Simpan Gagal');
     }
   };
 
@@ -376,9 +388,9 @@ const CustomizeBeranda = () => {
   };
 
   const handleSimpanPerubahan = async () => {
-    if (isSavingHero) return;
+    if (isSaving) return;
 
-    setIsSavingHero(true);
+    setIsSaving(true);
     try {
       const headerLogoUrl = await uploadHeaderLogo();
       const backgroundUrl = await uploadHeroBackground();
@@ -425,10 +437,10 @@ const CustomizeBeranda = () => {
       setSavedHeroForm(nextHeroForm);
       setIsSaveSuccessOpen(true);
     } catch (error) {
-      console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
-      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
+      console.error('Gagal menyimpan pengaturan Hero:', error);
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.', 'Simpan Gagal');
     } finally {
-      setIsSavingHero(false);
+      setIsSaving(false);
     }
   };
 
@@ -446,7 +458,7 @@ const CustomizeBeranda = () => {
               type="button"
               className="cb-btn cb-btn-batal"
               onClick={handleBatalPerubahan}
-              disabled={isSavingHero}
+              disabled={isSaving}
             >
               Batal
             </button>
@@ -454,9 +466,9 @@ const CustomizeBeranda = () => {
           <button
             className="cb-btn cb-btn-simpan"
             onClick={handleSimpanPerubahan}
-            disabled={isSavingHero || !hasPageChanges}
+            disabled={isSaving || !hasPageChanges}
           >
-            {isSavingHero ? 'Menyimpan...' : hasPageChanges ? 'Simpan Perubahan' : 'Simpan'}
+            {isSaving ? 'Menyimpan...' : hasPageChanges ? 'Simpan Perubahan' : 'Simpan'}
           </button>
         </div>
       </div>
@@ -617,6 +629,15 @@ const CustomizeBeranda = () => {
           </div>
         </div>
       )}
+      
+      <CustomAlert 
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={alertState.onConfirm}
+        onCancel={alertState.onCancel}
+      />
     </main>
   );
 };
