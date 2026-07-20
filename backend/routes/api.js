@@ -18,6 +18,7 @@ const LogoMitraController = require('../controllers/logoMitraController');
 const InfoKontakController = require('../controllers/infoKontakController');
 const TautanFooterController = require('../controllers/tautanFooterController');
 const TautanMediaSosialController = require('../controllers/tautanMediaSosialController');
+const UrutanSectionBerandaController = require('../controllers/urutanSectionBerandaController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
@@ -120,6 +121,10 @@ router.get('/beranda/tautan-footer', TautanFooterController.getTautanFooter);
 router.put('/beranda/tautan-footer', authMiddleware, TautanFooterController.updateTautanFooter);
 router.get('/beranda/media-sosial', TautanMediaSosialController.getSemua);
 router.put('/beranda/media-sosial', authMiddleware, TautanMediaSosialController.updateSemua);
+
+// --- SECTIONS BERANDA ---
+router.get('/beranda/urutan-section', UrutanSectionBerandaController.getOrder);
+router.put('/beranda/urutan-section', authMiddleware, UrutanSectionBerandaController.updateOrder);
 
 // Upload gambar dari editor (CKEditor SimpleUploadAdapter). Diproteksi login.
 // Bungkus uploadMiddleware agar error multer (mis. bukan gambar / kelewat besar)

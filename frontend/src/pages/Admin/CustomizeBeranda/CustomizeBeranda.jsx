@@ -50,6 +50,7 @@ const CustomizeBeranda = () => {
   const [isSavingHero, setIsSavingHero] = useState(false);
   const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isSavingSocials, setIsSavingSocials] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false });
 
@@ -122,18 +123,40 @@ const CustomizeBeranda = () => {
   const [tampilanLogo1, setTampilanLogo1] = useState(LOGO_UTAMA_OPTIONS[0]);
   const [tampilanLogo2, setTampilanLogo2] = useState(LOGO_UTAMA_OPTIONS[0]);
 
+const [socials, setSocials] = useState([
+    { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
+    { id: nextId(), label: 'Facebook', url: 'https://facebook.com/kemdikbud', avatar: null },
+  ]);
+const [mitraList, setMitraList] = useState([]);
+const [sections, setSections] = useState([
+    { id: nextId(), menu: 'Berita', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Logo Mitra', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Preview Media Sosial Instagram', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Preview Media Sosial YouTube', judul: '', isVisible: true },
+  ]);
+const [footer, setFooter] = useState({ email: '', telepon: '', alamat: '' });
+const [googleMaps, setGoogleMaps] = useState('');
+const [tautan, setTautan] = useState([
+    { id: nextId(), label: 'Portal Layanan', link: '' },
+    { id: nextId(), label: 'Portal Layanan', link: '' },
+    { id: nextId(), label: 'Portal Layanan', link: '' },
+    { id: nextId(), label: 'Portal Layanan', link: '' },
+    { id: nextId(), label: 'Portal Layanan', link: '' },
+  ]);
+
   useEffect(() => {
     let isMounted = true;
 
     const loadBerandaSettings = async () => {
       try {
-        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse, medsosResponse] = await Promise.all([
+        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse, medsosResponse, sectionResponse] = await Promise.all([
           axiosInstance.get('/api/beranda/header'),
           axiosInstance.get('/api/beranda/hero'),
           axiosInstance.get('/api/beranda/mitra'),
           axiosInstance.get('/api/beranda/footer'),
           axiosInstance.get('/api/beranda/tautan-footer'),
           axiosInstance.get('/api/beranda/media-sosial'),
+          axiosInstance.get('/api/beranda/urutan-section'),
         ]);
         const header = headerResponse.data?.data;
         const hero = heroResponse.data?.data;
@@ -141,6 +164,7 @@ const CustomizeBeranda = () => {
         const footerData = footerResponse?.data?.data || {};
         const tautanData = tautanResponse?.data?.data || [];
         const medsosData = medsosResponse?.data?.data || [];
+        const sectionData = sectionResponse?.data?.data || [];
 
         if (!hero || !isMounted) return;
 
@@ -173,6 +197,15 @@ const CustomizeBeranda = () => {
             url: m.url_tautan,
             avatar: m.url_logo,
             file: null
+          })));
+        }
+
+        if (sectionData.length > 0) {
+          setSections(sectionData.map((s, index) => ({
+            id: s.id || nextId(),
+            menu: s.nama_section,
+            judul: '', // not strictly used for now in order
+            isVisible: s.is_visible,
           })));
         }
 
@@ -229,10 +262,7 @@ const CustomizeBeranda = () => {
 
 
   // ---------- MEDIA SOSIAL ----------
-  const [socials, setSocials] = useState([
-    { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
-    { id: nextId(), label: 'Facebook', url: 'https://facebook.com/kemdikbud', avatar: null },
-  ]);
+  
 
   const updateSocial = (id, field, value) =>
     setSocials((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
@@ -249,35 +279,27 @@ const CustomizeBeranda = () => {
   const hapusPlatform = (id) => setSocials((prev) => prev.filter((s) => s.id !== id));
 
   // ---------- LOGO MITRA (Untuk Urutan Section) ----------
-  const [mitraList, setMitraList] = useState([]);
+  
 
   // ---------- SECTIONS HALAMAN BERANDA ----------
-  const [sections, setSections] = useState([
-    { id: nextId(), menu: 'Berita', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Logo Mitra', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Preview Media Sosial Instagram', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Preview Media Sosial YouTube', judul: '', isVisible: true },
-  ]);
+  
 
   const updateSection = (id, field, value) =>
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
 
-  const toggleSectionVisibility = (id) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isVisible: !s.isVisible } : s))
-    );
+  const toggleSectionVisibility = async (id) => {
+    let updatedSections = [];
+    setSections((prev) => {
+      updatedSections = prev.map((s) => (s.id === id ? { ...s, isVisible: !s.isVisible } : s));
+      return updatedSections;
+    });
+    await handleSaveOrder(updatedSections);
   };
 
   // ---------- FOOTER ----------
-  const [footer, setFooter] = useState({ email: '', telepon: '', alamat: '' });
-  const [googleMaps, setGoogleMaps] = useState('');
-  const [tautan, setTautan] = useState([
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-  ]);
+  
+  
+  
 
   const handleSaveFooter = async () => {
     try {
@@ -439,6 +461,27 @@ const CustomizeBeranda = () => {
     }
   };
 
+  const handleSaveOrder = async (sectionsToSave = sections) => {
+    if (isSavingOrder) return;
+    setIsSavingOrder(true);
+    try {
+      const payload = {
+        sections: sectionsToSave.map((s, index) => ({
+          nama_section: s.menu,
+          urutan: index + 1,
+          is_visible: s.isVisible
+        }))
+      };
+      await axiosInstance.put('/api/beranda/urutan-section', payload);
+      // Simpan diam-diam (silent save) agar tidak mengganggu UX saat drag & drop
+    } catch (error) {
+      console.error('Gagal menyimpan urutan section:', error);
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan urutan section.', 'Simpan Gagal');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
   return (
     <main className="admin-content">
       {/* ---------- HEADING + AKSI ---------- */}
@@ -527,6 +570,8 @@ const CustomizeBeranda = () => {
           menuOptions={MENU_OPTIONS}
           mitraList={mitraList}
           setMitraList={setMitraList}
+          handleSaveOrder={handleSaveOrder}
+          isSavingOrder={isSavingOrder}
         />
 
 
