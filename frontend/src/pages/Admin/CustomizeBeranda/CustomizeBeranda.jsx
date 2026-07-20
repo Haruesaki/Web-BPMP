@@ -480,15 +480,17 @@ const CustomizeBeranda = () => {
         themes={THEMES}
       />
 
-      {/* ---------- HEADER & DATA LOGO ---------- */}
-      <div className="cb-grid-2">
-        <HeaderLogoSetting
+              <HeaderLogoSetting
           headerLogoPreview={headerLogoPreview}
           headerLogoName={headerLogoName}
           headerLogoInputKey={headerLogoInputKey}
           handleHeaderLogoChange={handleHeaderLogoChange}
           handleHeaderLogoRemove={handleHeaderLogoRemove}
         />
+
+      {/* ---------- HEADER & DATA LOGO ---------- */}
+      {/* <div className="cb-grid-2">
+
 
         <LogoDataSetting
           logoNama={logoNama}
@@ -501,7 +503,7 @@ const CustomizeBeranda = () => {
           setSavedLogo={setSavedLogo}
           savedLogoOptions={SAVED_LOGO_OPTIONS}
         />
-      </div>
+      </div> */}
 
       {/* ---------- LANDING PAGE & SECTIONS ---------- */}
       <div className="cb-grid-2">
