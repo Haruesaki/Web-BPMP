@@ -478,8 +478,6 @@ const CustomizeBeranda = () => {
 
       {/* ---------- HEADER & DATA LOGO ---------- */}
       {/* <div className="cb-grid-2">
-
-
         <LogoDataSetting
           logoNama={logoNama}
           setLogoNama={setLogoNama}
