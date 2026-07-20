@@ -7,6 +7,8 @@ const SocialMediaSetting = ({
   handleSocialAvatarChange,
   tambahPlatform,
   hapusPlatform,
+  onSave,
+  isSaving,
 }) => {
   return (
     <section className="cb-card">
@@ -69,6 +71,17 @@ const SocialMediaSetting = ({
       <button className="cb-btn-dashed" onClick={tambahPlatform}>
         <i className="fa-solid fa-plus"></i> Tambah Platform
       </button>
+
+      <div className="cb-card-actions" style={{ marginTop: '16px', width: '100%' }}>
+        <button
+          className="cb-btn cb-btn-simpan"
+          onClick={onSave}
+          disabled={isSaving}
+          style={{ width: '100%' }}
+        >
+          {isSaving ? 'Menyimpan...' : 'Simpan'}
+        </button>
+      </div>
     </section>
   );
 };
