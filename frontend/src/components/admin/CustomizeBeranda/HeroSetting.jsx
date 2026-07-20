@@ -10,11 +10,14 @@ const HeroSetting = ({
   backgroundInputKey,
   handleBackgroundChange,
   handleBackgroundRemove,
-  tampilanLogo1,
-  setTampilanLogo1,
-  tampilanLogo2,
-  setTampilanLogo2,
-  logoUtamaOptions,
+  logo1Preview,
+  logo1InputKey,
+  handleLogo1Change,
+  handleLogo1Remove,
+  logo2Preview,
+  logo2InputKey,
+  handleLogo2Change,
+  handleLogo2Remove,
   onSave,
   isSaving,
 }) => {
@@ -85,37 +88,71 @@ const HeroSetting = ({
         <div className="cb-side-fields">
           <div>
             <label className="cb-field-label">Tampilkan Logo 1</label>
-            <div className="cb-select-wrap">
-              <select
-                className="cb-select"
-                value={tampilanLogo1}
-                onChange={(e) => setTampilanLogo1(e.target.value)}
-              >
-                {logoUtamaOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <i className="fa-solid fa-chevron-down cb-select-caret"></i>
+            <div className="hero-logo-upload">
+              <div className="hero-logo-preview">
+                {logo1Preview ? (
+                  <>
+                    <img src={logo1Preview} alt="Preview logo 1" />
+                    <button
+                      type="button"
+                      className="hero-logo-remove"
+                      aria-label="Hapus logo 1"
+                      title="Hapus logo 1"
+                      onClick={handleLogo1Remove}
+                    >
+                      <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  </>
+                ) : (
+                  <i className="fa-regular fa-image"></i>
+                )}
+              </div>
+              <label className="cb-btn-upload hero-logo-btn" htmlFor="logo1-input">
+                <i className="fa-solid fa-upload"></i> Upload
+              </label>
+              <input
+                key={logo1InputKey}
+                id="logo1-input"
+                type="file"
+                accept="image/*"
+                className="cb-hidden-input"
+                onChange={handleLogo1Change}
+              />
             </div>
           </div>
 
           <div>
             <label className="cb-field-label">Tampilkan Logo 2</label>
-            <div className="cb-select-wrap">
-              <select
-                className="cb-select"
-                value={tampilanLogo2}
-                onChange={(e) => setTampilanLogo2(e.target.value)}
-              >
-                {logoUtamaOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <i className="fa-solid fa-chevron-down cb-select-caret"></i>
+            <div className="hero-logo-upload">
+              <div className="hero-logo-preview">
+                {logo2Preview ? (
+                  <>
+                    <img src={logo2Preview} alt="Preview logo 2" />
+                    <button
+                      type="button"
+                      className="hero-logo-remove"
+                      aria-label="Hapus logo 2"
+                      title="Hapus logo 2"
+                      onClick={handleLogo2Remove}
+                    >
+                      <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  </>
+                ) : (
+                  <i className="fa-regular fa-image"></i>
+                )}
+              </div>
+              <label className="cb-btn-upload hero-logo-btn" htmlFor="logo2-input">
+                <i className="fa-solid fa-upload"></i> Upload
+              </label>
+              <input
+                key={logo2InputKey}
+                id="logo2-input"
+                type="file"
+                accept="image/*"
+                className="cb-hidden-input"
+                onChange={handleLogo2Change}
+              />
             </div>
           </div>
         </div>

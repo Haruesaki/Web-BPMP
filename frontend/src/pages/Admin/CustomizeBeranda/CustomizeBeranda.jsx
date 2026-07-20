@@ -38,8 +38,11 @@ const MENU_OPTIONS = [
   'Preview Media Sosial YouTube',
 ];
 
-const LOGO_UTAMA_OPTIONS = ['Pilih Logo Utama', 'Kemendikdasmen', 'BPMP Lampung', 'Dinas Pendidikan'];
 const SAVED_LOGO_OPTIONS = ['Dinas Pendidikan', 'Kemendikdasmen', 'BPMP Lampung'];
+
+// Nilai logo_1/logo_2 hanya dianggap gambar bila berupa path/URL upload
+// (mengabaikan data lama yang masih berupa nama).
+const asImageUrl = (v) => (v && (v.startsWith('/') || v.startsWith('http')) ? v : null);
 
 let uid = 100; // helper id lokal untuk baris dinamis (social, section, tautan)
 const nextId = () => uid++;
@@ -120,8 +123,15 @@ const CustomizeBeranda = () => {
   const [backgroundFile, setBackgroundFile] = useState(null);
   const [savedBackgroundUrl, setSavedBackgroundUrl] = useState(null);
   const [backgroundInputKey, setBackgroundInputKey] = useState(0);
-  const [tampilanLogo1, setTampilanLogo1] = useState(LOGO_UTAMA_OPTIONS[0]);
-  const [tampilanLogo2, setTampilanLogo2] = useState(LOGO_UTAMA_OPTIONS[0]);
+  // Logo 1 & 2 hero: upload gambar mandiri (tidak terkait logo mitra / gambar lain).
+  const [logo1File, setLogo1File] = useState(null);
+  const [logo1Preview, setLogo1Preview] = useState(null);
+  const [savedLogo1Url, setSavedLogo1Url] = useState(null);
+  const [logo1InputKey, setLogo1InputKey] = useState(0);
+  const [logo2File, setLogo2File] = useState(null);
+  const [logo2Preview, setLogo2Preview] = useState(null);
+  const [savedLogo2Url, setSavedLogo2Url] = useState(null);
+  const [logo2InputKey, setLogo2InputKey] = useState(0);
 
 const [socials, setSocials] = useState([
     { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
@@ -175,8 +185,8 @@ const [tautan, setTautan] = useState([
           judul: hero.judul || '',
           deskripsi: hero.subjudul || '',
           backgroundUrl: hero.url_gambar || null,
-          logo1: hero.logo_1 || LOGO_UTAMA_OPTIONS[0],
-          logo2: hero.logo_2 || LOGO_UTAMA_OPTIONS[0],
+          logo1: asImageUrl(hero.logo_1),
+          logo2: asImageUrl(hero.logo_2),
         };
 
         setFooter({
@@ -218,8 +228,10 @@ const [tautan, setTautan] = useState([
         setSavedBackgroundUrl(loadedHeroForm.backgroundUrl);
         setBackgroundPreview(loadedHeroForm.backgroundUrl);
         setBackgroundName(loadedHeroForm.backgroundUrl ? loadedHeroForm.backgroundUrl.split('/').pop() : '');
-        setTampilanLogo1(loadedHeroForm.logo1);
-        setTampilanLogo2(loadedHeroForm.logo2);
+        setSavedLogo1Url(loadedHeroForm.logo1);
+        setLogo1Preview(loadedHeroForm.logo1);
+        setSavedLogo2Url(loadedHeroForm.logo2);
+        setLogo2Preview(loadedHeroForm.logo2);
 
         if (mitraData.length > 0) {
           setMitraList(
@@ -258,6 +270,32 @@ const [tautan, setTautan] = useState([
     setBackgroundFile(null);
     setSavedBackgroundUrl(null);
     setBackgroundInputKey((prev) => prev + 1);
+  };
+
+  // ---------- LOGO 1 & 2 (upload gambar) ----------
+  const handleLogo1Change = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogo1File(file);
+    setLogo1Preview(URL.createObjectURL(file));
+  };
+  const handleLogo1Remove = () => {
+    setLogo1Preview(null);
+    setLogo1File(null);
+    setSavedLogo1Url(null);
+    setLogo1InputKey((prev) => prev + 1);
+  };
+  const handleLogo2Change = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogo2File(file);
+    setLogo2Preview(URL.createObjectURL(file));
+  };
+  const handleLogo2Remove = () => {
+    setLogo2Preview(null);
+    setLogo2File(null);
+    setSavedLogo2Url(null);
+    setLogo2InputKey((prev) => prev + 1);
   };
 
 
@@ -353,6 +391,16 @@ const [tautan, setTautan] = useState([
     return response.data?.url || savedBackgroundUrl;
   };
 
+  const uploadLogoImage = async (file, savedUrl) => {
+    if (!file) return savedUrl;
+    const formData = new FormData();
+    formData.append('upload', file);
+    const response = await axiosInstance.post('/api/upload/gambar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data?.url || savedUrl;
+  };
+
   const uploadHeaderLogo = async () => {
     if (!headerLogoFile) return savedHeaderLogoUrl;
 
@@ -401,13 +449,15 @@ const [tautan, setTautan] = useState([
     setIsSavingHero(true);
     try {
       const backgroundUrl = await uploadHeroBackground();
+      const logo1Url = await uploadLogoImage(logo1File, savedLogo1Url);
+      const logo2Url = await uploadLogoImage(logo2File, savedLogo2Url);
 
       const heroResponse = await axiosInstance.put('/api/beranda/hero', {
         judul: judulBeranda,
         subjudul: deskripsi,
         url_gambar: backgroundUrl,
-        logo_1: tampilanLogo1,
-        logo_2: tampilanLogo2,
+        logo_1: logo1Url || '',
+        logo_2: logo2Url || '',
         is_aktif: true,
       });
 
@@ -417,6 +467,15 @@ const [tautan, setTautan] = useState([
       setBackgroundPreview(nextBackgroundUrl);
       setBackgroundName(nextBackgroundUrl ? nextBackgroundUrl.split('/').pop() : '');
       setBackgroundFile(null);
+
+      const nextLogo1 = asImageUrl(savedHero?.logo_1) || logo1Url || null;
+      const nextLogo2 = asImageUrl(savedHero?.logo_2) || logo2Url || null;
+      setSavedLogo1Url(nextLogo1);
+      setLogo1Preview(nextLogo1);
+      setLogo1File(null);
+      setSavedLogo2Url(nextLogo2);
+      setLogo2Preview(nextLogo2);
+      setLogo2File(null);
       setIsSaveSuccessOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
@@ -540,11 +599,14 @@ const [tautan, setTautan] = useState([
           backgroundInputKey={backgroundInputKey}
           handleBackgroundChange={handleBackgroundChange}
           handleBackgroundRemove={handleBackgroundRemove}
-          tampilanLogo1={tampilanLogo1}
-          setTampilanLogo1={setTampilanLogo1}
-          tampilanLogo2={tampilanLogo2}
-          setTampilanLogo2={setTampilanLogo2}
-          logoUtamaOptions={LOGO_UTAMA_OPTIONS}
+          logo1Preview={logo1Preview}
+          logo1InputKey={logo1InputKey}
+          handleLogo1Change={handleLogo1Change}
+          handleLogo1Remove={handleLogo1Remove}
+          logo2Preview={logo2Preview}
+          logo2InputKey={logo2InputKey}
+          handleLogo2Change={handleLogo2Change}
+          handleLogo2Remove={handleLogo2Remove}
           onSave={handleSaveHero}
           isSaving={isSavingHero}
         />
