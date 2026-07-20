@@ -1,4 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import LogoMitraSectionForm from './LogoMitraSectionForm';
+import InstagramSectionForm from './InstagramSectionForm';
+import YouTubeSectionNotice from './YouTubeSectionNotice';
 import './SectionOrderSetting.css';
 
 const SectionOrderSetting = ({
@@ -7,24 +10,13 @@ const SectionOrderSetting = ({
   updateSection,
   toggleSectionVisibility,
   menuOptions,
+  mitraList,
+  setMitraList,
 }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isDraggable, setIsDraggable] = useState(false);
-  const [editingId, setEditingId] = useState(null); // State to track which title is being edited
-  const titleInputRef = useRef(null); // Ref to focus the input
-
-  // Effect to auto-focus the input when editing starts
-  useEffect(() => {
-    if (editingId !== null && titleInputRef.current) {
-      titleInputRef.current.focus();
-    }
-  }, [editingId]);
 
   const handleDragStart = (e, index) => {
-    if (editingId !== null) {
-      e.preventDefault();
-      return;
-    }
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -51,22 +43,6 @@ const SectionOrderSetting = ({
     setDraggedIndex(null);
   };
 
-  // Handlers for the editable title
-  const handleTitleClick = (sectionId) => {
-    setIsDraggable(false); // Prevent dragging when trying to click
-    setEditingId(sectionId);
-  };
-
-  const handleTitleBlur = () => {
-    setEditingId(null);
-  };
-
-  const handleTitleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === 'Escape') {
-      setEditingId(null);
-    }
-  };
-
   return (
     <section className="cb-card">
       <div className="cb-card-title">
@@ -77,7 +53,6 @@ const SectionOrderSetting = ({
       <div className="cb-section-grid">
         {sections.map((section, index) => {
           const isDragging = index === draggedIndex;
-          const isEditingTitle = editingId === section.id;
 
           return (
             <div
@@ -85,7 +60,7 @@ const SectionOrderSetting = ({
                 !section.isVisible ? 'is-hidden' : ''
               }`}
               key={section.id}
-              draggable={isDraggable && !isEditingTitle}
+              draggable={isDraggable}
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
@@ -93,8 +68,8 @@ const SectionOrderSetting = ({
             >
               <div
                 className="cb-section-head"
-                title={!isEditingTitle ? 'Seret untuk memindahkan' : ''}
-                onMouseEnter={() => !isEditingTitle && setIsDraggable(true)}
+                title="Seret untuk memindahkan"
+                onMouseEnter={() => setIsDraggable(true)}
                 onMouseLeave={() => setIsDraggable(false)}
               >
                 <div className="cb-section-title-wrap">
@@ -102,27 +77,9 @@ const SectionOrderSetting = ({
                   <div className="cb-drag-handle">
                     <i className="fa-solid fa-grip-vertical"></i>
                   </div>
-                  {/* --- EDITABLE TITLE LOGIC --- */}
-                  {isEditingTitle ? (
-                    <input
-                      ref={titleInputRef}
-                      type="text"
-                      className="cb-section-title-input"
-                      value={section.judul}
-                      placeholder="Masukan Judul Section"
-                      onChange={(e) => updateSection(section.id, 'judul', e.target.value)}
-                      onBlur={handleTitleBlur}
-                      onKeyDown={handleTitleKeyDown}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <span
-                      className={`cb-section-title-display ${!section.judul ? 'placeholder' : ''}`}
-                      onClick={() => handleTitleClick(section.id)}
-                    >
-                      {section.judul || 'Masukan Judul Section'}
-                    </span>
-                  )}
+                  <span className="cb-section-title-display" style={{ cursor: 'default' }}>
+                    {section.menu}
+                  </span>
                 </div>
                 <button
                   className={`cb-icon-btn cb-section-visibility ${!section.isVisible ? 'is-off' : ''}`}
@@ -131,27 +88,29 @@ const SectionOrderSetting = ({
                     e.stopPropagation();
                     setIsDraggable(false);
                   }}
-                  onMouseLeave={() => !isEditingTitle && setIsDraggable(true)}
+                  onMouseLeave={() => setIsDraggable(true)}
                   onClick={() => toggleSectionVisibility(section.id)}
                 >
                   <i className={`fa-solid ${section.isVisible ? 'fa-eye' : 'fa-eye-slash'}`}></i>
                 </button>
               </div>
+              
+              {/* --- KONDISIONAL FORM --- */}
+              <div className="cb-section-form-wrapper">
+                {section.menu === 'Logo Mitra' && (
+                  <LogoMitraSectionForm 
+                    mitraList={mitraList} 
+                    setMitraList={setMitraList} 
+                  />
+                )}
 
-              <label className="cb-field-label">Menu</label>
-              <div className="cb-select-wrap">
-                <select
-                  className="cb-select"
-                  value={section.menu}
-                  onChange={(e) => updateSection(section.id, 'menu', e.target.value)}
-                >
-                  {menuOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-                <i className="fa-solid fa-chevron-down cb-select-caret"></i>
+                {section.menu === 'Preview Media Sosial Instagram' && (
+                  <InstagramSectionForm />
+                )}
+
+                {section.menu === 'Preview Media Sosial YouTube' && (
+                  <YouTubeSectionNotice />
+                )}
               </div>
             </div>
           );

@@ -146,12 +146,19 @@ const CustomizeBeranda = () => {
 
     const loadBerandaSettings = async () => {
       try {
-        const [headerResponse, heroResponse] = await Promise.all([
+        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse] = await Promise.all([
           axiosInstance.get('/api/beranda/header'),
           axiosInstance.get('/api/beranda/hero'),
+          axiosInstance.get('/api/beranda/mitra'),
+          axiosInstance.get('/api/beranda/footer'),
+          axiosInstance.get('/api/beranda/tautan-footer'),
         ]);
         const header = headerResponse.data?.data;
         const hero = heroResponse.data?.data;
+        const mitraData = mitraResponse.data?.data || [];
+        const footerData = footerResponse?.data?.data || {};
+        const tautanData = tautanResponse?.data?.data || [];
+
         if (!hero || !isMounted) return;
 
         const loadedHeaderForm = {
@@ -164,6 +171,17 @@ const CustomizeBeranda = () => {
           logo1: hero.logo_1 || LOGO_UTAMA_OPTIONS[0],
           logo2: hero.logo_2 || LOGO_UTAMA_OPTIONS[0],
         };
+
+        setFooter({
+          email: footerData.posel || '',
+          telepon: footerData.no_telepon || '',
+          alamat: footerData.alamat || '',
+        });
+        setGoogleMaps(footerData.url_google_map || '');
+
+        if (tautanData.length > 0) {
+          setTautan(tautanData.map(t => ({ id: nextId(), label: t.label, link: t.url })));
+        }
 
         setSavedHeaderLogoUrl(loadedHeaderForm.logoUrl);
         setHeaderLogoPreview(loadedHeaderForm.logoUrl);
@@ -178,6 +196,18 @@ const CustomizeBeranda = () => {
         setTampilanLogo1(loadedHeroForm.logo1);
         setTampilanLogo2(loadedHeroForm.logo2);
         setSavedHeroForm(loadedHeroForm);
+
+        if (mitraData.length > 0) {
+          setMitraList(
+            mitraData.map((m) => ({
+              id: m.id,
+              preview: m.url_logo,
+              file: null,
+            }))
+          );
+        } else {
+          setMitraList([]);
+        }
       } catch (error) {
         console.error('Gagal mengambil pengaturan Customize Beranda:', error);
       }
@@ -249,12 +279,15 @@ const CustomizeBeranda = () => {
 
   const hapusPlatform = (id) => setSocials((prev) => prev.filter((s) => s.id !== id));
 
+  // ---------- LOGO MITRA (Untuk Urutan Section) ----------
+  const [mitraList, setMitraList] = useState([]);
+
   // ---------- SECTIONS HALAMAN BERANDA ----------
   const [sections, setSections] = useState([
-    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
-    { id: nextId(), menu: 'Kosong', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Berita', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Logo Mitra', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Preview Media Sosial Instagram', judul: '', isVisible: true },
+    { id: nextId(), menu: 'Preview Media Sosial YouTube', judul: '', isVisible: true },
   ]);
 
   const updateSection = (id, field, value) =>
@@ -276,6 +309,37 @@ const CustomizeBeranda = () => {
     { id: nextId(), label: 'Portal Layanan', link: '' },
     { id: nextId(), label: 'Portal Layanan', link: '' },
   ]);
+
+  const handleSaveFooter = async () => {
+    try {
+      const payload = {
+        email: footer.email,
+        telepon: footer.telepon,
+        alamat: footer.alamat,
+        googleMaps: googleMaps,
+      };
+      const res = await axiosInstance.put('/api/beranda/footer', payload);
+      if (res.data?.success) {
+        setIsSaveSuccessOpen(true);
+      }
+    } catch (error) {
+      console.error('Gagal menyimpan pengaturan footer:', error);
+      alert('Terjadi kesalahan saat menyimpan pengaturan footer.');
+    }
+  };
+
+  const handleSaveTautan = async () => {
+    try {
+      const payload = { links: tautan };
+      const res = await axiosInstance.put('/api/beranda/tautan-footer', payload);
+      if (res.data?.success) {
+        setIsSaveSuccessOpen(true);
+      }
+    } catch (error) {
+      console.error('Gagal menyimpan tautan footer:', error);
+      alert('Terjadi kesalahan saat menyimpan tautan footer.');
+    }
+  };
 
   const updateTautan = (id, field, value) =>
     setTautan((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
@@ -445,16 +509,8 @@ const CustomizeBeranda = () => {
           setTampilanLogo2={setTampilanLogo2}
           logoUtamaOptions={LOGO_UTAMA_OPTIONS}
         />
-        <SectionOrderSetting
-          sections={sections}
-          setSections={setSections}
-          updateSection={updateSection}
-          toggleSectionVisibility={toggleSectionVisibility}
-          menuOptions={MENU_OPTIONS}
-        />
-      </div>
 
-      {/* ---------- MEDIA SOSIAL ---------- */}
+              {/* ---------- MEDIA SOSIAL ---------- */}
       <SocialMediaSetting
         socials={socials}
         updateSocial={updateSocial}
@@ -462,6 +518,19 @@ const CustomizeBeranda = () => {
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
       />
+
+      </div>
+
+        <SectionOrderSetting
+          sections={sections}
+          setSections={setSections}
+          updateSection={updateSection}
+          toggleSectionVisibility={toggleSectionVisibility}
+          menuOptions={MENU_OPTIONS}
+          mitraList={mitraList}
+          setMitraList={setMitraList}
+        />
+
 
       {/* ---------- FOOTER ---------- */}
       <FooterSetting
@@ -473,6 +542,8 @@ const CustomizeBeranda = () => {
         updateTautan={updateTautan}
         tambahTautan={tambahTautan}
         hapusTautan={hapusTautan}
+        onSave={handleSaveFooter}
+        onSaveTautan={handleSaveTautan}
       />
 
       {isSaveSuccessOpen && (

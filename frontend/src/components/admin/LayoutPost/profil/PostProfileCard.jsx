@@ -25,7 +25,7 @@ const inisialDari = (n) => (n && n.trim() ? n.trim().slice(0, 2).toUpperCase() :
 
 const PostProfileCard = () => {
   const navigate = useNavigate();
-  const { menuId } = useParams();
+  const { menuId, profileId } = useParams();
   const [menuName, setMenuName] = useState('');
   const [isPageLoading, setIsPageLoading] = useState(true);
 
@@ -62,13 +62,27 @@ const PostProfileCard = () => {
         });
         
         const initialProfiles = contentRes.data || [];
-        setCards(initialProfiles.map((p) => ({ 
+        const loadedCards = initialProfiles.map((p) => ({ 
           id: p.id || makeId(), 
           nama: p.nama_lengkap || '', 
           jabatan: p.jabatan || '', 
           gambar: p.url_foto || '', 
           quotes: p.quotes || '' 
-        })));
+        }));
+        
+        setCards(loadedCards);
+
+        if (profileId) {
+          const cardToEdit = loadedCards.find(c => String(c.id) === String(profileId));
+          if (cardToEdit) {
+            setNama(cardToEdit.nama || '');
+            setJabatan(cardToEdit.jabatan || '');
+            setQuotes(cardToEdit.quotes || '');
+            setGambar(cardToEdit.gambar || '');
+            setPreview(cardToEdit.gambar || '');
+            setEditingId(cardToEdit.id);
+          }
+        }
 
       } catch (err) {
         console.error('Gagal memuat data awal profil:', err);

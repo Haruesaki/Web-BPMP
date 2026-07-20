@@ -21,6 +21,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   const location = useLocation();
   const [dynamicMenus, setDynamicMenus] = useState([]);
   const [isMenusLoading, setIsMenusLoading] = useState(true);
+  const [isLimitPopupOpen, setIsLimitPopupOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(() => {
     // Saat halaman pertama kali dibuka, ambil menu yang terakhir dipilih agar
     // highlight sidebar tidak kembali ke Beranda saat user melakukan refresh.
@@ -356,9 +357,50 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
         {adminMenuItems2.map(renderStaticItem)}
       </nav>
 
-      <button className="btn-tambah-menu" onClick={() => onTambahMenu?.()}>
+      <button className="btn-tambah-menu" onClick={() => {
+        if (dynamicMenus.length >= 9) {
+          setIsLimitPopupOpen(true);
+        } else {
+          onTambahMenu?.();
+        }
+      }}>
         <i className="fa-solid fa-plus"></i> Tambah Menu
       </button>
+
+      {/* POPUP: BATES MAKSIMAL MENU */}
+      {isLimitPopupOpen && (
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setIsLimitPopupOpen(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: '30px', textAlign: 'center' }}>
+            <div style={{
+              width: '70px', height: '70px', margin: '0 auto 20px',
+              backgroundColor: '#3b1818', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '2px solid #ff4d4f', color: '#ff4d4f', fontSize: '28px'
+            }}>
+              <i className="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <h3 style={{ fontSize: '20px', color: '#fff', marginBottom: '12px' }}>Batas Maksimum Menu</h3>
+            <p style={{ color: '#bbb', fontSize: '14.5px', lineHeight: '1.6', marginBottom: '25px' }}>
+              Anda tidak dapat menambahkan menu utama baru karena telah mencapai batas maksimum <strong>(9 Menu Utama)</strong>. Hal ini diterapkan untuk menjaga kerapian dan kenyamanan navigasi pengguna pada tampilan *Header* website.
+            </p>
+            
+            <button 
+              onClick={() => setIsLimitPopupOpen(false)}
+              style={{
+                width: '100%', padding: '12px', borderRadius: '8px',
+                border: 'none', backgroundColor: '#0284c7', color: '#fff',
+                fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0369a1'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0284c7'}
+            >
+              Oke, Saya Mengerti
+            </button>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import { getAuthHeaders } from '../../../api/userApi';
 import '../DashboardAdmin/dashboard-admin.css';
@@ -30,8 +30,27 @@ const Setting = () => {
   // ---------- PROFIL SAYA ----------
   const [nama, setNama] = useState(session.nama || '');
   const [email, setEmail] = useState(session.email || '');
+  const [role, setRole] = useState(session.role || '-');
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    // Ambil profil asli dari database saat komponen dimuat
+    const fetchMe = async () => {
+      try {
+        const res = await axiosInstance.get('/api/users/me', { headers: getAuthHeaders() });
+        const data = res.data?.data;
+        if (data) {
+          setNama(data.nama || '');
+          setEmail(data.email || '');
+          setRole(data.role || '-');
+        }
+      } catch (error) {
+        console.error('Gagal mengambil profil asli dari database:', error);
+      }
+    };
+    fetchMe();
+  }, []);
 
   const handleSimpanProfil = async (e) => {
     e.preventDefault();
@@ -46,7 +65,7 @@ const Setting = () => {
     try {
       await axiosInstance.put(
         '/api/users/me',
-        { nama_pengguna: nama, email },
+        { nama, email },
         { headers: getAuthHeaders() }
       );
 
@@ -68,6 +87,10 @@ const Setting = () => {
   const [passwordForm, setPasswordForm] = useState(EMPTY_PASSWORD_FORM);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
+  
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const updatePasswordField = (field, value) =>
     setPasswordForm((prev) => ({ ...prev, [field]: value }));
@@ -155,7 +178,7 @@ const Setting = () => {
                 <input
                   type="text"
                   className="st-input st-input-readonly"
-                  value={session.role || '-'}
+                  value={role}
                   readOnly
                 />
                 <span className="st-field-hint">Role hanya bisa diubah oleh Super Admin lewat Manajemen User.</span>
@@ -184,35 +207,59 @@ const Setting = () => {
             <div className="st-form-grid">
               <div className="st-field">
                 <label>Password Lama</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.oldPassword}
-                  onChange={(e) => updatePasswordField('oldPassword', e.target.value)}
-                  placeholder="Masukkan password saat ini"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => updatePasswordField('oldPassword', e.target.value)}
+                    placeholder="Masukkan password saat ini"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showOldPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                  ></i>
+                </div>
               </div>
 
               <div className="st-field">
                 <label>Password Baru</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.newPassword}
-                  onChange={(e) => updatePasswordField('newPassword', e.target.value)}
-                  placeholder="Minimal 8 karakter"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => updatePasswordField('newPassword', e.target.value)}
+                    placeholder="Minimal 8 karakter"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showNewPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  ></i>
+                </div>
               </div>
 
               <div className="st-field">
                 <label>Konfirmasi Password Baru</label>
-                <input
-                  type="password"
-                  className="st-input"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
-                  placeholder="Ulangi password baru"
-                />
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="st-input"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
+                    placeholder="Ulangi password baru"
+                    style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <i 
+                    className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`} 
+                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#666' }}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  ></i>
+                </div>
               </div>
             </div>
 

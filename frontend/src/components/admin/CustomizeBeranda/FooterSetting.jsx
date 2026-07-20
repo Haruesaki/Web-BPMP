@@ -10,6 +10,8 @@ const FooterSetting = ({
   updateTautan,
   tambahTautan,
   hapusTautan,
+  onSave,
+  onSaveTautan,
 }) => {
   return (
     <section className="cb-card">
@@ -24,13 +26,13 @@ const FooterSetting = ({
           <div className="cb-footer-box">
             <h3 className="cb-footer-title">Hubungi Kami</h3>
 
-            <label className="cb-field-label">Email</label>
-            <input
-              type="email"
-              className="cb-input"
-              placeholder="admin@instansi.go.id"
-              value={footer.email}
-              onChange={(e) => setFooter((prev) => ({ ...prev, email: e.target.value }))}
+            <label className="cb-field-label">Alamat</label>
+            <textarea
+              className="cb-textarea"
+              rows={3}
+              placeholder="Jl. Jenderal Sudirman No. 1..."
+              value={footer.alamat}
+              onChange={(e) => setFooter((prev) => ({ ...prev, alamat: e.target.value }))}
             />
 
             <label className="cb-field-label">No. Telepon</label>
@@ -42,14 +44,22 @@ const FooterSetting = ({
               onChange={(e) => setFooter((prev) => ({ ...prev, telepon: e.target.value }))}
             />
 
-            <label className="cb-field-label">Alamat</label>
-            <textarea
-              className="cb-textarea"
-              rows={2}
-              placeholder="Jl. Jenderal Sudirman No. 1..."
-              value={footer.alamat}
-              onChange={(e) => setFooter((prev) => ({ ...prev, alamat: e.target.value }))}
+            <label className="cb-field-label">Email</label>
+            <input
+              type="email"
+              className="cb-input"
+              placeholder="admin@instansi.go.id"
+              value={footer.email}
+              onChange={(e) => setFooter((prev) => ({ ...prev, email: e.target.value }))}
             />
+
+            <button 
+              className="cb-btn cb-btn-simpan" 
+              style={{ marginTop: '16px', alignSelf: 'flex-start' }}
+              onClick={onSave}
+            >
+              <i className="fa-solid fa-save"></i> Simpan Hubungi Kami
+            </button>
           </div>
 
           <div className="cb-footer-box">
@@ -63,6 +73,14 @@ const FooterSetting = ({
               value={googleMaps}
               onChange={(e) => setGoogleMaps(e.target.value)}
             />
+
+            <button 
+              className="cb-btn cb-btn-simpan" 
+              style={{ marginTop: '16px', alignSelf: 'flex-start' }}
+              onClick={onSave}
+            >
+              <i className="fa-solid fa-save"></i> Simpan Lokasi
+            </button>
           </div>
         </div>
 
@@ -102,9 +120,14 @@ const FooterSetting = ({
             </div>
           ))}
 
-          <button className="cb-btn-dashed" onClick={tambahTautan}>
-            <i className="fa-solid fa-plus"></i> Tambah Link
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+            <button className="cb-btn-dashed" onClick={tambahTautan}>
+              <i className="fa-solid fa-plus"></i> Tambah Link
+            </button>
+            <button className="cb-btn cb-btn-simpan" style={{ width: '100%', justifyContent: 'center' }} onClick={onSaveTautan}>
+              <i className="fa-solid fa-save"></i> Simpan Tautan
+            </button>
+          </div>
         </div>
       </div>
     </section>
