@@ -29,6 +29,16 @@ const ThemeSetting = ({ selectedTheme, setSelectedTheme, themes }) => {
           </button>
         ))}
       </div>
+
+      <div className="cb-card-actions" style={{ marginTop: '24px', width: '100%' }}>
+        <button
+          type="button"
+          className="cb-btn cb-btn-simpan"
+          style={{ width: '100%' }}
+        >
+          Simpan
+        </button>
+      </div>
     </section>
   );
 };

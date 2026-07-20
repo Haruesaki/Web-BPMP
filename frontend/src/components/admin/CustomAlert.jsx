@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import './CustomAlert.css';
 
 // types: 'info', 'success', 'warning', 'error', 'confirm'
@@ -36,7 +37,7 @@ const CustomAlert = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className="ca-overlay">
       <div className={`ca-modal ca-${type}`}>
         <div className="ca-icon-wrapper">
@@ -53,7 +54,8 @@ const CustomAlert = ({
           <button className={`ca-btn ca-btn-${type}`} onClick={onConfirm}>{confirmText}</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

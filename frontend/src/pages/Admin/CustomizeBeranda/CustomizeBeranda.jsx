@@ -49,6 +49,7 @@ const CustomizeBeranda = () => {
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
   const [isSavingHero, setIsSavingHero] = useState(false);
   const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [isSavingSocials, setIsSavingSocials] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false });
 
@@ -126,18 +127,20 @@ const CustomizeBeranda = () => {
 
     const loadBerandaSettings = async () => {
       try {
-        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse] = await Promise.all([
+        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse, medsosResponse] = await Promise.all([
           axiosInstance.get('/api/beranda/header'),
           axiosInstance.get('/api/beranda/hero'),
           axiosInstance.get('/api/beranda/mitra'),
           axiosInstance.get('/api/beranda/footer'),
           axiosInstance.get('/api/beranda/tautan-footer'),
+          axiosInstance.get('/api/beranda/media-sosial'),
         ]);
         const header = headerResponse.data?.data;
         const hero = heroResponse.data?.data;
         const mitraData = mitraResponse.data?.data || [];
         const footerData = footerResponse?.data?.data || {};
         const tautanData = tautanResponse?.data?.data || [];
+        const medsosData = medsosResponse?.data?.data || [];
 
         if (!hero || !isMounted) return;
 
@@ -161,6 +164,16 @@ const CustomizeBeranda = () => {
 
         if (tautanData.length > 0) {
           setTautan(tautanData.map(t => ({ id: nextId(), label: t.label, link: t.url })));
+        }
+
+        if (medsosData.length > 0) {
+          setSocials(medsosData.map(m => ({
+            id: nextId(),
+            label: m.platform,
+            url: m.url_tautan,
+            avatar: m.url_logo,
+            file: null
+          })));
         }
 
         setSavedHeaderLogoUrl(loadedHeaderForm.logoUrl);
@@ -227,11 +240,11 @@ const CustomizeBeranda = () => {
   const handleSocialAvatarChange = (id, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    updateSocial(id, 'avatar', URL.createObjectURL(file));
+    setSocials((prev) => prev.map((s) => (s.id === id ? { ...s, avatar: URL.createObjectURL(file), file: file } : s)));
   };
 
   const tambahPlatform = () =>
-    setSocials((prev) => [...prev, { id: nextId(), label: '', url: '', avatar: null }]);
+    setSocials((prev) => [...prev, { id: nextId(), label: '', url: '', avatar: null, file: null }]);
 
   const hapusPlatform = (id) => setSocials((prev) => prev.filter((s) => s.id !== id));
 
@@ -391,6 +404,41 @@ const CustomizeBeranda = () => {
     }
   };
 
+  const handleSaveSocials = async () => {
+    if (isSavingSocials) return;
+    setIsSavingSocials(true);
+    try {
+      // Upload any new avatar files first
+      const updatedSocials = await Promise.all(socials.map(async (social) => {
+        if (social.file) {
+          const formData = new FormData();
+          formData.append('upload', social.file);
+          const uploadRes = await axiosInstance.post('/api/upload/gambar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          return {
+            platform: social.label,
+            url_tautan: social.url,
+            url_logo: uploadRes.data?.url || social.avatar
+          };
+        }
+        return {
+          platform: social.label,
+          url_tautan: social.url,
+          url_logo: social.avatar
+        };
+      }));
+
+      await axiosInstance.put('/api/beranda/media-sosial', { socials: updatedSocials });
+      setIsSaveSuccessOpen(true);
+    } catch (error) {
+      console.error('Gagal menyimpan media sosial:', error);
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan media sosial.', 'Simpan Gagal');
+    } finally {
+      setIsSavingSocials(false);
+    }
+  };
+
   return (
     <main className="admin-content">
       {/* ---------- HEADING + AKSI ---------- */}
@@ -401,7 +449,23 @@ const CustomizeBeranda = () => {
         </div>
       </div>
 
-      {/* ---------- TEMA ---------- */}
+              {/* <LogoDataSetting
+          logoNama={logoNama}
+          setLogoNama={setLogoNama}
+          logoFileName={logoFileName}
+          logoPreview={logoPreview}
+          handleLogoFileChange={handleLogoFileChange}
+          handleSimpanLogo={handleSimpanLogo}
+          savedLogo={savedLogo}
+          setSavedLogo={setSavedLogo}
+          savedLogoOptions={SAVED_LOGO_OPTIONS}
+        /> */}
+
+    
+
+      {/* ---------- HEADER & DATA LOGO ---------- */}
+      <div className="cb-grid-2">
+  {/* ---------- TEMA ---------- */}
       <ThemeSetting
         selectedTheme={selectedTheme}
         setSelectedTheme={setSelectedTheme}
@@ -418,22 +482,8 @@ const CustomizeBeranda = () => {
           isSaving={isSavingHeader}
         />
 
-      {/* ---------- HEADER & DATA LOGO ---------- */}
-      {/* <div className="cb-grid-2">
 
-
-        <LogoDataSetting
-          logoNama={logoNama}
-          setLogoNama={setLogoNama}
-          logoFileName={logoFileName}
-          logoPreview={logoPreview}
-          handleLogoFileChange={handleLogoFileChange}
-          handleSimpanLogo={handleSimpanLogo}
-          savedLogo={savedLogo}
-          setSavedLogo={setSavedLogo}
-          savedLogoOptions={SAVED_LOGO_OPTIONS}
-        />
-      </div> */}
+      </div>
 
       {/* ---------- LANDING PAGE & SECTIONS ---------- */}
       <div className="cb-grid-2">
@@ -463,6 +513,8 @@ const CustomizeBeranda = () => {
         handleSocialAvatarChange={handleSocialAvatarChange}
         tambahPlatform={tambahPlatform}
         hapusPlatform={hapusPlatform}
+        onSave={handleSaveSocials}
+        isSaving={isSavingSocials}
       />
 
       </div>
