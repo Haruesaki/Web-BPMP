@@ -26,7 +26,8 @@ const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
     const [showSubtitle, setShowSubtitle] = useState(false);
-    const heroImageRef = useRef(null);
+    const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
+    const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
     const fullText = heroContent.judul || DEFAULT_HERO.judul;
     const subtitle = heroContent.subjudul || DEFAULT_HERO.subjudul;
@@ -71,10 +72,10 @@ const HeroSection = () => {
     const particles = useMemo(() => {
         const particleCount = 50;
         return Array.from({ length: particleCount }).map((_, i) => {
-            const size = pseudoRandom(i + 1) * 1 + 4; // Ukuran antara 1px dan 4px
-            const duration = pseudoRandom(i + 101) * 8 + 3; // Durasi antara 10s dan 20s
+            const size = pseudoRandom(i + 1) * 1 + 3; // Ukuran antara 1px dan 4px
+            const duration = pseudoRandom(i + 101) * 10 + 3; // Durasi antara 10s dan 20s
             const delay = pseudoRandom(i + 201) * 3; // Delay hingga 20s
-            const left = pseudoRandom(i + 301) * 120; // Posisi horizontal acak
+            const left = pseudoRandom(i + 301) * 150; // Posisi horizontal acak
 
             return (
                 <div
@@ -122,41 +123,44 @@ const HeroSection = () => {
     useEffect(() => {
         let animationFrame;
 
+        // REVISI: Ambil ref untuk wadah kanan dan gambar di dalamnya
+        const rightContainer = heroRightCmsRef.current;
         const rightImage = heroImageRef.current;
         const leftContent = heroLeftContentRef.current;
 
-        if (rightImage) {
-            rightImage.style.transformOrigin = 'right bottom';
-        }
-
         const animateHero = () => {
-            // Pastikan kedua elemen ada sebelum melanjutkan
-            if (!rightImage || !leftContent) return;
+            // Pastikan semua elemen yang dibutuhkan ada sebelum melanjutkan
+            if (!leftContent) return;
 
             const scrollY = window.scrollY;
 
-            // --- Kalkulasi untuk Gambar Kanan (Gedung) ---
-            const rightTranslateY = Math.min(scrollY * 1.5 , 1820); // Tingkatkan kecepatan "tenggelam"
-            const scale = Math.max(1 - scrollY * 0.00012, 0.93);
-            const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
+            // --- REVISI: Logika animasi untuk wadah kanan dan gambar ---
+            if (rightContainer && rightImage) {
+                const rightTranslateY = Math.min(scrollY * 1.5, 1820); // Kecepatan "tenggelam"
+                // REVISI: Ubah efek dari bergeser/mengecil menjadi zoom-in (upscale)
+                const scale = 1 + scrollY * 0.00015; // Nilai akan bertambah saat scroll untuk efek zoom
+                const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-            rightImage.style.transform = `translateY(${rightTranslateY}px) scale(${scale})`;
-            rightImage.style.filter = `brightness(${brightness})`;
+                // 1. Terapkan gerakan vertikal ke seluruh wadah (.hero-right-cms)
+                rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
+                // 2. Terapkan efek zoom-in dan kecerahan hanya pada gambar di dalamnya
+                rightImage.style.transform = `scale(${scale})`;
+                rightImage.style.filter = `brightness(${brightness})`;
+            }
 
             // 2. Tambahkan kalkulasi untuk Konten Kiri
-            const leftTranslateY = scrollY * 1.90; // Nilai Y dipertahankan
-            const leftTranslateX = scrollY * -0.500;   // Tambahkan parameter X untuk gerakan diagonal
+            const leftTranslateX = scrollY * -0.500;   // Gerakan horizontal ke kiri
             const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
 
-            // Gabungkan X dan Y untuk menciptakan gerakan diagonal
-            leftContent.style.transform = `translate(${leftTranslateX}px, ${leftTranslateY}px)`;
+            // REVISI: Terapkan gerakan horizontal murni
+            leftContent.style.transform = `translateX(${leftTranslateX}px)`;
             leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, [heroImage]);
+    }, [heroImage]); // Dependensi tetap, karena efek hanya aktif jika ada gambar
 
     return (
         <div className="landing-wrapper">
@@ -190,13 +194,17 @@ const HeroSection = () => {
                     </div>
 
                     {heroImage && (
-                        <div className="hero-right-cms">
-                            <img
-                                ref={heroImageRef}
-                                src={heroImage}
-                                alt="Visual Gedung dan Latar Belakang BPMP"
-                                className="cms-dynamic-image"
-                            />
+                        <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                            <div className="hero-right-cms">
+                                <div className="bingkai-gambar-cms">
+                                    <img
+                                        ref={heroImageRef}
+                                        src={heroImage}
+                                        alt="Visual Gedung dan Latar Belakang BPMP"
+                                        className="cms-dynamic-image"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
