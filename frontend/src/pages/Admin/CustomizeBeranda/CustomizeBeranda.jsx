@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 // Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
 // menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
 // <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
@@ -47,18 +47,7 @@ const nextId = () => uid++;
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [alertState, setAlertState] = useState({ isOpen: false });
-
-  const showAlert = (type, message, title) => {
-    setAlertState({
-      isOpen: true,
-      type,
-      title,
-      message,
-      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
-    });
-  };
+  const [isSavingHero, setIsSavingHero] = useState(false);
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -69,18 +58,6 @@ const CustomizeBeranda = () => {
   const [headerLogoFile, setHeaderLogoFile] = useState(null);
   const [savedHeaderLogoUrl, setSavedHeaderLogoUrl] = useState(null);
   const [headerLogoInputKey, setHeaderLogoInputKey] = useState(0);
-  const [savedHeaderForm, setSavedHeaderForm] = useState(null);
-
-  const currentHeaderForm = useMemo(() => ({
-    logoUrl: savedHeaderLogoUrl,
-  }), [savedHeaderLogoUrl]);
-
-  const hasHeaderChanges = Boolean(
-    savedHeaderForm && (
-      headerLogoFile ||
-      currentHeaderForm.logoUrl !== savedHeaderForm.logoUrl
-    )
-  );
 
   const handleHeaderLogoChange = (e) => {
     const file = e.target.files?.[0];
@@ -130,28 +107,6 @@ const CustomizeBeranda = () => {
   const [backgroundInputKey, setBackgroundInputKey] = useState(0);
   const [tampilanLogo1, setTampilanLogo1] = useState(LOGO_UTAMA_OPTIONS[0]);
   const [tampilanLogo2, setTampilanLogo2] = useState(LOGO_UTAMA_OPTIONS[0]);
-  const [savedHeroForm, setSavedHeroForm] = useState(null);
-
-  const currentHeroForm = useMemo(() => ({
-    judul: judulBeranda,
-    deskripsi,
-    backgroundUrl: savedBackgroundUrl,
-    logo1: tampilanLogo1,
-    logo2: tampilanLogo2,
-  }), [judulBeranda, deskripsi, savedBackgroundUrl, tampilanLogo1, tampilanLogo2]);
-
-  const hasHeroChanges = Boolean(
-    savedHeroForm && (
-      backgroundFile ||
-      currentHeroForm.judul !== savedHeroForm.judul ||
-      currentHeroForm.deskripsi !== savedHeroForm.deskripsi ||
-      currentHeroForm.backgroundUrl !== savedHeroForm.backgroundUrl ||
-      currentHeroForm.logo1 !== savedHeroForm.logo1 ||
-      currentHeroForm.logo2 !== savedHeroForm.logo2
-    )
-  );
-
-  const hasPageChanges = hasHeaderChanges || hasHeroChanges;
 
   useEffect(() => {
     let isMounted = true;
@@ -198,7 +153,6 @@ const CustomizeBeranda = () => {
         setSavedHeaderLogoUrl(loadedHeaderForm.logoUrl);
         setHeaderLogoPreview(loadedHeaderForm.logoUrl);
         setHeaderLogoName(loadedHeaderForm.logoUrl ? loadedHeaderForm.logoUrl.split('/').pop() : '');
-        setSavedHeaderForm(loadedHeaderForm);
 
         setJudulBeranda(loadedHeroForm.judul);
         setDeskripsi(loadedHeroForm.deskripsi);
@@ -207,7 +161,6 @@ const CustomizeBeranda = () => {
         setBackgroundName(loadedHeroForm.backgroundUrl ? loadedHeroForm.backgroundUrl.split('/').pop() : '');
         setTampilanLogo1(loadedHeroForm.logo1);
         setTampilanLogo2(loadedHeroForm.logo2);
-        setSavedHeroForm(loadedHeroForm);
 
         if (mitraData.length > 0) {
           setMitraList(
@@ -248,28 +201,6 @@ const CustomizeBeranda = () => {
     setBackgroundInputKey((prev) => prev + 1);
   };
 
-  const handleBatalPerubahan = () => {
-    if ((!savedHeroForm && !savedHeaderForm) || isSaving) return;
-
-    if (savedHeaderForm) {
-      setSavedHeaderLogoUrl(savedHeaderForm.logoUrl);
-      setHeaderLogoPreview(savedHeaderForm.logoUrl);
-      setHeaderLogoName(savedHeaderForm.logoUrl ? savedHeaderForm.logoUrl.split('/').pop() : '');
-      setHeaderLogoFile(null);
-      setHeaderLogoInputKey((prev) => prev + 1);
-    }
-
-    if (!savedHeroForm) return;
-
-    setJudulBeranda(savedHeroForm.judul);
-    setDeskripsi(savedHeroForm.deskripsi);
-    setSavedBackgroundUrl(savedHeroForm.backgroundUrl);
-    setBackgroundPreview(savedHeroForm.backgroundUrl);
-    setBackgroundName(savedHeroForm.backgroundUrl ? savedHeroForm.backgroundUrl.split('/').pop() : '');
-    setBackgroundFile(null);
-    setTampilanLogo1(savedHeroForm.logo1);
-    setTampilanLogo2(savedHeroForm.logo2);
-  };
 
   // ---------- MEDIA SOSIAL ----------
   const [socials, setSocials] = useState([
@@ -387,58 +318,35 @@ const CustomizeBeranda = () => {
     return response.data?.url || savedHeaderLogoUrl;
   };
 
-  const handleSimpanPerubahan = async () => {
-    if (isSaving) return;
 
-    setIsSaving(true);
+  // Simpan khusus card Landing Page (Hero). Dipanggil dari tombol Simpan di
+  // dalam HeroSetting.
+  const handleSaveHero = async () => {
+    if (isSavingHero) return;
+
+    setIsSavingHero(true);
     try {
-      const headerLogoUrl = await uploadHeaderLogo();
       const backgroundUrl = await uploadHeroBackground();
 
-      const [headerResponse, heroResponse] = await Promise.all([
-        axiosInstance.put('/api/beranda/header', {
-          url_logo_header: headerLogoUrl,
-        }),
-        axiosInstance.put('/api/beranda/hero', {
-          judul: judulBeranda,
-          subjudul: deskripsi,
-          url_gambar: backgroundUrl,
-          logo_1: tampilanLogo1,
-          logo_2: tampilanLogo2,
-          is_aktif: true,
-        }),
-      ]);
-
-      const savedHeader = headerResponse.data?.data;
-      const nextHeaderLogoUrl = savedHeader?.url_logo_header ?? headerLogoUrl ?? null;
-      const nextHeaderForm = {
-        logoUrl: nextHeaderLogoUrl,
-      };
-      setSavedHeaderLogoUrl(nextHeaderLogoUrl);
-      setHeaderLogoPreview(nextHeaderLogoUrl);
-      setHeaderLogoName(nextHeaderLogoUrl ? nextHeaderLogoUrl.split('/').pop() : '');
-      setHeaderLogoFile(null);
-      setSavedHeaderForm(nextHeaderForm);
+      const heroResponse = await axiosInstance.put('/api/beranda/hero', {
+        judul: judulBeranda,
+        subjudul: deskripsi,
+        url_gambar: backgroundUrl,
+        logo_1: tampilanLogo1,
+        logo_2: tampilanLogo2,
+        is_aktif: true,
+      });
 
       const savedHero = heroResponse.data?.data;
       const nextBackgroundUrl = savedHero?.url_gambar || backgroundUrl || null;
-      const nextHeroForm = {
-        judul: savedHero?.judul ?? judulBeranda,
-        deskripsi: savedHero?.subjudul ?? deskripsi,
-        backgroundUrl: nextBackgroundUrl,
-        logo1: savedHero?.logo_1 ?? tampilanLogo1,
-        logo2: savedHero?.logo_2 ?? tampilanLogo2,
-      };
-
       setSavedBackgroundUrl(nextBackgroundUrl);
       setBackgroundPreview(nextBackgroundUrl);
       setBackgroundName(nextBackgroundUrl ? nextBackgroundUrl.split('/').pop() : '');
       setBackgroundFile(null);
-      setSavedHeroForm(nextHeroForm);
       setIsSaveSuccessOpen(true);
     } catch (error) {
-      console.error('Gagal menyimpan pengaturan Hero:', error);
-      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.', 'Simpan Gagal');
+      console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
+      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
     } finally {
       setIsSaving(false);
     }
@@ -451,25 +359,6 @@ const CustomizeBeranda = () => {
         <div className="cb-heading">
           <h1>Customize Beranda</h1>
           <p>Kelola tampilan menu di halaman beranda.</p>
-        </div>
-        <div className="cb-header-actions">
-          {hasPageChanges && (
-            <button
-              type="button"
-              className="cb-btn cb-btn-batal"
-              onClick={handleBatalPerubahan}
-              disabled={isSaving}
-            >
-              Batal
-            </button>
-          )}
-          <button
-            className="cb-btn cb-btn-simpan"
-            onClick={handleSimpanPerubahan}
-            disabled={isSaving || !hasPageChanges}
-          >
-            {isSaving ? 'Menyimpan...' : hasPageChanges ? 'Simpan Perubahan' : 'Simpan'}
-          </button>
         </div>
       </div>
 
@@ -486,6 +375,8 @@ const CustomizeBeranda = () => {
           headerLogoInputKey={headerLogoInputKey}
           handleHeaderLogoChange={handleHeaderLogoChange}
           handleHeaderLogoRemove={handleHeaderLogoRemove}
+          onSave={handleSaveHeader}
+          isSaving={isSavingHeader}
         />
 
       {/* ---------- HEADER & DATA LOGO ---------- */}
@@ -522,6 +413,8 @@ const CustomizeBeranda = () => {
           tampilanLogo2={tampilanLogo2}
           setTampilanLogo2={setTampilanLogo2}
           logoUtamaOptions={LOGO_UTAMA_OPTIONS}
+          onSave={handleSaveHero}
+          isSaving={isSavingHero}
         />
 
               {/* ---------- MEDIA SOSIAL ---------- */}
