@@ -15,6 +15,8 @@ const HeroSetting = ({
   tampilanLogo2,
   setTampilanLogo2,
   logoUtamaOptions,
+  onSave,
+  isSaving,
 }) => {
   return (
     <section className="cb-card">
@@ -118,6 +120,19 @@ const HeroSetting = ({
           </div>
         </div>
       </div>
+
+      <button
+        className="cb-btn cb-btn-simpan"
+        style={{ marginTop: '20px', width: '100%', justifyContent: 'center' }}
+        onClick={onSave}
+        disabled={isSaving}
+      >
+        {isSaving ? (
+          <><i className="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</>
+        ) : (
+          <><i className="fa-solid fa-save"></i> Simpan Landing Page</>
+        )}
+      </button>
     </section>
   );
 };
