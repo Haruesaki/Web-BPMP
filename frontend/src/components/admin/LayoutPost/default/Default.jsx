@@ -74,12 +74,14 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
     navigate(`${currentPath}/edit/${id}`, { state: location.state });
   };
 
-  const handleToggleTampil = (id, currentVal) => {
+  const handleToggleTampil = async (id, currentVal) => {
     const nextList = kontenList.map((b) =>
-      b.id === id ? { ...b, isTampil: !currentVal } : b
+      b.id === id ? { ...b, status: !currentVal ? 'terbit' : 'draf' } : b
     );
     setKontenList(nextList);
-    // For now, this only updates local state since it's a temporary UI
+    if (onSave) {
+      await onSave({ contents: nextList }); // Simpan ke backend
+    }
   };
 
   const handleEditorCancel = () => {
@@ -90,8 +92,9 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
   const handleEditorSave = async ({ contents = [] }) => {
     let nextList;
     if (isAddMode) {
-      // Append new contents
-      nextList = [...contents, ...kontenList];
+      // Append new contents, defaulting to 'draf' so light switch is off
+      const newContents = contents.map(c => ({ ...c, status: c.status || 'draf' }));
+      nextList = [...newContents, ...kontenList];
     } else {
       nextList = kontenList.flatMap((b) => {
         if (String(b.id) !== String(editId)) return [b];
@@ -221,8 +224,8 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
                         <label className="bc-switch">
                           <input 
                             type="checkbox" 
-                            checked={b.isTampil || false} 
-                            onChange={() => handleToggleTampil(b.id, b.isTampil || false)} 
+                            checked={b.status === 'terbit'} 
+                            onChange={() => handleToggleTampil(b.id, b.status === 'terbit')} 
                           />
                           <span className="bc-slider"></span>
                         </label>

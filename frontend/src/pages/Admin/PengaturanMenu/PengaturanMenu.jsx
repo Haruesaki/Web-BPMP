@@ -3,6 +3,7 @@ import axiosInstance from '../../../api/axiosInstance';
 import './PengaturanMenu.css';
 import TambahSubmenu from './TambahSubmenu';
 import EditMenu from './EditMenu';
+import CustomAlert from '../../../components/admin/CustomAlert';
 
 const PengaturanMenu = () => {
   const [menus, setMenus] = useState([]);
@@ -11,6 +12,17 @@ const PengaturanMenu = () => {
   const [dragIndex, setDragIndex] = useState(null);
   const [subDrag, setSubDrag] = useState(null);
   const [expandedIds, setExpandedIds] = useState([]);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
 
   // State modal tambah submenu
   const [isModalSubmenuOpen, setIsModalSubmenuOpen] = useState(false);
@@ -98,7 +110,7 @@ const PengaturanMenu = () => {
       triggerSidebarRefresh();
     } catch (error) {
       console.error('Gagal menyimpan urutan', error);
-      alert('Gagal menyimpan urutan menu!');
+      showAlert('error', 'Gagal menyimpan urutan menu!', 'Simpan Gagal');
     }
   };
 
@@ -161,7 +173,7 @@ const PengaturanMenu = () => {
       triggerSidebarRefresh();
     } catch (error) {
       console.error(error);
-      alert('Terjadi kesalahan saat menghapus menu.');
+      showAlert('error', 'Terjadi kesalahan saat menghapus menu.', 'Hapus Gagal');
     }
   };
 
@@ -184,7 +196,7 @@ const PengaturanMenu = () => {
     } catch (error) {
       console.error(error);
       const errMsg = error.response?.data?.pesan || 'Gagal memindahkan konten ke submenu.';
-      alert(errMsg);
+      showAlert('error', errMsg, 'Konversi Gagal');
     } finally {
       setIsConvertLoading(false);
     }
@@ -510,6 +522,15 @@ const PengaturanMenu = () => {
           </div>
         </div>
       )}
+
+      <CustomAlert 
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={alertState.onConfirm}
+        onCancel={alertState.onCancel}
+      />
     </main>
   );
 };

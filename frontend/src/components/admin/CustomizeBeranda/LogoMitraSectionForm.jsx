@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import PartnerSection from '../../user/partner/PartnerSection';
+import CustomAlert from '../CustomAlert';
 import './LogoMitraSectionForm.css';
 
 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -14,6 +15,52 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
   const fileInputRefs = useRef({});
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
+
+  const requestDelete = (id) => {
+    const mitra = mitraList.find((m) => m.id === id);
+    if (!mitra) return;
+
+    if (!mitra.preview) {
+      setMitraList((prev) => prev.filter((m) => m.id !== id));
+      return;
+    }
+
+    setAlertState({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Konfirmasi Hapus',
+      message: 'Apakah Anda yakin ingin menghapus logo ini?',
+      onCancel: () => setAlertState(prev => ({ ...prev, isOpen: false })),
+      onConfirm: async () => {
+        setAlertState(prev => ({ ...prev, isOpen: false }));
+        await executeDelete(id);
+      }
+    });
+  };
+
+  const executeDelete = async (id) => {
+    try {
+      setIsLoading(true);
+      await axiosInstance.delete(`/api/beranda/mitra/${id}`);
+      setMitraList((prev) => prev.filter((m) => m.id !== id));
+    } catch (error) {
+      console.error('Gagal menghapus logo:', error);
+      showAlert('error', 'Gagal menghapus logo dari server.', 'Hapus Gagal');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Menutup dropdown jika user klik di luar
   useEffect(() => {
@@ -32,32 +79,6 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
   const toggleDropdown = (e, id) => {
     e.stopPropagation();
     setActiveDropdown((prev) => (prev === id ? null : id));
-  };
-
-  const handleHapusLogo = async (e, id) => {
-    e.stopPropagation();
-    
-    // Cari logo yang akan dihapus
-    const mitra = mitraList.find((m) => m.id === id);
-    if (!mitra) return;
-
-    // Jika ini adalah logo asli (bukan placeholder / memiliki preview url)
-    if (mitra.preview && typeof id === 'number') {
-      try {
-        setIsLoading(true);
-        await axiosInstance.delete(`/api/beranda/mitra/${id}`);
-      } catch (error) {
-        console.error('Gagal menghapus logo:', error);
-        alert('Gagal menghapus logo dari server.');
-        setIsLoading(false);
-        return;
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    // Hapus dari state lokal
-    setMitraList((prev) => prev.filter((m) => m.id !== id));
   };
 
   const triggerUpload = (id) => {
@@ -81,12 +102,10 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
       
       let response;
       if (!mitra.preview) {
-        // Ini placeholder baru, buat data baru (POST)
         response = await axiosInstance.post('/api/beranda/mitra', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        // Ini logo yang sudah ada, ubah data (PUT)
         response = await axiosInstance.put(`/api/beranda/mitra/${id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
@@ -104,11 +123,10 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
       }
     } catch (error) {
       console.error('Gagal mengunggah logo:', error);
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal mengunggah logo.');
+      showAlert('error', error.response?.data?.error?.message || error.response?.data?.message || 'Gagal mengunggah logo.', 'Upload Gagal');
     } finally {
       setIsLoading(false);
       setActiveDropdown(null);
-      // Reset input file agar bisa di-trigger lagi dengan file yang sama jika gagal
       if (fileInputRefs.current[id]) {
         fileInputRefs.current[id].value = '';
       }
@@ -158,7 +176,10 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
               <>
                 <button
                   className="cb-mitra-delete-btn"
-                  onClick={(e) => handleHapusLogo(e, mitra.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    requestDelete(mitra.id);
+                  }}
                   title="Batal / Hapus Placeholder"
                 >
                   <i className="fa-solid fa-xmark"></i>
@@ -170,7 +191,6 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
               </>
             )}
 
-            {/* Menu Titik Tiga (Hanya muncul jika sudah ada gambar) */}
             {mitra.preview && (
               <div className="cb-mitra-menu-container">
                 <button
@@ -196,7 +216,11 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
                   </button>
                   <button
                     className="danger-text"
-                    onClick={(e) => handleHapusLogo(e, mitra.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveDropdown(null);
+                      requestDelete(mitra.id);
+                    }}
                   >
                     <i className="fa-solid fa-trash"></i> Hapus Logo
                   </button>
@@ -207,7 +231,6 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
         ))}
       </div>
 
-      {/* Tombol Tambah Logo Penuh */}
       <button 
         className="cb-mitra-add-btn" 
         onClick={handleTambahLogo} 
@@ -219,7 +242,6 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
         <span>Tambah Tempat Logo Baru</span>
       </button>
 
-      {/* Preview Live Tampilan Logo */}
       <div className="cb-mitra-preview-container">
         <div className="cb-mitra-preview-header">
           <i className="fa-solid fa-desktop"></i>
@@ -238,6 +260,15 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
           )}
         </div>
       </div>
+
+      <CustomAlert 
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={alertState.onConfirm}
+        onCancel={alertState.onCancel}
+      />
     </div>
   );
 };

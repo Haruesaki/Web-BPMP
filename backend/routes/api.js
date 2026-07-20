@@ -13,6 +13,7 @@ const ProfilPegawaiController = require('../controllers/profilPegawaiController'
 const BeritaController = require('../controllers/beritaController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
+const BerandaBeritaController = require('../controllers/berandaBeritaController');
 const LogoMitraController = require('../controllers/logoMitraController');
 const InfoKontakController = require('../controllers/infoKontakController');
 const TautanFooterController = require('../controllers/tautanFooterController');
@@ -49,6 +50,10 @@ router.get('/beranda/header', BerandaHeaderController.getHeader);
 router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHeader);
 router.get('/beranda/hero', BerandaHeroController.getHero);
 router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
+router.get('/beranda/berita', BerandaBeritaController.getBeritaBeranda);
+router.patch('/beranda/berita/reorder', authMiddleware, BerandaBeritaController.reorderBerita);
+router.patch('/beranda/berita/:sumber/:id/thumbnail', authMiddleware, BerandaBeritaController.updateThumbnail);
+router.delete('/beranda/berita/:sumber/:id', authMiddleware, BerandaBeritaController.removeFromBeranda);
 
 router.get('/beranda/mitra', LogoMitraController.getLogoMitra);
 router.post(

@@ -15,6 +15,7 @@ import HeroSetting from '../../../components/admin/CustomizeBeranda/HeroSetting'
 import SocialMediaSetting from '../../../components/admin/CustomizeBeranda/SocialMediaSetting';
 import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/SectionOrderSetting';
 import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
+import CustomAlert from '../../../components/admin/CustomAlert';
 import axiosInstance from '../../../api/axiosInstance';
 
 // =========================================================================
@@ -46,8 +47,20 @@ const nextId = () => uid++;
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
-  const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isSavingHero, setIsSavingHero] = useState(false);
+  const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -201,6 +214,7 @@ const CustomizeBeranda = () => {
     setBackgroundInputKey((prev) => prev + 1);
   };
 
+
   // ---------- MEDIA SOSIAL ----------
   const [socials, setSocials] = useState([
     { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
@@ -264,9 +278,9 @@ const CustomizeBeranda = () => {
       if (res.data?.success) {
         setIsSaveSuccessOpen(true);
       }
-    } catch (error) {
-      console.error('Gagal menyimpan pengaturan footer:', error);
-      alert('Terjadi kesalahan saat menyimpan pengaturan footer.');
+    } catch (err) {
+      console.error('Gagal memperbarui footer:', err);
+      showAlert('error', 'Terjadi kesalahan saat menyimpan pengaturan footer.', 'Simpan Gagal');
     }
   };
 
@@ -277,9 +291,9 @@ const CustomizeBeranda = () => {
       if (res.data?.success) {
         setIsSaveSuccessOpen(true);
       }
-    } catch (error) {
-      console.error('Gagal menyimpan tautan footer:', error);
-      alert('Terjadi kesalahan saat menyimpan tautan footer.');
+    } catch (err) {
+      console.error('Gagal memperbarui tautan footer:', err);
+      showAlert('error', 'Terjadi kesalahan saat menyimpan tautan footer.', 'Simpan Gagal');
     }
   };
 
@@ -317,8 +331,9 @@ const CustomizeBeranda = () => {
     return response.data?.url || savedHeaderLogoUrl;
   };
 
-  // Simpan khusus card Header (logo utama website). Dipanggil dari tombol
-  // Simpan di dalam HeaderLogoSetting.
+
+  // Simpan khusus card Landing Page (Hero). Dipanggil dari tombol Simpan di
+  // dalam HeroSetting.
   const handleSaveHeader = async () => {
     if (isSavingHeader) return;
 
@@ -339,14 +354,12 @@ const CustomizeBeranda = () => {
       setIsSaveSuccessOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Header:', error);
-      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Header.');
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Header.', 'Simpan Gagal');
     } finally {
       setIsSavingHeader(false);
     }
   };
 
-  // Simpan khusus card Landing Page (Hero). Dipanggil dari tombol Simpan di
-  // dalam HeroSetting.
   const handleSaveHero = async () => {
     if (isSavingHero) return;
 
@@ -371,8 +384,8 @@ const CustomizeBeranda = () => {
       setBackgroundFile(null);
       setIsSaveSuccessOpen(true);
     } catch (error) {
-      console.error('Gagal menyimpan pengaturan Landing Page:', error);
-      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Landing Page.');
+      console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
+      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
     } finally {
       setIsSavingHero(false);
     }
@@ -550,6 +563,15 @@ const CustomizeBeranda = () => {
           </div>
         </div>
       )}
+      
+      <CustomAlert 
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={alertState.onConfirm}
+        onCancel={alertState.onCancel}
+      />
     </main>
   );
 };
