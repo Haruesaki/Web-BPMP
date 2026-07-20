@@ -23,6 +23,9 @@
     position: relative;
     flex: 1;
     max-width: 480px;
+    /* Override kebocoran ".search-wrapper { overflow:hidden }" dari Navbar.css
+       (navbar publik) yang memotong dropdown sugesti sehingga tak terlihat. */
+    overflow: visible;
 }
 
 .admin-layout .search-box {
@@ -55,6 +58,12 @@
     color: var(--text-main);
     font-family: inherit;
     font-size: 14px;
+    /* Override kebocoran rule global ".search-input" dari Navbar.css (navbar
+       publik) yang menyetel opacity:0 + pointer-events:none + padding besar,
+       sehingga input admin sempat tak terlihat & tak bisa diketik. */
+    opacity: 1;
+    pointer-events: auto;
+    padding: 0;
 }
 
 .admin-layout .search-input::placeholder {
