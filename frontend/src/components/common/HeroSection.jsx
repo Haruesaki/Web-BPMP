@@ -2,23 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
 import axiosInstance from '../../api/axiosInstance';
 
-// Import assets
-import Logo from '../../assets/source/Logo.png';
-import Mitra4 from '../../assets/source/Mitra (4).png';
-import Mitra5 from '../../assets/source/Mitra (5).png';
-
 const DEFAULT_HERO = {
     judul: 'Judul Website',
     subjudul: 'Deskripsi Website',
     url_gambar: null,
     logo_1: null,
     logo_2: null,
-};
-
-const LOGO_ASSETS = {
-    'Kemendikdasmen': Mitra5,
-    'BPMP Lampung': Logo,
-    'Dinas Pendidikan': Mitra4,
 };
 
 const pseudoRandom = (seed) => {

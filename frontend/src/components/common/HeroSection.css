@@ -122,6 +122,15 @@
   box-sizing: border-box;
 }
 
+/* REVISI BARU: Mencegah layout shift saat konten kanan kosong */
+/* Jika hanya ada satu anak (konten kiri), dorong ke kiri dengan margin auto */
+.hero-flex-container > :only-child {
+  /* 1. Dorong ke kiri untuk mempertahankan posisi */
+  margin-right: auto; 
+  /* 2. CONTOH: Beri lebih banyak ruang agar tidak terlihat kosong */
+  flex-basis: 55%;
+}
+
 /* --- Hero Content Kiri --- */
 .hero-left-content {
   display: flex;
@@ -204,8 +213,8 @@
   transform: translateY(150px);
   animation:
     /* REVISI: Sinkronkan waktu & properti untuk transisi yang mulus */
-    buildingSlideUp 3.5s cubic-bezier(0.25, 1.1, 0.36, 1) 0.3s forwards, /* Selesai pada t=2.5s */
-    smoothFloat 15s ease-in-out 3.6s infinite alternate; /* Mulai TEPAT pada t=2.5s */
+    buildingSlideUp 3.5s cubic-bezier(0.25, 1.1, 0.5, 1) 0.3s forwards, /* Selesai pada t=2.5s */
+    smoothFloat 15s ease-in-out 3.5s infinite alternate; /* Mulai TEPAT pada t=2.5s */
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

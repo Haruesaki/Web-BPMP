@@ -139,10 +139,10 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
                 screenWidth,
                 baseSpeedPerSecond: 120,
                 scrollSensitivityPerSecond: 38,
-                maxRotation: 50, // Rotasi logo di tepi layar
+                maxRotation: 55, // Rotasi logo di tepi layar
                 minScale: 2.4,   // Ukuran logo di titik tengah
-                maxScale: 4.5,   // Ukuran logo di sisi kanan/kiri
-                maxDepth: 600,   // Jarak kedalaman 3D
+                maxScale: 4,   // Ukuran logo di sisi kanan/kiri
+                maxDepth: 800,   // Jarak kedalaman 3D
                 perspective: 180,// Kekuatan efek perspektif
             };
         };
