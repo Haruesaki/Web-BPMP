@@ -6,7 +6,7 @@ import axiosInstance from '../../../api/axiosInstance';
 const ITEMS_PER_PAGE = 4;
 const AUTO_SLIDE_INTERVAL = 5000; // 5 detik
 
-const NewsSection = () => {
+const NewsSection = ({ previewData }) => {
     const [allNewsData, setAllNewsData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedNews, setPaginatedNews] = useState([]);
@@ -37,8 +37,20 @@ const NewsSection = () => {
         }, AUTO_SLIDE_INTERVAL);
     }, [paginatedNews.length, stopAutoSlide]);
 
-    // Efek untuk memuat data dari API
+    // Efek untuk memuat data dari API atau preview
     useEffect(() => {
+        if (previewData) {
+            const formattedPreview = previewData.map(item => ({
+                id: item.id,
+                category: item.kategori || 'Informasi',
+                title: item.judul,
+                date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                image: item.coverUrl || ''
+            }));
+            setAllNewsData(formattedPreview);
+            return;
+        }
+
         const fetchNews = async () => {
             try {
                 const res = await axiosInstance.get('/api/beranda/berita');
@@ -48,7 +60,7 @@ const NewsSection = () => {
                         category: item.kategori || 'Informasi',
                         title: item.judul,
                         date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
-                        image: item.coverUrl || '' // Kita bisa kasih fallback image jika perlu
+                        image: item.coverUrl || ''
                     }));
                     setAllNewsData(fetchedData);
                 }
@@ -57,7 +69,7 @@ const NewsSection = () => {
             }
         };
         fetchNews();
-    }, []);
+    }, [previewData]);
 
     // Efek untuk memuat data berita saat halaman berubah
     useEffect(() => {

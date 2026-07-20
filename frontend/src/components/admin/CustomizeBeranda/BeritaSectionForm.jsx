@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import CustomAlert from '../CustomAlert';
+import NewsSection from '../../user/berita/NewsSection';
 import './BeritaSectionForm.css';
 
 const PAGE_SIZE = 4;
@@ -276,6 +277,23 @@ const BeritaSectionForm = () => {
           </div>
         </div>
       )}
+
+      {/* Live Preview Section */}
+      <div className="bs-preview-container">
+        <div className="bs-preview-header">
+          <i className="fa-solid fa-desktop"></i>
+          <span>Live Preview Beranda</span>
+        </div>
+        <div className="bs-preview-box">
+          {beritaList.length > 0 ? (
+            <NewsSection previewData={beritaList} />
+          ) : (
+            <div className="bs-preview-empty">
+              Belum ada berita yang ditampilkan di beranda.
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Hidden File Input */}
       <input 

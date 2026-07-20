@@ -48,6 +48,19 @@ const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
   const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
   const [isSavingHero, setIsSavingHero] = useState(false);
+  const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
@@ -321,6 +334,32 @@ const CustomizeBeranda = () => {
 
   // Simpan khusus card Landing Page (Hero). Dipanggil dari tombol Simpan di
   // dalam HeroSetting.
+  const handleSaveHeader = async () => {
+    if (isSavingHeader) return;
+
+    setIsSavingHeader(true);
+    try {
+      const headerLogoUrl = await uploadHeaderLogo();
+
+      const headerResponse = await axiosInstance.put('/api/beranda/header', {
+        url_logo_header: headerLogoUrl,
+      });
+
+      const savedHeader = headerResponse.data?.data;
+      const nextHeaderLogoUrl = savedHeader?.url_logo_header ?? headerLogoUrl ?? null;
+      setSavedHeaderLogoUrl(nextHeaderLogoUrl);
+      setHeaderLogoPreview(nextHeaderLogoUrl);
+      setHeaderLogoName(nextHeaderLogoUrl ? nextHeaderLogoUrl.split('/').pop() : '');
+      setHeaderLogoFile(null);
+      setIsSaveSuccessOpen(true);
+    } catch (error) {
+      console.error('Gagal menyimpan pengaturan Header:', error);
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Header.', 'Simpan Gagal');
+    } finally {
+      setIsSavingHeader(false);
+    }
+  };
+
   const handleSaveHero = async () => {
     if (isSavingHero) return;
 
@@ -348,7 +387,7 @@ const CustomizeBeranda = () => {
       console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
       alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
     } finally {
-      setIsSaving(false);
+      setIsSavingHero(false);
     }
   };
 
