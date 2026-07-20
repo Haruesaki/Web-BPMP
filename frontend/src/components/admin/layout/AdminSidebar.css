@@ -87,6 +87,18 @@
     flex-shrink: 0;
 }
 
+/* Label menu: izinkan teks turun ke baris berikutnya alih-alih memanjang
+   keluar pembungkus. `min-width: 0` wajib agar flex-item boleh menyusut
+   di bawah lebar kontennya; `overflow-wrap: anywhere` memecah kata super
+   panjang tanpa spasi supaya tidak pernah melampaui batas sidebar. */
+.admin-layout .nav-item span {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 .admin-layout .nav-item:hover {
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-main);

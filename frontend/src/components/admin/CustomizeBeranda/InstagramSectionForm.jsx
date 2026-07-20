@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import InstagramSection from '../../user/instagram/InstagramSection';
+import CustomAlert from '../CustomAlert';
 import './InstagramSectionForm.css';
 
 const InstagramSectionForm = () => {
@@ -10,6 +11,17 @@ const InstagramSectionForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingEmbeds, setIsSavingEmbeds] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [alertState, setAlertState] = useState({ isOpen: false });
+
+  const showAlert = (type, message, title) => {
+    setAlertState({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm: () => setAlertState(prev => ({ ...prev, isOpen: false }))
+    });
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -44,11 +56,11 @@ const InstagramSectionForm = () => {
       if (res.data?.success && res.data?.data) {
         const data = typeof res.data.data === 'string' ? JSON.parse(res.data.data) : res.data.data;
         setIgProfile(data);
-        alert('Informasi akun Instagram berhasil diperbarui!');
+        showAlert('success', 'Informasi akun Instagram berhasil diperbarui!', 'Berhasil');
       }
     } catch (error) {
       console.error('Gagal memperbarui profil Instagram:', error);
-      alert(error.response?.data?.pesan || 'Gagal memperbarui profil Instagram');
+      showAlert('error', error.response?.data?.pesan || 'Gagal memperbarui profil Instagram', 'Gagal');
     } finally {
       setIsLoading(false);
     }
@@ -77,11 +89,11 @@ const InstagramSectionForm = () => {
           setEmbedLinks(loadedLinks.slice(0, 4));
         }
 
-        alert('Link embed postingan berhasil disimpan!');
+        showAlert('success', 'Link embed postingan berhasil disimpan!', 'Berhasil');
       }
     } catch (error) {
       console.error('Gagal menyimpan link embed:', error);
-      alert(error.response?.data?.pesan || 'Gagal menyimpan link embed');
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan link embed', 'Gagal');
     } finally {
       setIsSavingEmbeds(false);
     }
@@ -175,6 +187,15 @@ const InstagramSectionForm = () => {
           )}
         </button>
       </div>
+
+      <CustomAlert 
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={alertState.onConfirm}
+        onCancel={alertState.onCancel}
+      />
     </div>
   );
 };

@@ -53,7 +53,7 @@ class HalamanKontenController {
             deskripsi_kaya: c.konten || '',
             kunci_halaman: finalKunci,
             dibuat_oleh: req.user?.id || null,
-            status: 'terbit',
+            status: c.status || 'terbit',
             urutan_tampil: index
           };
         });

@@ -3,6 +3,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -32,6 +34,32 @@ const getWeekOfMonth = (date) => {
 const CHART_BAR_COLOR = '#4cae8e';
 const CHART_BAR_HIGHLIGHT_COLOR = '#c3c4f7';
 
+// Bulatkan nilai maksimum sumbu-Y ke angka "cantik" + sisakan ruang di atas
+// bar tertinggi. Efeknya: sumbu ikut membesar mengikuti data (mis. 78 → 80,
+// bahkan ratusan) sehingga bar bernilai kecil tampak rendah — tidak lagi
+// mentok di angka 4 saat datanya masih sedikit.
+const niceCeil = (v) => {
+  if (!v || v <= 0) return 5;
+  const step = v <= 10 ? 2 : v <= 20 ? 5 : v <= 50 ? 10 : v <= 100 ? 20 : v <= 500 ? 50 : 100;
+  let top = Math.ceil(v / step) * step;
+  if (top <= v) top += step; // pastikan bar tertinggi tak menyentuh atas
+  return top;
+};
+
+// Sumbu-Y SELALU minimal mencapai nilai ini (skala 0–80 tampil penuh walau
+// data masih kecil → bar terlihat rendah). Bila data melebihi 80, sumbu tetap
+// membesar otomatis (via niceCeil) supaya bar tak pernah terpotong.
+const Y_AXIS_MIN_TOP = 80;
+
+// Langkah antar-tick sumbu-Y agar label rapi (~8 pembagian, mis. 80 → tiap 10).
+const niceStep = (max) => {
+  const rough = (max || 1) / 8;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const n = rough / pow;
+  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return nice * pow;
+};
+
 // Tooltip custom Recharts, di-styling manual lewat CSS (bukan pakai Tooltip
 // bawaan Recharts yang defaultnya putih) supaya cocok dengan tema gelap.
 const ChartTooltip = ({ active, payload, label, chartMode }) => {
@@ -41,7 +69,7 @@ const ChartTooltip = ({ active, payload, label, chartMode }) => {
       <p className="chart-tooltip-label">{label}</p>
       <p className="chart-tooltip-value">
         {Number(payload[0].value).toLocaleString('id-ID')}{' '}
-        {chartMode === 'unik' ? 'Pengunjung Unik' : 'Tayangan'}
+        {chartMode === 'unik' ? 'Pengunjung' : 'Web Dibuka'}
       </p>
     </div>
   );
@@ -51,11 +79,12 @@ const DashboardAdmin = () => {
   const [pengunjungData, setPengunjungData] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [chartMode, setChartMode] = useState('unik'); // 'unik' | 'hits'
+  const [chartType, setChartType] = useState('bar'); // 'bar' | 'area'
 
   const now = new Date();
   const [filterYear, setFilterYear] = useState(now.getFullYear());
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1);
-  const [filterWeek, setFilterWeek] = useState(0);
+  const [filterWeek, setFilterWeek] = useState(getWeekOfMonth(now));
 
   const fetchStats = async () => {
     try {
@@ -109,7 +138,11 @@ const DashboardAdmin = () => {
     });
     const totalUnik = filtered.reduce((s, d) => s + parseInt(d.pengunjung_unik || 0), 0);
     const totalHits = filtered.reduce((s, d) => s + parseInt(d.total_hits || 0), 0);
-    return { totalUnik, totalHits };
+    
+    const allTimeUnik = pengunjungData.reduce((s, d) => s + parseInt(d.pengunjung_unik || 0), 0);
+    const allTimeHits = pengunjungData.reduce((s, d) => s + parseInt(d.total_hits || 0), 0);
+
+    return { totalUnik, totalHits, allTimeUnik, allTimeHits };
   }, [pengunjungData, filterYear, filterMonth, filterWeek]);
 
   // Proses Filter Chart
@@ -128,6 +161,34 @@ const DashboardAdmin = () => {
     filtered = filtered.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
     const valueKey = chartMode === 'unik' ? 'pengunjung_unik' : 'total_hits';
+
+    if (filterWeek === 0) {
+      // Kelompokkan berdasarkan minggu jika "Semua Minggu" dipilih
+      const lastDayOfMonth = new Date(filterYear, filterMonth, 0);
+      const maxWeeks = getWeekOfMonth(lastDayOfMonth);
+      
+      const weeklyData = Array.from({ length: maxWeeks }, (_, i) => ({
+        label: `Minggu ke-${i + 1}`,
+        value: 0
+      }));
+
+      filtered.forEach(d => {
+        const tStr = typeof d.tanggal === 'string' ? d.tanggal.split('T')[0] : '';
+        const [y, m, day] = (tStr || '2000-01-01').split('-');
+        const dateObj = new Date(y, m - 1, day);
+        const wIndex = getWeekOfMonth(dateObj) - 1;
+        if (weeklyData[wIndex]) {
+          weeklyData[wIndex].value += parseInt(d[valueKey] || 0);
+        }
+      });
+
+      const maxVal = Math.max(...weeklyData.map(d => d.value), 0);
+      return weeklyData.map(d => ({
+        ...d,
+        highlight: d.value === maxVal && maxVal > 0
+      }));
+    }
+
     const maxVal = Math.max(...filtered.map(d => parseInt(d[valueKey] || 0)), 0);
     return filtered.map(d => {
       const tStr = typeof d.tanggal === 'string' ? d.tanggal.split('T')[0] : '';
@@ -145,14 +206,75 @@ const DashboardAdmin = () => {
     });
   }, [pengunjungData, filterYear, filterMonth, filterWeek, chartMode]);
 
-  const yearOptions = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
-  const monthOptions = [
-    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
-    { value: 4, label: 'April' }, { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' }, { value: 9, label: 'September' },
-    { value: 10, label: 'Oktober' }, { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
-  ];
-  const weekOptions = [1, 2, 3, 4, 5, 6];
+  // Batas atas sumbu-Y: minimal 80 (skala penuh selalu tampil), membesar
+  // otomatis bila nilai tertinggi periode melebihi 80.
+  const yMax = useMemo(
+    () => Math.max(niceCeil(Math.max(...chartData.map((d) => d.value), 0)), Y_AXIS_MIN_TOP),
+    [chartData]
+  );
+
+  // Daftar tick sumbu-Y (0, step, 2·step, … , yMax) agar labelnya rapi.
+  const yTicks = useMemo(() => {
+    const step = niceStep(yMax);
+    const arr = [];
+    for (let v = 0; v <= yMax; v += step) arr.push(v);
+    return arr;
+  }, [yMax]);
+
+  const { minYear, maxYear, minMonth } = useMemo(() => {
+    const defaultRes = { minYear: now.getFullYear(), maxYear: now.getFullYear(), minMonth: 1 };
+    if (!pengunjungData || pengunjungData.length === 0) return defaultRes;
+
+    let earliestDate = new Date();
+    pengunjungData.forEach((d) => {
+      const tStr = typeof d.tanggal === 'string' ? d.tanggal.split('T')[0] : '';
+      const [y, m, day] = (tStr || '2000-01-01').split('-');
+      const dateObj = new Date(y, m - 1, day);
+      if (dateObj < earliestDate) earliestDate = dateObj;
+    });
+
+    return {
+      minYear: earliestDate.getFullYear(),
+      maxYear: now.getFullYear(),
+      minMonth: earliestDate.getMonth() + 1
+    };
+  }, [pengunjungData]);
+
+  const yearOptions = useMemo(() => {
+    const years = [];
+    for (let y = maxYear; y >= minYear; y--) {
+      years.push(y);
+    }
+    return years;
+  }, [minYear, maxYear]);
+
+  const monthOptions = useMemo(() => {
+    const allMonths = [
+      { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
+      { value: 4, label: 'April' }, { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
+      { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' }, { value: 9, label: 'September' },
+      { value: 10, label: 'Oktober' }, { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
+    ];
+    
+    return allMonths.filter(m => {
+      if (filterYear === minYear && m.value < minMonth) return false;
+      if (filterYear === now.getFullYear() && m.value > (now.getMonth() + 1)) return false;
+      return true;
+    });
+  }, [filterYear, minYear, minMonth]);
+
+  useEffect(() => {
+    if (filterYear === minYear && filterMonth < minMonth) {
+      setFilterMonth(minMonth);
+    } else if (filterYear === now.getFullYear() && filterMonth > (now.getMonth() + 1)) {
+      setFilterMonth(now.getMonth() + 1);
+    }
+  }, [filterYear, filterMonth, minYear, minMonth]);
+  const weekOptions = useMemo(() => {
+    const lastDayOfMonth = new Date(filterYear, filterMonth, 0);
+    const maxWeeks = getWeekOfMonth(lastDayOfMonth);
+    return Array.from({ length: maxWeeks }, (_, i) => i + 1);
+  }, [filterYear, filterMonth]);
 
   const [actPage, setActPage] = useState(1);
   const actTotalPages = Math.max(1, Math.ceil(recentActivity.length / ACT_PAGE_SIZE));
@@ -199,9 +321,13 @@ const DashboardAdmin = () => {
               </div>
             </div>
             <div className="chart-filters" style={{display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center'}}>
+              <select className="chart-select" value={chartType} onChange={e => setChartType(e.target.value)}>
+                <option value="bar">Diagram Batang</option>
+                <option value="area">Chart</option>
+              </select>
               <select className="chart-select" value={chartMode} onChange={e => setChartMode(e.target.value)}>
-                <option value="unik">Pengunjung Unik</option>
-                <option value="hits">Total Tayangan</option>
+                <option value="unik">Pengunjung</option>
+                <option value="hits">Web Dibuka</option>
               </select>
               <select className="chart-select" value={filterWeek} onChange={e => setFilterWeek(Number(e.target.value))}>
                 <option value={0}>Semua Minggu</option>
@@ -216,59 +342,123 @@ const DashboardAdmin = () => {
             </div>
           </div>
 
-          {/* ----- SUMMARY CARD ----- */}
-          <div style={{display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap'}}>
-            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0f4ff', textAlign: 'center'}}>
-              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#3f5aa8'}}>
-                {summary.totalUnik.toLocaleString('id-ID')}
-              </div>
-              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Pengunjung Unik</div>
-            </div>
-            <div style={{flex: '1 1 180px', padding: '16px', borderRadius: '8px', background: '#f0fff4', textAlign: 'center'}}>
-              <div style={{fontSize: '28px', fontWeight: 'bold', color: '#4cae8e'}}>
-                {summary.totalHits.toLocaleString('id-ID')}
-              </div>
-              <div style={{fontSize: '13px', color: '#666', marginTop: '4px'}}>Total Tayangan (Hits)</div>
-            </div>
-          </div>
-
-          <div className="chart-area">
+          <div className={`chart-area${chartData.length > 14 ? ' chart-area--scroll' : ''}`}>
             {chartData.length === 0 ? (
               <div className="chart-empty">Tidak ada data pengunjung untuk filter yang dipilih.</div>
             ) : (
-              <div className="chart-scroll" style={{ minWidth: `${Math.max(chartData.length * 60, 480)}px` }}>
+              <div
+                className="chart-scroll"
+                style={chartData.length > 14 ? { minWidth: `${chartData.length * 60}px` } : undefined}
+              >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 8, left: 0, bottom: 4 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fill: '#C7C4D8', fontSize: 11 }}
-                      axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      allowDecimals={false}
-                      tick={{ fill: '#5b6478', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={40}
-                    />
-                    <Tooltip
-                      content={<ChartTooltip chartMode={chartMode} />}
-                      cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                    />
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={46}>
-                      {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.highlight ? CHART_BAR_HIGHLIGHT_COLOR : CHART_BAR_COLOR}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                  {chartType === 'area' ? (
+                    <AreaChart data={chartData} margin={{ top: 20, right: 40, left: 0, bottom: 4 }}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={CHART_BAR_COLOR} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={CHART_BAR_COLOR} stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fill: '#C7C4D8', fontSize: 11 }}
+                        axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        domain={[0, yMax]}
+                        ticks={yTicks}
+                        tick={{ fill: '#5b6478', fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={40}
+                      />
+                      <Tooltip
+                        content={<ChartTooltip chartMode={chartMode} />}
+                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                        allowEscapeViewBox={{ x: false, y: false }}
+                        wrapperStyle={{ zIndex: 30 }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke={CHART_BAR_HIGHLIGHT_COLOR}
+                        strokeWidth={3}
+                        fillOpacity={1}
+                        fill="url(#colorValue)"
+                        activeDot={{ r: 6, fill: CHART_BAR_HIGHLIGHT_COLOR, stroke: '#fff', strokeWidth: 2 }}
+                      />
+                    </AreaChart>
+                  ) : (
+                    <BarChart data={chartData} margin={{ top: 20, right: 40, left: 0, bottom: 4 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fill: '#C7C4D8', fontSize: 11 }}
+                        axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        domain={[0, yMax]}
+                        ticks={yTicks}
+                        tick={{ fill: '#5b6478', fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={40}
+                      />
+                      <Tooltip
+                        content={<ChartTooltip chartMode={chartMode} />}
+                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                        allowEscapeViewBox={{ x: false, y: false }}
+                        wrapperStyle={{ zIndex: 30 }}
+                      />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={46}>
+                        {chartData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.highlight ? CHART_BAR_HIGHLIGHT_COLOR : CHART_BAR_COLOR}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  )}
                 </ResponsiveContainer>
               </div>
             )}
+          </div>
+
+          {/* ----- SUMMARY CARD (di bawah chart, tanpa pembungkus/background) ----- */}
+          <div className="chart-summary">
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-unik">
+                {summary.totalUnik.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Pengunjung</div>
+            </div>
+            <div className="chart-summary-divider"></div>
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-hits">
+                {summary.totalHits.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Web Dibuka</div>
+            </div>
+            <div className="chart-summary-divider"></div>
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-unik" style={{ opacity: 0.8 }}>
+                {summary.allTimeUnik.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Total Pengunjung</div>
+            </div>
+            <div className="chart-summary-divider"></div>
+            <div className="chart-summary-item">
+              <div className="chart-summary-value chart-summary-value-hits" style={{ opacity: 0.8 }}>
+                {summary.allTimeHits.toLocaleString('id-ID')}
+              </div>
+              <div className="chart-summary-label">Total Web Dibuka</div>
+            </div>
           </div>
         </section>
 
@@ -281,7 +471,7 @@ const DashboardAdmin = () => {
                 <tr>
                   <th className="activity-col-actor">PELAKU</th>
                   <th className="activity-col-role">ROLE</th>
-                  <th>DESKRIPSI</th>
+                  <th className="activity-col-desc">DESKRIPSI</th>
                   <th className="activity-col-time">WAKTU (WIB)</th>
                 </tr>
               </thead>
@@ -315,7 +505,7 @@ const DashboardAdmin = () => {
                           {a.role_admin}
                         </span>
                     </td>
-                    <td>{a.aksi}</td>
+                    <td className="activity-col-desc"><span className="activity-desc">{a.aksi}</span></td>
                     <td className="activity-col-time">{formatWaktu(a.created_at)}</td>
                   </tr>
                 ))}

@@ -68,6 +68,7 @@ const PostDefault = ({
       konten: konten,
       coverUrl: coverUrl || null,
       id: initialContents?.[0]?.id || null, // Sertakan ID asli jika ini mode edit
+      status: initialContents?.[0]?.status || 'draf', // Pertahankan status (tayang/draf)
     };
 
     if (!currentContent.judul && !currentContent.konten) {

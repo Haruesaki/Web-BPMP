@@ -1,35 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './NewsSection.css';
 import NewsCard from './NewsCard';
-
-// Import assets untuk data tiruan (mock data)
-import PreviewBerita1Jpg from "../../../assets/source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../../../assets/source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../../../assets/source/Preveiw-berita (3).jpg";
-
-// Data tiruan untuk semua artikel berita. Nantinya ini bisa diambil dari API.
-const allNewsData = [
-    { id: 1, category: 'Berita', title: 'Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan', date: '15 Juni 2026', image: PreviewBerita1Jpg },
-    { id: 2, category: 'Artikel', title: 'Pentingnya Digitalisasi Sekolah di Era Merdeka Belajar', date: '14 Juni 2026', image: PreviewBerita2 },
-    { id: 3, category: 'Pengumuman', title: 'Jadwal Pelatihan Guru Penggerak Angkatan 12 Telah Dirilis', date: '13 Juni 2026', image: PreviewBerita3 },
-    { id: 4, category: 'Berita', title: 'BPMP Lampung Kembali Raih Penghargaan Zona Integritas Wilayah Bebas Korupsi', date: '12 Juni 2026', image: PreviewBerita1Jpg },
-    // Halaman 2
-    { id: 5, category: 'Artikel', title: 'Strategi Jitu Peningkatan Mutu Pendidikan Dasar di Provinsi Lampung', date: '11 Juni 2026', image: PreviewBerita2 },
-    { id: 6, category: 'Berita', title: 'Kolaborasi dengan Universitas Lampung untuk Riset Pendidikan Terapan', date: '10 Juni 2026', image: PreviewBerita3 },
-    { id: 7, category: 'Pengumuman', title: 'Hasil Seleksi Administrasi Calon Fasilitator Program Sekolah Penggerak', date: '09 Juni 2026', image: PreviewBerita1Jpg },
-    { id: 8, category: 'Berita', title: 'Workshop Implementasi Kurikulum Merdeka di Daerah Terpencil, Terluar, dan Tertinggal', date: '08 Juni 2026', image: PreviewBerita1Jpg },
-];
+import axiosInstance from '../../../api/axiosInstance';
 
 const ITEMS_PER_PAGE = 4;
 const AUTO_SLIDE_INTERVAL = 5000; // 5 detik
 
-const NewsSection = () => {
+const NewsSection = ({ previewData }) => {
+    const [allNewsData, setAllNewsData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedNews, setPaginatedNews] = useState([]);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const intervalRef = useRef(null);
 
-    const totalPages = Math.ceil(allNewsData.length / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(allNewsData.length / ITEMS_PER_PAGE));
 
     // State turunan: Dapatkan berita unggulan dan thumbnail dari state utama
     const featuredNews = paginatedNews[featuredIndex] || null;
@@ -53,6 +37,40 @@ const NewsSection = () => {
         }, AUTO_SLIDE_INTERVAL);
     }, [paginatedNews.length, stopAutoSlide]);
 
+    // Efek untuk memuat data dari API atau preview
+    useEffect(() => {
+        if (previewData) {
+            const formattedPreview = previewData.map(item => ({
+                id: item.id,
+                category: item.kategori || 'Informasi',
+                title: item.judul,
+                date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                image: item.coverUrl || ''
+            }));
+            setAllNewsData(formattedPreview);
+            return;
+        }
+
+        const fetchNews = async () => {
+            try {
+                const res = await axiosInstance.get('/api/beranda/berita');
+                if (res.data?.success) {
+                    const fetchedData = res.data.data.map(item => ({
+                        id: item.id,
+                        category: item.kategori || 'Informasi',
+                        title: item.judul,
+                        date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                        image: item.coverUrl || ''
+                    }));
+                    setAllNewsData(fetchedData);
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data berita:", err);
+            }
+        };
+        fetchNews();
+    }, [previewData]);
+
     // Efek untuk memuat data berita saat halaman berubah
     useEffect(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -65,7 +83,7 @@ const NewsSection = () => {
 
         // Cleanup interval saat berpindah halaman
         return () => stopAutoSlide();
-    }, [currentPage, stopAutoSlide]);
+    }, [currentPage, allNewsData, stopAutoSlide]);
 
     // Efek untuk memulai/menghentikan auto-slide saat data berubah
     useEffect(() => {
@@ -105,29 +123,40 @@ const NewsSection = () => {
                             <div
                                 className="featured-card"
                                 key={news.id}
-                                style={{ transform: `translateX(${(index - featuredIndex) * 100}%)` }}
+                                style={{ 
+                                    transform: `translateX(${(index - featuredIndex) * 100}%)`,
+                                    border: news.image ? undefined : 'none',
+                                    backgroundColor: news.image ? undefined : 'transparent',
+                                    boxShadow: news.image ? undefined : 'none'
+                                }}
                             >
-                                <img src={news.image} alt={news.title} className="featured-img" />
-                                <div className="featured-overlay">
-                                    <h3>{news.title}</h3>
-                                </div>
+                                {news.image ? (
+                                    <>
+                                        <img src={news.image} alt={news.title} className="featured-img" />
+                                        <div className="featured-overlay">
+                                            <h3>{news.title}</h3>
+                                        </div>
+                                    </>
+                                ) : null}
                             </div>
                         ))}
                     </div>
 
                     <div className="thumbnail-row">
                         {thumbnailNews.map(thumb => (
-                            <img
-                                key={thumb.id}
-                                src={thumb.image}
-                                alt={`Thumbnail: ${thumb.title}`}
-                                className="thumb-img"
-                                onMouseEnter={() => handleSetFeatured(thumb)}
-                                onClick={() => handleSetFeatured(thumb)}
-                                // onFocus ditambahkan untuk aksesibilitas keyboard
-                                onFocus={() => handleSetFeatured(thumb)} 
-                                tabIndex="0" // Membuat gambar bisa difokus
-                                role="button" />
+                            thumb.image ? (
+                                <img
+                                    key={thumb.id}
+                                    src={thumb.image}
+                                    alt={`Thumbnail: ${thumb.title}`}
+                                    className="thumb-img"
+                                    onMouseEnter={() => handleSetFeatured(thumb)}
+                                    onClick={() => handleSetFeatured(thumb)}
+                                    onFocus={() => handleSetFeatured(thumb)} 
+                                    tabIndex="0"
+                                    role="button" 
+                                />
+                            ) : null
                         ))}
                     </div>
                 </div>

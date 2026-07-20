@@ -6,6 +6,8 @@ const HeaderLogoSetting = ({
   headerLogoInputKey,
   handleHeaderLogoChange,
   handleHeaderLogoRemove,
+  onSave,
+  isSaving,
 }) => {
   return (
     <section className="cb-card">
@@ -64,6 +66,19 @@ const HeaderLogoSetting = ({
         />
         <span className="cb-upload-filename">{headerLogoName || 'Tidak ada berkas dipilih.'}</span>
       </div>
+
+      <button
+        className="cb-btn cb-btn-simpan"
+        style={{ marginTop: '18px', width: '100%', justifyContent: 'center' }}
+        onClick={onSave}
+        disabled={isSaving}
+      >
+        {isSaving ? (
+          <><i className="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</>
+        ) : (
+          <><i className="fa-solid fa-save"></i> Simpan Header</>
+        )}
+      </button>
     </section>
   );
 };

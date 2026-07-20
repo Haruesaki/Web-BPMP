@@ -2,12 +2,19 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
 import axiosInstance from '../../api/axiosInstance';
 
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getFullUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('blob:') || url.startsWith('http')) return url;
+    return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const DEFAULT_HERO = {
     judul: 'Judul Website',
     subjudul: 'Deskripsi Website',
     url_gambar: null,
-    logo_1: null,
-    logo_2: null,
+    logo_1: '',
+    logo_2: '',
 };
 
 const pseudoRandom = (seed) => {
@@ -25,14 +32,15 @@ const HeroSection = () => {
     const fullText = heroContent.judul || DEFAULT_HERO.judul;
     const subtitle = heroContent.subjudul || DEFAULT_HERO.subjudul;
     const heroImage = heroContent.url_gambar || null;
+    // logo_1/logo_2 berisi URL gambar upload. Hanya render bila benar URL/path
+    // (kosong / data lama berupa nama = tidak menampilkan logo apa pun).
     const selectedLogos = [heroContent.logo_1, heroContent.logo_2]
-        .filter((logoName) => logoName && logoName !== 'Pilih Logo Utama')
-        .map((logoName, index) => ({
-            id: `${logoName}-${index}`,
-            name: logoName,
-            src: LOGO_ASSETS[logoName],
-        }))
-        .filter((logo) => logo.src);
+        .filter((v) => v && (v.startsWith('/') || v.startsWith('http')))
+        .map((v, index) => ({
+            id: `logo-${index}`,
+            name: `Logo ${index + 1}`,
+            src: getFullUrl(v),
+        }));
 
     useEffect(() => {
         let isMounted = true;

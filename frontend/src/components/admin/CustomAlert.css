@@ -1,0 +1,118 @@
+.ca-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: ca-fade-in 0.2s ease-out forwards;
+}
+
+@keyframes ca-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ca-slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ca-modal {
+  background: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 24px 24px;
+  animation: ca-slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Icons */
+.ca-icon-wrapper {
+  font-size: 50px;
+  margin-bottom: 16px;
+}
+
+.ca-icon-success { color: #10b981; }
+.ca-icon-error { color: #ef4444; }
+.ca-icon-warning { color: #f59e0b; }
+.ca-icon-info { color: #3b82f6; }
+.ca-icon-confirm { color: #0ea5e9; }
+
+/* Content */
+.ca-title {
+  margin: 0 0 12px 0;
+  color: #f3f4f6;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.ca-message {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Actions */
+.ca-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.ca-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.ca-btn-cancel {
+  background: transparent;
+  color: #d1d5db;
+  border: 1px solid #4b5563;
+}
+
+.ca-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.ca-btn-success { background: #10b981; color: #fff; }
+.ca-btn-success:hover { background: #059669; }
+
+.ca-btn-error { background: #ef4444; color: #fff; }
+.ca-btn-error:hover { background: #dc2626; }
+
+.ca-btn-warning { background: #f59e0b; color: #fff; }
+.ca-btn-warning:hover { background: #d97706; }
+
+.ca-btn-info { background: #3b82f6; color: #fff; }
+.ca-btn-info:hover { background: #2563eb; }
+
+.ca-btn-confirm { background: #0ea5e9; color: #fff; }
+.ca-btn-confirm:hover { background: #0284c7; }

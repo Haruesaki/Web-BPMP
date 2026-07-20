@@ -170,7 +170,15 @@
 
 /* ---------- CHART (Recharts) ---------- */
 .admin-layout .chart-area {
-    height: 300px;
+    height: 360px;
+    /* Default: chart muat penuh (data sedikit/mingguan) → overflow visible agar
+       tooltip yang mengikuti kursor tidak terpotong wadah & tak memunculkan
+       scrollbar horizontal. */
+    overflow: visible;
+}
+
+/* Data padat (mis. "Semua Minggu" ~30 titik): aktifkan scroll horizontal. */
+.admin-layout .chart-area--scroll {
     overflow-x: auto;
     overflow-y: hidden;
 }
@@ -188,6 +196,13 @@
     font-size: 14px;
     text-align: center;
     padding: 40px;
+}
+
+/* Wrapper tooltip Recharts: selalu di lapisan paling atas agar tidak tertutup
+   elemen lain saat mengikuti kursor. */
+.admin-layout .recharts-tooltip-wrapper {
+    z-index: 30 !important;
+    pointer-events: none;
 }
 
 /* Tooltip custom (menggantikan tooltip putih bawaan Recharts) */
@@ -212,6 +227,53 @@
     color: var(--text-main);
 }
 
+/* ---------- RINGKASAN (Pengunjung Unik / Total Tayangan) ----------
+   Diletakkan di BAWAH chart, tanpa kotak/background berwarna — cuma
+   angka besar + label, dipisahkan garis tipis dari chart di atasnya
+   dan garis vertikal tipis antar-item supaya tetap tertata rapi. */
+.admin-layout .chart-summary {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+}
+
+.admin-layout .chart-summary-item {
+    flex: 1 1 180px;
+    max-width: 240px;
+    text-align: center;
+}
+
+.admin-layout .chart-summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.admin-layout .chart-summary-value-unik {
+    color: var(--purple-soft);
+}
+
+.admin-layout .chart-summary-value-hits {
+    color: var(--green);
+}
+
+.admin-layout .chart-summary-label {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.admin-layout .chart-summary-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border-soft);
+}
+
 /* ---------- CARD: ACTIVITY ---------- */
 .admin-layout .card-activity h3 {
     font-size: 19px;
@@ -228,6 +290,9 @@
 .admin-layout .activity-table {
     width: 100%;
     border-collapse: collapse;
+    /* Lebar kolom jadi batas keras → deskripsi panjang tidak memaksa tabel
+       melebar / memunculkan scrollbar horizontal. */
+    table-layout: fixed;
 }
 
 .admin-layout .activity-table th {
@@ -260,9 +325,26 @@
 
 /* Kolom pelaku: badge inisial + nama */
 .admin-layout .activity-col-actor {
-    width: 1%;
+    width: 210px;
     white-space: nowrap;
     padding-right: 56px;
+}
+
+/* Kolom role: lebar tetap agar tak ikut melebar. */
+.admin-layout .activity-col-role {
+    width: 150px;
+}
+
+/* Kolom deskripsi: teks panjang turun ke baris berikutnya, maksimal 2 baris,
+   sisanya dipotong "…". overflow-wrap memecah kata super panjang tanpa spasi. */
+.admin-layout .activity-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .admin-layout .activity-actor {
@@ -296,7 +378,7 @@
     text-align: right;
     white-space: nowrap;
     color: var(--text-sub);
-    width: 1%;
+    width: 160px;
     padding-left: 24px;
 }
 
@@ -615,5 +697,10 @@
     .admin-layout .content-heading h1,
     .admin-layout .content-heading h2 {
         font-size: 24px;
+    }
+    /* Item ringkasan jadi bertumpuk vertikal di layar sempit — garis
+       pembatas vertikal dihilangkan karena tidak lagi relevan. */
+    .admin-layout .chart-summary-divider {
+        display: none;
     }
 }

@@ -99,6 +99,9 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 940px;
+    /* Lebar kolom jadi batas keras → tabel tidak ikut membengkak saat judul/
+       deskripsi panjang diinput (mencegah scroll horizontal dari konten). */
+    table-layout: fixed;
 }
 
 .postdefault .bc-table thead th {
@@ -176,6 +179,9 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* Penggal kata super panjang tanpa spasi agar ikut terpotong "…" di dalam
+       lebar sel, bukan memaksa kolom melebar. */
+    overflow-wrap: anywhere;
     font-weight: 500;
     color: var(--text-main);
     line-height: 1.4;
@@ -186,6 +192,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: anywhere;
     color: var(--text-sub);
     font-size: 12.5px;
     line-height: 1.4;
