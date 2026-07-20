@@ -2,305 +2,386 @@
    WADAH HALAMAN & ANIMASI (WRAPPERS)
    ========================================= */
 .landing-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    min-height: 100vh;
-    background-color: #0B132B;
-    position: relative;
-    /* === TRIK ABSOLUTE-STICKY === */
-    /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
-    margin-top: -160px;
-    /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
-    padding-top: 161px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0b132b;
+  position: relative;
+  /* === TRIK ABSOLUTE-STICKY === */
+  /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
+  margin-top: -160px;
+  /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
+  padding-top: 161px;
 }
 
 /* --- Efek Highlight Cahaya (Glass Shine) --- */
 .background-glow-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .background-glow-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 25%;
-    height: 100%;
-    background: linear-gradient(to right,
-            rgba(67, 67, 67, 0) 0%,
-            rgba(255, 255, 255, 0.095) 35%,
-            rgba(255, 255, 255, 0.261) 50%,
-            rgba(255, 255, 255, 0.095) 65%,
-            rgba(67, 67, 67, 0) 100%);
-    filter: blur(80px);
-    transform: skewX(35deg);
-    animation: lightSweep 11s infinite;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 30%; /* REVISI: Sedikit lebih lebar agar lebih menyebar */
+  height: 100%;
+  /* REVISI: Gradient dibuat lebih lembut, tidak terlalu terang, dan lebih menyatu */
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 75%,
+    transparent 100%
+  );
+  filter: blur(40px); /* REVISI: Blur ditingkatkan agar lebih halus */
+  transform: skewX(35deg);
+  animation: lightSweep 11s infinite;
 }
 
 @keyframes lightSweep {
-    0% {
-        left: -70%;
-    }
+  0% {
+    left: -70%;
+  }
 
-    100% {
-        left: 150%;
-    }
+  100% {
+    left: 150%;
+  }
 }
 
 /* =========================================
    ANIMASI PARTIKEL
    ========================================= */
 .particle-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 1; /* Di bawah konten, tapi bisa di atas background glow */
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1; /* Di bawah konten, tapi bisa di atas background glow */
+  pointer-events: none;
 }
 
 .particle {
-    position: absolute;
-    bottom: -10%; /* Mulai dari bawah layar */
-    background-color: rgba(255, 255, 255, 0.24);
-    border-radius: 50%;
-    filter: blur(0.5px);
-    animation-name: floatUp;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+  position: absolute;
+  bottom: -10%; /* Mulai dari bawah layar */
+  background-color: rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation-name: floatUp;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(0);
-        opacity: 0;
-    }
-    30%, 60% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-110vh); /* Bergerak ke atas hingga hilang */
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-70vh); /* Bergerak ke atas hingga hilang */
+    opacity: 0;
+  }
 }
 
 /* =========================================
    HERO SECTION UTAMA
    ========================================= */
 .hero-section {
-    flex: 1;
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
+  flex: 1;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .hero-flex-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0 4vw;
-    gap: 2rem;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0 6vw;
+  gap: 10rem;
+  box-sizing: border-box;
 }
 
 /* --- Hero Content Kiri --- */
 .hero-left-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    flex: 0 0 43%;
-    gap: 0.3rem;
-    color: #ffffff;
-    z-index: 222;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 0 0 42%; /* Beri ruang sedikit lebih besar untuk teks */
+  gap: 0.3rem;
+  color: #ffffff;
+  z-index: 222;
 }
 
 .welcome-text {
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(1.2rem, 1.5vw, 1.7rem);
-    font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
+  font-weight: 500;
 }
 
 .main-title {
-    font-family: 'Poppins', serif;
-    font-size: clamp(2.2rem, 2.1vw, 2.5rem);
-    line-height: 1.2;
-    margin: 0;
+  font-family: "Poppins", serif;
+  font-size: clamp(2.2rem, 2.1vw, 2.5rem);
+  line-height: 1.2;
+  margin: 0;
 }
 
 .sub-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(0.9rem, 1vw, 1.1rem);
-    font-weight: 400;
-    margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  font-weight: 400;
+  margin: 0;
 }
 /* Gaya untuk pembungkus CMS logo mitra */
 /* Wadah paling luar untuk logo, berfungsi sebagai frame statis-dinamis */
 .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(80px, 5.5vw, 100px);
+  display: flex;
+  width: 100%;
+  height: clamp(80px, 5.5vw, 100px);
 }
 
 /* Kontainer untuk daftar logo, agar bisa di-scroll atau wrap jika perlu */
 .hero-logos-flex {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 2.5rem;
-    height: 100%;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2.5rem;
+  height: 100%;
+  width: 100%;
 }
 
 /* Gaya untuk setiap item logo di dalam flex container (wadah gambar) */
 .logo-item-cms {
-    height: 100%; /* Tinggi item mengikuti tinggi flex container */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  height: 100%; /* Tinggi item mengikuti tinggi flex container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Gambar logo yang ukurannya akan menyesuaikan wadahnya */
 .bottom-logo {
-    /* KUNCI: Tinggi gambar tidak akan melebihi wadahnya (.logo-item-cms) */
-    max-height: 100%;
-    /* KUNCI: Lebar gambar juga tidak akan melebihi wadahnya */
-    max-width: 100%;
-    /* KUNCI: Tinggi disesuaikan otomatis untuk menjaga rasio aspek */
-    height: auto;
-    /* Memastikan gambar termuat utuh di dalam area yang tersedia */
-    object-fit: contain;
+  max-height: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.hero-right-parallax-wrapper {
+  flex: 0 0 45%;
+  aspect-ratio: 1 / 1;
+  max-width: 500px;
+  display: flex;
 }
 
 /* --- Hero Content Kanan (CMS) --- */
 .hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    
-    /* --- REVISI: Ukuran dinamis dan selalu di pojok kanan bawah --- */
-    width: 55vw;
-    height: 100%;
-    max-width: 800px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
-    max-height: 920px;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(150px);
+  animation:
+    /* REVISI: Sinkronkan waktu & properti untuk transisi yang mulus */
+    buildingSlideUp 3.5s cubic-bezier(0.25, 1.1, 0.36, 1) 0.3s forwards, /* Selesai pada t=2.5s */
+    smoothFloat 15s ease-in-out 3.6s infinite alternate; /* Mulai TEPAT pada t=2.5s */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(254, 253, 253, 0.46);
+  border-radius: 15%;
+  padding: 20px;
+  box-shadow: inset 0 0 10px rgba(14, 1, 84, 0.623),
+              inset 0 0 12px rgba(66, 180, 251, 0.742),
+              inset 0 0 5px rgba(252, 252, 252, 0.54),
+              inset 0 0 15px rgb(14, 14, 14),
+              0 0 20px -2px rgba(254, 254, 254, 0.39),
+              0 0 20px 0px rgba(0, 0, 0, 0.732);
+  display: flex;
+  /* --- REVISI BARU: Persiapan untuk Border Light Sweep --- */
+  position: relative; /* Diperlukan untuk memposisikan pseudo-element */
+  overflow: hidden;   /* Diperlukan untuk "memotong" cahaya yang berputar */
+}
+
+/* --- REVISI BARU: Efek kilatan cahaya pada border --- */
+.hero-right-cms::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1 / 1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 70%,
+    rgba(81, 151, 255, 0.347) 80%,
+    transparent 90%
+  );
+  animation: borderSweep 8s linear infinite;
+  z-index: 1;
+}
+
+@keyframes borderSweep {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 @keyframes buildingSlideUp {
-    0% {
-        opacity: 0;
-        transform: translateY(150px);
-    }
+  0% {
+    opacity: 1;
+    transform: translateY(60vh);
+    rotate: -5deg;
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    /* REVISI: Samakan state akhir dengan state awal smoothFloat */
+    transform: translateY(0);
+    rotate: 1deg;
+  }
+}
+
+@keyframes smoothFloat {
+  0% {
+    transform: translateY(0px);
+    rotate: 1deg;
+  }
+
+  35% {
+    transform: translateY(35px);
+    rotate: -2deg;
+  }
+
+  75% {
+    rotate: 1deg;
+  }
+
+  100% {
+    transform: translateY(-10px);
+    rotate: -1deg;
+  }
+}
+
+.bingkai-gambar-cms {
+  width: 100%;
+  height: 100%;
+  border-radius: 14%;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.573),
+              0 0 10px rgba(248, 248, 248, 0.81);
+  position: relative;
+  /* REVISI: Pastikan bingkai gambar berada di atas efek border sweep */
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.504);
 }
 
 .cms-dynamic-image {
-    /* --- REVISI: Paksa gambar untuk scale down (contain) bukan terpotong (cover) --- */
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* KUNCI: Menyesuaikan ukuran tanpa memotong */
-    object-position: right bottom; /* KUNCI: Menempel di pojok kanan bawah wadah */
-    
-    pointer-events: none;
-    will-change: transform;
-    transform: translateY(0);
-    transition: filter .25s linear;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  will-change: transform;
+  transform: translateY(0);
+  transition: filter 0.25s linear;
 }
 
 /* =========================================
    ANIMASI ENTRANCE (TYPEWRITER & FADE)
    ========================================= */
 .entrance-fade-down {
-    opacity: 0;
-    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+  opacity: 0;
+  animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
 }
 
 .entrance-fade-up {
-    opacity: 0;
-    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .entrance-fade-up-delay {
-    opacity: 0;
-    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
 }
 
 .opacity-0 {
-    opacity: 0 !important;
-    visibility: hidden;
+  opacity: 0 !important;
+  visibility: hidden;
 }
 
 /* Kursor berkedip layaknya terminal */
 .typing-cursor {
-    display: inline-block;
-    color: #ffffff;
-    font-weight: 300;
-    margin-left: 5px;
-    animation: blinkCursor 0.8s infinite;
+  display: inline-block;
+  color: #ffffff;
+  font-weight: 300;
+  margin-left: 5px;
+  animation: blinkCursor 0.8s infinite;
 }
 
 /* Sembunyikan kursor jika sudah selesai mengetik */
 .typing-cursor.stop-blink {
-    display: none;
+  display: none;
 }
 
 @keyframes fadeDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes blinkCursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
 
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0;
-    }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* ==========================================================================
@@ -310,378 +391,88 @@
 /* =========================================
    RESPONSIVE: BERDASARKAN LEBAR LAYAR (WIDTH-ONLY)
    ========================================= */
-@media (max-width: 1290px) and (min-height: 801px){
+@media (max-width: 1290px) and (min-height: 850px) {
     .landing-wrapper {
-        height: 100vh;
-        padding-top: 84px;
-        margin-top: -83px;
-    }
-
-    .hero-section {
-        align-items: stretch;
-    }
-
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        gap: 20px;
-        padding-bottom: 0px;
-        padding-top: 0px;
-        text-align: center;
-    }
-
-  
-
-    .hero-left-content {
-        display: flex;
-        padding-top: 5vh;
-        align-items: center;
-        width: 60%;
-        z-index: 10;
-    }
-
-    .hero-right-cms {
-        max-width: none;
-        width: 55%;
-        height: 60%;
-    }
-
-    .cms-dynamic-image {
-        position: relative;
-    }
-
-    .main-title {
-        font-size: clamp(2rem, 2.8vw, 2.3rem);
-    }
-
-    .welcome-text {
-        align-items: center;
-        text-align: center;
-        justify-content: center;
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(70px, 6.4vw, 90px);
+  margin-top: -160px;
+  padding-top: 160px;
 }
-.hero-logos-flex{
-    align-items: center;
+
+
+  /* Penyesuaian untuk layar yang lebar namun juga tinggi */
+  .hero-flex-container {
+    flex-direction: column;
     justify-content: center;
-}
-}
-
-@media (max-width: 888px) {
-    .landing-wrapper {
-        height: 100vh;
-        padding-top: 150px;
-        margin-top: -150px;
-    }
-
-    .hero-flex-container {
-        padding-top: 0px;
-        text-align: left;
-    }
-
-    .hero-left-content {
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding-top: 5vh;
-        width: clamp(50%, calc(515.2px - 0.15333vw), 100%);
-        z-index: 10;
-        gap: 0.5rem;
-
-    }
-
-    .hero-right-cms {
-        width: 500px;
-        max-width: 100%;
-        height: 50%;
-    }
-
-    .main-title {
-        font-size: clamp(1.8rem, 4.9vw, 2.7rem);
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(45px, 9vw, 70px);
-}
-
-.hero-logos-flex{
     align-items: flex-start;
-    justify-content: flex-start;
-}
+    padding: 0 6vw;
+    gap: 2em;
+  }
 
-
-}
-
-@media (max-width: 370px){
-
-    .hero-left-content {
-        text-align: center;
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-    }
-    .main-title{
-        font-size: clamp(1rem, 7vw, 1.5rem);
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    align-items: center;
+  .hero-left-content {
+    max-width: 600px;
     width: 100%;
-    height: clamp(45px, 9vw, 70px);
-}
+  }
 
-.hero-logos-flex{
-    justify-content: center;
-    align-items: center;
-}
+  .welcome-text {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+  }
 
-.welcome-text {
-    font-size: clamp(0.6rem, 5vw, 1.2rem);
-    justify-content: center;
-    align-items: center;
-}
+  .main-title {
+    font-size: clamp(2rem, 2vw, 2.3rem); /* Sedikit lebih kecil agar tidak terlalu dominan */
+  }
 
-.sub-title {
-    font-size: clamp(0.6rem, 3.7vw, 0.8rem);
-    font-weight: 500;
-}
-}
+  .sub-title {
+    font-size: clamp(0.85rem, 1.7vw, 1.2em); /* Sedikit lebih kecil */
+  }
 
-/* =========================================
-   RESPONSIVE: BERDASARKAN TINGGI LAYAR (HEIGHT-ONLY)
-   ========================================= */
-@media (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -150px;
-        padding-top: 145px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-right-cms {
-        max-width: none;
-        width: 50%;
-        height: 100%;
-    }
-
-    .hero-left-content {
-        width: 49%;
-        z-index: 10;
-        height: auto;
-    }
-
-    .welcome-text {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 1vw, 2.4rem);
-        font-weight: 500;
-    }
-
-    .main-title {
-        font-family: 'Poppins', serif;
-        font-size: clamp(2rem, 0vw, 2.2rem);
-        line-height: 1.2;
-        margin: 0;
-    }
-
-    .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 1.5vw, 1.2rem);
-        font-weight: 400;
-        margin: 0;
-    }
-
-    .hero-logos-wrapper-cms {
-        display: flex;
-        width: 100%;
-        height: clamp(70px, 5.5vw, 85px);
-    }
-}
-
-/* =========================================
-   RESPONSIVE: BERDASARKAN LEBAR & TINGGI LAYAR (WIDTH & HEIGHT)
-   ========================================= */
-
-@media (max-width: 1290px) and (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -83px;
-        padding-top: 84px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        height: 100%;
-        width: 100%;
-        gap: 20px;
-        padding-bottom: 0vh;
-        padding-top: 0px;
-    }
-
-    .hero-left-content {
-        padding:0px;
-        width: 45%;
-        gap: 0.5rem;
-
-    }
-
-.hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    width: 50%;
-    height: 80%;
-}
-
-    .main-title {
-        font-size: clamp(1.6rem, 4vw, 2rem);
-    }
-}
+  .hero-right-parallax-wrapper {
+    margin-right: 50px;
+    align-self: flex-end ;
+    flex: 0 0 40%; /* Kurangi ruang untuk gambar */
+    max-width: 480px; /* Batasi lebar maksimum gambar */
+  }
 
 
-@media (max-width: 888px) and (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -150px;
-        padding-top: 151px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        height: 100%;
-        width: 100%;
-        gap: 20px;
-        padding-top: 0px;
-    }
-
-        .hero-left-content {
-            margin-top: 20px;
-        padding:0px;
-        width: 75%;
-        gap: 0.5rem;
-
-    }
-
-.hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    width: 600px;
-    max-width: 100%;
-    height: 60%;
-}
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: clamp(45px, 9vw, 70px);
-}
-
-.hero-logos-flex{
+  .hero-logos-wrapper-cms {
+  height: clamp(70px, 7vw, 80px);
 }
 }
 
+@media (max-width: 888px) and (min-height: 850px) {
+  .hero-flex-container {
+    align-items: center; /* Override flex-start, pusatkan semua item secara horizontal */
+    text-align: center; /* Pastikan teks turunan juga terpusat */
+    gap:5rem;
+  }
+ 
+  .hero-left-content {
+    align-items: center; /* Pusatkan item di dalam konten kiri (misal: logo) */
+    width: 100%; /* Pastikan mengambil lebar penuh */
+  }
 
+  .main-title {
+    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Sesuaikan ukuran font untuk layar lebih sempit */
+  }
 
-@media (max-width: 480px) and (max-height: 800px) {
-    .hero-left-content {
-        padding-top: 3vh;
-        width: 100%;
-        gap: 0.5rem;
-    }
+  .sub-title {
+    font-size: clamp(0.8rem, 3vw, 1.1rem);
+  }
 
-    .hero-logos-wrapper-cms {
-        height: clamp(40px, 15vw, 120px);
-    }
+  .hero-logos-flex {
+    justify-content: center; /* Pusatkan logo-logo di dalamnya */
+  }
 
-    .main-title {
-        font-size: clamp(1rem, 6vw, 8rem);
-    }
+  .hero-logos-wrapper-cms {
+    height: clamp(60px, 8vw, 70px); /* Sedikit lebih kecil */
+  }
 
-    .welcome-text {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 3vw, 2.4rem);
-        font-weight: 500;
-    }
-
-    .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(0.8rem, 1.5vw, 1.2rem);
-        font-weight: 400;
-        margin: 0;
-    }
-
-    .hero-right-cms {
-    width: 100%;
-    height: 50%;
+  .hero-right-parallax-wrapper {
+    margin-right: 0; /* Hapus margin kanan dari breakpoint sebelumnya */
+    align-self: center; /* Pastikan gambar juga terpusat, override flex-end */
+    width: 70%; /* Buat lebar gambar lebih responsif */
+    max-width: 420px; /* Batasi lebar maksimum */
+  }
 }
+
+@media (max-width: 370px) and (min-height: 850px) {
+
 }
