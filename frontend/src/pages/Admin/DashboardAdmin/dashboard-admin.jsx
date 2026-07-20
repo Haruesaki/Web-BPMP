@@ -342,14 +342,17 @@ const DashboardAdmin = () => {
             </div>
           </div>
 
-          <div className="chart-area">
+          <div className={`chart-area${chartData.length > 14 ? ' chart-area--scroll' : ''}`}>
             {chartData.length === 0 ? (
               <div className="chart-empty">Tidak ada data pengunjung untuk filter yang dipilih.</div>
             ) : (
-              <div className="chart-scroll" style={{ minWidth: `${Math.max(chartData.length * 60, 480)}px` }}>
+              <div
+                className="chart-scroll"
+                style={chartData.length > 14 ? { minWidth: `${chartData.length * 60}px` } : undefined}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   {chartType === 'area' ? (
-                    <AreaChart data={chartData} margin={{ top: 20, right: 8, left: 0, bottom: 4 }}>
+                    <AreaChart data={chartData} margin={{ top: 20, right: 40, left: 0, bottom: 4 }}>
                       <defs>
                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor={CHART_BAR_COLOR} stopOpacity={0.8}/>
@@ -375,6 +378,8 @@ const DashboardAdmin = () => {
                       <Tooltip
                         content={<ChartTooltip chartMode={chartMode} />}
                         cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                        allowEscapeViewBox={{ x: false, y: false }}
+                        wrapperStyle={{ zIndex: 30 }}
                       />
                       <Area
                         type="monotone"
@@ -387,7 +392,7 @@ const DashboardAdmin = () => {
                       />
                     </AreaChart>
                   ) : (
-                    <BarChart data={chartData} margin={{ top: 20, right: 8, left: 0, bottom: 4 }}>
+                    <BarChart data={chartData} margin={{ top: 20, right: 40, left: 0, bottom: 4 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
                       <XAxis
                         dataKey="label"
@@ -407,6 +412,8 @@ const DashboardAdmin = () => {
                       <Tooltip
                         content={<ChartTooltip chartMode={chartMode} />}
                         cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                        allowEscapeViewBox={{ x: false, y: false }}
+                        wrapperStyle={{ zIndex: 30 }}
                       />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={46}>
                         {chartData.map((entry, index) => (
@@ -464,7 +471,7 @@ const DashboardAdmin = () => {
                 <tr>
                   <th className="activity-col-actor">PELAKU</th>
                   <th className="activity-col-role">ROLE</th>
-                  <th>DESKRIPSI</th>
+                  <th className="activity-col-desc">DESKRIPSI</th>
                   <th className="activity-col-time">WAKTU (WIB)</th>
                 </tr>
               </thead>
@@ -498,7 +505,7 @@ const DashboardAdmin = () => {
                           {a.role_admin}
                         </span>
                     </td>
-                    <td>{a.aksi}</td>
+                    <td className="activity-col-desc"><span className="activity-desc">{a.aksi}</span></td>
                     <td className="activity-col-time">{formatWaktu(a.created_at)}</td>
                   </tr>
                 ))}
