@@ -170,7 +170,7 @@
 
 /* ---------- CHART (Recharts) ---------- */
 .admin-layout .chart-area {
-    height: 300px;
+    height: 360px;
     overflow-x: auto;
     overflow-y: hidden;
 }
@@ -210,6 +210,53 @@
     font-size: 13.5px;
     font-weight: 600;
     color: var(--text-main);
+}
+
+/* ---------- RINGKASAN (Pengunjung Unik / Total Tayangan) ----------
+   Diletakkan di BAWAH chart, tanpa kotak/background berwarna — cuma
+   angka besar + label, dipisahkan garis tipis dari chart di atasnya
+   dan garis vertikal tipis antar-item supaya tetap tertata rapi. */
+.admin-layout .chart-summary {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+}
+
+.admin-layout .chart-summary-item {
+    flex: 1 1 180px;
+    max-width: 240px;
+    text-align: center;
+}
+
+.admin-layout .chart-summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.admin-layout .chart-summary-value-unik {
+    color: var(--purple-soft);
+}
+
+.admin-layout .chart-summary-value-hits {
+    color: var(--green);
+}
+
+.admin-layout .chart-summary-label {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.admin-layout .chart-summary-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border-soft);
 }
 
 /* ---------- CARD: ACTIVITY ---------- */
@@ -615,5 +662,10 @@
     .admin-layout .content-heading h1,
     .admin-layout .content-heading h2 {
         font-size: 24px;
+    }
+    /* Item ringkasan jadi bertumpuk vertikal di layar sempit — garis
+       pembatas vertikal dihilangkan karena tidak lagi relevan. */
+    .admin-layout .chart-summary-divider {
+        display: none;
     }
 }
