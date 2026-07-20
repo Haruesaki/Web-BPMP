@@ -114,6 +114,7 @@
     object-fit: contain;
     transition: transform 0.3s ease;
     z-index: 2;
+    border-radius: 100%;
 }
 
 .social-icon:hover {
