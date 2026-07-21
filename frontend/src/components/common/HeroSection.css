@@ -1,9 +1,3 @@
-/* =========================================
-   WADAH HALAMAN & ANIMASI (WRAPPERS)
-   ========================================= */
-
-
-
 .landing-wrapper {
   display: flex;
   flex-direction: column;
@@ -12,14 +6,10 @@
   --main-bg-color: #0b132b;
   background-color: var(--main-bg-color);
   position: relative;
-  /* === TRIK ABSOLUTE-STICKY === */
-  /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
   margin-top: -160px;
-  /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
   padding-top: 161px;
 }
 
-/* --- Efek Highlight Cahaya (Glass Shine) --- */
 .background-glow-container {
   position: absolute;
   top: 0;
@@ -36,9 +26,8 @@
   position: absolute;
   top: 0;
   left: -100%;
-  width: 30%; /* REVISI: Sedikit lebih lebar agar lebih menyebar */
+  width: 30%;
   height: 100%;
-  /* REVISI: Gradient dibuat lebih lembut, tidak terlalu terang, dan lebih menyatu */
   background: linear-gradient(
     to right,
     transparent 0%,
@@ -47,7 +36,7 @@
     rgba(255, 255, 255, 0.04) 75%,
     transparent 100%
   );
-  filter: blur(40px); /* REVISI: Blur ditingkatkan agar lebih halus */
+  filter: blur(40px);
   transform: skewX(35deg);
   animation: lightSweep 11s infinite;
 }
@@ -62,9 +51,6 @@
   }
 }
 
-/* =========================================
-   ANIMASI PARTIKEL
-   ========================================= */
 .particle-container {
   position: absolute;
   top: 0;
@@ -72,13 +58,13 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 1; /* Di bawah konten, tapi bisa di atas background glow */
+  z-index: 1;
   pointer-events: none;
 }
 
 .particle {
   position: absolute;
-  bottom: -10%; /* Mulai dari bawah layar */
+  bottom: -10%;
   background-color: rgba(255, 255, 255, 0.24);
   border-radius: 50%;
   filter: blur(0.5px);
@@ -97,14 +83,11 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(-70vh); /* Bergerak ke atas hingga hilang */
+    transform: translateY(-70vh);
     opacity: 0;
   }
 }
 
-/* =========================================
-   HERO SECTION UTAMA
-   ========================================= */
 .hero-section {
   flex: 1;
   position: relative;
@@ -126,16 +109,11 @@
   box-sizing: border-box;
 }
 
-/* REVISI BARU: Mencegah layout shift saat konten kanan kosong */
-/* Jika hanya ada satu anak (konten kiri), dorong ke kiri dengan margin auto */
 .hero-flex-container > :only-child {
-  /* 1. Dorong ke kiri untuk mempertahankan posisi */
   margin-right: auto; 
-  /* 2. CONTOH: Beri lebih banyak ruang agar tidak terlihat kosong */
   flex-basis: 55%;
 }
 
-/* --- Hero Content Kiri --- */
 .hero-left-content {
   display: flex;
   flex-direction: column;
@@ -152,7 +130,6 @@
   font-family: "Poppins", sans-serif;
   font-size: clamp(1.2rem, 1.5vw, 1.7rem);
   font-weight: 500;
-  /* Tambahan untuk adaptasi teks */
   overflow-wrap: break-word;
   min-width: 0;
   max-width: 100%;
@@ -163,12 +140,8 @@
   font-size: clamp(2.2rem, 2.1vw, 2.5rem);
   line-height: 1.2;
   margin: 0;
-  /* REVISI FINAL: Ganti ke overflow-wrap agar kata utuh tidak terpotong di tengah. */
-  /* Ini akan memindahkan seluruh kata ke baris baru jika tidak muat. */
   overflow-wrap: break-word;
-  /* KUNCI: Izinkan flex item ini untuk menyusut di bawah ukuran kontennya */
   min-width: 0;
-  /* KUNCI 2: Batasi lebar maksimum secara eksplisit agar tidak meluap */
   max-width: 100%;
 }
 
@@ -177,20 +150,17 @@
   font-size: clamp(0.9rem, 1vw, 1.1rem);
   font-weight: 400;
   margin: 0;
-  /* Tambahan untuk adaptasi teks */
   overflow-wrap: break-word;
   min-width: 0;
   max-width: 100%;
 }
-/* Gaya untuk pembungkus CMS logo mitra */
-/* Wadah paling luar untuk logo, berfungsi sebagai frame statis-dinamis */
+
 .hero-logos-wrapper-cms {
   display: flex;
   width: 100%;
   height: clamp(80px, 5.5vw, 100px);
 }
 
-/* Kontainer untuk daftar logo, agar bisa di-scroll atau wrap jika perlu */
 .hero-logos-flex {
   display: flex;
   flex-direction: row;
@@ -201,15 +171,13 @@
   width: 100%;
 }
 
-/* Gaya untuk setiap item logo di dalam flex container (wadah gambar) */
 .logo-item-cms {
-  height: 100%; /* Tinggi item mengikuti tinggi flex container */
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Gambar logo yang ukurannya akan menyesuaikan wadahnya */
 .bottom-logo {
   max-height: 100%;
   max-width: 100%;
@@ -224,7 +192,6 @@
   display: flex;
 }
 
-/* --- Hero Content Kanan (CMS) --- */
 .hero-right-cms {
   width: 100%;
   height: 100%;
@@ -232,9 +199,8 @@
   opacity: 0;
   transform: translateY(150px);
   animation:
-    /* REVISI: Sinkronkan waktu & properti untuk transisi yang mulus */
-    buildingSlideUp 4s cubic-bezier(0.34, 1, 0.5, 1) 0.3s forwards, /* Selesai pada t=2.5s */
-    smoothFloat 15s ease-in-out 4s infinite alternate; /* Mulai TEPAT pada t=2.5s */
+    buildingSlideUp 4s cubic-bezier(0.34, 1, 0.5, 1) 0.3s forwards,
+    smoothFloat 15s ease-in-out 4s infinite alternate;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -248,12 +214,10 @@
               0 0 20px -2px rgba(254, 254, 254, 0.148),
               0 0 20px 0px rgba(0, 0, 0, 0.732);
   display: flex;
-  /* --- REVISI BARU: Persiapan untuk Border Light Sweep --- */
-  position: relative; /* Diperlukan untuk memposisikan pseudo-element */
-  overflow: hidden;   /* Diperlukan untuk "memotong" cahaya yang berputar */
+  position: relative;
+  overflow: hidden;
 }
 
-/* --- REVISI BARU: Efek kilatan cahaya pada border --- */
 .hero-right-cms::before {
   content: '';
   position: absolute;
@@ -269,23 +233,19 @@
     transparent 90%
   );
   animation: borderSweep 8s linear infinite;
-  z-index: 1; /* Di atas background, di bawah masker */
+  z-index: 1;
 }
 
-/* REVISI: Lapisan "masker" fisik untuk membatasi light sweep hanya di border */
 .hero-right-cms::after {
   content: '';
   position: absolute;
-  /* Posisikan tepat di dalam area padding */
   top: 20px;
   left: 20px;
   right: 20px;
   bottom: 20px;
-  /* Beri warna solid yang sama dengan background utama untuk efek "lubang" */
   background: var(--main-bg-color);
-  /* Sesuaikan border-radius agar pas di dalam */
   border-radius: 14%;
-  z-index: 2; /* Posisikan di atas light sweep, di bawah gambar */
+  z-index: 2;
 }
 
 @keyframes borderSweep {
@@ -306,7 +266,6 @@
 
   100% {
     opacity: 1;
-    /* REVISI: Samakan state akhir dengan state awal smoothFloat */
     transform: translateY(0) translateX(0) scale(1);
     rotate: 1deg;
   }
@@ -341,7 +300,6 @@
   box-shadow: 0 0 20px rgba(40, 40, 40, 0.415),
               0 0 10px rgba(32, 101, 211, 0.556);
   position: relative;
-  /* REVISI: Naikkan agar di atas lapisan masker ::after */
   z-index: 3;
   border: 1px solid rgba(255, 255, 255, 0.585);
 }
@@ -349,8 +307,6 @@
 .cms-dynamic-image {
   width: 100%;
   height: 100%;
-  /* REVISI: 'contain' akan membuat gambar menyusut agar muat sepenuhnya di dalam bingkai, */
-  /* menjaga rasio aspek dan merespons perubahan lebar & tinggi wadah. */
   object-fit: contain;
   object-position: center;
   pointer-events: none;
@@ -359,9 +315,6 @@
   transition: filter 0.25s linear;
 }
 
-/* =========================================
-   ANIMASI ENTRANCE (TYPEWRITER & FADE)
-   ========================================= */
 .entrance-fade-down {
   opacity: 0;
   animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
@@ -382,7 +335,6 @@
   visibility: hidden;
 }
 
-/* Kursor berkedip layaknya terminal */
 .typing-cursor {
   display: inline-block;
   color: #ffffff;
@@ -391,7 +343,6 @@
   animation: blinkCursor 0.8s infinite;
 }
 
-/* Sembunyikan kursor jika sudah selesai mengetik */
 .typing-cursor.stop-blink {
   display: none;
 }
@@ -431,21 +382,12 @@
   }
 }
 
-/* ==========================================================================
-   KUMPULAN MEDIA QUERIES UNTUK RESPONSIVE DESIGN
-   ========================================================================== */
-
-/* =========================================
-   RESPONSIVE: BERDASARKAN LEBAR LAYAR (WIDTH-ONLY)
-   ========================================= */
 @media (max-width: 1290px) and (min-height: 900px) {
     .landing-wrapper {
   margin-top: -160px;
   padding-top: 160px;
 }
 
-
-  /* Penyesuaian untuk layar yang lebar namun juga tinggi */
   .hero-flex-container {
     flex-direction: column;
     justify-content: center;
@@ -464,20 +406,19 @@
   }
 
   .main-title {
-    font-size: clamp(2rem, 2vw, 2.3rem); /* Sedikit lebih kecil agar tidak terlalu dominan */
+    font-size: clamp(2rem, 2vw, 2.3rem);
   }
 
   .sub-title {
-    font-size: clamp(0.85rem, 1.7vw, 1.2em); /* Sedikit lebih kecil */
+    font-size: clamp(0.85rem, 1.7vw, 1.2em);
   }
 
   .hero-right-parallax-wrapper {
     margin-right: 50px;
     align-self: flex-end ;
-    flex: 0 0 40%; /* Kurangi ruang untuk gambar */
-    max-width: 400px; /* Batasi lebar maksimum gambar */
+    flex: 0 0 40%;
+    max-width: 400px;
   }
-
 
   .hero-logos-wrapper-cms {
   height: clamp(70px, 7vw, 80px);
@@ -486,18 +427,18 @@
 
 @media (max-width: 610px) and (min-height: 900px) {
   .hero-flex-container {
-    align-items: center; /* Override flex-start, pusatkan semua item secara horizontal */
-    text-align: center; /* Pastikan teks turunan juga terpusat */
+    align-items: center;
+    text-align: center;
     gap:5rem;
   }
  
   .hero-left-content {
-    align-items: center; /* Pusatkan item di dalam konten kiri (misal: logo) */
-    width: 100%; /* Pastikan mengambil lebar penuh */
+    align-items: center;
+    width: 100%;
   }
 
   .main-title {
-    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Sesuaikan ukuran font untuk layar lebih sempit */
+    font-size: clamp(1.8rem, 5vw, 2.2rem);
   }
 
   .sub-title {
@@ -505,33 +446,30 @@
   }
 
   .hero-logos-flex {
-    justify-content: center; /* Pusatkan logo-logo di dalamnya */
+    justify-content: center;
   }
 
   .hero-logos-wrapper-cms {
-    height: clamp(60px, 8vw, 70px); /* Sedikit lebih kecil */
+    height: clamp(60px, 8vw, 70px);
   }
 
   .hero-right-parallax-wrapper {
-    margin-right: 0; /* Hapus margin kanan dari breakpoint sebelumnya */
-    align-self: center; /* Pastikan gambar juga terpusat, override flex-end */
-    width: 70%; /* Buat lebar gambar lebih responsif */
-    max-width: 400px; /* Batasi lebar maksimum */
+    margin-right: 0;
+    align-self: center;
+    width: 70%;
+    max-width: 400px;
   }
 }
 
 @media (max-width: 370px) and (min-height: 900px) {
   .hero-right-parallax-wrapper {
-    margin-right: 0; /* Hapus margin kanan dari breakpoint sebelumnya */
-    align-self: center; /* Pastikan gambar juga terpusat, override flex-end */
-    width: 80%; /* Buat lebar gambar lebih responsif */
-    max-width: 400px; /* Batasi lebar maksimum */
+    margin-right: 0;
+    align-self: center;
+    width: 80%;
+    max-width: 400px;
   }
 }
 
-/* =========================================
-   RESPONSIVE: BERDASARKAN TINGGI LAYAR (HEIGHT-ONLY)
-   ========================================= */
 @media (max-height: 899px) {
     .landing-wrapper {
   margin-top: -160px;
@@ -539,7 +477,6 @@
 }
 
 
-  /* Penyesuaian untuk layar yang lebar namun juga tinggi */
   .hero-flex-container {
     padding: 0 6vw;
     gap: 5em;
@@ -551,40 +488,28 @@
   }
 
   .welcome-text {
-    /* Adaptif terhadap lebar & tinggi */
     font-size: clamp(1rem, min(2vw, 3vh), 1.5rem);
   }
 
   .main-title {
-    /* KUNCI: Gabungkan vw dan vh menggunakan min() untuk mengambil nilai terkecil. */
-    /* Ini membuat font responsif terhadap lebar dan tinggi secara bersamaan. */
     font-size: clamp(1.5rem, min(4.3vw, 4.3vh), 2.3rem);
   }
 
   .sub-title {
-    /* Adaptif terhadap lebar & tinggi */
     font-size: clamp(0.85rem, min(1.7vw, 2.5vh), 1.2rem);
   }
 
   .hero-right-parallax-wrapper {
     margin-right: 50px;
     align-self: flex-end;
-    /* KUNCI: Batasi tinggi berdasarkan tinggi viewport, bukan persentase. */
-    /* Dengan aspect-ratio: 1/1 yang sudah ada, lebar akan ikut menyesuaikan. */
-    max-height: 45vh; /* Contoh: Maksimal 45% dari tinggi layar */
-    max-width: 45vh;  /* Samakan dengan max-height untuk menjaga rasio 1:1 */
+    max-height: 45vh;
+    max-width: 45vh;
   }
-
 
   .hero-logos-wrapper-cms {
   height: clamp(70px, 7vw, 80px);
 }
 }
-
-/* ==========================================================================
-   RESPONSIVE: BERDASARKAN KOMBINASI LEBAR & TINGGI LAYAR
-   (Menangani layar pendek seperti mobile landscape)
-   ========================================================================== */
 
 @media (max-width: 1290px) and (max-height: 899px) {
     .landing-wrapper {
@@ -592,8 +517,6 @@
   padding-top: 160px;
 }
 
-
-  /* Penyesuaian untuk layar yang lebar namun juga tinggi */
   .hero-flex-container {
     flex-direction: row;
     justify-content: center;
@@ -610,17 +533,14 @@
   }
 
   .welcome-text {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi */
     font-size: clamp(0.8rem, min(2.3vw, 3vh), 1.5rem);
   }
 
   .main-title {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi */
     font-size: clamp(1rem, min(2.9vw, 4.3vh), 2rem);
   }
 
   .sub-title {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi */
     font-size: clamp(0.9rem, min(1.9vw, 2.5vh), 1.2rem);
   }
 
@@ -628,11 +548,9 @@
     margin-right: 50px;
     justify-self: flex-start;
     align-self: flex-end;
-    /* KESELARASAN: Terapkan logika responsif berbasis tinggi layar yang konsisten */
     max-height: 40vh;
     max-width: 40vh;
   }
-
 
   .hero-logos-wrapper-cms {
   height: clamp(55px, 5vw, 70px);
@@ -641,7 +559,6 @@
 
 @media (max-width: 888px) and (max-height: 899px) {
   .hero-right-parallax-wrapper {
-    /* KESELARASAN: Terapkan logika responsif berbasis tinggi layar yang konsisten */
     max-height: 33vh;
     max-width: 33vh;
   }
@@ -650,28 +567,25 @@
   .hero-flex-container {
     flex-direction: column;
     justify-content: center;
-    align-items: center; /* Override flex-start, pusatkan semua item secara horizontal */
-    text-align: center; /* Pastikan teks turunan juga terpusat */
+    align-items: center;
+    text-align: center;
     gap:1rem;
   }
  
   .hero-left-content {
-    align-items: center; /* Pusatkan item di dalam konten kiri (misal: logo) */
-    width: 100%; /* Pastikan mengambil lebar penuh */
+    align-items: center;
+    width: 100%;
   }
 
    .welcome-text {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi */
     font-size: clamp(0.7rem, min(2.3vw, 3vh), 1.5rem);
   }
 
     .sub-title {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi */
     font-size: clamp(0.6rem, min(1.9vw, 2.5vh), 1.2rem);
   }
 
   .main-title {
-    /* KESELARASAN: Adaptif terhadap lebar & tinggi untuk layar sempit */
     font-size: clamp(0.9rem, min(4vw, 6vh), 2.2rem);
   }
 
@@ -688,7 +602,7 @@
   }
 
     .hero-logos-flex {
-    justify-content: center; /* Pusatkan logo-logo di dalamnya */
+    justify-content: center;
   }
 }
 
