@@ -59,6 +59,11 @@
 
 .news-right {
   flex: 1;
+  /* Sumber TUNGGAL tinggi & jarak kartu berita. Dipakai bersama oleh
+     .news-list (tinggi baris grid) dan .news-item (NewsCard.css), agar
+     keduanya tidak pernah "drift" saat salah satu diubah. */
+  --news-card-h: clamp(110px, 8.6vw, 130px);
+  --news-card-gap: clamp(12px, 1.5vw, 16px);
 }
 
 
@@ -201,10 +206,13 @@
   letter-spacing: 0.5px;
 }
 
+/* KUNCI: jumlah baris DIKUNCI 4 (sesuai ITEMS_PER_PAGE). Mau isinya 1, 2, 3,
+   atau 4 berita, tinggi wadah TETAP sama — baris yang tak terisi hanya menjadi
+   ruang kosong. Konsep identik dengan .thumbnail-row yang mengunci 3 slot. */
 .news-list {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 1.5vw, 16px);
+  display: grid;
+  grid-template-rows: repeat(4, var(--news-card-h));
+  gap: var(--news-card-gap);
 }
 
 /* --- Pagination Berita --- */
@@ -286,6 +294,12 @@
     width: 100%;
     height: 2px;
     margin: 20px 0;
+  }
+
+  .news-right {
+    /* Cukup ganti variabelnya — .news-list & .news-item ikut menyesuaikan,
+       jadi tinggi baris grid selalu sinkron dengan tinggi kartu. */
+    --news-card-h: clamp(100px, 13vw, 140px);
   }
 
   .news-header-bar {

@@ -45,6 +45,12 @@
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+/* Baris dapat diklik untuk membuka lokasi berita. Sel gagang-seret, thumbnail,
+   dan tombol hapus tetap punya kursornya sendiri. */
+.bs-row-clickable {
+  cursor: pointer;
+}
+
 .bs-table tbody tr:last-child td {
   border-bottom: none;
 }

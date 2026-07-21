@@ -2,7 +2,10 @@
     position: relative;
     display: flex;
     width: 100%;
-    height: clamp(110px, 8.6vw, 130px);
+    /* Memakai variabel dari .news-right agar tinggi kartu SELALU sama dengan
+       tinggi baris grid .news-list. Fallback menjaga tampilan bila komponen
+       ini dipakai di luar konteks tersebut. */
+    height: var(--news-card-h, clamp(110px, 8.6vw, 130px));
     align-items: center;
     background: linear-gradient(90deg, #1A3C87 0%, #10255A 100%);
     border: 1.5px solid #3498DB;
@@ -80,7 +83,9 @@
 
 .news-item {
     width: 100%;
-    height: clamp(100px, 13vw, 140px);
+    /* Variabel sudah diganti untuk mobile di NewsSection.css, jadi tinggi
+       kartu tetap sinkron dengan tinggi baris grid .news-list. */
+    height: var(--news-card-h, clamp(100px, 13vw, 140px));
     align-items: center;
     padding: clamp(12px, 1.5vw, 16px) 10px clamp(12px, 1.5vw, 16px) clamp(24px, 1.6vw, 45px);
 }
@@ -93,6 +98,7 @@
     /* KUNCI: Menambahkan ellipsis (...) jika judul melebihi 3 baris */
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import CustomAlert from '../CustomAlert';
 import NewsSection from '../../user/berita/NewsSection';
@@ -20,7 +21,17 @@ const formatWaktu = (iso) => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 
+// Bentuk rute admin menuju lokasi berita/konten — selaras dengan generatePath
+// di AdminSidebar agar tujuannya konsisten dengan navigasi sidebar.
+const buildBeritaPath = (item) => {
+  if (!item.menu_id) return null;
+  const layout = item.menu_layout || 'default';
+  if (layout === 'profile-card') return `/admin/kelola-profil/${item.menu_id}`;
+  return `/admin/post/${layout}/${item.menu_id}`;
+};
+
 const BeritaSectionForm = () => {
+  const navigate = useNavigate();
   const [beritaList, setBeritaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,6 +66,22 @@ const BeritaSectionForm = () => {
     };
     fetchBerita();
   }, []);
+
+  // Klik baris → buka lokasi berita/konten tersebut di panel admin.
+  const handleRowClick = (item) => {
+    const path = buildBeritaPath(item);
+    if (!path) {
+      showAlert(
+        'error',
+        'Berita ini tidak terhubung ke menu mana pun, sehingga lokasinya tidak dapat dibuka.',
+        'Lokasi Tidak Ditemukan'
+      );
+      return;
+    }
+    // Bawa state yang sama seperti navigasi dari sidebar agar halaman tujuan
+    // menerima konteks menu dengan benar.
+    navigate(path, { state: { menuName: item.kategori, menuId: String(item.menu_id) } });
+  };
 
   const handleThumbClick = (item) => {
     setUploadTarget(item);
@@ -202,12 +229,15 @@ const BeritaSectionForm = () => {
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnd={() => { setDraggedIndex(null); setIsDraggable(false); }}
                   onDrop={(e) => handleDrop(e, i)}
-                  className={isDragging ? 'bs-row-dragging' : ''}
+                  onClick={() => handleRowClick(b)}
+                  className={`bs-row-clickable ${isDragging ? 'bs-row-dragging' : ''}`}
+                  title="Klik untuk membuka lokasi berita ini"
                 >
-                  <td 
+                  <td
                     style={{ textAlign: 'center', color: '#666', cursor: 'grab' }}
                     onMouseEnter={() => setIsDraggable(true)}
                     onMouseLeave={() => setIsDraggable(false)}
+                    onClick={(e) => e.stopPropagation()}
                     title="Seret untuk memindah urutan"
                   >
                     <i className="fa-solid fa-grip-vertical"></i>
@@ -216,7 +246,7 @@ const BeritaSectionForm = () => {
                   <td>
                     <div 
                       className="bs-thumb" 
-                      onClick={() => handleThumbClick(b)} 
+                      onClick={(e) => { e.stopPropagation(); handleThumbClick(b); }}
                       title="Klik untuk mengubah thumbnail"
                       style={{ cursor: 'pointer', position: 'relative' }}
                     >
@@ -240,7 +270,7 @@ const BeritaSectionForm = () => {
                     <button 
                       className="bs-btn-delete" 
                       title="Hapus dari Beranda"
-                      onClick={() => requestDelete(b)}
+                      onClick={(e) => { e.stopPropagation(); requestDelete(b); }}
                     >
                       <i className="fa-solid fa-trash-can"></i>
                     </button>

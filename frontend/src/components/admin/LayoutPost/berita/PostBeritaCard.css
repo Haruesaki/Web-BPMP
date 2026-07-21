@@ -449,6 +449,13 @@
 .bc-modal-box {
     width: 100%;
     max-width: 420px;
+    /* Tanpa ini, padding ditambahkan DI LUAR max-width sehingga kotak jadi
+       ±44px lebih lebar dari yang dimaksud (proyek tak punya reset global). */
+    box-sizing: border-box;
+    /* Pengaman: judul yang sangat panjang tidak membuat modal lebih tinggi
+       dari layar — isinya bergulir di dalam modal. */
+    max-height: 85vh;
+    overflow-y: auto;
     background: #131a2e;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
@@ -468,6 +475,10 @@
     font-size: 13.5px;
     line-height: 1.55;
     color: #c7c4d8;
+    /* KUNCI: penggal judul super panjang tanpa spasi agar turun ke bawah,
+       bukan menembus batas modal. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .bc-modal-actions {

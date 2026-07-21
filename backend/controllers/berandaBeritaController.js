@@ -13,7 +13,10 @@ class BerandaBeritaController {
           'berita.url_foto as coverUrl',
           'berita.waktu_tayang as tanggal',
           'berita.urutan_beranda',
-          'menu.nama_menu as kategori'
+          'menu.nama_menu as kategori',
+          // Dipakai panel admin untuk membangun tautan ke lokasi berita.
+          'menu.id as menu_id',
+          'menu.slug_atau_tautan as menu_layout'
         )
         .where('berita.status', 'terbit');
 
@@ -28,7 +31,10 @@ class BerandaBeritaController {
           'halaman_konten.tanggal_terbit as tanggal', // bisa null, fallback ke diperbarui_pada
           'halaman_konten.diperbarui_pada',
           'halaman_konten.urutan_beranda',
-          'menu.nama_menu as kategori'
+          'menu.nama_menu as kategori',
+          // Dipakai panel admin untuk membangun tautan ke lokasi konten.
+          'menu.id as menu_id',
+          'menu.slug_atau_tautan as menu_layout'
         )
         .where('halaman_konten.status', 'terbit');
 
@@ -41,6 +47,8 @@ class BerandaBeritaController {
         tanggal: b.tanggal,
         urutan_beranda: b.urutan_beranda || 0,
         kategori: b.kategori || 'Berita',
+        menu_id: b.menu_id || null,
+        menu_layout: b.menu_layout || null,
         sumber: 'berita'
       }));
 
@@ -61,6 +69,8 @@ class BerandaBeritaController {
           tanggal: k.tanggal || k.diperbarui_pada,
           urutan_beranda: k.urutan_beranda || 0,
           kategori: k.kategori || 'Artikel',
+          menu_id: k.menu_id || null,
+          menu_layout: k.menu_layout || null,
           sumber: 'halaman_konten'
         };
       });
