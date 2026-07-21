@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './InstagramSection.css';
 
 import Logo from "../../../assets/source/Logo.png";
@@ -11,28 +11,53 @@ const getFullUrl = (url) => {
   return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-const InstagramEmbedCard = React.memo(({ postId }) => {
+// Script embed Instagram hanya dimuat sekali dan dipakai bersama oleh semua kartu
+let instagramScriptPromise = null;
+const loadInstagramScript = () => {
+    if (instagramScriptPromise) return instagramScriptPromise;
+
+    instagramScriptPromise = new Promise((resolve) => {
+        if (window.instgrm) return resolve();
+
+        const existing = document.getElementById('instagram-embed-script');
+        if (existing) {
+            existing.addEventListener('load', resolve);
+            existing.addEventListener('error', resolve);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = 'instagram-embed-script';
+        script.src = 'https://www.instagram.com/embed.js';
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = resolve; // tetap lanjut walau gagal agar tidak menggantung
+        document.body.appendChild(script);
+    });
+
+    return instagramScriptPromise;
+};
+
+const InstagramEmbedCard = React.memo(({ postId, active }) => {
     useEffect(() => {
-        // Fungsi untuk memicu proses embed dari script Instagram
-        const processInstagram = () => {
+        // Embed baru diproses saat section sudah mendekati layar (lihat prop active)
+        if (!active) return;
+
+        let cancelled = false;
+        loadInstagramScript().then(() => {
+            if (cancelled) return;
             if (window.instgrm) {
                 window.instgrm.Embeds.process();
             }
-        };
+        });
 
-        // Cek apakah script sudah ada, jika belum muat scriptnya
-        if (!document.getElementById('instagram-embed-script')) {
-            const script = document.createElement('script');
-            script.id = 'instagram-embed-script';
-            script.src = 'https://www.instagram.com/embed.js';
-            script.async = true;
-            script.onload = processInstagram;
-            document.body.appendChild(script);
-        } else {
-            // Jika sudah ada, beri sedikit jeda agar DOM terupdate lalu jalankan ulang process()
-            setTimeout(processInstagram, 100);
-        }
-    }, [postId]);
+        return () => { cancelled = true; };
+    }, [postId, active]);
+
+    // Placeholder ringan selama embed belum dimuat, agar tidak ada lompatan layout
+    if (!active) {
+        return <div className="ig-post-card ig-embed-wrapper ig-embed-skeleton" aria-hidden="true" />;
+    }
 
     return (
         <div className="ig-post-card ig-embed-wrapper">
@@ -45,11 +70,14 @@ const InstagramEmbedCard = React.memo(({ postId }) => {
             </blockquote>
         </div>
     );
-}, (prevProps, nextProps) => prevProps.postId === nextProps.postId);
+}, (prevProps, nextProps) => prevProps.postId === nextProps.postId && prevProps.active === nextProps.active);
 
 
 const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
     const followBtnWrapperRef = useRef(null);
+    const feedGridRef = useRef(null);
+    // Di mode preview embed langsung ditampilkan, di halaman user menunggu user scroll mendekat
+    const [embedsActive, setEmbedsActive] = useState(isPreviewMode);
     const scrollState = useRef({
         currentY: 0,
         targetY: 0,
@@ -109,6 +137,27 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (embedsActive) return;
+
+        const grid = feedGridRef.current;
+        if (!grid || typeof IntersectionObserver === 'undefined') {
+            setEmbedsActive(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                setEmbedsActive(true);
+                observer.disconnect();
+            }
+        }, { rootMargin: '400px 0px' }); // mulai memuat sedikit sebelum section terlihat
+
+        observer.observe(grid);
+
+        return () => observer.disconnect();
+    }, [embedsActive]);
+
     return (
         <section className="container-instagram-section">
         <section className="instagram-section">
@@ -158,18 +207,18 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
             </div>
 
             <div className="ig-feed-section">
-                <div className="ig-feed-grid">
+                <div className="ig-feed-grid" ref={feedGridRef}>
                     {/* Dynamic Instagram Embed Component */}
                     {igProfile && igProfile.embed_links && igProfile.embed_links.length > 0 ? (
                         igProfile.embed_links.map((linkId, index) => (
-                            linkId ? <InstagramEmbedCard key={index} postId={linkId} /> : null
+                            linkId ? <InstagramEmbedCard key={index} postId={linkId} active={embedsActive} /> : null
                         ))
                     ) : (
                         <>
-                            <InstagramEmbedCard postId="DaMGvRKAb7z" />
-                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" />
-                            <InstagramEmbedCard postId="DaNwf5vyIYn" />
-                            <InstagramEmbedCard postId="DaKohaEPomy" />
+                            <InstagramEmbedCard postId="DaMGvRKAb7z" active={embedsActive} />
+                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" active={embedsActive} />
+                            <InstagramEmbedCard postId="DaNwf5vyIYn" active={embedsActive} />
+                            <InstagramEmbedCard postId="DaKohaEPomy" active={embedsActive} />
                         </>
                     )}
                 </div>
