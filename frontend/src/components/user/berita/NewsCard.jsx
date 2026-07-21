@@ -1,7 +1,7 @@
 import React from 'react';
 import './NewsCard.css';
 
-const NewsCard = ({ category, title, date, link = "#", onMouseEnter, onFocus }) => {
+const NewsCard = ({ title, date, link = "#", onMouseEnter, onFocus }) => {
   return (
     <a
       href={link}
