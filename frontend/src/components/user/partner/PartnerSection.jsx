@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import './PartnerSection.css';
-import Mitra1Jpg from "../../../assets/source/Unila.jpeg";
-import Mitra1Png from "../../../assets/source/Unila.jpeg";
-import Mitra2 from "../../../assets/source/Unila.jpeg";
-import Mitra4 from "../../../assets/source/Unila.jpeg";
-import Mitra5 from "../../../assets/source/Unila.jpeg";
 
 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const getFullUrl = (url) => {
@@ -14,7 +9,7 @@ const getFullUrl = (url) => {
   return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-const fallbackMitra = [Mitra1Jpg, Mitra5, Mitra2, Mitra4, Mitra1Png];
+const fallbackMitra = [];
 
 const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
     const trackRef = useRef(null);
@@ -127,11 +122,11 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
                     screenWidth,
                     baseSpeedPerSecond: 70,
                     scrollSensitivityPerSecond: 24,
-                    maxRotation: 38, // Rotasi logo di tepi layar
+                    maxRotation: 55, // Rotasi logo di tepi layar
                     minScale: 1.1,   // Ukuran logo di titik tengah
                     maxScale: 1.4,   // Ukuran logo di sisi kanan/kiri
                     maxDepth: 540,   // Jarak kedalaman 3D
-                    perspective: 760,// Kekuatan efek perspektif
+                    perspective: 660,// Kekuatan efek perspektif
                 };
             }
 
@@ -139,11 +134,11 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
                 screenWidth,
                 baseSpeedPerSecond: 120,
                 scrollSensitivityPerSecond: 38,
-                maxRotation: 50, // Rotasi logo di tepi layar
+                maxRotation: 30, // Rotasi logo di tepi layar
                 minScale: 2.4,   // Ukuran logo di titik tengah
-                maxScale: 4.5,   // Ukuran logo di sisi kanan/kiri
-                maxDepth: 600,   // Jarak kedalaman 3D
-                perspective: 180,// Kekuatan efek perspektif
+                maxScale: 4,   // Ukuran logo di sisi kanan/kiri
+                maxDepth: 800,   // Jarak kedalaman 3D
+                perspective: 200,// Kekuatan efek perspektif
             };
         };
 
