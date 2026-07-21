@@ -12,6 +12,9 @@ const InstagramSectionForm = () => {
   const [isSavingEmbeds, setIsSavingEmbeds] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [alertState, setAlertState] = useState({ isOpen: false });
+  // Pop-up sukses simpan: memakai style .cb-success-* yang sama persis dengan
+  // Landing Page / Header / Floating Media Sosial (lihat CustomizeBeranda.css).
+  const [successMessage, setSuccessMessage] = useState('');
 
   const showAlert = (type, message, title) => {
     setAlertState({
@@ -56,7 +59,7 @@ const InstagramSectionForm = () => {
       if (res.data?.success && res.data?.data) {
         const data = typeof res.data.data === 'string' ? JSON.parse(res.data.data) : res.data.data;
         setIgProfile(data);
-        showAlert('success', 'Informasi akun Instagram berhasil diperbarui!', 'Berhasil');
+        setSuccessMessage('Informasi akun Instagram Anda telah diperbarui.');
       }
     } catch (error) {
       console.error('Gagal memperbarui profil Instagram:', error);
@@ -89,7 +92,7 @@ const InstagramSectionForm = () => {
           setEmbedLinks(loadedLinks.slice(0, 4));
         }
 
-        showAlert('success', 'Link embed postingan berhasil disimpan!', 'Berhasil');
+        setSuccessMessage('Link embed postingan Instagram Anda telah diperbarui.');
       }
     } catch (error) {
       console.error('Gagal menyimpan link embed:', error);
@@ -188,7 +191,49 @@ const InstagramSectionForm = () => {
         </button>
       </div>
 
-      <CustomAlert 
+      {/* Pop-up sukses simpan — markup & class disalin dari modal sukses
+          Landing Page / Header / Floating Media Sosial di CustomizeBeranda.jsx */}
+      {successMessage && (
+        <div
+          className="cb-success-overlay"
+          data-lenis-prevent="true"
+          onClick={() => setSuccessMessage('')}
+        >
+          <div
+            className="cb-success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cb-ig-success-title"
+            aria-describedby="cb-ig-success-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="cb-success-close"
+              aria-label="Tutup notifikasi"
+              onClick={() => setSuccessMessage('')}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden="true" />
+            </button>
+            <div className="cb-success-icon" aria-hidden="true">
+              <i className="fa-solid fa-check" />
+            </div>
+            <h2 id="cb-ig-success-title">Perubahan berhasil disimpan!</h2>
+            <p id="cb-ig-success-description">{successMessage}</p>
+            <button
+              type="button"
+              className="cb-success-button"
+              onClick={() => setSuccessMessage('')}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* CustomAlert kini HANYA untuk notifikasi gagal (pola sama seperti
+          CustomizeBeranda: sukses → modal di atas, error → CustomAlert). */}
+      <CustomAlert
         isOpen={alertState.isOpen}
         type={alertState.type}
         title={alertState.title}

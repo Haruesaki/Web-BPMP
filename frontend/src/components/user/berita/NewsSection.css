@@ -49,6 +49,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Wajib agar kolom boleh menyusut & konten panjang tidak mendorong layout. */
+  min-width: 0;
 }
 
 .news-left{
@@ -83,10 +85,6 @@
   overflow: hidden;
 }
 
-.featured-card-track {
-  /* Elemen ini tidak lagi digunakan. */
-}
-
 /* Setiap kartu sekarang adalah unit animasi yang lengkap */
 .featured-card {
   width: 100%;
@@ -116,9 +114,14 @@
 
 .featured-overlay {
   position: absolute;
+  /* Selalu menempel di dasar bingkai preview. */
   bottom: 0;
+  /* KUNCI: regangkan ke DUA tepi, bukan width:100%. Proyek ini tidak punya
+     reset box-sizing global, sehingga "width:100% + padding" membuat overlay
+     ±40-50px LEBIH LEBAR dari .featured-card lalu terpotong overflow:hidden. */
   left: 0;
-  width: 100%;
+  right: 0;
+  box-sizing: border-box; /* pengaman ganda: padding memakan ke dalam */
   padding: clamp(40px, 6vw, 60px) clamp(20px, 3vw, 25px) clamp(20px, 3vw, 25px);
   background: linear-gradient(
     to top,
@@ -134,30 +137,57 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
+  /* Maksimal 2 baris, sisanya dipotong "…" */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* WAJIB: tanpa ini, satu kata super panjang tanpa spasi tetap menembus
+     ke samping dan klem 2 baris tidak berfungsi. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  /* Tinggi setara 2 baris agar overlay tidak "melompat" saat slider
+     berganti antara judul 1 baris dan 2 baris. */
+  min-height: calc(1.4em * 2);
+  /* Menjaga keterbacaan saat gambar berita berlatar terang. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
+/* KUNCI: jumlah kolom dikunci 3 dengan lebar maksimum tetap. Mau isinya 1, 2,
+   atau 3 thumbnail, tiap slot TETAP berukuran sama — tidak melebar mengikuti
+   jumlah item. Slot yang tak terisi hanya menjadi ruang kosong. */
 .thumbnail-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 150px));
   gap: clamp(10px, 1.5vw, 15px);
-  justify-content: flex-start;
 }
 
-.thumb-img {
-  flex: 1;
-  max-width: 140px;
-  height: clamp(60px, 8vw, 90px);
+/* Wadah STATIS dengan rasio landscape — selaras dengan .featured-card-wrapper */
+.thumb-item {
+  width: 100%;
+  aspect-ratio: 16 / 10;
   border-radius: clamp(8px, 1.2vw, 12px);
-  object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background-color: #1a3c87;
+  overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.thumb-img:hover,
-.thumb-img:focus {
+.thumb-item:hover,
+.thumb-item:focus {
   border-color: #ffffff;
   transform: scale(1.05);
+  outline: none;
+}
+
+/* Gambar hanya bertugas mengisi wadah, tidak lagi mengatur layout. */
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* --- Grid Berita Kanan --- */
@@ -238,6 +268,13 @@
   cursor: not-allowed;
 }
 
+.page-dots {
+  color: #ffffff;
+  opacity: 0.6;
+  padding: 0 2px;
+  font-size: clamp(12px, 1.4vw, 14px);
+}
+
 /* --- Responsive Berita --- */
 @media (max-width: 1020px) {
   .news-grid {
@@ -275,19 +312,15 @@
   }
 
   .featured-overlay h3 {
-    /* Ukuran font judul yang lebih dinamis dan responsif untuk mobile */
-    font-size: clamp(9px, 3vw, 20px);
+    /* Lantai dinaikkan dari 9px → 13px agar tetap terbaca di ponsel kecil
+       (pada layar 320px, 3vw hanya menghasilkan ±9,6px). */
+    font-size: clamp(13px, 3vw, 20px);
     line-height: 1.3;
+    /* Samakan tinggi 2 baris dengan line-height mobile. */
+    min-height: calc(1.3em * 2);
   }
 
-  .thumb-img {
-    /* Hapus batasan lebar maks & buat tinggi lebih responsif di mobile */
-    max-width: none;
-    /* KUNCI: Hapus tinggi eksplisit. Biarkan browser menghitung tinggi
-       secara otomatis untuk menjaga rasio aspek asli gambar. */
-    height: auto;
-    /* KUNCI: Izinkan gambar untuk menyusut di bawah ukuran aslinya.
-       Tanpa ini, gambar akan "tertahan" pada lebar minimumnya di dalam flex container. */
-    min-width: 0;
-  }
+  /* Catatan: .thumb-img / .thumb-item tidak lagi butuh override di sini.
+     Grid dengan 3 slot ber-batas tetap sudah responsif dengan sendirinya —
+     slot menyusut proporsional di layar sempit tanpa mengubah rasionya. */
 }
