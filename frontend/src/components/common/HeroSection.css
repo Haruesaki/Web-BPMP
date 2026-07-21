@@ -408,12 +408,10 @@
     gap: 0.3rem;
   }
 
-  .hero-right-cms{
+  /* .hero-right-cms{
     padding:10px;
-  }
+  } */
 
-  .hero-logos-flex {
-  }
   .hero-right-parallax-wrapper {
     margin: 0;
     justify-self: center;
@@ -483,10 +481,10 @@
   }
 }
 
-@media (max-height: 560px) and (min-width: 1291px){
+@media (max-height: 560px) and (min-width: 889px){
   .hero-right-parallax-wrapper {
-    width: clamp(150px, min(17vw, 44vh), 250px);
-    height: clamp(150px, min(17vw, 44vh), 250px);
+    width: clamp(150px, min(20vw, 44vh), 250px);
+    height: clamp(150px, min(20vw, 44vh), 250px);
   }
 
   .hero-right-cms {
