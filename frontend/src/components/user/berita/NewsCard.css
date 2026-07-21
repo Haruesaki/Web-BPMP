@@ -10,6 +10,8 @@
     padding: clamp(12px, 1.5vw, 16px) 10px clamp(12px, 1.5vw, 16px) clamp(24px, 1.6vw, 45px);
     text-decoration: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    /* Pengaman: isi tidak pernah melewati batas card. */
+    overflow: hidden;
 }
 
 .news-item:hover {
@@ -30,11 +32,20 @@
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Pembungkus isi card — flex-item langsung dari .news-item.
+   KUNCI: min-width:0 wajib agar boleh menyusut di bawah lebar kontennya.
+   Tanpa ini (default min-width:auto) judul panjang memaksa card melebar. */
+.news-item-inner {
+    flex: 1;
+    min-width: 0;
+}
+
 .news-text {
     display: flex;
     flex-direction: column;
     gap: clamp(4px, 0.5vw, 6px);
     z-index: 1;
+    min-width: 0;
 }
 
 
@@ -47,9 +58,14 @@
     /* KUNCI: Menambahkan ellipsis (...) jika judul melebihi 3 baris */
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Penggal kata super panjang tanpa spasi agar ikut turun ke bawah,
+       bukan memaksa card melebar. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .news-date {
