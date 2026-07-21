@@ -4,8 +4,8 @@
 .partners-section {
     --partner-logo-height: clamp(50px, 6vw, 90px);
     --partner-logo-gap: clamp(72px, 17vw, 150px);
-    --partner-section-padding-y: 65px;
-    --partner-container-padding-y: 20px;
+    --partner-section-padding-y: 40px;
+    --partner-container-padding-y: 50px;
 
     position: relative;
     width: 100%;
@@ -83,10 +83,31 @@
 .partner-logo {
     height: var(--partner-logo-height);
     width: auto;
+    max-width: calc(var(--partner-logo-height) * 3);
     object-fit: contain;
     transform-origin: center center;
     backface-visibility: hidden;
     will-change: transform;
+}
+
+/* PENAMBAHAN BARU: Placeholder saat tidak ada logo */
+.partner-placeholder-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    min-height: 150px; /* Memberi tinggi minimal agar tidak gepeng */
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.partner-placeholder-wrapper i {
+    font-size: 3.5rem;
+    opacity: 0.6;
 }
 
 /* --- Responsive Mitra --- */

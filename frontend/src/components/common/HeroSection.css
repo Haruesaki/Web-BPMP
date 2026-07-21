@@ -1,687 +1,614 @@
-/* =========================================
-   WADAH HALAMAN & ANIMASI (WRAPPERS)
-   ========================================= */
 .landing-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    min-height: 100vh;
-    background-color: #0B132B;
-    position: relative;
-    /* === TRIK ABSOLUTE-STICKY === */
-    /* 1. Tarik wadah ini ke atas secara paksa agar tumpang tindih dengan header */
-    margin-top: -160px;
-    /* 2. Dorong isi kontennya (Hero Section) ke bawah agar tidak tertutup oleh header */
-    padding-top: 161px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  --main-bg-color: #0b132b;
+  background-color: var(--main-bg-color);
+  position: relative;
+  margin-top: -160px;
+  padding-top: 161px;
 }
 
-/* --- Efek Highlight Cahaya (Glass Shine) --- */
 .background-glow-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .background-glow-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 25%;
-    height: 100%;
-    background: linear-gradient(to right,
-            rgba(67, 67, 67, 0) 0%,
-            rgba(255, 255, 255, 0.095) 35%,
-            rgba(255, 255, 255, 0.261) 50%,
-            rgba(255, 255, 255, 0.095) 65%,
-            rgba(67, 67, 67, 0) 100%);
-    filter: blur(80px);
-    transform: skewX(35deg);
-    animation: lightSweep 11s infinite;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 75%,
+    transparent 100%
+  );
+  filter: blur(40px);
+  transform: skewX(35deg);
+  animation: lightSweep 11s infinite;
 }
 
 @keyframes lightSweep {
-    0% {
-        left: -70%;
-    }
+  0% {
+    left: -70%;
+  }
 
-    100% {
-        left: 150%;
-    }
+  100% {
+    left: 150%;
+  }
 }
 
-/* =========================================
-   ANIMASI PARTIKEL
-   ========================================= */
 .particle-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 1; /* Di bawah konten, tapi bisa di atas background glow */
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .particle {
-    position: absolute;
-    bottom: -10%; /* Mulai dari bawah layar */
-    background-color: rgba(255, 255, 255, 0.24);
-    border-radius: 50%;
-    filter: blur(0.5px);
-    animation-name: floatUp;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+  position: absolute;
+  bottom: -10%;
+  background-color: rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation-name: floatUp;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(0);
-        opacity: 0;
-    }
-    30%, 60% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-110vh); /* Bergerak ke atas hingga hilang */
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-70vh);
+    opacity: 0;
+  }
 }
 
-/* =========================================
-   HERO SECTION UTAMA
-   ========================================= */
 .hero-section {
-    flex: 1;
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
+  flex: 1;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .hero-flex-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0 4vw;
-    gap: 2rem;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0 6vw;
+  gap: 10rem;
+  box-sizing: border-box;
 }
 
-/* --- Hero Content Kiri --- */
+.hero-flex-container > :only-child {
+  margin-right: auto; 
+  flex-basis: 55%;
+}
+
 .hero-left-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    flex: 0 0 43%;
-    gap: 0.3rem;
-    color: #ffffff;
-    z-index: 222;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 45%;
+  flex: 0 0 45%;
+  gap: 0.3rem;
+  color: #ffffff;
+  z-index: 222;
 }
 
 .welcome-text {
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(1.2rem, 1.5vw, 1.7rem);
-    font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
+  font-weight: 500;
+  overflow-wrap: break-word;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .main-title {
-    font-family: 'Poppins', serif;
-    font-size: clamp(2.2rem, 2.1vw, 2.5rem);
-    line-height: 1.2;
-    margin: 0;
+  font-family: "Poppins", serif;
+  font-size: clamp(2.2rem, 2.1vw, 2.5rem);
+  line-height: 1.2;
+  margin: 0;
+  overflow-wrap: break-word;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .sub-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(0.9rem, 1vw, 1.1rem);
-    font-weight: 400;
-    margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  font-weight: 400;
+  margin: 0;
+  overflow-wrap: break-word;
+  min-width: 0;
+  max-width: 100%;
 }
-/* Gaya untuk pembungkus CMS logo mitra */
-/* Wadah paling luar untuk logo, berfungsi sebagai frame statis-dinamis */
+
 .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(80px, 5.5vw, 100px);
+  display: flex;
+  width: 100%;
+  height: clamp(80px, 5.5vw, 100px);
 }
 
-/* Kontainer untuk daftar logo, agar bisa di-scroll atau wrap jika perlu */
 .hero-logos-flex {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 2.5rem;
-    height: 100%;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2.5rem;
+  height: 100%;
+  width: 100%;
 }
 
-/* Gaya untuk setiap item logo di dalam flex container (wadah gambar) */
 .logo-item-cms {
-    height: 100%; /* Tinggi item mengikuti tinggi flex container */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Gambar logo yang ukurannya akan menyesuaikan wadahnya */
 .bottom-logo {
-    /* KUNCI: Tinggi gambar tidak akan melebihi wadahnya (.logo-item-cms) */
-    max-height: 100%;
-    /* KUNCI: Lebar gambar juga tidak akan melebihi wadahnya */
-    max-width: 100%;
-    /* KUNCI: Tinggi disesuaikan otomatis untuk menjaga rasio aspek */
-    height: auto;
-    /* Memastikan gambar termuat utuh di dalam area yang tersedia */
-    object-fit: contain;
+  max-height: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
-/* --- Hero Content Kanan (CMS) --- */
+.hero-right-parallax-wrapper {
+  flex: 0 0 45%;
+  aspect-ratio: 1 / 1;
+  max-width: 500px;
+  display: flex;
+}
+
 .hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    
-    /* --- REVISI: Ukuran dinamis dan selalu di pojok kanan bawah --- */
-    width: 55vw;
-    height: 100%;
-    max-width: 800px; /* Batas maksimal agar tidak terlalu besar di layar ultra-wide */
-    max-height: 920px;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(150px);
+  animation:
+    buildingSlideUp 4s cubic-bezier(0.34, 1, 0.5, 1) 0.3s forwards,
+    smoothFloat 15s ease-in-out 4s infinite alternate;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(254, 253, 253, 0.46);
+  border-radius: 15%;
+  padding: 17px;
+  box-shadow: inset 0 0 10px rgba(14, 1, 84, 0.623),
+              inset 0 0 12px rgba(66, 180, 251, 0.742),
+              inset 0 0 5px rgba(252, 252, 252, 0.54),
+              inset 0 0 15px rgb(14, 14, 14),
+              0 0 20px -2px rgba(254, 254, 254, 0.148),
+              0 0 20px 0px rgba(0, 0, 0, 0.732);
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-right-cms::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1 / 1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 70%,
+    rgba(81, 151, 255, 0.347) 80%,
+    transparent 90%
+  );
+  animation: borderSweep 8s linear infinite;
+  z-index: 1;
+}
+
+.hero-right-cms::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  background: var(--main-bg-color);
+  border-radius: 14%;
+  z-index: 2;
+}
+
+@keyframes borderSweep {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 @keyframes buildingSlideUp {
-    0% {
-        opacity: 0;
-        transform: translateY(150px);
-    }
+  0% {
+    opacity: 1;
+    transform: translateY(60vh) translateX(15vw) scale(0.8);
+    rotate: -5deg;
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+    rotate: 1deg;
+  }
+}
+
+@keyframes smoothFloat {
+  0% {
+    transform: translateY(0px);
+    rotate: 1deg;
+  }
+
+  35% {
+    transform: translateY(25px);
+    rotate: -2deg;
+  }
+
+  75% {
+    rotate: 1deg;
+  }
+
+  100% {
+    transform: translateY(-10px);
+    rotate: -1deg;
+  }
+}
+
+.bingkai-gambar-cms {
+  width: 100%;
+  height: 100%;
+  border-radius: 14%;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(40, 40, 40, 0.415),
+              0 0 10px rgba(32, 101, 211, 0.556);
+  position: relative;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.585);
 }
 
 .cms-dynamic-image {
-    /* --- REVISI: Paksa gambar untuk scale down (contain) bukan terpotong (cover) --- */
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* KUNCI: Menyesuaikan ukuran tanpa memotong */
-    object-position: right bottom; /* KUNCI: Menempel di pojok kanan bawah wadah */
-    
-    pointer-events: none;
-    will-change: transform;
-    transform: translateY(0);
-    transition: filter .25s linear;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+  will-change: transform;
+  transform: translateY(0);
+  transition: filter 0.25s linear;
 }
 
-/* =========================================
-   ANIMASI ENTRANCE (TYPEWRITER & FADE)
-   ========================================= */
 .entrance-fade-down {
-    opacity: 0;
-    animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+  opacity: 0;
+  animation: fadeDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
 }
 
 .entrance-fade-up {
-    opacity: 0;
-    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .entrance-fade-up-delay {
-    opacity: 0;
-    animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
 }
 
 .opacity-0 {
-    opacity: 0 !important;
-    visibility: hidden;
+  opacity: 0 !important;
+  visibility: hidden;
 }
 
-/* Kursor berkedip layaknya terminal */
 .typing-cursor {
-    display: inline-block;
-    color: #ffffff;
-    font-weight: 300;
-    margin-left: 5px;
-    animation: blinkCursor 0.8s infinite;
+  display: inline-block;
+  color: #ffffff;
+  font-weight: 300;
+  margin-left: 5px;
+  animation: blinkCursor 0.8s infinite;
 }
 
-/* Sembunyikan kursor jika sudah selesai mengetik */
 .typing-cursor.stop-blink {
-    display: none;
+  display: none;
 }
 
 @keyframes fadeDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes blinkCursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
 
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0;
-    }
+  50% {
+    opacity: 0;
+  }
 }
 
-/* ==========================================================================
-   KUMPULAN MEDIA QUERIES UNTUK RESPONSIVE DESIGN
-   ========================================================================== */
-
-/* =========================================
-   RESPONSIVE: BERDASARKAN LEBAR LAYAR (WIDTH-ONLY)
-   ========================================= */
-@media (max-width: 1290px) and (min-height: 801px){
+@media (max-width: 1290px) and (min-height: 900px) {
     .landing-wrapper {
-        height: 100vh;
-        padding-top: 84px;
-        margin-top: -83px;
-    }
+  margin-top: -160px;
+  padding-top: 160px;
+}
 
-    .hero-section {
-        align-items: stretch;
-    }
+  .hero-flex-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 6vw;
+    gap: 2em;
+  }
 
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        gap: 20px;
-        padding-bottom: 0px;
-        padding-top: 0px;
-        text-align: center;
-    }
+  .hero-left-content {
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .welcome-text {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .main-title {
+    font-size: clamp(2rem, 2vw, 2.3rem);
+  }
+
+  .sub-title {
+    font-size: clamp(0.85rem, 1.7vw, 1.2em);
+  }
+
+  .hero-right-parallax-wrapper {
+    margin-right: 50px;
+    align-self: flex-end ;
+    flex: 0 0 40%;
+    max-width: 400px;
+  }
+
+  .hero-logos-wrapper-cms {
+  height: clamp(70px, 7vw, 80px);
+}
+}
+
+@media (max-width: 610px) and (min-height: 900px) {
+  .hero-flex-container {
+    align-items: center;
+    text-align: center;
+    gap:5rem;
+  }
+ 
+  .hero-left-content {
+    align-items: center;
+    width: 100%;
+  }
+
+  .main-title {
+    font-size: clamp(1.8rem, 5vw, 2.2rem);
+  }
+
+  .sub-title {
+    font-size: clamp(0.8rem, 3vw, 1.1rem);
+  }
+
+  .hero-logos-flex {
+    justify-content: center;
+  }
+
+  .hero-logos-wrapper-cms {
+    height: clamp(60px, 8vw, 70px);
+  }
+
+  .hero-right-parallax-wrapper {
+    margin-right: 0;
+    align-self: center;
+    width: 70%;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 370px) and (min-height: 900px) {
+  .hero-right-parallax-wrapper {
+    margin-right: 0;
+    align-self: center;
+    width: 80%;
+    max-width: 400px;
+  }
+}
+
+@media (max-height: 899px) {
+    .landing-wrapper {
+  margin-top: -160px;
+  padding-top: 160px;
+}
+
+
+  .hero-flex-container {
+    padding: 0 6vw;
+    gap: 5em;
+  }
+
+  .hero-left-content {
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .welcome-text {
+    font-size: clamp(1rem, min(2vw, 3vh), 1.5rem);
+  }
+
+  .main-title {
+    font-size: clamp(1.5rem, min(4.3vw, 4.3vh), 2.3rem);
+  }
+
+  .sub-title {
+    font-size: clamp(0.85rem, min(1.7vw, 2.5vh), 1.2rem);
+  }
+
+  .hero-right-parallax-wrapper {
+    margin-right: 50px;
+    align-self: flex-end;
+    max-height: 45vh;
+    max-width: 45vh;
+  }
+
+  .hero-logos-wrapper-cms {
+  height: clamp(70px, 7vw, 80px);
+}
+}
+
+@media (max-width: 1290px) and (max-height: 899px) {
+    .landing-wrapper {
+  margin-top: -160px;
+  padding-top: 160px;
+}
+
+  .hero-flex-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0 6vw;
+    height: 100%;
+    gap: 3rem;
+  }
+
+  .hero-left-content {
+    flex:0 0 45%;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .welcome-text {
+    font-size: clamp(0.8rem, min(2.3vw, 3vh), 1.5rem);
+  }
+
+  .main-title {
+    font-size: clamp(1rem, min(2.9vw, 4.3vh), 2rem);
+  }
+
+  .sub-title {
+    font-size: clamp(0.9rem, min(1.9vw, 2.5vh), 1.2rem);
+  }
+
+  .hero-right-parallax-wrapper {
+    margin-right: 50px;
+    justify-self: flex-start;
+    align-self: flex-end;
+    max-height: 40vh;
+    max-width: 40vh;
+  }
+
+  .hero-logos-wrapper-cms {
+  height: clamp(55px, 5vw, 70px);
+}
+}
+
+@media (max-width: 888px) and (max-height: 899px) {
+  .hero-right-parallax-wrapper {
+    max-height: 33vh;
+    max-width: 33vh;
+  }
+
+@media (max-width: 800px) and (max-height: 899px) {
+  .hero-flex-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap:1rem;
+  }
+ 
+  .hero-left-content {
+    align-items: center;
+    width: 100%;
+  }
+
+   .welcome-text {
+    font-size: clamp(0.7rem, min(2.3vw, 3vh), 1.5rem);
+  }
+
+    .sub-title {
+    font-size: clamp(0.6rem, min(1.9vw, 2.5vh), 1.2rem);
+  }
+
+  .main-title {
+    font-size: clamp(0.9rem, min(4vw, 6vh), 2.2rem);
+  }
 
   
-
-    .hero-left-content {
-        display: flex;
-        padding-top: 5vh;
-        align-items: center;
-        width: 60%;
-        z-index: 10;
-    }
-
-    .hero-right-cms {
-        max-width: none;
-        width: 55%;
-        height: 60%;
-    }
-
-    .cms-dynamic-image {
-        position: relative;
-    }
-
-    .main-title {
-        font-size: clamp(2rem, 2.8vw, 2.3rem);
-    }
-
-    .welcome-text {
-        align-items: center;
-        text-align: center;
-        justify-content: center;
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(70px, 6.4vw, 90px);
+  .hero-logos-wrapper-cms {
+  height: clamp(35px, 8vw, 50px);
 }
-.hero-logos-flex{
-    align-items: center;
+
+    .hero-right-parallax-wrapper {
+    margin-right: 0;
+    justify-self: center;
+    align-self: center;
+    width: 100%; 
+  }
+
+    .hero-logos-flex {
     justify-content: center;
-}
-}
-
-@media (max-width: 888px) {
-    .landing-wrapper {
-        height: 100vh;
-        padding-top: 150px;
-        margin-top: -150px;
-    }
-
-    .hero-flex-container {
-        padding-top: 0px;
-        text-align: left;
-    }
-
-    .hero-left-content {
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding-top: 5vh;
-        width: clamp(50%, calc(515.2px - 0.15333vw), 100%);
-        z-index: 10;
-        gap: 0.5rem;
-
-    }
-
-    .hero-right-cms {
-        width: 500px;
-        max-width: 100%;
-        height: 50%;
-    }
-
-    .main-title {
-        font-size: clamp(1.8rem, 4.9vw, 2.7rem);
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    width: 100%;
-    height: clamp(45px, 9vw, 70px);
+  }
 }
 
-.hero-logos-flex{
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-
-}
-
-@media (max-width: 370px){
-
-    .hero-left-content {
-        text-align: center;
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-    }
-    .main-title{
-        font-size: clamp(1rem, 7vw, 1.5rem);
-    }
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: clamp(45px, 9vw, 70px);
-}
-
-.hero-logos-flex{
-    justify-content: center;
-    align-items: center;
-}
-
-.welcome-text {
-    font-size: clamp(0.6rem, 5vw, 1.2rem);
-    justify-content: center;
-    align-items: center;
-}
-
-.sub-title {
-    font-size: clamp(0.6rem, 3.7vw, 0.8rem);
-    font-weight: 500;
-}
-}
-
-/* =========================================
-   RESPONSIVE: BERDASARKAN TINGGI LAYAR (HEIGHT-ONLY)
-   ========================================= */
-@media (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -150px;
-        padding-top: 145px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-right-cms {
-        max-width: none;
-        width: 50%;
-        height: 100%;
-    }
-
-    .hero-left-content {
-        width: 49%;
-        z-index: 10;
-        height: auto;
-    }
-
-    .welcome-text {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 1vw, 2.4rem);
-        font-weight: 500;
-    }
-
-    .main-title {
-        font-family: 'Poppins', serif;
-        font-size: clamp(2rem, 0vw, 2.2rem);
-        line-height: 1.2;
-        margin: 0;
-    }
-
-    .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 1.5vw, 1.2rem);
-        font-weight: 400;
-        margin: 0;
-    }
-
-    .hero-logos-wrapper-cms {
-        display: flex;
-        width: 100%;
-        height: clamp(70px, 5.5vw, 85px);
-    }
-}
-
-/* =========================================
-   RESPONSIVE: BERDASARKAN LEBAR & TINGGI LAYAR (WIDTH & HEIGHT)
-   ========================================= */
-
-@media (max-width: 1290px) and (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -83px;
-        padding-top: 84px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        height: 100%;
-        width: 100%;
-        gap: 20px;
-        padding-bottom: 0vh;
-        padding-top: 0px;
-    }
-
-    .hero-left-content {
-        padding:0px;
-        width: 45%;
-        gap: 0.5rem;
-
-    }
-
-.hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    width: 50%;
-    height: 80%;
-}
-
-    .main-title {
-        font-size: clamp(1.6rem, 4vw, 2rem);
-    }
-}
-
-
-@media (max-width: 888px) and (max-height: 800px) {
-    .landing-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100vh;
-        overflow-x: clip;
-        margin-top: -150px;
-        padding-top: 151px;
-    }
-
-    .hero-section {
-    margin-top: 0px;
-    flex: 1;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    z-index: 1;
-}
-
-    .hero-flex-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex: 1;
-        height: 100%;
-        width: 100%;
-        gap: 20px;
-        padding-top: 0px;
-    }
-
-        .hero-left-content {
-            margin-top: 20px;
-        padding:0px;
-        width: 75%;
-        gap: 0.5rem;
-
-    }
-
-.hero-right-cms {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    opacity: 0;
-    transform: translateY(150px);
-    animation: buildingSlideUp 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-    width: 600px;
-    max-width: 100%;
-    height: 60%;
-}
-
-    .hero-logos-wrapper-cms {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: clamp(45px, 9vw, 70px);
-}
-
-.hero-logos-flex{
-}
-}
-
-
-
-@media (max-width: 480px) and (max-height: 800px) {
-    .hero-left-content {
-        padding-top: 3vh;
-        width: 100%;
-        gap: 0.5rem;
-    }
-
-    .hero-logos-wrapper-cms {
-        height: clamp(40px, 15vw, 120px);
-    }
-
-    .main-title {
-        font-size: clamp(1rem, 6vw, 8rem);
-    }
-
-    .welcome-text {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(1rem, 3vw, 2.4rem);
-        font-weight: 500;
-    }
-
-    .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: clamp(0.8rem, 1.5vw, 1.2rem);
-        font-weight: 400;
-        margin: 0;
-    }
-
-    .hero-right-cms {
-    width: 100%;
-    height: 50%;
+@media (max-width: 370px) and (max-height: 899px) {
+  .hero-right-parallax-wrapper {
+    width: 60%;
+  }
 }
 }

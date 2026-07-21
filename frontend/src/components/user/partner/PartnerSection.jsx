@@ -2,15 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import './PartnerSection.css';
 
-// --- IMPORT ASSETS (Fallback) ---
-import Mitra1Jpg from "../../../assets/source/Unila.jpeg";
-import Mitra1Png from "../../../assets/source/Unila.jpeg";
-import Mitra2 from "../../../assets/source/Unila.jpeg";
-import Mitra3 from "../../../assets/source/Unila.jpeg";
-import Mitra4 from "../../../assets/source/Unila.jpeg";
-import Mitra5 from "../../../assets/source/Unila.jpeg";
-
-const LOOP_COPIES = 8;
 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const getFullUrl = (url) => {
   if (!url) return '';
@@ -18,15 +9,15 @@ const getFullUrl = (url) => {
   return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-const fallbackMitra = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
+const fallbackMitra = [];
 
 const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
     const trackRef = useRef(null);
     const partnersSectionRef = useRef(null);
-    const [fetchedMitra, setFetchedMitra] = useState([]);
+    const [fetchedMitra, setFetchedMitra] = useState(null);
+    const [loopCopies, setLoopCopies] = useState(2);
 
     useEffect(() => {
-      // Jika diberikan custom list (misal dari Preview Admin), tidak perlu fetch
       if (customMitraList) return;
 
       const fetchMitra = async () => {
@@ -35,6 +26,8 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
           const data = res.data?.data || [];
           if (data.length > 0) {
             setFetchedMitra(data.map(m => getFullUrl(m.url_logo)));
+          } else {
+            setFetchedMitra([]);
           }
         } catch (error) {
           console.error("Gagal mengambil logo mitra:", error);
@@ -43,31 +36,57 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
       fetchMitra();
     }, [customMitraList]);
 
-    const activeMitraList = customMitraList 
-      ? customMitraList 
-      : (fetchedMitra.length > 0 ? fetchedMitra : fallbackMitra);
+    const activeMitraList = customMitraList ? customMitraList : (fetchedMitra === null ? fallbackMitra : fetchedMitra);
+    const showPlaceholder = activeMitraList.length === 0;
+
+    useEffect(() => {
+        if (activeMitraList.length === 0) return;
+
+        const calculateAndSetCopies = () => {
+            const track = trackRef.current;
+            const section = partnersSectionRef.current;
+            if (!track || !section) return;
+            const firstGroup = track.querySelector('.partner-logo-group');
+            if (!firstGroup) return;
+
+            const groupWidth = firstGroup.getBoundingClientRect().width;
+            const screenWidth = isPreviewMode 
+                ? (section.clientWidth || window.innerWidth) 
+                : window.innerWidth;
+
+            if (groupWidth > 0 && screenWidth > 0) {
+                const requiredCopies = Math.ceil(screenWidth / groupWidth) + 3;
+                setLoopCopies(prev => Math.max(prev, requiredCopies));
+            }
+        };
+
+        const timer = setTimeout(calculateAndSetCopies, 50);
+        window.addEventListener('resize', calculateAndSetCopies);
+
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', calculateAndSetCopies);
+        };
+    }, [activeMitraList, isPreviewMode]);
+
     useEffect(() => {
         const track = trackRef.current;
         const partnersSection = partnersSectionRef.current;
         if (!track || !partnersSection) return;
 
-        let animationId; // KUNCI: Satu ID untuk loop animasi gabungan
+        let animationId;
         let observer;
         let resizeObserver;
 
         const logoFrames = track.querySelectorAll('.partner-logo-frame');
         logoFrames.forEach((frame) => frame.style.removeProperty('opacity'));
         let isSectionVisible = false;
-
-        // --- Jarak antar grup dipakai sebagai periode loop agar reset selalu mulus ---
         let loopWidth = 0;
         let layoutInitialized = false;
-
-        // --- State untuk Marquee & Animasi Berbasis Waktu ---
         let translateX = 0;
         let lastScrollY = window.scrollY;
         let currentVelocity = 0;
-        let lastTime = 0; // Untuk kalkulasi deltaTime
+        let lastTime = 0;
 
         const getAnimationSettings = () => {
             const screenWidth = isPreviewMode ? (partnersSectionRef.current?.clientWidth || window.innerWidth) : window.innerWidth;
@@ -75,56 +94,71 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             if (screenWidth <= 370) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 48,
+                    baseSpeedPerSecond: 40,
                     scrollSensitivityPerSecond: 10,
-                    maxRotation: 28,
-                    minScale: 0.86,
-                    maxScale: 1.05,
-                    maxDepth: 260,
-                    perspective: 620,
+                    maxRotation: 28, // Rotasi logo di tepi layar
+                    minScale: 0.86,  // Ukuran logo di titik tengah
+                    maxScale: 1.05,  // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 260,   // Jarak kedalaman 3D
+                    perspective: 620,// Kekuatan efek perspektif
                 };
             }
 
             if (screenWidth <= 953) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 54,
+                    baseSpeedPerSecond: 50,
                     scrollSensitivityPerSecond: 16,
-                    maxRotation: 38,
-                    minScale: 2,
-                    maxScale: 1.8,
-                    maxDepth: 380,
-                    perspective: 200,
+                    maxRotation: 38, // Rotasi logo di tepi layar
+                    minScale: 0.9,   // Ukuran logo di titik tengah
+                    maxScale: 1.2,   // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 380,   // Jarak kedalaman 3D
+                    perspective: 700,// Kekuatan efek perspektif
                 };
             }
 
-            // BREAKPOINT 1280px:
-            // - Speed sedikit diperlambat agar tidak terasa terlalu cepat pada ruang yang lebih sempit.
-            // - Rotation/depth dikurangi agar logo tidak terlihat gepeng saat browser mengecil.
-            // - Scale dibuat lebih rapat dengan ukuran wadah supaya komposisi tetap lega.
             if (screenWidth <= 1280) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 82,
+                    baseSpeedPerSecond: 70,
                     scrollSensitivityPerSecond: 24,
-                    maxRotation: 38,
-                    minScale: 1.5,
-                    maxScale: 1.68,
-                    maxDepth: 540,
-                    perspective: 760,
+                    maxRotation: 55, // Rotasi logo di tepi layar
+                    minScale: 1.1,   // Ukuran logo di titik tengah
+                    maxScale: 1.4,   // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 540,   // Jarak kedalaman 3D
+                    perspective: 660,// Kekuatan efek perspektif
                 };
             }
 
             return {
                 screenWidth,
-                baseSpeedPerSecond: 106,
+                baseSpeedPerSecond: 120,
                 scrollSensitivityPerSecond: 38,
-                maxRotation: 25,
-                minScale: 1.45,
-                maxScale: 1.72,
-                maxDepth: 600,
-                perspective: 430,
+                maxRotation: 30, // Rotasi logo di tepi layar
+                minScale: 2.4,   // Ukuran logo di titik tengah
+                maxScale: 4,   // Ukuran logo di sisi kanan/kiri
+                maxDepth: 800,   // Jarak kedalaman 3D
+                perspective: 200,// Kekuatan efek perspektif
             };
+        };
+
+        const measureLoopWidth = () => {
+            const groups = track.querySelectorAll('.partner-logo-group');
+            if (groups.length < 2) return;
+ 
+            const previousLoopWidth = loopWidth;
+            const firstGroupRect = groups[0].getBoundingClientRect();
+            const secondGroupRect = groups[1].getBoundingClientRect();
+            const measuredWidth = secondGroupRect.left - firstGroupRect.left;
+
+            if (measuredWidth > 0) {
+                loopWidth = measuredWidth;
+                layoutInitialized = true;
+                if (previousLoopWidth > 0 && previousLoopWidth !== loopWidth) {
+                    translateX = (translateX / previousLoopWidth) * loopWidth;
+                }
+                normalizeTranslate();
+            }
         };
 
         const normalizeTranslate = () => {
@@ -133,34 +167,9 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             if (translateX > 0) translateX -= loopWidth;
         };
 
-        const measureLoopWidth = () => {
-            const groups = track.querySelectorAll('.partner-logo-group');
-            if (groups.length < 2) return;
-
-            const previousLoopWidth = loopWidth;
-            const firstGroupRect = groups[0].getBoundingClientRect();
-            const secondGroupRect = groups[1].getBoundingClientRect();
-
-            // Ukur jarak aktual antar grup, bukan sekadar width.
-            // Ini menangkap gap/padding decimal pada viewport kecil maupun besar.
-            const measuredWidth = secondGroupRect.left - firstGroupRect.left;
-            if (measuredWidth > 0) {
-                loopWidth = measuredWidth;
-                layoutInitialized = true;
-
-                // Saat viewport berubah, pertahankan fase animasi agar tidak terlihat loncat.
-                if (previousLoopWidth > 0 && previousLoopWidth !== loopWidth) {
-                    translateX = (translateX / previousLoopWidth) * loopWidth;
-                }
-                normalizeTranslate();
-            }
-        };
-
-        // --- FUNGSI ANIMASI GABUNGAN ---
         function animate(currentTime) {
             if (!isSectionVisible) return;
 
-            // --- PERBAIKAN: Implementasi deltaTime untuk kecepatan yang konsisten ---
             if (!lastTime) {
                 lastTime = currentTime;
                 animationId = requestAnimationFrame(animate);
@@ -169,78 +178,47 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             const deltaTime = Math.min(currentTime - lastTime, 50);
             lastTime = currentTime;
 
-            // --- Inisialisasi layout saat pertama kali dijalankan & terlihat ---
             if (!layoutInitialized) {
                 measureLoopWidth();
             }
             const animationSettings = getAnimationSettings();
 
-            // --- Bagian 1: Logika Marquee (Pergerakan Pita) ---
             const currentScrollY = window.scrollY;
             const scrollDelta = currentScrollY - lastScrollY;
             lastScrollY = currentScrollY;
             currentVelocity += (scrollDelta - currentVelocity) * 0.06;
 
-            // ===== PENGATURAN KECEPATAN AUTOSLIDE =====
-            // baseSpeedPerSecond:
-            // - Semakin besar nilainya, logo bergerak semakin cepat.
-            // - Semakin kecil nilainya, logo bergerak semakin pelan.
-            //
-            // scrollSensitivityPerSecond:
-            // - Mengatur seberapa besar scroll halaman mempengaruhi laju logo.
-            // - Jika ingin autoslide stabil tanpa dorongan scroll, ubah nilainya menjadi 0.
             const { baseSpeedPerSecond, scrollSensitivityPerSecond } = animationSettings;
             const rawSpeedPerSecond = baseSpeedPerSecond + (currentVelocity * scrollSensitivityPerSecond);
-            // Kecepatan dijaga tetap maju agar scroll ke atas tidak membalik arah marquee.
-            // Pembalikan arah dapat memicu reset mendadak dan terlihat seperti animasi start ulang.
             const minSpeedPerSecond = baseSpeedPerSecond * 0.35;
             const maxSpeedPerSecond = baseSpeedPerSecond * 2.2;
             const totalSpeedPerSecond = Math.min(maxSpeedPerSecond, Math.max(minSpeedPerSecond, rawSpeedPerSecond));
-            translateX -= totalSpeedPerSecond * (deltaTime / 1000); // Terapkan kecepatan berbasis deltaTime
+            translateX -= totalSpeedPerSecond * (deltaTime / 1000);
 
             if (layoutInitialized && loopWidth > 0) {
                 normalizeTranslate();
             }
             track.style.transform = `translate3d(${translateX}px, 0, 0)`;
 
-            // --- Bagian 2: Lewati logika 3D jika layout belum siap ---
             if (!layoutInitialized) {
                 animationId = requestAnimationFrame(animate);
                 return;
             }
 
-            // --- Bagian 2: Logika Efek Visual 3D (Circular Depth) ---
-            const {
-                screenWidth,
-                maxRotation,
-                minScale,
-                maxScale,
-                maxDepth,
-                perspective,
-            } = animationSettings;
+            const { screenWidth, maxRotation, minScale, maxScale, maxDepth, perspective } = animationSettings;
             const screenCenter = screenWidth / 2;
-            const maxDistance = screenWidth / 2;
+            const maxDistance = screenWidth;
 
-            // ===== PENGATURAN PERSPEKTIF 3D LOGO =====
-            // Konsep visual:
-            // - Sisi kanan dan kiri layar adalah posisi terdekat dari mata pengguna.
-            // - Titik tengah layar adalah posisi terjauh, sehingga logo terlihat mengecil.
-            //
-            // maxRotation:
-            // - Semakin besar, logo di sisi kanan/kiri semakin miring.
-            //
-            // minScale:
-            // - Ukuran logo saat berada di titik tengah.
-            // - Semakin kecil, efek "jauh di tengah" semakin kuat.
-            //
-            // maxScale:
-            // - Ukuran logo saat berada di sisi kanan/kiri.
-            // - Semakin besar, efek "dekat di sisi layar" semakin kuat.
-            //
-            // maxDepth:
-            // - Jarak mundur logo saat berada di titik tengah.
-            // - Semakin besar, titik tengah terasa semakin jauh.
-            // --- Posisi frame dipakai agar transform logo tidak mengganggu kalkulasi layout ---
+            /*
+            =========================================
+              KONFIGURASI ANIMASI 3D LOGO
+            =========================================
+            - perspective: Mengatur kekuatan efek 3D. Nilai lebih kecil = lebih dramatis.
+            - maxScale:    Ukuran logo saat berada di sisi kanan/kiri (paling dekat).
+            - minScale:    Ukuran logo saat berada di titik tengah (paling jauh).
+            - maxDepth:    Jarak kedalaman (mundur) logo saat di tengah.
+            - maxRotation: Kemiringan maksimal logo saat berada di sisi layar.
+            */
             for (let i = 0; i < logoFrames.length; i++) {
                 const frame = logoFrames[i];
                 const logo = frame.querySelector('.partner-logo');
@@ -259,21 +237,17 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
                 logo.style.transform = `perspective(${perspective}px) translateZ(${translateZ}px) rotateY(${rotationAngle}deg) scale(${scale})`;
             }
 
-            // Minta frame animasi berikutnya untuk loop gabungan ini
             animationId = requestAnimationFrame(animate);
         }
 
-        // --- Observer untuk mengontrol kapan animasi berjalan ---
         observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     isSectionVisible = entry.isIntersecting;
                     if (isSectionVisible) {
-                        lastTime = 0; // Reset lastTime saat kembali terlihat
-                        // Mulai loop animasi gabungan
+                        lastTime = 0;
                         animationId = requestAnimationFrame(animate);
                     } else {
-                        // Hentikan loop animasi gabungan
                         if (animationId) cancelAnimationFrame(animationId);
                     }
                 });
@@ -294,44 +268,46 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
         }
         window.addEventListener('resize', measureLoopWidth);
 
-        // --- Perbaikan Memory Leak: Gunakan fungsi bernama agar bisa dihapus ---
         if (document.readyState === 'complete') {
             startObserver();
         } else {
             window.addEventListener('load', startObserver);
         }
 
-        // --- Fungsi Cleanup ---
         return () => {
             if (observer) observer.disconnect();
             if (resizeObserver) resizeObserver.disconnect();
             if (animationId) cancelAnimationFrame(animationId);
-            // Perbaikan: Hapus listener yang sama persis
             window.removeEventListener('load', startObserver);
             window.removeEventListener('resize', measureLoopWidth);
         };
-    }, []); // Dependency array kosong, hanya berjalan sekali saat mount
+    }, [activeMitraList, loopCopies, isPreviewMode]);
 
     return (
         <section className="partners-section" ref={partnersSectionRef}>
             <div className="partners-container">
-                {/* PERBAIKAN: Hapus inline style untuk gap dan padding pada anak */}
-                <div className="partners-track" ref={trackRef}>
-                    {/* Duplikasi grup untuk buffer loop. Reset animasi memakai jarak antar grup. */}
-                    {Array.from({ length: LOOP_COPIES }).map((_, groupIndex) => (
-                        <div className="partner-logo-group" key={groupIndex}>
-                            {activeMitraList.map((mitra, index) => (
-                                <span className="partner-logo-frame" key={`${groupIndex}-${index}`}>
-                                    <img
-                                        src={mitra}
-                                        alt={`Mitra Kerja BPMP ${index + 1}`}
-                                        className="partner-logo"
-                                    />
-                                </span>
-                            ))}
-                        </div>
-                    ))}
-                </div>
+                {showPlaceholder ? (
+                    <div className="partner-placeholder-wrapper">
+                        <i className="fa-solid fa-camera"></i>
+                        <span>Image tidak ada</span>
+                    </div>
+                ) : (
+                    <div className="partners-track" ref={trackRef}>
+                        {Array.from({ length: loopCopies }).map((_, groupIndex) => (
+                            <div className="partner-logo-group" key={groupIndex}>
+                                {activeMitraList.map((mitra, index) => (
+                                    <span className="partner-logo-frame" key={`${groupIndex}-${index}`}>
+                                        <img
+                                            src={mitra}
+                                            alt={`Mitra Kerja BPMP ${index + 1}`}
+                                            className="partner-logo"
+                                        />
+                                    </span>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );
