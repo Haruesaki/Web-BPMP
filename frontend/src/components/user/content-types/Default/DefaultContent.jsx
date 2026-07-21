@@ -1,18 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./DefaultContent.css";
-import WOWOK from '../../../../assets/source/WOWOK.jpg';
-import parse from "html-react-parser"; // Import library
+import axiosInstance from "../../../../api/axiosInstance";
+import parse from "html-react-parser"; 
 
-const DefaultContent = ({
-  contentHtml = `
-  <p>Nulla maximus eu arcu nec consequat. Donec eget iaculis lectus. Etiam in lectus scelerisque, elementum justo sed, tempor justo. Aenean consectetur ex enim, eu luctus augue suscipit efficitur. Donec egestas lectus sit amet blandit mollis. Phasellus et sapien mollis, consequat lorem porttitor, pharetra leo. Proin at laoreet leo, vel imperdiet urna. Maecenas interdum accumsan tortor a dictum. Fusce sodales, lacus eget facilisis egestas, lectus tellus vulputate dui, vitae viverra diam odio eget leo. Pellentesque egestas sit amet nisi dignissim pulvinar. Vestibulum euismod pharetra turpis, efficitur venenatis dui sollicitudin quis. Aenean gravida pellentesque velit, in commodo est lobortis sit amet. Suspendisse sed congue diam, in porttitor leo.
-Pellentesque vel nunc nec mauris viverra tincidunt eu ut velit. Vestibulum ullamcorper quam vitae ligula scelerisque, vel efficitur urna consequat. Sed finibus imperdiet fermentum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin ut scelerisque dui. Aliquam pulvinar convallis tincidunt. Morbi vestibulum auctor ligula ac convallis. Etiam risus odio, laoreet eu commodo non, venenatis in dolor. Cras euismod turpis vitae laoreet tempus. Nullam mi lorem, volutpat at congue a, laoreet placerat metus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum facilisis volutpat eros, a ornare ante. Cras ultricies, diam non feugiat malesuada, neque dolor egestas sem, a faucibus risus nunc in nunc.
-</p>
-  <img src={WOWOK} alt="Placeholder Image">
-  <p>Nulla maximus eu arcu nec consequat. Donec eget iaculis lectus. Etiam in lectus scelerisque, elementum justo sed, tempor justo. Aenean consectetur ex enim, eu luctus augue suscipit efficitur. Donec egestas lectus sit amet blandit mollis. Phasellus et sapien mollis, consequat lorem porttitor, pharetra leo. Proin at laoreet leo, vel imperdiet urna. Maecenas interdum accumsan tortor a dictum. Fusce sodales, lacus eget facilisis egestas, lectus tellus vulputate dui, vitae viverra diam odio eget leo. Pellentesque egestas sit amet nisi dignissim pulvinar. Vestibulum euismod pharetra turpis, efficitur venenatis dui sollicitudin quis. Aenean gravida pellentesque velit, in commodo est lobortis sit amet. Suspendisse sed congue diam, in porttitor leo.
-Pellentesque vel nunc nec mauris viverra tincidunt eu ut velit. Vestibulum ullamcorper quam vitae ligula scelerisque, vel efficitur urna consequat. Sed finibus imperdiet fermentum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin ut scelerisque dui. Aliquam pulvinar convallis tincidunt. Morbi vestibulum auctor ligula ac convallis. Etiam risus odio, laoreet eu commodo non, venenatis in dolor. Cras euismod turpis vitae laoreet tempus. Nullam mi lorem, volutpat at congue a, laoreet placerat metus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum facilisis volutpat eros, a ornare ante. Cras ultricies, diam non feugiat malesuada, neque dolor egestas sem, a faucibus risus nunc in nunc.
-</p>`,
-}) => {
+const DefaultContent = ({ menuId, viewLayout }) => {
+  const [content, setContent] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!menuId) return;
+    const fetchContent = async () => {
+      setLoading(true);
+      try {
+        const res = await axiosInstance.get(`/api/halaman-konten/${menuId}`);
+        setContent(res.data || []);
+      } catch (err) {
+        console.error("Gagal mengambil halaman konten:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContent();
+  }, [menuId]);
+
   // Fungsi untuk membungkus elemen <img>
   const replaceImagesWithFrames = (node) => {
     if (node.type === "tag" && node.name === "img") {
@@ -31,19 +41,42 @@ Pellentesque vel nunc nec mauris viverra tincidunt eu ut velit. Vestibulum ullam
     }
     return node;
   };
-  const parsedContent = parse(contentHtml, {
-    replace: replaceImagesWithFrames,
-  });
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat konten...</div>;
+  }
+
+  if (content.length === 0) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada konten untuk menu ini.</div>;
+  }
+
+  const isVertical = viewLayout === 'Vertikal';
 
   return (
-    <div className="content-type-section default-content">
-      <div className="default-banner-wrapper">
-        <h1 className="default-banner-title">Judul Halaman</h1>
-      </div>
-      <div className="default-description-container">
-        {/* Render konten HTML yang sudah di-parse dan diubah */}
-        {parsedContent}
-      </div>
+    <div style={{
+      display: 'flex',
+      flexDirection: isVertical ? 'column' : 'row',
+      flexWrap: isVertical ? 'nowrap' : 'wrap',
+      gap: '40px',
+      padding: '40px',
+      width: '100%',
+      justifyContent: 'center'
+    }}>
+      {content.map(c => {
+        const parsedContent = parse(c.deskripsi_kaya || '', {
+          replace: replaceImagesWithFrames,
+        });
+
+        return (
+          <div key={c.id} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%', minWidth: '300px' }}>
+            <div className="default-banner-wrapper">
+              <h1 className="default-banner-title">{c.judul}</h1>
+            </div>
+            <div className="default-description-container">
+              {parsedContent}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

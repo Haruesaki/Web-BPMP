@@ -115,7 +115,8 @@ const AdminLayout = () => {
         nama_menu: menuName,
         ikon_menu: selectedIcon,
         jenis_menu: selectedType.toLowerCase(), // post / link
-        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default')
+        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default'),
+        tampilan: selectedType === 'Link' ? null : selectedPostView
       }, {
         headers: {
           'Authorization': `Bearer ${token}`

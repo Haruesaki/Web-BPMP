@@ -26,7 +26,7 @@ const NewsCard = ({ title, date, excerpt, imageSrc }) => (
   </div>
 );
 
-const NewsCardContent = ({ menuId }) => {
+const NewsCardContent = ({ menuId, viewLayout }) => {
   const [berita, setBerita] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,8 +51,20 @@ const NewsCardContent = ({ menuId }) => {
   
   if (berita.length === 0) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada berita yang diterbitkan.</div>;
 
+  const isVertical = viewLayout === 'Vertikal';
+
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', padding: '40px', justifyContent: 'center', minHeight: '80vh', alignContent: 'flex-start' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexWrap: isVertical ? 'nowrap' : 'wrap', 
+      flexDirection: isVertical ? 'column' : 'row',
+      alignItems: isVertical ? 'center' : 'stretch',
+      gap: '30px', 
+      padding: '40px', 
+      justifyContent: 'center', 
+      minHeight: '80vh', 
+      alignContent: 'flex-start' 
+    }}>
       {berita.map(b => {
         const date = new Date(b.waktu_tayang).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         

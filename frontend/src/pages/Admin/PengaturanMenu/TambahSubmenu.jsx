@@ -77,7 +77,8 @@ const TambahSubmenu = ({ isOpen, onClose, parentId, onSuccess }) => {
         ikon_menu: selectedIcon,
         jenis_menu: selectedType.toLowerCase(),
         induk_id: parentId, // Karena ini submenu, induk_id disertakan
-        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default')
+        slug_atau_tautan: selectedType === 'Link' ? menuLink : (LAYOUT_LABEL_TO_KEY[selectedPostLayout] || 'default'),
+        tampilan: selectedType === 'Link' ? null : selectedPostView
       }, {
         headers: {
           'Authorization': `Bearer ${token}`

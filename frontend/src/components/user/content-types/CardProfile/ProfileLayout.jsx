@@ -3,7 +3,7 @@ import axiosInstance from '../../../../api/axiosInstance';
 import CardContent from './CardContent';
 import './CardContent.css'; 
 
-const ProfileLayout = ({ menuId }) => {
+const ProfileLayout = ({ menuId, viewLayout }) => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,8 +33,16 @@ const ProfileLayout = ({ menuId }) => {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada data profil untuk menu ini.</div>;
   }
 
+  const isVertical = viewLayout === 'Vertikal';
+
   return (
-    <div className="profile-layout-grid">
+    <div 
+      className="profile-layout-grid" 
+      style={{ 
+        flexDirection: isVertical ? 'column' : 'row', 
+        flexWrap: isVertical ? 'nowrap' : 'wrap' 
+      }}
+    >
       {profiles.map((profile, index) => (
         <CardContent 
           key={profile.id || profile.nama_lengkap || index}

@@ -55,18 +55,18 @@ const GenericPage = () => {
   return (
     <div className="generic-page-container">
       {/* Jika menu tersebut bertipe post dan layout-nya profil */}
-      {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'profil' && (
-        <ProfileLayout menuId={menuData.id} />
+      {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'profile-card' && (
+        <ProfileLayout menuId={menuData.id} viewLayout={menuData.tampilan} />
       )}
 
       {/* Placeholder untuk layout default */}
       {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'default' && (
-        <DefaultContent menuId={menuData.id} />
+        <DefaultContent menuId={menuData.id} viewLayout={menuData.tampilan} />
       )}
 
       {/* Placeholder untuk layout berita */}
-      {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'berita' && (
-        <NewsCardContent menuId={menuData.id} />
+      {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'berita-card' && (
+        <NewsCardContent menuId={menuData.id} viewLayout={menuData.tampilan} />
       )}
     </div>
   );

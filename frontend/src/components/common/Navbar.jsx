@@ -8,87 +8,12 @@ import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
 import { useTTS } from "../../context/TTSContext";
 
 // --- DATA NAVIGASI (CMS-READY) ---
-// Struktur menu dipusatkan di sini agar mudah dikelola atau diganti dengan data dari CMS.
-const navData = [
-  { id: 'beranda', title: 'Beranda', path: '/', type: 'link', dataPath: 'beranda' },
-  {
-    id: 'profil',
-    title: 'Profil',
-    path: '#',
-    type: 'dropdown',
-    dataPath: 'profil',
-    submenu: [
-      { title: 'Sejarah', path: '#' },
-      { title: 'Visi & Misi', path: '/profil/visi-misi' },
-      { title: 'Tugas & Fungsi', path: '#' },
-      { title: 'Struktur Organisasi', path: '#' },
-      { title: 'Pejabat', path: '#' },
-      { title: 'Informasi Pegawai', path: '#' },
-      { title: 'Sarana dan Prasarana', path: '#' },
-    ],
-  },
-  {
-    id: 'rb',
-    title: 'Reformasi Birokrasi',
-    path: '#',
-    type: 'dropdown',
-    dataPath: 'rb',
-    submenu: [
-      { title: 'Manajemen Perubahan', path: '#' },
-      { title: 'Penataan Tata Laksana', path: '#' },
-      { title: 'Penataan Manajemen SDM', path: '#' },
-      { title: 'Penguatan Akuntabilitas', path: '#' },
-      { title: 'Penguatan Pengawasan', path: '#' },
-      { title: 'Peningkatan Kualitas Pelayanan Publik', path: '#' },
-      { title: 'Aktivitas RBI', path: '#' },
-    ],
-  },
-  {
-    id: 'kinerja',
-    title: 'Dok. Kinerja',
-    path: '#',
-    type: 'dropdown',
-    dataPath: 'kinerja',
-    submenu: [
-      { title: 'Perjanjian Kinerja', path: '#' },
-      { title: 'Renstra', path: '#' },
-      { title: 'Lakin 2024', path: '#' },
-      { title: 'Lakin 2025', path: '#' },
-    ],
-  },
-  {
-    id: 'pelayanan',
-    title: 'Pelayanan',
-    path: '#',
-    type: 'dropdown',
-    dataPath: 'pelayanan',
-    submenu: [
-      { title: 'Maklumat Pelayanan', path: '#' },
-      { title: 'Standar Pelayanan', path: '#' },
-      { title: 'Unit Layanan Terpadu', path: '#' },
-      { title: 'Hasil Survey SKM', path: '#' },
-      { title: 'Layanan Inovatif', path: '#' },
-      { title: 'Peminjaman Sarana dan Prasarana', path: '#' },
-    ],
-  },
-  { id: 'ppid', title: 'PPID', path: '#', type: 'link', dataPath: 'ppid' },
-  { id: 'sipers', title: 'Sipers', path: '#', type: 'link', dataPath: 'sipers' },
-  { id: 'spab', title: 'SPAB', path: '#', type: 'link', dataPath: 'spab' },
-  {
-    id: 'pengaduan',
-    title: 'Pengaduan',
-    path: '#',
-    type: 'dropdown',
-    dataPath: 'pengaduan',
-    submenu: [
-      { title: 'WBS', path: '#' },
-      { title: 'SP4N Lapor', path: '#' },
-      { title: 'Lapor Gratifikasi', path: '#' },
-    ],
-  },
-];
+// Beranda akan selalu dimasukkan secara manual sebagai elemen pertama
 
 const Navbar = () => {
+  const [navData, setNavData] = useState([
+    { id: 'beranda', title: 'Beranda', path: '/', type: 'link', dataPath: 'beranda' }
+  ]);
   const { isActive, toggle } = useTTS();
   const location = useLocation(); // Hook untuk mendapatkan info URL saat ini
 
@@ -122,7 +47,51 @@ const Navbar = () => {
       }
     };
 
+    const fetchMenus = async () => {
+      try {
+        const response = await axiosInstance.get('/api/menus');
+        if (isMounted) {
+          const rawMenus = response.data || [];
+          
+          // Pisahkan menu utama (induk_id == null) dan submenu
+          const mainMenus = rawMenus.filter(m => !m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+          const subMenus = rawMenus.filter(m => m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+          
+          const dynamicMenus = mainMenus.map(menu => {
+            const children = subMenus.filter(sub => sub.induk_id === menu.id);
+            const isDropdown = children.length > 0;
+            
+            // Format rute berdasar jenis
+            const getPath = (item) => {
+              if (item.jenis_menu === 'link') return item.slug_atau_tautan || '#';
+              return `/halaman/${item.id}`;
+            };
+
+            return {
+              id: menu.id.toString(),
+              title: menu.nama_menu,
+              path: isDropdown ? '#' : getPath(menu),
+              type: isDropdown ? 'dropdown' : 'link',
+              dataPath: menu.id.toString(),
+              submenu: isDropdown ? children.map(sub => ({
+                title: sub.nama_menu,
+                path: getPath(sub)
+              })) : undefined
+            };
+          });
+
+          setNavData([
+            { id: 'beranda', title: 'Beranda', path: '/', type: 'link', dataPath: 'beranda' },
+            ...dynamicMenus
+          ]);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil menu navigasi:", error);
+      }
+    };
+
     loadHeaderLogo();
+    fetchMenus();
 
     return () => {
       isMounted = false;
@@ -384,11 +353,19 @@ const Navbar = () => {
 
     // 3. Tentukan link mana yang harus aktif berdasarkan URL saat ini
     let newActiveLink = null;
-    if (location.pathname === '/') {
-      newActiveLink = document.querySelector('[data-path-group="beranda"]');
-    } else if (location.pathname.startsWith('/profil/')) {
-      newActiveLink = document.querySelector('[data-path-group="profil"]');
-    } // Tambahkan else if untuk grup lain di sini (e.g., /rb/, /kinerja/)
+    const currentPath = location.pathname;
+
+    const activeNav = navData.find(item => {
+      if (item.path === currentPath) return true;
+      if (item.submenu) {
+        return item.submenu.some(sub => sub.path === currentPath);
+      }
+      return false;
+    });
+
+    if (activeNav) {
+      newActiveLink = document.querySelector(`[data-path-group="${activeNav.dataPath}"]`);
+    }
 
     // 4. Jika link aktif baru ditemukan, jalankan logika pergerakan
     if (newActiveLink) {
@@ -421,7 +398,7 @@ const Navbar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [location.pathname]); // KUNCI: Efek ini berjalan setiap kali URL berubah
+  }, [location.pathname, navData]); // KUNCI: Efek ini berjalan setiap kali URL atau menu dinamis berubah
 
   return (
     <header className="unified-header">
@@ -477,9 +454,13 @@ const Navbar = () => {
           </button>
         </div>
         <div className="tablet-submenu-list">
-          {submenuPanelContent.items.map((item, index) => (
-            <Link key={index} to={item.path} onClick={handleLinkClick}>{item.title}</Link>
-          ))}
+          {submenuPanelContent.items.map((item, index) => {
+            const isExternal = item.path.startsWith('http');
+            if (isExternal) {
+              return <a key={index} href={item.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>{item.title}</a>;
+            }
+            return <Link key={index} to={item.path} onClick={handleLinkClick}>{item.title}</Link>;
+          })}
         </div>
       </div>
 
@@ -497,6 +478,14 @@ const Navbar = () => {
         {/* RENDER MENU SECARA DINAMIS DARI navData */}
         {navData.map(item => {
           if (item.type === 'link') {
+            const isExternal = item.path.startsWith('http');
+            if (isExternal) {
+              return (
+                <a key={item.id} href={item.path} target="_blank" rel="noopener noreferrer" className="nav-link" data-path-group={item.dataPath} onClick={handleLinkClick}>
+                  {item.title}
+                </a>
+              );
+            }
             return (
               <Link key={item.id} to={item.path} className="nav-link" data-path-group={item.dataPath} onClick={handleLinkClick}>
                 {item.title}
@@ -515,9 +504,13 @@ const Navbar = () => {
                   {item.title} <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
                 </a>
                 <div className="dropdown-menu">
-                  {item.submenu.map((subItem, index) => (
-                    <Link key={index} to={subItem.path} onClick={handleLinkClick}>{subItem.title}</Link>
-                  ))}
+                  {item.submenu.map((subItem, index) => {
+                    const isExternal = subItem.path.startsWith('http');
+                    if (isExternal) {
+                      return <a key={index} href={subItem.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>{subItem.title}</a>;
+                    }
+                    return <Link key={index} to={subItem.path} onClick={handleLinkClick}>{subItem.title}</Link>;
+                  })}
                 </div>
               </div>
             );

@@ -16,7 +16,7 @@ class MenuController {
   // POST /api/menus
   static async createMenu(req, res) {
     try {
-      const { nama_menu, ikon_menu, jenis_menu, induk_id, slug_atau_tautan } = req.body;
+      const { nama_menu, ikon_menu, jenis_menu, induk_id, slug_atau_tautan, tampilan } = req.body;
       
       if (!nama_menu || !ikon_menu || !jenis_menu) {
         return res.status(400).json({ pesan: 'Nama menu, ikon, dan jenis menu wajib diisi.' });
@@ -41,6 +41,7 @@ class MenuController {
         jenis_menu,
         induk_id: induk_id || null,
         slug_atau_tautan: finalSlug,
+        tampilan: tampilan || 'Vertikal',
       });
       
       // LOG AKTIVITAS
