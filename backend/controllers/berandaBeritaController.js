@@ -13,7 +13,10 @@ class BerandaBeritaController {
           'berita.url_foto as coverUrl',
           'berita.waktu_tayang as tanggal',
           'berita.urutan_beranda',
-          'menu.nama_menu as kategori'
+          'menu.nama_menu as kategori',
+          'menu.id as menu_id',
+          'menu.jenis_menu',
+          'menu.slug_atau_tautan as layout'
         )
         .where('berita.status', 'terbit');
 
@@ -28,7 +31,10 @@ class BerandaBeritaController {
           'halaman_konten.tanggal_terbit as tanggal', // bisa null, fallback ke diperbarui_pada
           'halaman_konten.diperbarui_pada',
           'halaman_konten.urutan_beranda',
-          'menu.nama_menu as kategori'
+          'menu.nama_menu as kategori',
+          'menu.id as menu_id',
+          'menu.jenis_menu',
+          'menu.slug_atau_tautan as layout'
         )
         .where('halaman_konten.status', 'terbit');
 
@@ -41,7 +47,10 @@ class BerandaBeritaController {
         tanggal: b.tanggal,
         urutan_beranda: b.urutan_beranda || 0,
         kategori: b.kategori || 'Berita',
-        sumber: 'berita'
+        sumber: 'berita',
+        menu_id: b.menu_id,
+        jenis_menu: b.jenis_menu,
+        layout: b.layout
       }));
 
       const formattedKonten = kontenRaw.map(k => {
@@ -60,8 +69,11 @@ class BerandaBeritaController {
           coverUrl: coverUrl,
           tanggal: k.tanggal || k.diperbarui_pada,
           urutan_beranda: k.urutan_beranda || 0,
-          kategori: k.kategori || 'Artikel',
-          sumber: 'halaman_konten'
+          kategori: k.kategori || 'Konten',
+          sumber: 'halaman_konten',
+          menu_id: k.menu_id,
+          jenis_menu: k.jenis_menu,
+          layout: k.layout
         };
       });
 

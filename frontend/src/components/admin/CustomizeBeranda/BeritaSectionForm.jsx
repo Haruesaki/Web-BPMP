@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import CustomAlert from '../CustomAlert';
 import NewsSection from '../../user/berita/NewsSection';
@@ -29,6 +30,32 @@ const BeritaSectionForm = () => {
   const [isDraggable, setIsDraggable] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false });
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleRowClick = (b, e) => {
+    // Abaikan klik jika pada elemen interaktif seperti tombol/input
+    if (e.target.closest('button') || e.target.closest('.bs-thumb') || e.target.closest('td:first-child')) return;
+    if (!b.menu_id) return;
+    
+    let layoutType = 'default';
+    if (b.jenis_menu === 'post' || b.jenis_menu === 'profil' || b.jenis_menu === 'berita') {
+      layoutType = b.layout || 'berita-card'; 
+    } else if (b.jenis_menu === 'page') {
+      layoutType = 'default';
+    }
+
+    const actualId = b.id.split('-').pop();
+    
+    if (layoutType === 'profile-card') {
+      navigate(`/admin/kelola-profil/${b.menu_id}`, {
+        state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id }
+      });
+    } else {
+      navigate(`/admin/post/${layoutType}/${b.menu_id}`, { 
+        state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id } 
+      });
+    }
+  };
 
   const showAlert = (type, message, title) => {
     setAlertState({
@@ -202,6 +229,8 @@ const BeritaSectionForm = () => {
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnd={() => { setDraggedIndex(null); setIsDraggable(false); }}
                   onDrop={(e) => handleDrop(e, i)}
+                  onClick={(e) => handleRowClick(b, e)}
+                  style={{ cursor: 'pointer' }}
                   className={isDragging ? 'bs-row-dragging' : ''}
                 >
                   <td 
