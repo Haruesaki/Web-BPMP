@@ -37,6 +37,10 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [highlightedRow, setHighlightedRow] = useState(null);
+
+  const highlightId = location.state?.highlightId;
+  const highlightSumber = location.state?.highlightSumber;
 
   const fetchBerita = async () => {
     if (!menuId) { setLoading(false); return; }
@@ -80,6 +84,23 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
   const page = Math.min(currentPage, totalPages);
   const startIdx = (page - 1) * pageSize;
   const visible = filtered.slice(startIdx, startIdx + pageSize);
+
+  useEffect(() => {
+    if (highlightId && highlightSumber === 'berita' && filtered.length > 0 && !highlightedRow) {
+      const idx = filtered.findIndex((b) => String(b.id) === String(highlightId));
+      if (idx !== -1) {
+        const targetPage = Math.floor(idx / pageSize) + 1;
+        setCurrentPage(targetPage);
+        setHighlightedRow(String(highlightId));
+        setTimeout(() => {
+          const el = document.getElementById(`row-${highlightId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 150);
+      }
+    }
+  }, [highlightId, highlightSumber, filtered, pageSize, highlightedRow]);
 
   const toggleTayang = async (id) => {
     const b = beritaList.find(x => x.id === id);
@@ -204,7 +225,11 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
                   <tr><td colSpan={8} className="bc-empty-row">Tidak ada berita yang cocok dengan pencarian.</td></tr>
                 ) : (
                   visible.map((b, i) => (
-                    <tr key={b.id}>
+                    <tr 
+                      key={b.id} 
+                      id={`row-${b.id}`} 
+                      className={highlightedRow === String(b.id) ? 'row-blink' : ''}
+                    >
                       <td className="bc-col-no">{startIdx + i + 1}</td>
                       <td>
                         <div className="bc-thumb">

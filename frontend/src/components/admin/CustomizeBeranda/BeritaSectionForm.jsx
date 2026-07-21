@@ -21,17 +21,7 @@ const formatWaktu = (iso) => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 
-// Bentuk rute admin menuju lokasi berita/konten — selaras dengan generatePath
-// di AdminSidebar agar tujuannya konsisten dengan navigasi sidebar.
-const buildBeritaPath = (item) => {
-  if (!item.menu_id) return null;
-  const layout = item.menu_layout || 'default';
-  if (layout === 'profile-card') return `/admin/kelola-profil/${item.menu_id}`;
-  return `/admin/post/${layout}/${item.menu_id}`;
-};
-
 const BeritaSectionForm = () => {
-  const navigate = useNavigate();
   const [beritaList, setBeritaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,6 +30,32 @@ const BeritaSectionForm = () => {
   const [isDraggable, setIsDraggable] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false });
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleRowClick = (b, e) => {
+    // Abaikan klik jika pada elemen interaktif seperti tombol/input
+    if (e.target.closest('button') || e.target.closest('.bs-thumb') || e.target.closest('td:first-child')) return;
+    if (!b.menu_id) return;
+    
+    let layoutType = 'default';
+    if (b.jenis_menu === 'post' || b.jenis_menu === 'profil' || b.jenis_menu === 'berita') {
+      layoutType = b.layout || 'berita-card'; 
+    } else if (b.jenis_menu === 'page') {
+      layoutType = 'default';
+    }
+
+    const actualId = b.id.split('-').pop();
+    
+    if (layoutType === 'profile-card') {
+      navigate(`/admin/kelola-profil/${b.menu_id}`, {
+        state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id }
+      });
+    } else {
+      navigate(`/admin/post/${layoutType}/${b.menu_id}`, { 
+        state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id } 
+      });
+    }
+  };
 
   const showAlert = (type, message, title) => {
     setAlertState({
@@ -66,22 +82,6 @@ const BeritaSectionForm = () => {
     };
     fetchBerita();
   }, []);
-
-  // Klik baris → buka lokasi berita/konten tersebut di panel admin.
-  const handleRowClick = (item) => {
-    const path = buildBeritaPath(item);
-    if (!path) {
-      showAlert(
-        'error',
-        'Berita ini tidak terhubung ke menu mana pun, sehingga lokasinya tidak dapat dibuka.',
-        'Lokasi Tidak Ditemukan'
-      );
-      return;
-    }
-    // Bawa state yang sama seperti navigasi dari sidebar agar halaman tujuan
-    // menerima konteks menu dengan benar.
-    navigate(path, { state: { menuName: item.kategori, menuId: String(item.menu_id) } });
-  };
 
   const handleThumbClick = (item) => {
     setUploadTarget(item);
@@ -229,15 +229,14 @@ const BeritaSectionForm = () => {
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnd={() => { setDraggedIndex(null); setIsDraggable(false); }}
                   onDrop={(e) => handleDrop(e, i)}
-                  onClick={() => handleRowClick(b)}
-                  className={`bs-row-clickable ${isDragging ? 'bs-row-dragging' : ''}`}
-                  title="Klik untuk membuka lokasi berita ini"
+                  onClick={(e) => handleRowClick(b, e)}
+                  style={{ cursor: 'pointer' }}
+                  className={isDragging ? 'bs-row-dragging' : ''}
                 >
-                  <td
+                  <td 
                     style={{ textAlign: 'center', color: '#666', cursor: 'grab' }}
                     onMouseEnter={() => setIsDraggable(true)}
                     onMouseLeave={() => setIsDraggable(false)}
-                    onClick={(e) => e.stopPropagation()}
                     title="Seret untuk memindah urutan"
                   >
                     <i className="fa-solid fa-grip-vertical"></i>
@@ -246,7 +245,7 @@ const BeritaSectionForm = () => {
                   <td>
                     <div 
                       className="bs-thumb" 
-                      onClick={(e) => { e.stopPropagation(); handleThumbClick(b); }}
+                      onClick={() => handleThumbClick(b)} 
                       title="Klik untuk mengubah thumbnail"
                       style={{ cursor: 'pointer', position: 'relative' }}
                     >
@@ -270,7 +269,7 @@ const BeritaSectionForm = () => {
                     <button 
                       className="bs-btn-delete" 
                       title="Hapus dari Beranda"
-                      onClick={(e) => { e.stopPropagation(); requestDelete(b); }}
+                      onClick={() => requestDelete(b)}
                     >
                       <i className="fa-solid fa-trash-can"></i>
                     </button>

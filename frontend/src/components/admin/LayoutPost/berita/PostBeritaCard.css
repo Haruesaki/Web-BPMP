@@ -510,3 +510,16 @@
         justify-content: center;
     }
 }
+
+/* ---------- ANIMASI BLINK ---------- */
+@keyframes blink-blue {
+  0% { background-color: transparent; }
+  15% { background-color: rgba(59, 130, 246, 0.4); }
+  50% { background-color: rgba(59, 130, 246, 0.1); }
+  85% { background-color: rgba(59, 130, 246, 0.4); }
+  100% { background-color: transparent; }
+}
+
+.postdefault .bc-table tbody tr.row-blink td {
+  animation: blink-blue 3s ease-in-out;
+}
