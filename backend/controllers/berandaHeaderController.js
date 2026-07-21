@@ -50,10 +50,10 @@ class BerandaHeaderController {
         data: normalizeHeader(savedSettings),
       });
     } catch (error) {
+      // Detail teknis cukup di log server, tidak dikirim ke klien.
       console.error('Error updateHeader Beranda:', error);
       return res.status(500).json({
         pesan: 'Gagal menyimpan pengaturan header beranda',
-        detail: error.message,
       });
     }
   }
