@@ -6,8 +6,8 @@
   --main-bg-color: #0b132b;
   background-color: var(--main-bg-color);
   position: relative;
-  margin-top: -160px;
-  padding-top: 161px;
+  margin-top: -165px;
+  padding-top: 165px;
 }
 
 .background-glow-container {
@@ -107,10 +107,13 @@
   padding: 0 6vw;
   gap: 10rem;
   box-sizing: border-box;
+  transition:
+    padding 0.4s ease-in-out,
+    gap 0.4s ease-in-out;
 }
 
 .hero-flex-container > :only-child {
-  margin-right: auto; 
+  margin-right: auto;
   flex-basis: 55%;
 }
 
@@ -119,16 +122,19 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  max-width: 45%;
-  flex: 0 0 45%;
+  max-width: 40%;
+  flex-basis: 44%;
   gap: 0.3rem;
   color: #ffffff;
   z-index: 222;
+  transition:
+    max-width 0.4s ease-in-out,
+    flex-basis 0.4s ease-in-out;
 }
 
 .welcome-text {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
+  font-size: clamp(1.2rem, min(1.5vw, 2.2vh), 1.7rem);
   font-weight: 500;
   overflow-wrap: break-word;
   min-width: 0;
@@ -137,7 +143,7 @@
 
 .main-title {
   font-family: "Poppins", serif;
-  font-size: clamp(2.2rem, 2.1vw, 2.5rem);
+  font-size: clamp(2.2rem, min(2.5vw, 4.5vh), 2.8rem);
   line-height: 1.2;
   margin: 0;
   overflow-wrap: break-word;
@@ -147,7 +153,7 @@
 
 .sub-title {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  font-size: clamp(0.9rem, min(1.1vw, 2vh), 1.1rem);
   font-weight: 400;
   margin: 0;
   overflow-wrap: break-word;
@@ -158,7 +164,8 @@
 .hero-logos-wrapper-cms {
   display: flex;
   width: 100%;
-  height: clamp(80px, 5.5vw, 100px);
+  height: clamp(70px, min(6vw, 10vh), 100px);
+  transition: height 0.4s ease-in-out;
 }
 
 .hero-logos-flex {
@@ -169,6 +176,7 @@
   gap: 2.5rem;
   height: 100%;
   width: 100%;
+  transition: justify-content 0.4s ease-in-out;
 }
 
 .logo-item-cms {
@@ -186,10 +194,17 @@
 }
 
 .hero-right-parallax-wrapper {
-  flex: 0 0 45%;
-  aspect-ratio: 1 / 1;
-  max-width: 500px;
+  justify-self: center;
+  align-self: center;
+  flex-shrink: 0;
   display: flex;
+  width: clamp(320px, min(40vw, 45vh), 500px);
+  height: clamp(320px, min(40vw, 45vh), 500px);
+  /* `transform` diatur oleh JS, jadi transisi dibatasi pada ukuran dan margin. */
+  transition:
+    width 0.4s ease-in-out,
+    height 0.4s ease-in-out,
+    margin 0.4s ease-in-out;
 }
 
 .hero-right-cms {
@@ -206,20 +221,21 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(254, 253, 253, 0.46);
   border-radius: 15%;
-  padding: 17px;
-  box-shadow: inset 0 0 10px rgba(14, 1, 84, 0.623),
-              inset 0 0 12px rgba(66, 180, 251, 0.742),
-              inset 0 0 5px rgba(252, 252, 252, 0.54),
-              inset 0 0 15px rgb(14, 14, 14),
-              0 0 20px -2px rgba(254, 254, 254, 0.148),
-              0 0 20px 0px rgba(0, 0, 0, 0.732);
+  padding: 20px;
+  box-shadow:
+    inset 0 0 10px rgba(14, 1, 84, 0.623),
+    inset 0 0 12px rgba(66, 180, 251, 0.742),
+    inset 0 0 5px rgba(252, 252, 252, 0.54),
+    inset 0 0 15px rgb(14, 14, 14),
+    0 0 20px -2px rgba(254, 254, 254, 0.148),
+    0 0 20px 0px rgba(0, 0, 0, 0.732);
   display: flex;
   position: relative;
   overflow: hidden;
 }
 
 .hero-right-cms::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -237,7 +253,7 @@
 }
 
 .hero-right-cms::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 20px;
   left: 20px;
@@ -297,8 +313,9 @@
   height: 100%;
   border-radius: 14%;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(40, 40, 40, 0.415),
-              0 0 10px rgba(32, 101, 211, 0.556);
+  box-shadow:
+    0 0 20px rgba(40, 40, 40, 0.415),
+    0 0 10px rgba(32, 101, 211, 0.556);
   position: relative;
   z-index: 3;
   border: 1px solid rgba(255, 255, 255, 0.585);
@@ -307,12 +324,11 @@
 .cms-dynamic-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   pointer-events: none;
-  will-change: transform;
-  transform: translateY(0);
-  transition: filter 0.25s linear;
+  will-change: transform, filter;
+  /* Transisi filter dihapus agar efek kecerahan pada saat scroll terasa real-time */
 }
 
 .entrance-fade-down {
@@ -382,233 +398,159 @@
   }
 }
 
-@media (max-width: 1290px) and (min-height: 900px) {
-    .landing-wrapper {
-  margin-top: -160px;
-  padding-top: 160px;
-}
-
+@media (max-width: 1290px) {
   .hero-flex-container {
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 0 6vw;
-    gap: 2em;
+    gap: 8rem;
+  }
+  .hero-left-content {
+    max-width: 40%;
+    flex-basis: 44%;
+    gap: 0.3rem;
   }
 
-  .hero-left-content {
-    max-width: 600px;
-    width: 100%;
+  /* .hero-right-cms{
+    padding:10px;
+  } */
+
+  .hero-right-parallax-wrapper {
+    margin: 0;
+    justify-self: center;
+    align-self: center;
+    width: clamp(150px, min(31vw, 45vh), 350px);
+    height: clamp(150px, min(31vw, 45vh), 350px);
+  }
+  .main-title {
+    font-size: clamp(1.5rem, min(2.4vw, 10vh), 2rem);
   }
 
   .welcome-text {
-    font-size: clamp(1rem, 2vw, 1.5rem);
-  }
-
-  .main-title {
-    font-size: clamp(2rem, 2vw, 2.3rem);
+    font-size: clamp(1rem, min(1.6vw, 2.2vh), 1.5rem);
   }
 
   .sub-title {
-    font-size: clamp(0.85rem, 1.7vw, 1.2em);
-  }
-
-  .hero-right-parallax-wrapper {
-    margin-right: 50px;
-    align-self: flex-end ;
-    flex: 0 0 40%;
-    max-width: 400px;
+    font-size: clamp(0.8rem, min(1.4vw, 2vh), 1.1rem);
   }
 
   .hero-logos-wrapper-cms {
-  height: clamp(70px, 7vw, 80px);
-}
+    height: clamp(50px, min(12vw, 7vh), 70px);
+  }
 }
 
-@media (max-width: 610px) and (min-height: 900px) {
-  .hero-flex-container {
-    align-items: center;
+@media (max-width: 888px) and (min-height: 441px)  {
+   .hero-flex-container {
+    gap: 4rem;
+    flex-direction: column;
     text-align: center;
-    gap:5rem;
-  }
- 
-  .hero-left-content {
+    justify-content: center;
     align-items: center;
-    width: 100%;
+  }
+
+  .hero-left-content{
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    max-width: 80%;
+    flex-basis: 1;
+  }
+
+  .welcome-text {
+    font-size: clamp(1rem, min(3vw, 2.2vh), 1.5rem);
   }
 
   .main-title {
-    font-size: clamp(1.8rem, 5vw, 2.2rem);
+    font-size: clamp(1.5rem, min(4vw, 10vh), 2rem);
   }
 
   .sub-title {
-    font-size: clamp(0.8rem, 3vw, 1.1rem);
+    font-size: clamp(0.8rem, min(2vw, 2vh), 1.1rem);
+  }
+
+  .hero-logos-wrapper-cms {
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-logos-flex {
+    align-items: center;
     justify-content: center;
   }
 
-  .hero-logos-wrapper-cms {
-    height: clamp(60px, 8vw, 70px);
-  }
-
   .hero-right-parallax-wrapper {
-    margin-right: 0;
-    align-self: center;
-    width: 70%;
-    max-width: 400px;
+    width: clamp(150px, min(42vw, 30vh), 300px);
+    height: clamp(150px, min(42vw, 30vh), 300px);
   }
 }
 
-@media (max-width: 370px) and (min-height: 900px) {
+@media (max-height: 560px) and (min-width: 889px){
   .hero-right-parallax-wrapper {
-    margin-right: 0;
-    align-self: center;
-    width: 80%;
-    max-width: 400px;
+    width: clamp(150px, min(20vw, 44vh), 250px);
+    height: clamp(150px, min(20vw, 44vh), 250px);
+  }
+
+  .hero-right-cms {
+    padding: 12px;
   }
 }
 
-@media (max-height: 899px) {
-    .landing-wrapper {
-  margin-top: -160px;
-  padding-top: 160px;
-}
-
-
-  .hero-flex-container {
-    padding: 0 6vw;
-    gap: 5em;
+@media (max-width: 480px) {
+  .landing-wrapper {
+    margin-top: -120px;
+    padding-top: 121px;
   }
-
-  .hero-left-content {
-    max-width: 600px;
-    width: 100%;
-  }
-
-  .welcome-text {
-    font-size: clamp(1rem, min(2vw, 3vh), 1.5rem);
-  }
-
   .main-title {
-    font-size: clamp(1.5rem, min(4.3vw, 4.3vh), 2.3rem);
+    font-size: clamp(0rem, min(100vw), 1.4rem);
   }
-
   .sub-title {
-    font-size: clamp(0.85rem, min(1.7vw, 2.5vh), 1.2rem);
-  }
-
-  .hero-right-parallax-wrapper {
-    margin-right: 50px;
-    align-self: flex-end;
-    max-height: 45vh;
-    max-width: 45vh;
+    font-size: clamp(0.5rem, min(100vw), 0.8rem);
   }
 
   .hero-logos-wrapper-cms {
-  height: clamp(70px, 7vw, 80px);
-}
+    height: clamp(30px, min(12vw), 50px);
+  }
+
+  .hero-right-cms{
+    padding:10px;
+  }
 }
 
-@media (max-width: 1290px) and (max-height: 899px) {
-    .landing-wrapper {
-  margin-top: -160px;
-  padding-top: 160px;
-}
 
+@media (max-width: 888px) and (max-height: 440px) {
   .hero-flex-container {
     flex-direction: row;
+    gap: 4rem;
+    text-align: left;
     justify-content: center;
     align-items: center;
-    padding: 0 6vw;
-    height: 100%;
-    gap: 3rem;
   }
 
-  .hero-left-content {
-    flex:0 0 45%;
-    max-width: 600px;
-    width: 100%;
+    .main-title {
+    font-size: clamp(1rem, min(2.4vw, 10vh), 2rem);
   }
 
   .welcome-text {
-    font-size: clamp(0.8rem, min(2.3vw, 3vh), 1.5rem);
-  }
-
-  .main-title {
-    font-size: clamp(1rem, min(2.9vw, 4.3vh), 2rem);
+    font-size: clamp(0.7rem, min(1.6vw, 2.2vh), 1.5rem);
   }
 
   .sub-title {
-    font-size: clamp(0.9rem, min(1.9vw, 2.5vh), 1.2rem);
-  }
-
-  .hero-right-parallax-wrapper {
-    margin-right: 50px;
-    justify-self: flex-start;
-    align-self: flex-end;
-    max-height: 40vh;
-    max-width: 40vh;
+    font-size: clamp(0.5rem, min(1.4vw, 2vh), 1.1rem);
   }
 
   .hero-logos-wrapper-cms {
-  height: clamp(55px, 5vw, 70px);
-}
-}
-
-@media (max-width: 888px) and (max-height: 899px) {
-  .hero-right-parallax-wrapper {
-    max-height: 33vh;
-    max-width: 33vh;
+    height: clamp(50px, min(12vw, 7vh), 70px);
   }
 
-@media (max-width: 800px) and (max-height: 899px) {
-  .hero-flex-container {
-    flex-direction: column;
+   .hero-logos-wrapper-cms {
+    align-items: center;
     justify-content: center;
+  }
+
+  .hero-logos-flex {
     align-items: center;
-    text-align: center;
-    gap:1rem;
+    justify-content: flex-start;
   }
- 
-  .hero-left-content {
-    align-items: center;
-    width: 100%;
-  }
-
-   .welcome-text {
-    font-size: clamp(0.7rem, min(2.3vw, 3vh), 1.5rem);
-  }
-
-    .sub-title {
-    font-size: clamp(0.6rem, min(1.9vw, 2.5vh), 1.2rem);
-  }
-
-  .main-title {
-    font-size: clamp(0.9rem, min(4vw, 6vh), 2.2rem);
-  }
-
-  
-  .hero-logos-wrapper-cms {
-  height: clamp(35px, 8vw, 50px);
-}
 
     .hero-right-parallax-wrapper {
-    margin-right: 0;
-    justify-self: center;
-    align-self: center;
-    width: 100%; 
+    width: clamp(150px, min(100vw), 180px);
+    height: clamp(150px, min(100vw), 180px);
   }
-
-    .hero-logos-flex {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 370px) and (max-height: 899px) {
-  .hero-right-parallax-wrapper {
-    width: 60%;
-  }
-}
 }
