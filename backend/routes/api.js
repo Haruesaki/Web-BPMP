@@ -20,6 +20,7 @@ const InfoKontakController = require('../controllers/infoKontakController');
 const TautanFooterController = require('../controllers/tautanFooterController');
 const TautanMediaSosialController = require('../controllers/tautanMediaSosialController');
 const UrutanSectionBerandaController = require('../controllers/urutanSectionBerandaController');
+const SearchController = require('../controllers/searchController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
@@ -27,6 +28,9 @@ const uploadMiddleware = require('../middlewares/uploadMiddleware');
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
 });
+
+// ================= GLOBAL SEARCH =================
+router.get('/search', SearchController.globalSearch);
 
 // ================= PENGUNJUNG & AKTIVITAS =================
 router.post('/pengunjung', StatistikPengunjungController.increment);
