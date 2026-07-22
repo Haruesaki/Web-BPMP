@@ -88,6 +88,91 @@ const DefaultContent = ({ menuId, viewLayout }) => {
       );
     };
 
+    // --- MEDIA EMBED (Instagram/YouTube/Vimeo) ---
+    // CKEditor menyimpan hasil "Media Embed" sebagai elemen SEMANTIK
+    // <figure class="media"><oembed url="..."></oembed></figure> (bukan iframe
+    // jadi). <oembed> bukan elemen HTML nyata → tak tampil di browser. Di sini
+    // kita ambil url-nya lalu render embed asli.
+    const getEmbedUrl = (n) => {
+      if (!n || n.type !== "tag") return "";
+      if (n.attribs?.["data-oembed-url"]) return n.attribs["data-oembed-url"];
+      if (n.name === "oembed" && n.attribs?.url) return n.attribs.url;
+      if (n.name === "figure") {
+        const o = (n.children || []).find(
+          (c) => c.type === "tag" && c.name === "oembed" && c.attribs?.url
+        );
+        if (o) return o.attribs.url;
+      }
+      return "";
+    };
+
+    const renderMediaEmbed = (url) => {
+      // Instagram (post/reel/tv) → iframe endpoint /embed (dirancang untuk disematkan).
+      const ig = url.match(/instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_-]+)/i);
+      if (ig) {
+        return (
+          // data-lenis-prevent: lepaskan pembajakan roda mouse oleh Lenis saat
+          // kursor di atas embed, agar konten IG (yang punya scroll internal)
+          // bisa digulir — sama seperti wadah pratinjau dokumen.
+          <div className="media-embed media-embed-ig" data-lenis-prevent>
+            <iframe
+              src={`https://www.instagram.com/${ig[1]}/${ig[2]}/embed`}
+              title="Instagram"
+              loading="lazy"
+              frameBorder="0"
+            />
+          </div>
+        );
+      }
+      // YouTube (watch/youtu.be/embed/shorts)
+      const yt = url.match(
+        /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i
+      );
+      if (yt) {
+        return (
+          <div className="media-embed media-embed-video">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${yt[1]}`}
+              title="YouTube"
+              loading="lazy"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+      // Vimeo
+      const vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+      if (vm) {
+        return (
+          <div className="media-embed media-embed-video">
+            <iframe
+              src={`https://player.vimeo.com/video/${vm[1]}`}
+              title="Vimeo"
+              loading="lazy"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+      // Provider lain yang tak dikenali → tetap tampil sebagai tautan (bukan hilang).
+      return (
+        <div className="media-embed media-embed-fallback">
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {url}
+          </a>
+        </div>
+      );
+    };
+
+    const embedUrl = getEmbedUrl(node);
+    if (embedUrl) {
+      return renderMediaEmbed(embedUrl);
+    }
+
     // CKEditor membungkus tautan dalam <p>. Karena viewer memakai <div> (blok),
     // menaruhnya di dalam <p> melanggar HTML & memicu error hydration. Maka bila
     // sebuah <p> HANYA berisi satu tautan dokumen, kita ganti seluruh <p>-nya.

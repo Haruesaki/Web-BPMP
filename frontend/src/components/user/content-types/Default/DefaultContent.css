@@ -225,6 +225,46 @@
 }
 
 /* =========================================================================
+   MEDIA EMBED (hasil tombol "Media Embed" di editor: Instagram/YouTube/Vimeo)
+   ========================================================================= */
+.media-embed {
+    margin: 24px 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Instagram: lebar kartu khas IG, tinggi tetap agar tidak terlalu panjang. */
+.media-embed-ig iframe {
+    width: 100%;
+    max-width: 540px;
+    height: 640px;
+    background: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+/* Video (YouTube/Vimeo): responsif 16:9. */
+.media-embed-video {
+    max-width: 720px;
+}
+
+.media-embed-video iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 10px;
+    display: block;
+}
+
+/* Provider tak dikenali → tautan biasa (tetap terbaca di latar gelap). */
+.media-embed-fallback a {
+    color: #9db2ff;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+/* =========================================================================
    PREVIEW DOKUMEN (hasil tombol "Sisipkan Dokumen" di editor)
    ========================================================================= */
 .doc-embed {
