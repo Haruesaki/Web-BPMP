@@ -308,3 +308,33 @@
     font-size: 12.5px;
     color: #ff5555;
 }
+
+/* =========================================================================
+   TOOLBAR MENGAMBANG (STICKY) — perbaikan interaksi dengan zoom:0.7 layout.
+   -------------------------------------------------------------------------
+   Saat konten panjang & di-scroll, CKEditor mengubah toolbar menjadi
+   position:fixed dengan top:0 agar tetap mengambang. Karena berada di dalam
+   ".admin-layout { zoom: 0.7 }", toolbar menempel di puncak viewport dan
+   MENUTUPI header admin (yang sticky, z-index 40).
+
+   Perbaikan: paksa toolbar berhenti tepat di bawah header, dan taruh di
+   bawah header pada urutan tumpuk sebagai jaring pengaman. Nilai top memakai
+   satuan tata-letak sehingga ikut ter-zoom 0.7 sama seperti header → sejajar.
+   Toolbar tetap mengambang (fixed) — hanya titik berhentinya yang diperbaiki. */
+.ckeditor-container .ck.ck-sticky-panel__content_sticky {
+    top: 78px !important;
+    z-index: 30 !important;
+    /* Samakan LEBAR & POSISI toolbar mengambang dengan editor saat belum
+       di-scroll — TANPA menyentuh ukuran tombol. Editor berada di kolom
+       max-width 760px yang di-tengah-kan pada area konten (setelah sidebar
+       280px). CKEditor memasang lebar/posisi inline yang meleset akibat zoom;
+       kita batalkan lalu tengahkan toolbar pada area yang sama. Semua nilai
+       memakai satuan tata-letak sehingga ikut ter-zoom 0.7 (selaras sidebar
+       & editor). max-width ≈ lebar editable (760 kolom - padding kolom & kartu). */
+    left: 280px !important;
+    right: 0 !important;
+    width: auto !important;
+    max-width: 726px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
