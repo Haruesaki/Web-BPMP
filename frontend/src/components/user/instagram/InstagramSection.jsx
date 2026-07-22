@@ -38,29 +38,62 @@ const loadInstagramScript = () => {
     return instagramScriptPromise;
 };
 
-const InstagramEmbedCard = React.memo(({ postId, active }) => {
-    useEffect(() => {
-        // Embed baru diproses saat section sudah mendekati layar (lihat prop active)
-        if (!active) return;
+// Gabungkan (coalesce) pemrosesan embed: bila beberapa kartu aktif hampir
+// bersamaan, cukup SATU kali window.instgrm.Embeds.process() per frame — bukan
+// N pemindaian global. process() menghidrasi semua <blockquote> yang belum
+// diproses, dan hanya kartu yang terlihat yang merender blockquote.
+let processScheduled = false;
+const scheduleProcess = () => {
+    if (processScheduled) return;
+    processScheduled = true;
+    requestAnimationFrame(() => {
+        processScheduled = false;
+        if (window.instgrm) window.instgrm.Embeds.process();
+    });
+};
 
+const InstagramEmbedCard = React.memo(({ postId, forceActive }) => {
+    const wrapperRef = useRef(null);
+    // Lazy per-kartu: embed baru dimuat saat KARTU INI mendekati viewport
+    // (bukan saat seluruh grid mendekat). forceActive = mode preview admin.
+    const [visible, setVisible] = useState(forceActive);
+
+    // Observer per-kartu.
+    useEffect(() => {
+        if (visible) return;
+        const el = wrapperRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') {
+            setVisible(true);
+            return;
+        }
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                setVisible(true);
+                observer.disconnect();
+            }
+        }, { rootMargin: '300px 0px' }); // mulai memuat sedikit sebelum terlihat
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [visible]);
+
+    // Proses embed hanya setelah kartu terlihat.
+    useEffect(() => {
+        if (!visible) return;
         let cancelled = false;
         loadInstagramScript().then(() => {
-            if (cancelled) return;
-            if (window.instgrm) {
-                window.instgrm.Embeds.process();
-            }
+            if (!cancelled) scheduleProcess();
         });
-
         return () => { cancelled = true; };
-    }, [postId, active]);
+    }, [postId, visible]);
 
-    // Placeholder ringan selama embed belum dimuat, agar tidak ada lompatan layout
-    if (!active) {
-        return <div className="ig-post-card ig-embed-wrapper ig-embed-skeleton" aria-hidden="true" />;
+    // Placeholder ringan selama embed belum dimuat, agar tidak ada lompatan layout.
+    // wrapperRef dipasang di kedua cabang agar observer punya elemen untuk diamati.
+    if (!visible) {
+        return <div ref={wrapperRef} className="ig-post-card ig-embed-wrapper ig-embed-skeleton" aria-hidden="true" />;
     }
 
     return (
-        <div className="ig-post-card ig-embed-wrapper">
+        <div ref={wrapperRef} className="ig-post-card ig-embed-wrapper">
             <blockquote
                 className="instagram-media"
                 data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
@@ -70,14 +103,11 @@ const InstagramEmbedCard = React.memo(({ postId, active }) => {
             </blockquote>
         </div>
     );
-}, (prevProps, nextProps) => prevProps.postId === nextProps.postId && prevProps.active === nextProps.active);
+}, (prevProps, nextProps) => prevProps.postId === nextProps.postId && prevProps.forceActive === nextProps.forceActive);
 
 
 const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
     const followBtnWrapperRef = useRef(null);
-    const feedGridRef = useRef(null);
-    // Di mode preview embed langsung ditampilkan, di halaman user menunggu user scroll mendekat
-    const [embedsActive, setEmbedsActive] = useState(isPreviewMode);
     const scrollState = useRef({
         currentY: 0,
         targetY: 0,
@@ -137,36 +167,19 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
         };
     }, []);
 
-    useEffect(() => {
-        if (embedsActive) return;
-
-        const grid = feedGridRef.current;
-        if (!grid || typeof IntersectionObserver === 'undefined') {
-            setEmbedsActive(true);
-            return;
-        }
-
-        const observer = new IntersectionObserver((entries) => {
-            if (entries.some((entry) => entry.isIntersecting)) {
-                setEmbedsActive(true);
-                observer.disconnect();
-            }
-        }, { rootMargin: '400px 0px' }); // mulai memuat sedikit sebelum section terlihat
-
-        observer.observe(grid);
-
-        return () => observer.disconnect();
-    }, [embedsActive]);
-
     return (
         <section className="container-instagram-section">
         <section className="instagram-section">
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
-                    <img 
-                      src={igProfile?.profile_pic_url_hd ? getFullUrl(igProfile.profile_pic_url_hd) : Logo} 
-                      alt="Logo BPMP" 
-                      className="ig-avatar" 
+                    <img
+                      src={igProfile?.profile_pic_url_hd ? getFullUrl(igProfile.profile_pic_url_hd) : Logo}
+                      alt="Logo BPMP"
+                      className="ig-avatar"
+                      width={65}
+                      height={65}
+                      loading="lazy"
+                      decoding="async"
                       style={{ borderRadius: '50%', objectFit: 'cover' }}
                       referrerPolicy="no-referrer"
                     />
@@ -207,18 +220,18 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
             </div>
 
             <div className="ig-feed-section">
-                <div className="ig-feed-grid" ref={feedGridRef}>
+                <div className="ig-feed-grid">
                     {/* Dynamic Instagram Embed Component */}
                     {igProfile && igProfile.embed_links && igProfile.embed_links.length > 0 ? (
                         igProfile.embed_links.map((linkId, index) => (
-                            linkId ? <InstagramEmbedCard key={index} postId={linkId} active={embedsActive} /> : null
+                            linkId ? <InstagramEmbedCard key={index} postId={linkId} forceActive={isPreviewMode} /> : null
                         ))
                     ) : (
                         <>
-                            <InstagramEmbedCard postId="DaMGvRKAb7z" active={embedsActive} />
-                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" active={embedsActive} />
-                            <InstagramEmbedCard postId="DaNwf5vyIYn" active={embedsActive} />
-                            <InstagramEmbedCard postId="DaKohaEPomy" active={embedsActive} />
+                            <InstagramEmbedCard postId="DaMGvRKAb7z" forceActive={isPreviewMode} />
+                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" forceActive={isPreviewMode} />
+                            <InstagramEmbedCard postId="DaNwf5vyIYn" forceActive={isPreviewMode} />
+                            <InstagramEmbedCard postId="DaKohaEPomy" forceActive={isPreviewMode} />
                         </>
                     )}
                 </div>
