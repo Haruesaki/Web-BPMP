@@ -9,6 +9,7 @@ const SocialMediaSetting = ({
   hapusPlatform,
   onSave,
   isSaving,
+  isDirty,
 }) => {
   return (
     <section className="cb-card">
@@ -74,12 +75,12 @@ const SocialMediaSetting = ({
 
       <div className="cb-card-actions" style={{ marginTop: '16px', width: '100%' }}>
         <button
-          className="cb-btn cb-btn-simpan"
+          className={`cb-btn cb-btn-simpan ${isDirty ? 'is-dirty' : ''}`}
           onClick={onSave}
-          disabled={isSaving}
+          disabled={isSaving || !isDirty}
           style={{ width: '100%' }}
         >
-          {isSaving ? 'Menyimpan...' : 'Simpan'}
+          {isSaving ? 'Menyimpan...' : isDirty ? 'Simpan Perubahan' : 'Simpan'}
         </button>
       </div>
     </section>

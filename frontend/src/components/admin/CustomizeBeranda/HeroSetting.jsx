@@ -20,6 +20,7 @@ const HeroSetting = ({
   handleLogo2Remove,
   onSave,
   isSaving,
+  isDirty,
 }) => {
   return (
     <section className="cb-card">
@@ -159,13 +160,15 @@ const HeroSetting = ({
       </div>
 
       <button
-        className="cb-btn cb-btn-simpan"
+        className={`cb-btn cb-btn-simpan ${isDirty ? 'is-dirty' : ''}`}
         style={{ marginTop: '20px', width: '100%', justifyContent: 'center' }}
         onClick={onSave}
-        disabled={isSaving}
+        disabled={isSaving || !isDirty}
       >
         {isSaving ? (
           <><i className="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</>
+        ) : isDirty ? (
+          <><i className="fa-solid fa-save"></i> Simpan Perubahan</>
         ) : (
           <><i className="fa-solid fa-save"></i> Simpan Landing Page</>
         )}

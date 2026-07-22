@@ -12,6 +12,9 @@ const FooterSetting = ({
   hapusTautan,
   onSave,
   onSaveTautan,
+  isDirtyContact,
+  isDirtyLokasi,
+  isDirtyTautan,
 }) => {
   return (
     <section className="cb-card">
@@ -53,12 +56,13 @@ const FooterSetting = ({
               onChange={(e) => setFooter((prev) => ({ ...prev, email: e.target.value }))}
             />
 
-            <button 
-              className="cb-btn cb-btn-simpan" 
+            <button
+              className={`cb-btn cb-btn-simpan ${isDirtyContact ? 'is-dirty' : ''}`}
               style={{ marginTop: '16px', alignSelf: 'flex-start' }}
               onClick={onSave}
+              disabled={!isDirtyContact}
             >
-              <i className="fa-solid fa-save"></i> Simpan Hubungi Kami
+              <i className="fa-solid fa-save"></i> {isDirtyContact ? 'Simpan Perubahan' : 'Simpan Hubungi Kami'}
             </button>
           </div>
 
@@ -74,12 +78,13 @@ const FooterSetting = ({
               onChange={(e) => setGoogleMaps(e.target.value)}
             />
 
-            <button 
-              className="cb-btn cb-btn-simpan" 
+            <button
+              className={`cb-btn cb-btn-simpan ${isDirtyLokasi ? 'is-dirty' : ''}`}
               style={{ marginTop: '16px', alignSelf: 'flex-start' }}
               onClick={onSave}
+              disabled={!isDirtyLokasi}
             >
-              <i className="fa-solid fa-save"></i> Simpan Lokasi
+              <i className="fa-solid fa-save"></i> {isDirtyLokasi ? 'Simpan Perubahan' : 'Simpan Lokasi'}
             </button>
           </div>
         </div>
@@ -124,8 +129,8 @@ const FooterSetting = ({
             <button className="cb-btn-dashed" onClick={tambahTautan}>
               <i className="fa-solid fa-plus"></i> Tambah Link
             </button>
-            <button className="cb-btn cb-btn-simpan" style={{ width: '100%', justifyContent: 'center' }} onClick={onSaveTautan}>
-              <i className="fa-solid fa-save"></i> Simpan Tautan
+            <button className={`cb-btn cb-btn-simpan ${isDirtyTautan ? 'is-dirty' : ''}`} style={{ width: '100%', justifyContent: 'center' }} onClick={onSaveTautan} disabled={!isDirtyTautan}>
+              <i className="fa-solid fa-save"></i> {isDirtyTautan ? 'Simpan Perubahan' : 'Simpan Tautan'}
             </button>
           </div>
         </div>

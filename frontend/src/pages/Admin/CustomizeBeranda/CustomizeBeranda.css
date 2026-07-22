@@ -54,9 +54,25 @@
     opacity: 0.58;
 }
 
+/* Tombol Simpan saat TIDAK ada perubahan: redup & mati (tidak bisa diklik). */
 .admin-layout .cb-btn-simpan:disabled,
 .admin-layout .cb-btn-simpan:disabled:hover {
     background: var(--purple);
+    opacity: 0.4;
+    filter: grayscale(45%);
+    box-shadow: none;
+}
+
+/* Tombol Simpan saat ADA perubahan: menyala terang untuk mengundang klik. */
+.admin-layout .cb-btn-simpan.is-dirty:not(:disabled) {
+    background: var(--purple-hover);
+    box-shadow: 0 0 0 1px rgba(91, 95, 232, 0.55),
+                0 6px 20px rgba(91, 95, 232, 0.55);
+}
+
+.admin-layout .cb-btn-simpan.is-dirty:not(:disabled):hover {
+    box-shadow: 0 0 0 1px rgba(91, 95, 232, 0.7),
+                0 8px 24px rgba(91, 95, 232, 0.7);
 }
 
 /* ---------- MODAL SUKSES SIMPAN ---------- */

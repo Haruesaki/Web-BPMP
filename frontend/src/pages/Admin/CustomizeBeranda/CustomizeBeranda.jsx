@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // Halaman ini di-render sebagai konten di dalam <AdminLayout> (yang sudah
 // menyediakan sidebar, header, dan wrapper .admin-layout). Jadi cukup return
 // <main className="admin-content"> saja — tanpa AdminSidebar/AdminHeader.
@@ -46,6 +46,27 @@ const asImageUrl = (v) => (v && (v.startsWith('/') || v.startsWith('http')) ? v 
 
 let uid = 100; // helper id lokal untuk baris dinamis (social, section, tautan)
 const nextId = () => uid++;
+
+// Tanda-tangan ringkas untuk mendeteksi perubahan pada array (dipakai hanya
+// untuk menyalakan label "Simpan Perubahan"). Sengaja mengabaikan `id` karena
+// itu penanda lokal, bukan data yang dikirim ke server.
+const socialSig = (arr) =>
+  arr.map((s) => `${s.label}|${s.url}|${s.avatar || ''}|${s.file ? 1 : 0}`).join('~');
+const tautanSig = (arr) => arr.map((t) => `${t.label}|${t.link}`).join('~');
+
+// Nilai awal socials & tautan dibungkus factory agar baseline deteksi-perubahan
+// bisa dihitung dari sumber yang sama persis dengan state-nya.
+const makeInitialSocials = () => [
+  { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
+  { id: nextId(), label: 'Facebook', url: 'https://facebook.com/kemdikbud', avatar: null },
+];
+const makeInitialTautan = () => [
+  { id: nextId(), label: 'Portal Layanan', link: '' },
+  { id: nextId(), label: 'Portal Layanan', link: '' },
+  { id: nextId(), label: 'Portal Layanan', link: '' },
+  { id: nextId(), label: 'Portal Layanan', link: '' },
+  { id: nextId(), label: 'Portal Layanan', link: '' },
+];
 
 const CustomizeBeranda = () => {
   const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
@@ -133,10 +154,7 @@ const CustomizeBeranda = () => {
   const [savedLogo2Url, setSavedLogo2Url] = useState(null);
   const [logo2InputKey, setLogo2InputKey] = useState(0);
 
-const [socials, setSocials] = useState([
-    { id: nextId(), label: 'Instagram', url: 'https://instagram.com/kemdikbud', avatar: null },
-    { id: nextId(), label: 'Facebook', url: 'https://facebook.com/kemdikbud', avatar: null },
-  ]);
+const [socials, setSocials] = useState(makeInitialSocials);
 const [mitraList, setMitraList] = useState([]);
 const [sections, setSections] = useState([
     { id: nextId(), menu: 'Berita', judul: '', isVisible: true },
@@ -146,13 +164,19 @@ const [sections, setSections] = useState([
   ]);
 const [footer, setFooter] = useState({ email: '', telepon: '', alamat: '' });
 const [googleMaps, setGoogleMaps] = useState('');
-const [tautan, setTautan] = useState([
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-    { id: nextId(), label: 'Portal Layanan', link: '' },
-  ]);
+const [tautan, setTautan] = useState(makeInitialTautan);
+
+  // ---------- BASELINE DETEKSI PERUBAHAN (khusus label tombol Simpan) ----------
+  // Hanya diisi saat data selesai di-load & setelah simpan sukses. Tidak
+  // memengaruhi payload apa pun yang dikirim ke database.
+  const [baseHeaderLogoUrl, setBaseHeaderLogoUrl] = useState(null);
+  const [baseHero, setBaseHero] = useState({
+    judul: '', deskripsi: '', backgroundUrl: null, logo1: null, logo2: null,
+  });
+  const [baseSocialsSig, setBaseSocialsSig] = useState(() => socialSig(makeInitialSocials()));
+  const [baseFooter, setBaseFooter] = useState({ email: '', telepon: '', alamat: '' });
+  const [baseGoogleMaps, setBaseGoogleMaps] = useState('');
+  const [baseTautanSig, setBaseTautanSig] = useState(() => tautanSig(makeInitialTautan()));
 
   useEffect(() => {
     let isMounted = true;
@@ -195,19 +219,29 @@ const [tautan, setTautan] = useState([
           alamat: footerData.alamat || '',
         });
         setGoogleMaps(footerData.url_google_map || '');
+        setBaseFooter({
+          email: footerData.posel || '',
+          telepon: footerData.no_telepon || '',
+          alamat: footerData.alamat || '',
+        });
+        setBaseGoogleMaps(footerData.url_google_map || '');
 
         if (tautanData.length > 0) {
-          setTautan(tautanData.map(t => ({ id: nextId(), label: t.label, link: t.url })));
+          const mappedTautan = tautanData.map(t => ({ id: nextId(), label: t.label, link: t.url }));
+          setTautan(mappedTautan);
+          setBaseTautanSig(tautanSig(mappedTautan));
         }
 
         if (medsosData.length > 0) {
-          setSocials(medsosData.map(m => ({
+          const mappedSocials = medsosData.map(m => ({
             id: nextId(),
             label: m.platform,
             url: m.url_tautan,
             avatar: m.url_logo,
             file: null
-          })));
+          }));
+          setSocials(mappedSocials);
+          setBaseSocialsSig(socialSig(mappedSocials));
         }
 
         if (sectionData.length > 0) {
@@ -222,6 +256,7 @@ const [tautan, setTautan] = useState([
         setSavedHeaderLogoUrl(loadedHeaderForm.logoUrl);
         setHeaderLogoPreview(loadedHeaderForm.logoUrl);
         setHeaderLogoName(loadedHeaderForm.logoUrl ? loadedHeaderForm.logoUrl.split('/').pop() : '');
+        setBaseHeaderLogoUrl(loadedHeaderForm.logoUrl);
 
         setJudulBeranda(loadedHeroForm.judul);
         setDeskripsi(loadedHeroForm.deskripsi);
@@ -232,6 +267,13 @@ const [tautan, setTautan] = useState([
         setLogo1Preview(loadedHeroForm.logo1);
         setSavedLogo2Url(loadedHeroForm.logo2);
         setLogo2Preview(loadedHeroForm.logo2);
+        setBaseHero({
+          judul: loadedHeroForm.judul,
+          deskripsi: loadedHeroForm.deskripsi,
+          backgroundUrl: loadedHeroForm.backgroundUrl,
+          logo1: loadedHeroForm.logo1,
+          logo2: loadedHeroForm.logo2,
+        });
 
         if (mitraData.length > 0) {
           setMitraList(
@@ -349,6 +391,10 @@ const [tautan, setTautan] = useState([
       };
       const res = await axiosInstance.put('/api/beranda/footer', payload);
       if (res.data?.success) {
+        // Tombol "Simpan Hubungi Kami" & "Simpan Lokasi" berbagi handler ini,
+        // jadi keduanya kembali ke keadaan bersih setelah tersimpan.
+        setBaseFooter({ email: footer.email, telepon: footer.telepon, alamat: footer.alamat });
+        setBaseGoogleMaps(googleMaps);
         setIsSaveSuccessOpen(true);
       }
     } catch (err) {
@@ -362,6 +408,7 @@ const [tautan, setTautan] = useState([
       const payload = { links: tautan };
       const res = await axiosInstance.put('/api/beranda/tautan-footer', payload);
       if (res.data?.success) {
+        setBaseTautanSig(tautanSig(tautan));
         setIsSaveSuccessOpen(true);
       }
     } catch (err) {
@@ -434,6 +481,7 @@ const [tautan, setTautan] = useState([
       setHeaderLogoPreview(nextHeaderLogoUrl);
       setHeaderLogoName(nextHeaderLogoUrl ? nextHeaderLogoUrl.split('/').pop() : '');
       setHeaderLogoFile(null);
+      setBaseHeaderLogoUrl(nextHeaderLogoUrl);
       setIsSaveSuccessOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Header:', error);
@@ -476,6 +524,13 @@ const [tautan, setTautan] = useState([
       setSavedLogo2Url(nextLogo2);
       setLogo2Preview(nextLogo2);
       setLogo2File(null);
+      setBaseHero({
+        judul: judulBeranda,
+        deskripsi,
+        backgroundUrl: nextBackgroundUrl,
+        logo1: nextLogo1,
+        logo2: nextLogo2,
+      });
       setIsSaveSuccessOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
@@ -511,6 +566,7 @@ const [tautan, setTautan] = useState([
       }));
 
       await axiosInstance.put('/api/beranda/media-sosial', { socials: updatedSocials });
+      setBaseSocialsSig(socialSig(socials));
       setIsSaveSuccessOpen(true);
     } catch (error) {
       console.error('Gagal menyimpan media sosial:', error);
@@ -540,6 +596,37 @@ const [tautan, setTautan] = useState([
       setIsSavingOrder(false);
     }
   };
+
+  // ---------- DETEKSI PERUBAHAN (dirty) UNTUK LABEL TOMBOL SIMPAN ----------
+  // Membandingkan nilai berjalan dengan baseline terakhir-tersimpan. Untuk
+  // gambar, dianggap berubah bila ada file baru dipilih ATAU URL tersimpan
+  // berbeda dari baseline (mencakup kasus dihapus).
+  const headerDirty = useMemo(
+    () => headerLogoFile !== null || savedHeaderLogoUrl !== baseHeaderLogoUrl,
+    [headerLogoFile, savedHeaderLogoUrl, baseHeaderLogoUrl]
+  );
+  const heroDirty = useMemo(
+    () =>
+      judulBeranda !== baseHero.judul ||
+      deskripsi !== baseHero.deskripsi ||
+      backgroundFile !== null ||
+      savedBackgroundUrl !== baseHero.backgroundUrl ||
+      logo1File !== null ||
+      savedLogo1Url !== baseHero.logo1 ||
+      logo2File !== null ||
+      savedLogo2Url !== baseHero.logo2,
+    [judulBeranda, deskripsi, backgroundFile, savedBackgroundUrl, logo1File, savedLogo1Url, logo2File, savedLogo2Url, baseHero]
+  );
+  const socialsDirty = useMemo(() => socialSig(socials) !== baseSocialsSig, [socials, baseSocialsSig]);
+  const footerContactDirty = useMemo(
+    () =>
+      footer.email !== baseFooter.email ||
+      footer.telepon !== baseFooter.telepon ||
+      footer.alamat !== baseFooter.alamat,
+    [footer, baseFooter]
+  );
+  const footerLokasiDirty = useMemo(() => googleMaps !== baseGoogleMaps, [googleMaps, baseGoogleMaps]);
+  const tautanDirty = useMemo(() => tautanSig(tautan) !== baseTautanSig, [tautan, baseTautanSig]);
 
   return (
     <main className="admin-content">
@@ -582,6 +669,7 @@ const [tautan, setTautan] = useState([
           handleHeaderLogoRemove={handleHeaderLogoRemove}
           onSave={handleSaveHeader}
           isSaving={isSavingHeader}
+          isDirty={headerDirty}
         />
 
 
@@ -609,6 +697,7 @@ const [tautan, setTautan] = useState([
           handleLogo2Remove={handleLogo2Remove}
           onSave={handleSaveHero}
           isSaving={isSavingHero}
+          isDirty={heroDirty}
         />
 
               {/* ---------- MEDIA SOSIAL ---------- */}
@@ -620,6 +709,7 @@ const [tautan, setTautan] = useState([
         hapusPlatform={hapusPlatform}
         onSave={handleSaveSocials}
         isSaving={isSavingSocials}
+        isDirty={socialsDirty}
       />
 
       </div>
@@ -649,6 +739,9 @@ const [tautan, setTautan] = useState([
         hapusTautan={hapusTautan}
         onSave={handleSaveFooter}
         onSaveTautan={handleSaveTautan}
+        isDirtyContact={footerContactDirty}
+        isDirtyLokasi={footerLokasiDirty}
+        isDirtyTautan={tautanDirty}
       />
 
       {isSaveSuccessOpen && (

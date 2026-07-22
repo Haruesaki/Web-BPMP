@@ -7,6 +7,9 @@ import './InstagramSectionForm.css';
 const InstagramSectionForm = () => {
   const [username, setUsername] = useState('');
   const [embedLinks, setEmbedLinks] = useState(['', '', '', '']);
+  // Baseline embed terakhir-tersimpan, hanya untuk label tombol "Simpan
+  // Perubahan". Tidak memengaruhi data yang dikirim ke server.
+  const [baseEmbeds, setBaseEmbeds] = useState(['', '', '', '']);
   const [igProfile, setIgProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingEmbeds, setIsSavingEmbeds] = useState(false);
@@ -42,6 +45,7 @@ const InstagramSectionForm = () => {
           const loadedLinks = [...data.embed_links];
           while (loadedLinks.length < 4) loadedLinks.push('');
           setEmbedLinks(loadedLinks.slice(0, 4));
+          setBaseEmbeds(loadedLinks.slice(0, 4));
         }
       }
     } catch (error) {
@@ -90,6 +94,7 @@ const InstagramSectionForm = () => {
           const loadedLinks = [...data.embed_links];
           while (loadedLinks.length < 4) loadedLinks.push('');
           setEmbedLinks(loadedLinks.slice(0, 4));
+          setBaseEmbeds(loadedLinks.slice(0, 4));
         }
 
         setSuccessMessage('Link embed postingan Instagram Anda telah diperbarui.');
@@ -107,6 +112,10 @@ const InstagramSectionForm = () => {
     newLinks[index] = value;
     setEmbedLinks(newLinks);
   };
+
+  // Berubah bila daftar embed berbeda dari yang terakhir tersimpan; kembali
+  // normal secara otomatis bila diketik lalu dikembalikan ke nilai semula.
+  const embedsDirty = JSON.stringify(embedLinks) !== JSON.stringify(baseEmbeds);
 
   return (
     <div className="cb-ig-section-form">
@@ -177,14 +186,16 @@ const InstagramSectionForm = () => {
             </div>
           ))}
         </div>
-        <button 
-          className="cb-btn cb-btn-simpan cb-ig-btn-simpan"
+        <button
+          className={`cb-btn cb-btn-simpan cb-ig-btn-simpan ${embedsDirty ? 'is-dirty' : ''}`}
           style={{ marginTop: '16px', alignSelf: 'flex-start' }}
           onClick={handleSimpanEmbeds}
-          disabled={isSavingEmbeds || isFetching}
+          disabled={isSavingEmbeds || isFetching || !embedsDirty}
         >
           {isSavingEmbeds ? (
             <><i className="fa-solid fa-circle-notch fa-spin"></i> Menyimpan</>
+          ) : embedsDirty ? (
+            <><i className="fa-solid fa-save"></i> Simpan Perubahan</>
           ) : (
             <><i className="fa-solid fa-save"></i> Simpan Postingan</>
           )}
