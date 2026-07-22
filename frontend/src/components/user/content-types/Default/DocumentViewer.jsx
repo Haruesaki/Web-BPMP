@@ -11,9 +11,15 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 //         (mis. 44 halaman) yang bisa membuat dokumen lain di halaman yang
 //         sama ikut gagal dirender.
 //  DOCX → dirender docx-preview menjadi HTML.
+//  XLSX/XLS → dirender SheetJS (xlsx) menjadi tabel HTML per sheet.
+//  PPTX → dirender pptx-preview menjadi slide (per halaman).
 //
-//  Pustaka berat (pdfjs-dist, docx-preview) diimpor DINAMIS saat dipakai.
-//  Tidak melibatkan PDF viewer bawaan browser → tidak ada auto-unduh.
+//  Pustaka berat (pdfjs-dist, docx-preview, xlsx, pptx-preview) diimpor
+//  DINAMIS saat dipakai. Tidak melibatkan viewer bawaan browser → tidak
+//  ada auto-unduh, dan tampil konsisten tanpa bergantung setting browser.
+//  Catatan: .doc & .ppt (biner Office lama) TIDAK didukung parser ini —
+//  hanya format modern (docx/xlsx/pptx). Format lama ditangani sebagai
+//  kartu unduh di DefaultContent.
 // =========================================================================
 
 // Ubah URL berkas /uploads/<base>.<ext> menjadi /api/berkas/<base> (tanpa
@@ -36,6 +42,8 @@ const DocumentViewer = ({ href, label, ext }) => {
 
   const isPdf = ext === 'pdf';
   const isDocx = ext === 'doc' || ext === 'docx';
+  const isXls = ext === 'xls' || ext === 'xlsx';
+  const isPptx = ext === 'pptx';
 
   useEffect(() => {
     let cancelled = false;
@@ -118,11 +126,61 @@ const DocumentViewer = ({ href, label, ext }) => {
       });
     };
 
+    // XLSX/XLS → SheetJS. Tiap sheet jadi satu tabel HTML (kartu putih).
+    const renderXlsx = async () => {
+      const mod = await import('xlsx');
+      const XLSX = mod.read ? mod : mod.default; // aman utk interop CJS/ESM
+      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.arrayBuffer();
+      const wb = XLSX.read(data, { type: 'array' });
+      const container = containerRef.current;
+      if (cancelled || !container) return;
+      container.innerHTML = '';
+
+      wb.SheetNames.forEach((name) => {
+        const sheet = wb.Sheets[name];
+        const card = document.createElement('div');
+        card.className = 'docv-sheet';
+
+        const title = document.createElement('div');
+        title.className = 'docv-sheet-title';
+        title.textContent = name;
+
+        const tableWrap = document.createElement('div');
+        tableWrap.className = 'docv-sheet-table';
+        tableWrap.innerHTML = XLSX.utils.sheet_to_html(sheet);
+
+        card.appendChild(title);
+        card.appendChild(tableWrap);
+        container.appendChild(card);
+      });
+    };
+
+    // PPTX → pptx-preview. init(container, {width,height}) lalu preview(buffer).
+    const renderPptx = async () => {
+      const { init } = await import('pptx-preview');
+      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.arrayBuffer();
+      const container = containerRef.current;
+      if (cancelled || !container) return;
+      container.innerHTML = '';
+
+      // Skala slide 16:9 mengikuti lebar wadah (maks 960px seperti default lib).
+      const width = Math.min(960, (container.clientWidth || 720) - 24);
+      const height = Math.round((width * 540) / 960);
+      const previewer = init(container, { width, height });
+      await Promise.resolve(previewer.preview(data));
+    };
+
     const run = async () => {
       try {
         setStatus('loading');
         if (isPdf) await renderPdf();
         else if (isDocx) await renderDocx();
+        else if (isXls) await renderXlsx();
+        else if (isPptx) await renderPptx();
         if (!cancelled) setStatus('ready');
       } catch (err) {
         console.error('Gagal menampilkan pratinjau dokumen:', err);
@@ -142,7 +200,7 @@ const DocumentViewer = ({ href, label, ext }) => {
         }
       }
     };
-  }, [href, isPdf, isDocx]);
+  }, [href, isPdf, isDocx, isXls, isPptx]);
 
   return (
     <div className="doc-embed">

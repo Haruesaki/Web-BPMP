@@ -281,6 +281,57 @@
     touch-action: pan-y;
 }
 
+/* --- XLSX/XLS: tiap sheet jadi kartu putih berisi tabel --- */
+.docv-canvas-wrap .docv-sheet {
+    width: 100%;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+}
+
+.docv-canvas-wrap .docv-sheet-title {
+    font-weight: 700;
+    padding: 8px 12px;
+    background: #f1f3f5;
+    color: #2a2f3a;
+    border-bottom: 1px solid #d3d9e3;
+}
+
+/* Tabel bisa digulir horizontal bila kolomnya banyak. */
+.docv-canvas-wrap .docv-sheet-table {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.docv-canvas-wrap .docv-sheet-table table {
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #222;
+    width: max-content;
+}
+
+.docv-canvas-wrap .docv-sheet-table td,
+.docv-canvas-wrap .docv-sheet-table th {
+    border: 1px solid #d0d5dd;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+/* --- PPTX: slide dari pptx-preview, diberi jarak & bayangan --- */
+.docv-canvas-wrap .pptx-preview-wrapper {
+    background: transparent;
+    max-width: 100%;
+}
+
+.docv-canvas-wrap .pptx-preview-slide-wrapper {
+    margin: 0 auto 14px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    max-width: 100%;
+}
+
 .docv-status {
     padding: 20px;
     text-align: center;

@@ -62,12 +62,14 @@ const DefaultContent = ({ menuId, viewLayout }) => {
       const match = href.match(DOC_EXT);
       const ext = match && match[1] ? match[1].toLowerCase() : "";
 
-      // PDF & DOCX dirender sebagai pratinjau yang bisa discroll & dibaca.
-      if (ext === "pdf" || ext === "doc" || ext === "docx") {
+      // Format modern dirender sebagai pratinjau yang bisa discroll & dibaca:
+      // PDF, DOCX, XLSX/XLS, PPTX. (.doc & .ppt biner lama → kartu unduh.)
+      const PREVIEWABLE = ["pdf", "doc", "docx", "xls", "xlsx", "pptx"];
+      if (PREVIEWABLE.includes(ext)) {
         return <DocumentViewer href={href} label={label} ext={ext} />;
       }
 
-      // Format lain (XLS/PPT/dll) belum bisa dirender langsung → kartu unduh.
+      // Format lain (.ppt lama/dll) belum bisa dirender langsung → kartu unduh.
       return (
         <div className="doc-embed doc-embed-card">
           <i className="fa-solid fa-file-lines doc-embed-icon" />
