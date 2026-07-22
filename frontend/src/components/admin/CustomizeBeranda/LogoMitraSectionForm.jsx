@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import PartnerSection from '../../user/partner/PartnerSection';
-import CustomAlert from '../CustomAlert';
+import ThemeAlert from '../ThemeAlert';
 import './LogoMitraSectionForm.css';
 
 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -261,7 +261,7 @@ const LogoMitraSectionForm = ({ mitraList, setMitraList }) => {
         </div>
       </div>
 
-      <CustomAlert 
+      <ThemeAlert 
         isOpen={alertState.isOpen}
         type={alertState.type}
         title={alertState.title}

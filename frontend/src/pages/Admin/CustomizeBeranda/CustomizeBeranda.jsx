@@ -10,12 +10,11 @@ import './CustomizeBeranda.css';
 // Import subcomponents
 import ThemeSetting from '../../../components/admin/CustomizeBeranda/ThemeSetting';
 import HeaderLogoSetting from '../../../components/admin/CustomizeBeranda/HeaderLogoSetting';
-import LogoDataSetting from '../../../components/admin/CustomizeBeranda/LogoDataSetting';
 import HeroSetting from '../../../components/admin/CustomizeBeranda/HeroSetting';
 import SocialMediaSetting from '../../../components/admin/CustomizeBeranda/SocialMediaSetting';
 import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/SectionOrderSetting';
 import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
-import CustomAlert from '../../../components/admin/CustomAlert';
+import ThemeAlert from '../../../components/admin/ThemeAlert';
 import axiosInstance from '../../../api/axiosInstance';
 
 // =========================================================================
@@ -38,8 +37,6 @@ const MENU_OPTIONS = [
   'Preview Media Sosial YouTube',
   'Jumlah Pengunjung',
 ];
-
-const SAVED_LOGO_OPTIONS = ['Dinas Pendidikan', 'Kemendikdasmen', 'BPMP Lampung'];
 
 // Nilai logo_1/logo_2 hanya dianggap gambar bila berupa path/URL upload
 // (mengabaikan data lama yang masih berupa nama).
@@ -70,8 +67,6 @@ const makeInitialTautan = () => [
 ];
 
 const CustomizeBeranda = () => {
-  const [isSaveSuccessOpen, setIsSaveSuccessOpen] = useState(false);
-  const [isLogoSaveSuccessOpen, setIsLogoSaveSuccessOpen] = useState(false);
   const [isSavingHero, setIsSavingHero] = useState(false);
   const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isSavingSocials, setIsSavingSocials] = useState(false);
@@ -113,28 +108,6 @@ const CustomizeBeranda = () => {
     setHeaderLogoFile(null);
     setSavedHeaderLogoUrl(null);
     setHeaderLogoInputKey((prev) => prev + 1);
-  };
-
-  // ---------- DATA LOGO ----------
-  const [logoNama, setLogoNama] = useState('');
-  const [logoFileName, setLogoFileName] = useState('');
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [savedLogo, setSavedLogo] = useState(SAVED_LOGO_OPTIONS[0]);
-
-  const handleLogoFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setLogoFileName(file.name);
-    setLogoPreview(URL.createObjectURL(file));
-  };
-
-  const handleSimpanLogo = () => {
-    if (!logoNama.trim()) return;
-    // TODO: kirim ke backend (POST /api/logos)
-    setLogoNama('');
-    setLogoFileName('');
-    setLogoPreview(null);
-    setIsLogoSaveSuccessOpen(true); // Tampilkan modal sukses
   };
 
   // ---------- LANDING PAGE ----------
@@ -396,7 +369,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         // jadi keduanya kembali ke keadaan bersih setelah tersimpan.
         setBaseFooter({ email: footer.email, telepon: footer.telepon, alamat: footer.alamat });
         setBaseGoogleMaps(googleMaps);
-        setIsSaveSuccessOpen(true);
+        showAlert('success', 'Pengaturan tampilan beranda Anda telah diperbarui.', 'Berhasil');
       }
     } catch (err) {
       console.error('Gagal memperbarui footer:', err);
@@ -410,7 +383,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
       const res = await axiosInstance.put('/api/beranda/tautan-footer', payload);
       if (res.data?.success) {
         setBaseTautanSig(tautanSig(tautan));
-        setIsSaveSuccessOpen(true);
+        showAlert('success', 'Pengaturan tampilan beranda Anda telah diperbarui.', 'Berhasil');
       }
     } catch (err) {
       console.error('Gagal memperbarui tautan footer:', err);
@@ -483,7 +456,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
       setHeaderLogoName(nextHeaderLogoUrl ? nextHeaderLogoUrl.split('/').pop() : '');
       setHeaderLogoFile(null);
       setBaseHeaderLogoUrl(nextHeaderLogoUrl);
-      setIsSaveSuccessOpen(true);
+      showAlert('success', 'Pengaturan tampilan beranda Anda telah diperbarui.', 'Berhasil');
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Header:', error);
       showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Header.', 'Simpan Gagal');
@@ -532,10 +505,10 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         logo1: nextLogo1,
         logo2: nextLogo2,
       });
-      setIsSaveSuccessOpen(true);
+      showAlert('success', 'Pengaturan tampilan beranda Anda telah diperbarui.', 'Berhasil');
     } catch (error) {
       console.error('Gagal menyimpan pengaturan Hero Beranda:', error);
-      alert(error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.');
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan Hero Beranda.', 'Simpan Gagal');
     } finally {
       setIsSavingHero(false);
     }
@@ -568,7 +541,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
 
       await axiosInstance.put('/api/beranda/media-sosial', { socials: updatedSocials });
       setBaseSocialsSig(socialSig(socials));
-      setIsSaveSuccessOpen(true);
+      showAlert('success', 'Pengaturan tampilan beranda Anda telah diperbarui.', 'Berhasil');
     } catch (error) {
       console.error('Gagal menyimpan media sosial:', error);
       showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan media sosial.', 'Simpan Gagal');
@@ -639,21 +612,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         </div>
       </div>
 
-              {/* <LogoDataSetting
-          logoNama={logoNama}
-          setLogoNama={setLogoNama}
-          logoFileName={logoFileName}
-          logoPreview={logoPreview}
-          handleLogoFileChange={handleLogoFileChange}
-          handleSimpanLogo={handleSimpanLogo}
-          savedLogo={savedLogo}
-          setSavedLogo={setSavedLogo}
-          savedLogoOptions={SAVED_LOGO_OPTIONS}
-        /> */}
-
-    
-
-      {/* ---------- HEADER & DATA LOGO ---------- */}
+              {/* ---------- HEADER & DATA LOGO ---------- */}
       <div className="cb-grid-2">
   {/* ---------- TEMA ---------- */}
       <ThemeSetting
@@ -745,79 +704,9 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         isDirtyTautan={tautanDirty}
       />
 
-      {isSaveSuccessOpen && (
-        <div
-          className="cb-success-overlay"
-          data-lenis-prevent="true"
-          onClick={() => setIsSaveSuccessOpen(false)}
-        >
-          <div
-            className="cb-success-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="cb-success-title"
-            aria-describedby="cb-success-description"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="cb-success-close"
-              aria-label="Tutup notifikasi"
-              onClick={() => setIsSaveSuccessOpen(false)}
-            >
-              <i className="fa-solid fa-xmark" aria-hidden="true" />
-            </button>
-            <div className="cb-success-icon" aria-hidden="true">
-              <i className="fa-solid fa-check" />
-            </div>
-            <h2 id="cb-success-title">Perubahan berhasil disimpan!</h2>
-            <p id="cb-success-description">
-              Pengaturan tampilan beranda Anda telah diperbarui.
-            </p>
-            <button
-              type="button"
-              className="cb-success-button"
-              onClick={() => setIsSaveSuccessOpen(false)}
-            >
-              Mengerti
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Sukses Simpan Logo */}
-      {isLogoSaveSuccessOpen && (
-        <div
-          className="cb-success-overlay"
-          data-lenis-prevent="true"
-          onClick={() => setIsLogoSaveSuccessOpen(false)}
-        >
-          <div
-            className="cb-success-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="cb-logo-success-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="cb-success-icon" aria-hidden="true">
-              <i className="fa-solid fa-check" />
-            </div>
-            <h2 id="cb-logo-success-title">Logo berhasil disimpan!</h2>
-            <p>
-              Logo baru telah berhasil ditambahkan ke dalam daftar logo tersimpan.
-            </p>
-            <button
-              type="button"
-              className="cb-success-button"
-              onClick={() => setIsLogoSaveSuccessOpen(false)}
-            >
-              Mengerti
-            </button>
-          </div>
-        </div>
-      )}
-      
-      <CustomAlert 
+      {/* Notifikasi simpan (sukses & gagal) untuk seluruh section memakai satu
+          style: ThemeAlert (ungu/hijau untuk sukses, ungu/merah untuk error). */}
+      <ThemeAlert
         isOpen={alertState.isOpen}
         type={alertState.type}
         title={alertState.title}

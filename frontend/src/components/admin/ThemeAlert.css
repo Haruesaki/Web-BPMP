@@ -1,0 +1,205 @@
+/* =========================================================================
+   THEME ALERT — pop-up notifikasi bergaya tema admin (ungu + aksen warna).
+   Diadaptasi dari modal sukses lama (.cb-success-*) agar menyatu dengan tema:
+   kartu var(--bg-elevated), sudut 18px, garis aksen ungu, tombol var(--purple).
+   Warna ikon & garis aksen mengikuti tipe (success hijau, error merah, dst).
+   Di-scope ke .admin-layout karena variabel tema dideklarasikan di sana.
+   ========================================================================= */
+.admin-layout .ta-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(3px);
+    animation: ta-overlay-in 0.2s ease-out;
+}
+
+.admin-layout .ta-modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 36px 32px 32px;
+    overflow: hidden;
+    text-align: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    animation: ta-modal-in 0.24s ease-out;
+}
+
+/* Garis aksen atas — ungu + warna tipe di tengah. */
+.admin-layout .ta-modal::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    content: '';
+    background: linear-gradient(90deg, var(--purple), #55c79f, var(--purple));
+}
+
+.admin-layout .ta-modal.ta-error::before {
+    background: linear-gradient(90deg, var(--purple), #e5606a, var(--purple));
+}
+
+.admin-layout .ta-modal.ta-warning::before {
+    background: linear-gradient(90deg, var(--purple), #f0b445, var(--purple));
+}
+
+.admin-layout .ta-modal.ta-confirm::before,
+.admin-layout .ta-modal.ta-info::before {
+    background: linear-gradient(90deg, var(--purple), #8a8df2, var(--purple));
+}
+
+.admin-layout .ta-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--text-sub);
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-layout .ta-close:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Lingkaran ikon — warna per tipe. */
+.admin-layout .ta-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+}
+
+.admin-layout .ta-icon i {
+    font-size: 31px;
+}
+
+.admin-layout .ta-icon-success {
+    color: #65d4aa;
+    background: rgba(76, 174, 142, 0.14);
+    border: 1px solid rgba(76, 174, 142, 0.45);
+    box-shadow: 0 0 0 8px rgba(76, 174, 142, 0.05);
+}
+
+.admin-layout .ta-icon-error {
+    color: #f0737c;
+    background: rgba(224, 80, 90, 0.14);
+    border: 1px solid rgba(224, 80, 90, 0.45);
+    box-shadow: 0 0 0 8px rgba(224, 80, 90, 0.05);
+}
+
+.admin-layout .ta-icon-warning {
+    color: #f5b545;
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.05);
+}
+
+.admin-layout .ta-icon-confirm,
+.admin-layout .ta-icon-info {
+    color: #9095f0;
+    background: rgba(91, 95, 232, 0.14);
+    border: 1px solid rgba(91, 95, 232, 0.45);
+    box-shadow: 0 0 0 8px rgba(91, 95, 232, 0.05);
+}
+
+.admin-layout .ta-title {
+    margin: 0 0 10px;
+    color: var(--text-main);
+    font-size: 21px;
+    font-weight: 650;
+}
+
+.admin-layout .ta-message {
+    max-width: 300px;
+    margin: 0 auto 26px;
+    color: var(--text-sub);
+    font-size: 14.5px;
+    line-height: 1.6;
+}
+
+.admin-layout .ta-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.admin-layout .ta-btn {
+    min-width: 130px;
+    padding: 11px 22px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 0;
+    border-radius: 10px;
+    transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
+}
+
+/* Tombol utama = ungu (identitas tema), untuk semua tipe. */
+.admin-layout .ta-btn-confirm {
+    color: #fff;
+    background: var(--purple);
+}
+
+.admin-layout .ta-btn-confirm:hover {
+    background: var(--purple-hover);
+    transform: translateY(-1px);
+}
+
+.admin-layout .ta-btn-cancel {
+    color: var(--text-sub);
+    background: transparent;
+    border: 1px solid var(--border-soft);
+}
+
+.admin-layout .ta-btn-cancel:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+@keyframes ta-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ta-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-layout .ta-overlay {
+        padding: 16px;
+    }
+
+    .admin-layout .ta-modal {
+        padding: 34px 24px 26px;
+    }
+}

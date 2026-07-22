@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
-import CustomAlert from '../CustomAlert';
+import ThemeAlert from '../ThemeAlert';
 import NewsSection from '../../user/berita/NewsSection';
 import './BeritaSectionForm.css';
 
@@ -333,7 +333,7 @@ const BeritaSectionForm = () => {
         onChange={handleFileChange} 
       />
 
-      <CustomAlert 
+      <ThemeAlert 
         isOpen={alertState.isOpen}
         type={alertState.type}
         title={alertState.title}
