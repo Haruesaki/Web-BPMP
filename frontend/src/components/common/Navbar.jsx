@@ -33,6 +33,7 @@ const Navbar = () => {
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
+  const submenuPanelRef = useRef(null); // REF BARU untuk panel submenu
 
   useEffect(() => {
     let isMounted = true;
@@ -149,7 +150,7 @@ const Navbar = () => {
     // 1. Update konten dan posisi untuk menu baru.
     setActiveDropdown(menu.id);
     setSubmenuPanelContent({ title: menu.title, items: menu.submenu || [] });
-    setSubmenuPanelPosition({ top: rect.top });
+    setSubmenuPanelPosition({ top: rect.bottom });
 
     // 2. Pastikan panel dianggap 'tertutup' sebelum kita mengganti kuncinya.
     setIsSubmenuPanelOpen(false);
@@ -230,7 +231,7 @@ const Navbar = () => {
       if (parentMenuItem) {
         const rect = parentMenuItem.getBoundingClientRect();
         // Update state posisi 'top' dari panel agar selalu sejajar
-        setSubmenuPanelPosition({ top: rect.top });
+        setSubmenuPanelPosition({ top: rect.bottom });
       }
     };
 
@@ -315,6 +316,27 @@ const Navbar = () => {
       if (overlay) overlay.removeEventListener('wheel', handleWheelOverlay);
     };
   }, [isMobileMenuOpen]); // Efek ini bergantung pada status buka/tutup menu.
+
+  // --- EFEK PERBAIKAN: Mengisolasi scroll di dalam panel submenu ---
+  useEffect(() => {
+    const submenuPanel = submenuPanelRef.current;
+  
+    // Handler untuk menghentikan "bocoran" scroll dari panel submenu
+    const handleWheelSubmenuPanel = (e) => {
+      e.stopPropagation();
+    };
+  
+    if (isSubmenuPanelOpen && submenuPanel) {
+      submenuPanel.addEventListener('wheel', handleWheelSubmenuPanel);
+    }
+  
+    // Cleanup: Hapus listener saat komponen unmount atau panel tertutup
+    return () => {
+      if (submenuPanel) {
+        submenuPanel.removeEventListener('wheel', handleWheelSubmenuPanel);
+      }
+    };
+  }, [isSubmenuPanelOpen]); // Efek ini hanya bergantung pada status buka/tutup panel submenu.
 
   // EFEK BARU: Logika selector yang sadar akan perubahan rute (URL)
   useEffect(() => {
@@ -443,6 +465,7 @@ const Navbar = () => {
 
       {/* PANEL SUBMENU BARU UNTUK TAMPILAN TABLET */}
       <div
+        ref={submenuPanelRef} // Lampirkan ref di sini
         className={`tablet-submenu-panel ${isSubmenuPanelOpen ? 'open' : ''}`}
         key={submenuPanelKey} // KUNCI: Menggunakan key untuk me-remount & re-animasi
         style={{ top: `${submenuPanelPosition.top}px` }}
@@ -450,7 +473,6 @@ const Navbar = () => {
         <div className="tablet-submenu-header">
           <button onClick={handleCloseSubmenuPanel} className="tablet-submenu-back-btn">
             <i className="fa-solid fa-chevron-left"></i>
-            <span>{submenuPanelContent.title}</span>
           </button>
         </div>
         <div className="tablet-submenu-list">

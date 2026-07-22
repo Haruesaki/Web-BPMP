@@ -199,7 +199,7 @@
   flex-shrink: 0;
   display: flex;
   width: clamp(320px, min(40vw, 45vh), 500px);
-  height: clamp(320px, min(40vw, 45vh), 500px);
+  aspect-ratio: 1 / 1;
   /* `transform` diatur oleh JS, jadi transisi dibatasi pada ukuran dan margin. */
   transition:
     width 0.4s ease-in-out,
@@ -398,159 +398,159 @@
   }
 }
 
-@media (max-width: 1290px) {
+
+/*
+======================================================================
+  MEDIA QUERIES (PENDEKATAN PROFESIONAL: MOBILE-FIRST)
+======================================================================
+Struktur di bawah ini menggunakan pendekatan "Mobile-First".
+Artinya, style CSS utama Anda (di luar media query) adalah untuk
+tampilan mobile. Media query di bawah ini digunakan untuk secara
+progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
+*/
+
+/*
+----------------------------------------------------------------------
+  1. BREAKPOINTS UTAMA (Berdasarkan Lebar Layar)
+     Menggunakan `min-width` dan unit `rem` untuk aksesibilitas.
+     1rem = 16px (jika pengguna tidak mengubah setting default browser)
+----------------------------------------------------------------------
+*/
+
+/*
+ * BREAKPOINT: Tablet (Portrait) ke atas
+ * TARGET: ~768px+
+ * FUNGSI: Mengubah layout dari tumpukan vertikal (mobile) ke horizontal.
+*/
+@media (max-width: 48rem) { /* 48rem = 768px */
   .hero-flex-container {
-    gap: 8rem;
-  }
-  .hero-left-content {
-    max-width: 40%;
-    flex-basis: 44%;
-    gap: 0.3rem;
-  }
-
-  /* .hero-right-cms{
-    padding:10px;
-  } */
-
-  .hero-right-parallax-wrapper {
-    margin: 0;
-    justify-self: center;
-    align-self: center;
-    width: clamp(150px, min(31vw, 45vh), 350px);
-    height: clamp(150px, min(31vw, 45vh), 350px);
-  }
-  .main-title {
-    font-size: clamp(1.5rem, min(2.4vw, 10vh), 2rem);
-  }
-
-  .welcome-text {
-    font-size: clamp(1rem, min(1.6vw, 2.2vh), 1.5rem);
-  }
-
-  .sub-title {
-    font-size: clamp(0.8rem, min(1.4vw, 2vh), 1.1rem);
-  }
-
-  .hero-logos-wrapper-cms {
-    height: clamp(50px, min(12vw, 7vh), 70px);
-  }
-}
-
-@media (max-width: 888px) and (min-height: 441px)  {
-   .hero-flex-container {
-    gap: 4rem;
     flex-direction: column;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
+    padding-top: clamp(1rem, 5vh, 2rem);
+    padding-bottom: clamp(2rem, 8vh, 4rem);
+    gap: clamp(1rem, 4vh, 2rem); 
   }
 
-  .hero-left-content{
-    text-align: center;
-    justify-content: center;
+  .hero-left-content {
+    max-width: 90%; 
+    flex-basis: auto;
     align-items: center;
-    max-width: 80%;
-    flex-basis: 1;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .hero-right-parallax-wrapper {
+    width: clamp(180px, min(70vw, 35vh), 320px);
+    margin: 0; 
   }
 
   .welcome-text {
-    font-size: clamp(1rem, min(3vw, 2.2vh), 1.5rem);
+    font-size: clamp(0.9rem, min(4vw, 2.2vh), 1.2rem);
   }
-
+  
   .main-title {
-    font-size: clamp(1.5rem, min(4vw, 10vh), 2rem);
+    font-size: clamp(1.6rem, min(4vw, 4.5vh), 2.5rem);
   }
 
   .sub-title {
-    font-size: clamp(0.8rem, min(2vw, 2vh), 1.1rem);
+    font-size: clamp(0.8rem, min(3.5vw, 2vh), 1rem);
   }
 
   .hero-logos-wrapper-cms {
-    align-items: center;
-    justify-content: center;
+    height: clamp(40px, 7vh, 55px);
   }
 
   .hero-logos-flex {
-    align-items: center;
     justify-content: center;
+    gap: 1.5rem;
   }
+  
+  @keyframes buildingSlideUp {
+    0% {
+      opacity: 1;
+      transform: translateY(60vh) scale(0.8);
+      rotate: -5deg;
+    }
 
-  .hero-right-parallax-wrapper {
-    width: clamp(150px, min(42vw, 30vh), 300px);
-    height: clamp(150px, min(42vw, 30vh), 300px);
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      rotate: 1deg;
+    }
   }
 }
 
-@media (max-height: 560px) and (min-width: 889px){
-  .hero-right-parallax-wrapper {
-    width: clamp(150px, min(20vw, 44vh), 250px);
-    height: clamp(150px, min(20vw, 44vh), 250px);
-  }
-
-  .hero-right-cms {
-    padding: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .landing-wrapper {
-    margin-top: -120px;
-    padding-top: 121px;
+/*
+ * BREAKPOINT: Tablet (Landscape) & Desktop Kecil ke atas
+ * TARGET: ~1024px+
+ * FUNGSI: Memberi lebih banyak ruang, memperbesar font.
+*/
+@media (min-width: 64rem) { /* 64rem = 1024px */
+ 
+  
+  /* CONTOH PENGGUNAAN:
+  .hero-left-content {
+    max-width: 45%;
   }
   .main-title {
-    font-size: clamp(0rem, min(100vw), 1.4rem);
+    font-size: clamp(2rem, 4vw, 3rem);
   }
-  .sub-title {
-    font-size: clamp(0.5rem, min(100vw), 0.8rem);
-  }
-
-  .hero-logos-wrapper-cms {
-    height: clamp(30px, min(12vw), 50px);
-  }
-
-  .hero-right-cms{
-    padding:10px;
-  }
+  */
 }
 
-
-@media (max-width: 888px) and (max-height: 440px) {
+/*
+ * BREAKPOINT: Desktop Besar ke atas
+ * TARGET: ~1280px+
+ * FUNGSI: Optimasi untuk layar lebar.
+*/
+@media (min-width: 80rem) { /* 80rem = 1280px */
+  /* CONTOH PENGGUNAAN:
   .hero-flex-container {
-    flex-direction: row;
-    gap: 4rem;
-    text-align: left;
-    justify-content: center;
-    align-items: center;
+    padding: 0 8vw;
+  }
+  */
+}
+
+
+/*
+----------------------------------------------------------------------
+  2. KONDISI SPESIFIK (Rasio Aspek & Preferensi Pengguna)
+     Untuk penanganan kasus khusus yang membuat UI/UX lebih baik.
+----------------------------------------------------------------------
+*/
+
+/*
+ * KONDISI: Orientasi Landscape pada layar yang tidak terlalu lebar
+ * TARGET: Smartphone atau Tablet saat diputar miring.
+ * FUNGSI: Mencegah elemen menjadi terlalu besar dan aneh.
+*/
+@media (max-width: 63.9375rem) and (orientation: landscape) { /* Di bawah 1024px */
+  /* CONTOH PENGGUNAAN:
+  .main-title {
+    font-size: clamp(1.5rem, 8vh, 2.2rem); // Gunakan 'vh' karena tinggi layar terbatas
+  }
+  */
+}
+
+/*
+ * KONDISI: Pengguna menginginkan lebih sedikit gerakan/animasi.
+ * TARGET: Pengguna yang mengaktifkan setelan aksesibilitas di OS mereka.
+ * FUNGSI: Meningkatkan aksesibilitas dengan mematikan animasi.
+*/
+@media (prefers-reduced-motion: reduce) {
+  /* Matikan semua animasi yang bersifat dekoratif */
+  .particle,
+  .hero-right-cms,
+  .background-glow-container::before,
+  .typing-cursor {
+    animation: none !important;
+    transition: none !important;
   }
 
-    .main-title {
-    font-size: clamp(1rem, min(2.4vw, 10vh), 2rem);
-  }
-
-  .welcome-text {
-    font-size: clamp(0.7rem, min(1.6vw, 2.2vh), 1.5rem);
-  }
-
-  .sub-title {
-    font-size: clamp(0.5rem, min(1.4vw, 2vh), 1.1rem);
-  }
-
-  .hero-logos-wrapper-cms {
-    height: clamp(50px, min(12vw, 7vh), 70px);
-  }
-
-   .hero-logos-wrapper-cms {
-    align-items: center;
-    justify-content: center;
-  }
-
-  .hero-logos-flex {
-    align-items: center;
-    justify-content: flex-start;
-  }
-
-    .hero-right-parallax-wrapper {
-    width: clamp(150px, min(100vw), 180px);
-    height: clamp(150px, min(100vw), 180px);
+  /* Posisikan elemen ke state akhir animasi agar tidak 'stuck' di awal */
+  .hero-right-cms {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+    rotate: 1deg;
   }
 }
+
