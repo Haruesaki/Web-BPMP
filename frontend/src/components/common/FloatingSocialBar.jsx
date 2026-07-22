@@ -1,13 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../api/axiosInstance';
 import './FloatingSocialBar.css';
 
-// --- IMPORT ASSETS ---
-import Facebook from "../../assets/source/facebook.png";
-import Instagram from "../../assets/source/instagram.png";
-import Youtube from "../../assets/source/youtube.png";
-import Social from "../../assets/source/social.png";
-
 const FloatingSocialBar = () => {
+  const [socials, setSocials] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchSocials = async () => {
+      try {
+        const res = await axiosInstance.get('/api/beranda/media-sosial');
+        if (isMounted && res.data?.success) {
+          setSocials(res.data.data);
+        }
+      } catch (error) {
+        console.error('Gagal mengambil data floating media sosial:', error);
+      }
+    };
+
+    fetchSocials();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (socials.length === 0) return null;
+
   return (
     <aside className="floating-social-bar">
       <div className="glass-sidebar-bg">
@@ -16,22 +35,25 @@ const FloatingSocialBar = () => {
         <div className="blur-shape shape-ketiga"></div>
       </div>
 
-      <a href="#" className="social-icon" aria-label="Instagram">
-        <span className="social-text">@bpmplampung</span>
-        <img src={Instagram} alt="Instagram" />
-      </a>
-      <a href="#" className="social-icon" aria-label="YouTube">
-        <span className="social-text">bpmplampung</span>
-        <img src={Youtube} alt="YouTube" />
-      </a>
-      <a href="#" className="social-icon" aria-label="WhatsApp">
-        <span className="social-text">62+895-462-763</span>
-        <img src={Social} alt="WhatsApp" />
-      </a>
-      <a href="#" className="social-icon" aria-label="Facebook">
-        <span className="social-text">bpmplampung</span>
-        <img src={Facebook} alt="Facebook" />
-      </a>
+      {socials.map((social) => (
+        <a 
+          key={social.id} 
+          href={social.url_tautan || '#'} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="social-icon" 
+          aria-label={social.platform}
+        >
+          <span className="social-text">{social.platform}</span>
+          {social.url_logo ? (
+            <img src={social.url_logo} alt={social.platform} />
+          ) : (
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px' }}>
+              <i className="fa-solid fa-link"></i>
+            </div>
+          )}
+        </a>
+      ))}
     </aside>
   );
 };

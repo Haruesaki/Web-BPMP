@@ -2,12 +2,17 @@
    SECTION MITRA KERJA (3D CONCAVE EFFECT)
    ========================================= */
 .partners-section {
+    --partner-logo-height: clamp(50px, 6vw, 90px);
+    --partner-logo-gap: clamp(72px, 17vw, 150px);
+    --partner-section-padding-y: 40px;
+    --partner-container-padding-y: 50px;
+
     position: relative;
     width: 100%;
     background-image: linear-gradient(to right, #79cbf8 0%, #aeceff 50%, #79cbf8 100%);
-    padding: 65px 0vw;
-    margin-top: 200px;
-    margin-bottom: 200px;
+    padding: var(--partner-section-padding-y) 0;
+    margin-top: 50px;
+    margin-bottom: 50px;
     overflow: hidden;
     z-index: 1;
 }
@@ -42,26 +47,142 @@
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
-    padding: 20px 0;
+    padding: var(--partner-container-padding-y) 0;
+    /* PERSPEKTIF WADAH:
+       Semakin kecil nilainya, efek 3D terasa semakin dramatis/dekat.
+       Semakin besar nilainya, efek 3D terasa semakin datar/halus. */
+    perspective: 800px;
+    perspective-origin: 50% 50%;
 }
 
 .partners-track {
     display: flex;
     align-items: center;
     width: max-content;
-    gap: 7vw;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.partner-logo-group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--partner-logo-gap);
+    padding-right: var(--partner-logo-gap);
+    transform-style: preserve-3d;
+}
+
+.partner-logo-frame {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    transform-style: preserve-3d;
 }
 
 .partner-logo {
-    height: clamp(50px, 6vw, 90px);
+    height: var(--partner-logo-height);
     width: auto;
+    max-width: calc(var(--partner-logo-height) * 3);
     object-fit: contain;
+    transform-origin: center center;
+    backface-visibility: hidden;
+    will-change: transform;
+}
+
+/* PENAMBAHAN BARU: Placeholder saat tidak ada logo */
+.partner-placeholder-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    min-height: 150px; /* Memberi tinggi minimal agar tidak gepeng */
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.partner-placeholder-wrapper i {
+    font-size: 3.5rem;
+    opacity: 0.6;
 }
 
 /* --- Responsive Mitra --- */
-@media (max-width: 953px) {
+@media (max-width: 1280px) {
     .partners-section {
-        margin-top: 10px;
-        margin-bottom: 50px;
+        --partner-logo-height: clamp(58px, 6.4vw, 82px);
+        --partner-logo-gap: clamp(76px, 13vw, 176px);
+        --partner-section-padding-y: 30px;
+        --partner-container-padding-y: 60px;
+
+        margin-top: 150px;
+        margin-bottom: 150px;
+    }
+
+    .partners-container {
+        min-height: 150px;
+    }
+}
+
+@media (min-width: 371px) and (max-width: 953px) {
+    .partners-section {
+        --partner-logo-height: clamp(46px, 7.4vw, 64px);
+        --partner-logo-gap: clamp(48px, 10vw, 72px);
+        --partner-section-padding-y: 34px;
+        --partner-container-padding-y: 28px;
+
+        margin-top: 6px;
+        margin-bottom: 42px;
+    }
+
+    .partners-section::before,
+    .partners-section::after {
+        height: 104px;
+    }
+
+    .partners-section::before {
+        top: -58px;
+    }
+
+    .partners-section::after {
+        bottom: -58px;
+    }
+
+    .partners-container {
+        min-height: 112px;
+        perspective: 700px;
+    }
+}
+
+@media (max-width: 370px) {
+    .partners-section {
+        --partner-logo-height: clamp(40px, 12vw, 50px);
+        --partner-logo-gap: clamp(42px, 14vw, 56px);
+        --partner-section-padding-y: 35px;
+        --partner-container-padding-y: 26px;
+
+        margin-top: 0;
+        margin-bottom: 36px;
+    }
+
+    .partners-section::before,
+    .partners-section::after {
+        height: 88px;
+    }
+
+    .partners-section::before {
+        top: -48px;
+    }
+
+    .partners-section::after {
+        bottom: -48px;
+    }
+
+    .partners-container {
+        min-height: 96px;
+        perspective: 620px;
     }
 }

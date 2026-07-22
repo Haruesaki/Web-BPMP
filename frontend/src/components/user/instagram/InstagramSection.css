@@ -1,6 +1,14 @@
 /* =========================================
    SECTION INSTAGRAM 
    ========================================= */
+
+.container-instagram-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 100px 0px;
+}
+
 .instagram-section {
     width: 100%;
     display: flex;
@@ -49,9 +57,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 35px 8%;
+    padding: 18px 8%;
     background-color: #0B132B;
     color: #ffffff;
+    overflow: hidden;
     border-bottom: 2px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -124,11 +133,13 @@
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: ig-floatAnimation 9s ease-in-out infinite;
 }
 
 .ig-follow-btn:hover {
-    transform: translateY(-3px);
+    /* Transform dihapus agar tidak konflik dengan animasi float dan scroll */
+    background: linear-gradient(135deg, #2a52c7 0%, #0e1533 100%);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.4);
 }
@@ -165,6 +176,25 @@
     transform: translateY(-10px) scale(1.02);
 }
 
+/* --- Keyframes untuk Animasi Tombol --- */
+@keyframes ig-floatAnimation {
+    0% {
+        transform: translateY(0) rotate(4deg);
+    }
+    25% {
+        transform: translateY(8px) rotate(2deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(-4deg);
+    }
+    75% {
+        transform: translateY(5px) rotate(-1deg);
+    }
+    100% {
+        transform: translateY(0) rotate(4deg);
+    }
+}
+
 .ig-post-img {
     width: 100%;
     height: 100%;
@@ -188,6 +218,26 @@
 
     .ig-stats {
         gap: 30px;
+    }
+
+    /* REVISI: Ukuran font dinamis untuk header Instagram di mobile */
+    .ig-username {
+        font-size: clamp(16px, 4vw, 20px);
+    }
+
+    .ig-stat-label,
+    .ig-stat-value {
+        font-size: clamp(12px, 2.5vw, 14px);
+    }
+
+    .ig-follow-btn {
+        font-size: clamp(14px, 3.5vw, 18px);
+        padding: clamp(8px, 2.5vw, 12px) clamp(18px, 4vw, 24px);
+    }
+
+    .ig-follow-btn .ig-btn-icon {
+        width: clamp(18px, 4vw, 22px);
+        height: clamp(18px, 4vw, 22px);
     }
 
     .ig-feed-grid {
@@ -217,6 +267,25 @@
 .ig-embed-wrapper:hover {
     transform: translateY(-10px) scale(1.02);
 }
+/* Placeholder saat embed Instagram belum dimuat (lazy load) */
+.ig-embed-skeleton {
+    min-height: 500px;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #ececec 30%, #f6f6f6 50%, #ececec 70%);
+    background-size: 200% 100%;
+    animation: ig-skeletonShimmer 1.4s ease-in-out infinite;
+    cursor: default;
+}
+
+.ig-embed-skeleton:hover {
+    transform: none;
+}
+
+@keyframes ig-skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 .ig-embed-wrapper iframe {
     margin: 0 !important;
     border-radius: 10px !important;

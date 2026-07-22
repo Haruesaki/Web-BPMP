@@ -13,9 +13,11 @@ export const useAuth = () => {
             if (result.status === 'success' && result.data) {
                 // Simpan data session lengkap ke sessionStorage
                 const sessionData = {
+                    id: result.data.user.id,
                     nama: result.data.user.nama,
                     role: result.data.user.role,
                     email: result.data.user.email,
+                    access: result.data.user.access,
                     token: result.data.token
                 };
                 sessionStorage.setItem('adminSession', JSON.stringify(sessionData));

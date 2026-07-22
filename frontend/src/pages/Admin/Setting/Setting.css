@@ -1,0 +1,145 @@
+/* =========================================================================
+   SETTING
+   Catatan: variabel warna (--bg-card, --text-sub, dst.) berasal dari scope
+   ".admin-layout" yang dideklarasikan di dashboard-admin.css. Halaman ini
+   WAJIB dibungkus <div className="admin-layout"> (disediakan oleh AdminLayout).
+   ========================================================================= */
+
+.admin-layout .st-heading h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.admin-layout .st-heading p {
+    font-size: 15px;
+    color: var(--text-sub);
+    margin: 6px 0 28px;
+}
+
+/* ---------- CARD ---------- */
+.admin-layout .st-card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.admin-layout .st-card-title i {
+    color: var(--text-sub);
+    font-size: 16px;
+}
+
+.admin-layout .st-card-sub {
+    font-size: 13.5px;
+    color: var(--text-sub);
+    margin: 0 0 22px;
+}
+
+/* ---------- FORM ---------- */
+.admin-layout .st-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.admin-layout .st-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-layout .st-field label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.admin-layout .st-input {
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 9px;
+    background: var(--bg-card-soft);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.admin-layout .st-input:focus {
+    border-color: var(--purple);
+}
+
+.admin-layout .st-input::placeholder {
+    color: var(--text-faint);
+}
+
+.admin-layout .st-input-readonly {
+    color: var(--text-sub);
+    cursor: not-allowed;
+}
+
+.admin-layout .st-field-hint {
+    font-size: 12px;
+    color: var(--text-faint);
+}
+
+/* ---------- ALERT ---------- */
+.admin-layout .st-alert {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 9px;
+    font-size: 13.5px;
+}
+
+.admin-layout .st-alert-error {
+    border: 1px solid rgba(214, 90, 90, 0.4);
+    background: rgba(214, 90, 90, 0.1);
+    color: #e57373;
+}
+
+.admin-layout .st-alert-success {
+    border: 1px solid rgba(76, 174, 142, 0.4);
+    background: rgba(76, 174, 142, 0.1);
+    color: #55c79f;
+}
+
+/* ---------- TOMBOL SIMPAN ---------- */
+.admin-layout .st-btn-simpan {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .st-btn-simpan:hover {
+    background: var(--purple-hover);
+}
+
+.admin-layout .st-btn-simpan:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .admin-layout .st-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-layout .st-btn-simpan {
+        width: 100%;
+    }
+}

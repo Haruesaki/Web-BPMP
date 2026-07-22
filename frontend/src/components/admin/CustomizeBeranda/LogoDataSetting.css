@@ -1,0 +1,107 @@
+.admin-layout .cb-icon-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    color: var(--text-sub);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-layout .cb-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+.admin-layout .cb-icon-btn-danger {
+    color: #e57373;
+    border-color: rgba(214, 90, 90, 0.35);
+    background: rgba(214, 90, 90, 0.08);
+}
+
+.admin-layout .cb-icon-btn-danger:hover {
+    background: rgba(214, 90, 90, 0.2);
+    color: #e57373;
+}
+
+.admin-layout .cb-logo-form-row {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.admin-layout .cb-logo-form-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.admin-layout .cb-logo-preview-box {
+    flex-shrink: 0;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg-card-soft);
+    padding: 10px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: center;
+}
+
+.admin-layout .cb-logo-preview-box i {
+    font-size: 22px;
+    color: var(--text-faint);
+}
+
+.admin-layout .cb-logo-preview-img {
+    max-width: 100%;
+    max-height: 46px;
+    object-fit: contain;
+}
+
+.admin-layout .cb-btn-simpan-logo {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    border: none;
+    border-radius: 9px;
+    background: var(--purple-soft);
+    color: #1c1d3d;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .cb-btn-simpan-logo:hover {
+    background: #d3d4fb;
+}
+
+@media (max-width: 1100px) {
+    .admin-layout .cb-logo-form-row {
+        flex-direction: column;
+    }
+
+    .admin-layout .cb-logo-preview-box {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+    }
+}

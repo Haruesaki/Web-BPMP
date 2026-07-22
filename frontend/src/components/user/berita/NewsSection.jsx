@@ -1,39 +1,31 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './NewsSection.css';
 import NewsCard from './NewsCard';
-
-// Import assets untuk data tiruan (mock data)
-import PreviewBerita1Jpg from "../../../assets/source/Preveiw-berita (1).jpg";
-import PreviewBerita2 from "../../../assets/source/Preveiw-berita (2).jpg";
-import PreviewBerita3 from "../../../assets/source/Preveiw-berita (3).jpg";
-
-// Data tiruan untuk semua artikel berita. Nantinya ini bisa diambil dari API.
-const allNewsData = [
-    { id: 1, category: 'Berita', title: 'Awali Pekan dengan Semangat Melayani, BPMP Lampung Perkuat Budaya Kerja dan Kualitas Layanan', date: '15 Juni 2026', image: PreviewBerita1Jpg },
-    { id: 2, category: 'Artikel', title: 'Pentingnya Digitalisasi Sekolah di Era Merdeka Belajar', date: '14 Juni 2026', image: PreviewBerita2 },
-    { id: 3, category: 'Pengumuman', title: 'Jadwal Pelatihan Guru Penggerak Angkatan 12 Telah Dirilis', date: '13 Juni 2026', image: PreviewBerita3 },
-    { id: 4, category: 'Berita', title: 'BPMP Lampung Kembali Raih Penghargaan Zona Integritas Wilayah Bebas Korupsi', date: '12 Juni 2026', image: PreviewBerita1Jpg },
-    // Halaman 2
-    { id: 5, category: 'Artikel', title: 'Strategi Jitu Peningkatan Mutu Pendidikan Dasar di Provinsi Lampung', date: '11 Juni 2026', image: PreviewBerita2 },
-    { id: 6, category: 'Berita', title: 'Kolaborasi dengan Universitas Lampung untuk Riset Pendidikan Terapan', date: '10 Juni 2026', image: PreviewBerita3 },
-    { id: 7, category: 'Pengumuman', title: 'Hasil Seleksi Administrasi Calon Fasilitator Program Sekolah Penggerak', date: '09 Juni 2026', image: PreviewBerita1Jpg },
-    { id: 8, category: 'Berita', title: 'Workshop Implementasi Kurikulum Merdeka di Daerah Terpencil, Terluar, dan Tertinggal', date: '08 Juni 2026', image: PreviewBerita1Jpg },
-];
+import axiosInstance from '../../../api/axiosInstance';
 
 const ITEMS_PER_PAGE = 4;
 const AUTO_SLIDE_INTERVAL = 5000; // 5 detik
 
-const NewsSection = () => {
+const NewsSection = ({ previewData }) => {
+    const [allNewsData, setAllNewsData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedNews, setPaginatedNews] = useState([]);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const intervalRef = useRef(null);
 
-    const totalPages = Math.ceil(allNewsData.length / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(allNewsData.length / ITEMS_PER_PAGE));
 
-    // State turunan: Dapatkan berita unggulan dan thumbnail dari state utama
-    const featuredNews = paginatedNews[featuredIndex] || null;
-    const thumbnailNews = paginatedNews.filter((_, index) => index !== featuredIndex).slice(0, 3);
+    // Hanya berita YANG PUNYA GAMBAR yang boleh tampil sebagai featured.
+    // Berita tanpa gambar tidak ikut di-slide agar area featured tidak pernah kosong.
+    const featurableIndexes = useMemo(
+        () => paginatedNews.reduce((acc, news, index) => (news.image ? [...acc, index] : acc), []),
+        [paginatedNews]
+    );
+
+    // Thumbnail: saring yang bergambar DULU, baru ambil 3 — agar jumlahnya konsisten.
+    const thumbnailNews = paginatedNews
+        .filter((news, index) => index !== featuredIndex && news.image)
+        .slice(0, 3);
 
     // Fungsi untuk menghentikan auto-slide
     const stopAutoSlide = useCallback(() => {
@@ -46,12 +38,51 @@ const NewsSection = () => {
     // Fungsi untuk memulai auto-slide
     const startAutoSlide = useCallback(() => {
         stopAutoSlide(); // Hentikan dulu untuk menghindari duplikasi interval
-        if (paginatedNews.length <= 1) return;
+        // Hanya berputar di antara berita bergambar.
+        if (featurableIndexes.length <= 1) return;
 
         intervalRef.current = setInterval(() => {
-            setFeaturedIndex(prevIndex => (prevIndex + 1) % paginatedNews.length);
+            setFeaturedIndex(prevIndex => {
+                const pos = featurableIndexes.indexOf(prevIndex);
+                const nextPos = (pos + 1) % featurableIndexes.length;
+                return featurableIndexes[nextPos];
+            });
         }, AUTO_SLIDE_INTERVAL);
-    }, [paginatedNews.length, stopAutoSlide]);
+    }, [featurableIndexes, stopAutoSlide]);
+
+    // Efek untuk memuat data dari API atau preview
+    useEffect(() => {
+        if (previewData) {
+            const formattedPreview = previewData.map(item => ({
+                id: item.id,
+                category: item.kategori || 'Informasi',
+                title: item.judul,
+                date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                image: item.coverUrl || ''
+            }));
+            setAllNewsData(formattedPreview);
+            return;
+        }
+
+        const fetchNews = async () => {
+            try {
+                const res = await axiosInstance.get('/api/beranda/berita');
+                if (res.data?.success) {
+                    const fetchedData = res.data.data.map(item => ({
+                        id: item.id,
+                        category: item.kategori || 'Informasi',
+                        title: item.judul,
+                        date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                        image: item.coverUrl || ''
+                    }));
+                    setAllNewsData(fetchedData);
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data berita:", err);
+            }
+        };
+        fetchNews();
+    }, [previewData]);
 
     // Efek untuk memuat data berita saat halaman berubah
     useEffect(() => {
@@ -61,15 +92,14 @@ const NewsSection = () => {
 
         setPaginatedNews(currentNews);
 
-        if (currentNews.length > 0) {
-            setFeaturedIndex(0);
-        } else {
-            setFeaturedIndex(0);
-        }
+        // Mulai dari berita bergambar pertama, bukan selalu indeks 0 — agar
+        // area featured tidak kosong saat berita pertama tak punya gambar.
+        const firstWithImage = currentNews.findIndex(news => news.image);
+        setFeaturedIndex(firstWithImage === -1 ? 0 : firstWithImage);
 
         // Cleanup interval saat berpindah halaman
         return () => stopAutoSlide();
-    }, [currentPage, stopAutoSlide]);
+    }, [currentPage, allNewsData, stopAutoSlide]);
 
     // Efek untuk memulai/menghentikan auto-slide saat data berubah
     useEffect(() => {
@@ -79,9 +109,14 @@ const NewsSection = () => {
 
     // Fungsi untuk mengubah pratinjau utama saat di-hover secara manual
     const handleSetFeatured = (newsItem) => {
+        // Abaikan berita tanpa gambar: pratinjau tetap pada gambar terakhir,
+        // tidak berpindah ke kartu kosong.
+        if (!newsItem.image) return;
+
         const newIndex = paginatedNews.findIndex(item => item.id === newsItem.id);
         if (newIndex !== -1 && newIndex !== featuredIndex) {
             setFeaturedIndex(newIndex);
+            startAutoSlide(); // Reset timer saat interaksi manual
         }
     };
 
@@ -90,7 +125,24 @@ const NewsSection = () => {
         setCurrentPage(pageNumber);
     };
 
+    // Daftar nomor halaman ringkas (pakai "…") agar tidak meluber saat
+    // halaman banyak — pola sama seperti tabel di panel admin.
+    const buildPageList = () => {
+        if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+        const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+        const sorted = [...pages].filter(p => p >= 1 && p <= totalPages).sort((a, b) => a - b);
+        const result = [];
+        let prev = 0;
+        for (const p of sorted) {
+            if (prev && p - prev > 1) result.push('...');
+            result.push(p);
+            prev = p;
+        }
+        return result;
+    };
+
     return (
+        <section className="container-news-section"> 
         <section className="news-section">
             <div className="news-header-bar">
                 <h2>BERITA TERKINI</h2>
@@ -102,26 +154,51 @@ const NewsSection = () => {
                 onMouseLeave={startAutoSlide}
             >
                 <div className="news-left">
-                    <div className="featured-card-wrapper">
-                        {paginatedNews.map((news, index) => (
-                            <div
-                                className="featured-card"
-                                key={news.id}
-                                style={{ transform: `translateX(${(index - featuredIndex) * 100}%)` }}
-                            >
-                                <img src={news.image} alt={news.title} className="featured-img" />
-                                <div className="featured-overlay">
-                                    <h3>{news.title}</h3>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    {/* Hanya render kartu bergambar — tak ada lagi "sisa pembungkus" kosong. */}
+                    {featurableIndexes.length > 0 && (
+                        <div className="featured-card-wrapper">
+                            {paginatedNews.map((news, index) => (
+                                news.image ? (
+                                    <div
+                                        className="featured-card"
+                                        key={news.id}
+                                        style={{ transform: `translateX(${(index - featuredIndex) * 100}%)` }}
+                                    >
+                                        <img src={news.image} alt={news.title} className="featured-img" />
+                                        <div className="featured-overlay">
+                                            {/* title: judul utuh saat hover, karena teks dipotong "…" */}
+                                            <h3 title={news.title}>{news.title}</h3>
+                                        </div>
+                                    </div>
+                                ) : null
+                            ))}
+                        </div>
+                    )}
 
-                    <div className="thumbnail-row">
-                        {thumbnailNews.map(thumb => (
-                            <img key={thumb.id} src={thumb.image} alt={`Thumbnail: ${thumb.title}`} className="thumb-img" />
-                        ))}
-                    </div>
+                    {thumbnailNews.length > 0 && (
+                        <div className="thumbnail-row">
+                            {thumbnailNews.map(thumb => (
+                                // Wadah statis: ukuran & rasio tetap, tidak bergantung
+                                // jumlah thumbnail. Gambar hanya mengisi wadah ini.
+                                <div
+                                    key={thumb.id}
+                                    className="thumb-item"
+                                    onMouseEnter={() => handleSetFeatured(thumb)}
+                                    onClick={() => handleSetFeatured(thumb)}
+                                    onFocus={() => handleSetFeatured(thumb)}
+                                    tabIndex="0"
+                                    role="button"
+                                    aria-label={`Tampilkan pratinjau: ${thumb.title}`}
+                                >
+                                    <img
+                                        src={thumb.image}
+                                        alt={`Thumbnail: ${thumb.title}`}
+                                        className="thumb-img"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="news-divider"></div>
@@ -131,9 +208,13 @@ const NewsSection = () => {
 
                     <div className="news-list">
                         {paginatedNews.map(news => (
-                            <div key={news.id} onMouseEnter={() => handleSetFeatured(news)}>
-                                <NewsCard category={news.category} title={news.title} date={news.date} />
-                            </div>
+                            <NewsCard
+                                key={news.id}
+                                title={news.title}
+                                date={news.date}
+                                onMouseEnter={() => handleSetFeatured(news)}
+                                onFocus={() => handleSetFeatured(news)} // Prop onFocus untuk aksesibilitas
+                            />
                         ))}
                     </div>
 
@@ -141,10 +222,14 @@ const NewsSection = () => {
                         <button className="page-arrow" aria-label="Previous" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                             <i className="fa-solid fa-chevron-left"></i>
                         </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
-                            <button key={num} className={`page-num ${currentPage === num ? 'active' : ''}`} onClick={() => handlePageChange(num)}>
-                                {num}
-                            </button>
+                        {buildPageList().map((num, idx) => (
+                            num === '...' ? (
+                                <span key={`dots-${idx}`} className="page-dots">…</span>
+                            ) : (
+                                <button key={num} className={`page-num ${currentPage === num ? 'active' : ''}`} onClick={() => handlePageChange(num)}>
+                                    {num}
+                                </button>
+                            )
                         ))}
                         <button className="page-arrow" aria-label="Next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
                             <i className="fa-solid fa-chevron-right"></i>
@@ -152,6 +237,7 @@ const NewsSection = () => {
                     </div>
                 </div>
             </div>
+        </section>
         </section>
     );
 };

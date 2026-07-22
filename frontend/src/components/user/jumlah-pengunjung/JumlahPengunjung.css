@@ -1,0 +1,92 @@
+/* =========================================
+   Area Putih Konter Pengunjung
+   ========================================= */
+.visitor-counter-wrapper {
+    background-color: #ffffff;
+    padding: 50px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Desain Tombol Konter */
+.visitor-counter-box {
+    --padding-x: clamp(20px, 7vw, 100px); /* Variabel untuk padding horizontal dinamis */
+    /* --- Glassmorphism Effect --- */
+    background: linear-gradient(20deg , rgb(0, 21, 92), rgb(0, 37, 118));
+    /* background: rgb(0, 22, 87); */
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    /* border: 1px solid rgba(255, 255, 255, 0.18); */
+    /* --- Layered Box Shadow --- */
+    box-shadow: 
+      /* Lapisan 1 (Atas): Bayangan utama untuk kedalaman */
+      0 8px 20px 0 rgba(0, 0, 0, 0.301),
+      /* Lapisan 2 (Tengah): Aura berwarna biru yang menyebar */
+      0 0 20px 5px rgba(0, 0, 0, 0.105),
+      /* Lapisan 3 (Bawah): Garis tepi kaca 'inset' yang halus */
+      inset 0 11px 20px -10px rgba(255, 255, 255, 0.796),
+      inset 0 -15px 20px -10px rgba(0, 0, 0, 0.737);
+
+    padding: clamp(12px, 5vw, 40px) var(--padding-x);
+    border-radius: 15px; /* Sudut lebih lembut untuk efek kaca */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(10px, 2vw, 15px); 
+    
+}
+
+.visitor-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% + (var(--padding-x) * 2)); /* Lebar dinamis berdasarkan padding parent */
+    /* background-color: #236a54; */
+    gap: clamp(8px, 1.5vw, 10px);
+    padding-bottom: clamp(8px, 1.5vw, 10px);
+    border-bottom: 1px solid #ffffff7e;
+}
+
+.visitor-text-header{
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 2vw, 23px);
+    font-weight: 800;
+    margin: 0;
+}
+
+.visitor-icon {
+    color: #ffffff;
+    font-size: clamp(24px, 4vw, 30px);
+}
+
+.visitor-content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(15px, 4vw, 30px);
+    
+}
+
+.visitor-content.left{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.visitor-content.right{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.visitor-text {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 1.5vw, 18px);
+    font-weight: 600;
+}

@@ -1,143 +1,313 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import axiosInstance from '../../../api/axiosInstance';
 import './PartnerSection.css';
 
-// --- IMPORT ASSETS ---
-import Mitra1Jpg from "../../../assets/source/Mitra (1).jpg";
-import Mitra1Png from "../../../assets/source/Mitra (1).png";
-import Mitra2 from "../../../assets/source/Mitra (2).png";
-import Mitra3 from "../../../assets/source/Mitra (3).png";
-import Mitra4 from "../../../assets/source/Mitra (4).png";
-import Mitra5 from "../../../assets/source/Mitra (5).png";
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getFullUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('blob:') || url.startsWith('http')) return url;
+  return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
-const PartnerSection = () => {
+const fallbackMitra = [];
+
+const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
     const trackRef = useRef(null);
     const partnersSectionRef = useRef(null);
+    const [fetchedMitra, setFetchedMitra] = useState(null);
+    const [loopCopies, setLoopCopies] = useState(2);
 
-    const mitraList = [Mitra1Jpg, Mitra5, Mitra2, Mitra3, Mitra1Png, Mitra4];
+    useEffect(() => {
+      if (customMitraList) return;
 
-    // 1. LENS EFEK 3D LOGO MITRA
+      const fetchMitra = async () => {
+        try {
+          const res = await axiosInstance.get('/api/beranda/mitra');
+          const data = res.data?.data || [];
+          if (data.length > 0) {
+            setFetchedMitra(data.map(m => getFullUrl(m.url_logo)));
+          } else {
+            setFetchedMitra([]);
+          }
+        } catch (error) {
+          console.error("Gagal mengambil logo mitra:", error);
+        }
+      };
+      fetchMitra();
+    }, [customMitraList]);
+
+    const activeMitraList = customMitraList ? customMitraList : (fetchedMitra === null ? fallbackMitra : fetchedMitra);
+    const showPlaceholder = activeMitraList.length === 0;
+
+    useEffect(() => {
+        if (activeMitraList.length === 0) return;
+
+        const calculateAndSetCopies = () => {
+            const track = trackRef.current;
+            const section = partnersSectionRef.current;
+            if (!track || !section) return;
+            const firstGroup = track.querySelector('.partner-logo-group');
+            if (!firstGroup) return;
+
+            const groupWidth = firstGroup.getBoundingClientRect().width;
+            const screenWidth = isPreviewMode 
+                ? (section.clientWidth || window.innerWidth) 
+                : window.innerWidth;
+
+            if (groupWidth > 0 && screenWidth > 0) {
+                const requiredCopies = Math.ceil(screenWidth / groupWidth) + 3;
+                setLoopCopies(prev => Math.max(prev, requiredCopies));
+            }
+        };
+
+        const timer = setTimeout(calculateAndSetCopies, 50);
+        window.addEventListener('resize', calculateAndSetCopies);
+
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', calculateAndSetCopies);
+        };
+    }, [activeMitraList, isPreviewMode]);
+
     useEffect(() => {
         const track = trackRef.current;
         const partnersSection = partnersSectionRef.current;
-        let observerMitra;
-        let animationFrameId;
+        if (!track || !partnersSection) return;
 
-        if (track && partnersSection) {
-            const allLogos = track.querySelectorAll('.partner-logo');
-            let isSectionVisible = false;
+        let animationId;
+        let observer;
+        let resizeObserver;
 
-            function apply3DLensEffect() {
-                if (!isSectionVisible) return;
-
-                const screenCenter = window.innerWidth / 2;
-                const maxDistance = window.innerWidth / 2;
-
-                for (let i = 0; i < allLogos.length; i++) {
-                    const rect = allLogos[i].getBoundingClientRect();
-
-                    if (rect.width === 0) continue;
-
-                    const logoCenter = rect.left + rect.width / 2;
-                    const distanceFromCenter = Math.abs(screenCenter - logoCenter);
-
-                    let normalized = distanceFromCenter / maxDistance;
-                    if (normalized > 1) normalized = 1;
-
-                    const scale = 0.65 + 0.95 * Math.pow(normalized, 2);
-
-                    allLogos[i].style.transform = `scale(${scale}) translateZ(0)`;
-                    allLogos[i].style.opacity = '1';
-                    allLogos[i].style.filter = 'none';
-                }
-
-                animationFrameId = requestAnimationFrame(apply3DLensEffect);
-            }
-
-            observerMitra = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((entry) => {
-                        isSectionVisible = entry.isIntersecting;
-                        if (isSectionVisible) {
-                            apply3DLensEffect();
-                        } else {
-                            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                        }
-                    });
-                },
-                { threshold: 0.01 }
-            );
-
-            const startObserver = () => {
-                if (partnersSectionRef.current) {
-                    observerMitra.observe(partnersSectionRef.current);
-                }
-            };
-
-            if (document.readyState === 'complete') {
-                startObserver();
-            } else {
-                window.addEventListener('load', startObserver);
-            }
-        }
-
-        return () => {
-            if (observerMitra) observerMitra.disconnect();
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            window.removeEventListener('load', () => { });
-        };
-    }, []);
-
-    // 2. EFEK MARQUEE SCROLL VELOCITY 
-    useEffect(() => {
-        const track = trackRef.current;
-        if (!track) return;
-
-        let percentX = 0;
+        const logoFrames = track.querySelectorAll('.partner-logo-frame');
+        logoFrames.forEach((frame) => frame.style.removeProperty('opacity'));
+        let isSectionVisible = false;
+        let loopWidth = 0;
+        let layoutInitialized = false;
+        let translateX = 0;
         let lastScrollY = window.scrollY;
         let currentVelocity = 0;
-        let animationFrameId;
+        let lastTime = 0;
 
-        const animateMarquee = () => {
+        const getAnimationSettings = () => {
+            const screenWidth = isPreviewMode ? (partnersSectionRef.current?.clientWidth || window.innerWidth) : window.innerWidth;
+
+            if (screenWidth <= 370) {
+                return {
+                    screenWidth,
+                    baseSpeedPerSecond: 40,
+                    scrollSensitivityPerSecond: 10,
+                    maxRotation: 28, // Rotasi logo di tepi layar
+                    minScale: 0.86,  // Ukuran logo di titik tengah
+                    maxScale: 1.05,  // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 260,   // Jarak kedalaman 3D
+                    perspective: 620,// Kekuatan efek perspektif
+                };
+            }
+
+            if (screenWidth <= 953) {
+                return {
+                    screenWidth,
+                    baseSpeedPerSecond: 50,
+                    scrollSensitivityPerSecond: 16,
+                    maxRotation: 38, // Rotasi logo di tepi layar
+                    minScale: 0.9,   // Ukuran logo di titik tengah
+                    maxScale: 1.2,   // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 380,   // Jarak kedalaman 3D
+                    perspective: 700,// Kekuatan efek perspektif
+                };
+            }
+
+            if (screenWidth <= 1280) {
+                return {
+                    screenWidth,
+                    baseSpeedPerSecond: 70,
+                    scrollSensitivityPerSecond: 24,
+                    maxRotation: 55, // Rotasi logo di tepi layar
+                    minScale: 1.1,   // Ukuran logo di titik tengah
+                    maxScale: 1.4,   // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 540,   // Jarak kedalaman 3D
+                    perspective: 660,// Kekuatan efek perspektif
+                };
+            }
+
+            return {
+                screenWidth,
+                baseSpeedPerSecond: 120,
+                scrollSensitivityPerSecond: 38,
+                maxRotation: 30, // Rotasi logo di tepi layar
+                minScale: 2.4,   // Ukuran logo di titik tengah
+                maxScale: 4,   // Ukuran logo di sisi kanan/kiri
+                maxDepth: 800,   // Jarak kedalaman 3D
+                perspective: 200,// Kekuatan efek perspektif
+            };
+        };
+
+        const measureLoopWidth = () => {
+            const groups = track.querySelectorAll('.partner-logo-group');
+            if (groups.length < 2) return;
+ 
+            const previousLoopWidth = loopWidth;
+            const firstGroupRect = groups[0].getBoundingClientRect();
+            const secondGroupRect = groups[1].getBoundingClientRect();
+            const measuredWidth = secondGroupRect.left - firstGroupRect.left;
+
+            if (measuredWidth > 0) {
+                loopWidth = measuredWidth;
+                layoutInitialized = true;
+                if (previousLoopWidth > 0 && previousLoopWidth !== loopWidth) {
+                    translateX = (translateX / previousLoopWidth) * loopWidth;
+                }
+                normalizeTranslate();
+            }
+        };
+
+        const normalizeTranslate = () => {
+            if (!loopWidth) return;
+            translateX = ((translateX % loopWidth) + loopWidth) % loopWidth;
+            if (translateX > 0) translateX -= loopWidth;
+        };
+
+        function animate(currentTime) {
+            if (!isSectionVisible) return;
+
+            if (!lastTime) {
+                lastTime = currentTime;
+                animationId = requestAnimationFrame(animate);
+                return;
+            }
+            const deltaTime = Math.min(currentTime - lastTime, 50);
+            lastTime = currentTime;
+
+            if (!layoutInitialized) {
+                measureLoopWidth();
+            }
+            const animationSettings = getAnimationSettings();
+
             const currentScrollY = window.scrollY;
             const scrollDelta = currentScrollY - lastScrollY;
             lastScrollY = currentScrollY;
+            currentVelocity += (scrollDelta - currentVelocity) * 0.06;
 
-            currentVelocity += (scrollDelta - currentVelocity) * 0.08;
+            const { baseSpeedPerSecond, scrollSensitivityPerSecond } = animationSettings;
+            const rawSpeedPerSecond = baseSpeedPerSecond + (currentVelocity * scrollSensitivityPerSecond);
+            const minSpeedPerSecond = baseSpeedPerSecond * 0.35;
+            const maxSpeedPerSecond = baseSpeedPerSecond * 2.2;
+            const totalSpeedPerSecond = Math.min(maxSpeedPerSecond, Math.max(minSpeedPerSecond, rawSpeedPerSecond));
+            translateX -= totalSpeedPerSecond * (deltaTime / 1000);
 
-            const baseSpeed = 0.04;
-            const scrollSensitivity = 0.015;
-            const totalSpeed = baseSpeed + (currentVelocity * scrollSensitivity);
+            if (layoutInitialized && loopWidth > 0) {
+                normalizeTranslate();
+            }
+            track.style.transform = `translate3d(${translateX}px, 0, 0)`;
 
-            percentX -= totalSpeed;
-
-            if (percentX <= -50) {
-                percentX += 50;
-            } else if (percentX > 0) {
-                percentX -= 50;
+            if (!layoutInitialized) {
+                animationId = requestAnimationFrame(animate);
+                return;
             }
 
-            track.style.transform = `translate3d(${percentX}%, 0, 0)`;
-            animationFrameId = requestAnimationFrame(animateMarquee);
+            const { screenWidth, maxRotation, minScale, maxScale, maxDepth, perspective } = animationSettings;
+            const screenCenter = screenWidth / 2;
+            const maxDistance = screenWidth;
+
+            /*
+            =========================================
+              KONFIGURASI ANIMASI 3D LOGO
+            =========================================
+            - perspective: Mengatur kekuatan efek 3D. Nilai lebih kecil = lebih dramatis.
+            - maxScale:    Ukuran logo saat berada di sisi kanan/kiri (paling dekat).
+            - minScale:    Ukuran logo saat berada di titik tengah (paling jauh).
+            - maxDepth:    Jarak kedalaman (mundur) logo saat di tengah.
+            - maxRotation: Kemiringan maksimal logo saat berada di sisi layar.
+            */
+            for (let i = 0; i < logoFrames.length; i++) {
+                const frame = logoFrames[i];
+                const logo = frame.querySelector('.partner-logo');
+                if (!logo) continue;
+                const frameRect = frame.getBoundingClientRect();
+                const logoCenter = frameRect.left + frameRect.width / 2;
+
+                const distanceFromCenter = logoCenter - screenCenter;
+                const normalizedDistance = Math.max(-1, Math.min(1, distanceFromCenter / maxDistance));
+                const absNormalizedDistance = Math.abs(normalizedDistance);
+                const depthProgress = 1 - absNormalizedDistance;
+                const scale = minScale + (maxScale - minScale) * absNormalizedDistance;
+                const rotationAngle = -maxRotation * normalizedDistance;
+                const translateZ = -maxDepth * depthProgress;
+
+                logo.style.transform = `perspective(${perspective}px) translateZ(${translateZ}px) rotateY(${rotationAngle}deg) scale(${scale})`;
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    isSectionVisible = entry.isIntersecting;
+                    if (isSectionVisible) {
+                        lastTime = 0;
+                        animationId = requestAnimationFrame(animate);
+                    } else {
+                        if (animationId) cancelAnimationFrame(animationId);
+                    }
+                });
+            },
+            { threshold: 0.01 }
+        );
+
+        const startObserver = () => {
+            if (partnersSectionRef.current) {
+                observer.observe(partnersSectionRef.current);
+            }
         };
 
-        animationFrameId = requestAnimationFrame(animateMarquee);
-        return () => cancelAnimationFrame(animationFrameId);
-    }, []);
+        const firstGroup = track.querySelector('.partner-logo-group');
+        if (firstGroup && 'ResizeObserver' in window) {
+            resizeObserver = new ResizeObserver(measureLoopWidth);
+            resizeObserver.observe(firstGroup);
+        }
+        window.addEventListener('resize', measureLoopWidth);
+
+        if (document.readyState === 'complete') {
+            startObserver();
+        } else {
+            window.addEventListener('load', startObserver);
+        }
+
+        return () => {
+            if (observer) observer.disconnect();
+            if (resizeObserver) resizeObserver.disconnect();
+            if (animationId) cancelAnimationFrame(animationId);
+            window.removeEventListener('load', startObserver);
+            window.removeEventListener('resize', measureLoopWidth);
+        };
+    }, [activeMitraList, loopCopies, isPreviewMode]);
 
     return (
         <section className="partners-section" ref={partnersSectionRef}>
             <div className="partners-container">
-                <div className="partners-track" ref={trackRef} style={{ gap: '0px' }}>
-                    {[...mitraList, ...mitraList].map((mitra, index) => (
-                        <img
-                            key={index}
-                            src={mitra}
-                            alt={`Mitra Kerja BPMP ${index + 1}`}
-                            className="partner-logo"
-                            style={{ paddingRight: '7vw' }}
-                        />
-                    ))}
-                </div>
+                {showPlaceholder ? (
+                    <div className="partner-placeholder-wrapper">
+                        <i className="fa-solid fa-camera"></i>
+                        <span>Image tidak ada</span>
+                    </div>
+                ) : (
+                    <div className="partners-track" ref={trackRef}>
+                        {Array.from({ length: loopCopies }).map((_, groupIndex) => (
+                            <div className="partner-logo-group" key={groupIndex}>
+                                {activeMitraList.map((mitra, index) => (
+                                    <span className="partner-logo-frame" key={`${groupIndex}-${index}`}>
+                                        <img
+                                            src={mitra}
+                                            alt={`Mitra Kerja BPMP ${index + 1}`}
+                                            className="partner-logo"
+                                        />
+                                    </span>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );

@@ -1,0 +1,399 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import '../default/PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
+import './PostProfileCard.css';
+import axiosInstance from '../../../../api/axiosInstance';
+import { uploadImageToServer } from '../uploadImage';
+
+// =========================================================================
+//  POST PROFILE CARD — EDITOR konten admin untuk layout "Profile Card".
+//  -----------------------------------------------------------------------
+//  Muncul saat Super Admin membuat menu bertipe Post dengan layout
+//  "Profile Card". Mendukung CRUD BANYAK kartu profil (satu per karyawan):
+//  tambah, edit, hapus. Tiap kartu berisi: Gambar, Nama, Jabatan, Quotes.
+//  Dirender oleh MenuContentEditor via layoutRegistry (key: 'profile-card').
+//
+//  Props (opsional supaya tetap bisa dipakai standalone):
+//    - menuName         : nama menu yang sedang diedit (untuk judul halaman)
+//    - initialProfiles  : array kartu awal [{ id?, nama, jabatan, gambar, quotes }]
+//    - onSave(data)     : dipanggil saat Simpan → { profiles: [...] }
+//    - onCancel()       : dipanggil saat Batal
+// =========================================================================
+
+const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+const inisialDari = (n) => (n && n.trim() ? n.trim().slice(0, 2).toUpperCase() : '?');
+
+const PostProfileCard = () => {
+  const navigate = useNavigate();
+  const { menuId, profileId } = useParams();
+  const [menuName, setMenuName] = useState('');
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
+  // Daftar kartu profil yang sudah ditambahkan.
+  const [cards, setCards] = useState([]);
+
+  // --- STATE FORM (untuk menambah / mengedit satu kartu) ---
+  const [nama, setNama] = useState('');
+  const [jabatan, setJabatan] = useState('');
+  const [quotes, setQuotes] = useState('');
+  const [gambar, setGambar] = useState(''); // URL final dari server
+  const [preview, setPreview] = useState(''); // yang ditampilkan di avatar form
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [editingId, setEditingId] = useState(null); // null = mode tambah
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!menuId) {
+        setIsPageLoading(false);
+        return;
+      }
+      try {
+        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const token = session?.token;
+
+        const menuRes = await axiosInstance.get('/api/menus');
+        const currentMenu = menuRes.data.find(m => String(m.id) === menuId);
+        if (currentMenu) setMenuName(currentMenu.nama_menu);
+
+        const contentRes = await axiosInstance.get(`/api/profil-pegawai/${menuId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const initialProfiles = contentRes.data || [];
+        const loadedCards = initialProfiles.map((p) => ({ 
+          id: p.id || makeId(), 
+          nama: p.nama_lengkap || '', 
+          jabatan: p.jabatan || '', 
+          gambar: p.url_foto || '', 
+          quotes: p.quotes || '' 
+        }));
+        
+        setCards(loadedCards);
+
+        if (profileId) {
+          const cardToEdit = loadedCards.find(c => String(c.id) === String(profileId));
+          if (cardToEdit) {
+            setNama(cardToEdit.nama || '');
+            setJabatan(cardToEdit.jabatan || '');
+            setQuotes(cardToEdit.quotes || '');
+            setGambar(cardToEdit.gambar || '');
+            setPreview(cardToEdit.gambar || '');
+            setEditingId(cardToEdit.id);
+          }
+        }
+
+      } catch (err) {
+        console.error('Gagal memuat data awal profil:', err);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+    fetchData();
+  }, [menuId]);
+
+  const resetForm = () => {
+    setNama('');
+    setJabatan('');
+    setQuotes('');
+    setGambar('');
+    setPreview('');
+    setUploadError('');
+    setFormError('');
+    setEditingId(null);
+  };
+
+  const handlePilihGambar = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // reset agar file yang sama bisa dipilih lagi
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Berkas harus berupa gambar.');
+      return;
+    }
+
+    setUploadError('');
+    const localUrl = URL.createObjectURL(file);
+    setPreview(localUrl); // pratinjau instan sebelum upload selesai
+    setUploading(true);
+    try {
+      const url = await uploadImageToServer(file);
+      setGambar(url);
+      setPreview(url);
+      URL.revokeObjectURL(localUrl);
+    } catch (err) {
+      setUploadError(err.message || 'Gagal mengunggah gambar.');
+      setGambar(''); // URL server tak ada → jangan disimpan setengah jadi
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleHapusGambar = () => {
+    setGambar('');
+    setPreview('');
+    setUploadError('');
+  };
+
+  // Tambah kartu baru ATAU perbarui kartu yang sedang diedit.
+  const handleTambahAtauPerbarui = () => {
+    if (uploading) return;
+    if (!nama.trim()) {
+      setFormError('Nama wajib diisi.');
+      return;
+    }
+    const entry = {
+      nama: nama.trim(),
+      jabatan: jabatan.trim(),
+      gambar,
+      quotes: quotes.trim(),
+    };
+    if (editingId) {
+      setCards((prev) => prev.map((c) => (c.id === editingId ? { ...c, ...entry } : c)));
+    } else {
+      setCards((prev) => [...prev, { id: makeId(), ...entry }]);
+    }
+    resetForm();
+  };
+
+  const handleEditCard = (id) => {
+    const c = cards.find((x) => x.id === id);
+    if (!c) return;
+    setNama(c.nama || '');
+    setJabatan(c.jabatan || '');
+    setQuotes(c.quotes || '');
+    setGambar(c.gambar || '');
+    setPreview(c.gambar || '');
+    setUploadError('');
+    setFormError('');
+    setEditingId(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleHapusCard = (id) => {
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    if (editingId === id) resetForm();
+  };
+
+  const [saveError, setSaveError] = useState('');
+
+  const handleSimpan = async () => {
+    setSaveError(''); // Reset error
+    try {
+      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const token = session?.token;
+      
+      let finalProfiles = cards.map(c => ({
+        nama: c.nama,
+        jabatan: c.jabatan,
+        gambar: c.gambar,
+        quotes: c.quotes
+      }));
+
+      // Auto-add or update if user typed something but forgot to click the "+ Tambah Profil" button
+      if (nama.trim()) {
+        const currentEntry = {
+          nama: nama.trim(),
+          jabatan: jabatan.trim(),
+          gambar,
+          quotes: quotes.trim()
+        };
+
+        if (editingId) {
+          const index = cards.findIndex(c => c.id === editingId);
+          if (index !== -1) finalProfiles[index] = currentEntry;
+        } else {
+          finalProfiles.push(currentEntry);
+        }
+      }
+
+      const payload = { profiles: finalProfiles };
+
+      await axiosInstance.post(`/api/profil-pegawai/${menuId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      navigate(`/admin/kelola-profil/${menuId}`);
+    } catch (error) {
+      console.error('Gagal menyimpan data profil:', error);
+      const resData = error.response?.data || {};
+      let errorMsg = resData.pesan || resData.message || error.message || 'Terjadi kesalahan jaringan saat menyimpan.';
+      if (resData.detail) errorMsg += ` Detail: ${resData.detail}`;
+      setSaveError(`❌ Gagal menyimpan data: ${errorMsg}`);
+    }
+  };
+
+  const handleBatal = () => {
+    navigate(`/admin/kelola-profil/${menuId}`);
+  };
+
+  if (isPageLoading) return <div className="postdefault"><main className="pd-content"><p>Memuat editor...</p></main></div>;
+
+  return (
+    <div className="postdefault">
+      <main className="pd-content">
+        {/* ---------- HEADING ---------- */}
+        <div className="pd-heading">
+          <h1>{menuName ? `Edit Profil — ${menuName}` : 'Buat Profile Card'}</h1>
+          <p>Tambahkan satu atau beberapa kartu profil untuk ditampilkan di halaman user.</p>
+        </div>
+
+        {/* ---------- FORM: TAMBAH / EDIT SATU PROFIL ---------- */}
+        <section className="pd-card">
+          <h2 className="ppc-section-title">{editingId ? 'Edit Profil' : 'Tambah Profil'}</h2>
+
+          {/* Gambar Profil */}
+          <div className="pd-field">
+            <label>Gambar Profil</label>
+            <div className="ppc-photo-row">
+              <div className="ppc-avatar">
+                {preview ? (
+                  <img src={preview} alt="Pratinjau profil" />
+                ) : (
+                  <span className="ppc-avatar-fallback">{inisialDari(nama)}</span>
+                )}
+              </div>
+
+              <div className="ppc-photo-actions">
+                <div className="ppc-photo-buttons">
+                  <label className={`pd-btn pd-btn-simpan ppc-upload-btn${uploading ? ' ppc-disabled' : ''}`}>
+                    {uploading ? 'Mengunggah…' : preview ? 'Ganti Gambar' : 'Unggah Gambar'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePilihGambar}
+                      hidden
+                      disabled={uploading}
+                    />
+                  </label>
+                  {preview && !uploading && (
+                    <button type="button" className="pd-btn pd-btn-batal" onClick={handleHapusGambar}>
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <p className="ppc-hint">Format gambar, maks. 10 MB. Disarankan rasio 1:1.</p>
+                {uploadError && <p className="ppc-error">{uploadError}</p>}
+              </div>
+            </div>
+          </div>
+
+          {/* Nama */}
+          <div className="pd-field">
+            <label htmlFor="ppc-nama">Nama</label>
+            <input
+              id="ppc-nama"
+              type="text"
+              className="pd-input"
+              placeholder="Masukkan nama…"
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+            />
+          </div>
+
+          {/* Jabatan */}
+          <div className="pd-field">
+            <label htmlFor="ppc-jabatan">Jabatan</label>
+            <input
+              id="ppc-jabatan"
+              type="text"
+              className="pd-input"
+              placeholder="Masukkan jabatan…"
+              value={jabatan}
+              onChange={(e) => setJabatan(e.target.value)}
+            />
+          </div>
+
+          {/* Quotes */}
+          <div className="pd-field">
+            <label htmlFor="ppc-quotes">Quotes</label>
+            <textarea
+              id="ppc-quotes"
+              className="pd-input ppc-textarea"
+              placeholder="Masukkan kutipan…"
+              rows={4}
+              value={quotes}
+              onChange={(e) => setQuotes(e.target.value)}
+            />
+          </div>
+
+          {formError && <p className="ppc-error">{formError}</p>}
+
+          <div className="ppc-form-actions">
+            {editingId && (
+              <button type="button" className="pd-btn pd-btn-batal" onClick={resetForm}>
+                Batal Edit
+              </button>
+            )}
+            <button
+              type="button"
+              className={`pd-btn pd-btn-simpan${uploading ? ' ppc-disabled' : ''}`}
+              onClick={handleTambahAtauPerbarui}
+              disabled={uploading}
+            >
+              {editingId ? 'Perbarui Profil' : '+ Tambah Profil'}
+            </button>
+          </div>
+        </section>
+
+        {/* ---------- DAFTAR PROFIL ---------- */}
+        <section className="pd-card ppc-list-card">
+          <h2 className="ppc-section-title">Daftar Profil ({cards.length})</h2>
+          {cards.length === 0 ? (
+            <p className="ppc-empty">Belum ada profil. Tambahkan lewat form di atas.</p>
+          ) : (
+            <div className="ppc-list">
+              {cards.map((c) => (
+                <div className="ppc-list-item" key={c.id}>
+                  <div className="ppc-list-avatar">
+                    {c.gambar ? <img src={c.gambar} alt={c.nama} /> : <span>{inisialDari(c.nama)}</span>}
+                  </div>
+                  <div className="ppc-list-info">
+                    <div className="ppc-list-nama">{c.nama}</div>
+                    {c.jabatan && <div className="ppc-list-jabatan">{c.jabatan}</div>}
+                    {c.quotes && <div className="ppc-list-quotes">“{c.quotes}”</div>}
+                  </div>
+                  <div className="ppc-list-actions">
+                    <button type="button" className="ppc-icon-btn" onClick={() => handleEditCard(c.id)}>
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="ppc-icon-btn ppc-icon-btn-danger"
+                      onClick={() => handleHapusCard(c.id)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ---------- TAMPILAN ERROR SAAT MENYIMPAN ---------- */}
+        {saveError && (
+          <div className="lk-error" style={{ marginBottom: '20px', padding: '15px', backgroundColor: 'rgba(255,0,0,0.1)', color: '#ff4d4d', borderRadius: '8px', border: '1px solid #ff4d4d' }}>
+            {saveError}
+          </div>
+        )}
+
+        {/* ---------- AKSI SIMPAN SELURUH DAFTAR ---------- */}
+        <div className="pd-actions">
+          <button className="pd-btn pd-btn-batal" onClick={handleBatal}>
+            Batal
+          </button>
+          <button
+            className={`pd-btn pd-btn-simpan${uploading ? ' ppc-disabled' : ''}`}
+            onClick={handleSimpan}
+            disabled={uploading}
+          >
+            Simpan
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default PostProfileCard;

@@ -1,8 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 // Reuse tema & layout dari dashboard-admin (variabel CSS --bg-app, dst.
 // dideklarasikan di scope ".admin-layout" pada dashboard-admin.css).
 import '../DashboardAdmin/dashboard-admin.css';
 import './ManajemenUser.css';
+import { useUsers } from '../../../hooks/useUsers';
+import axiosInstance from '../../../api/axiosInstance';
 
 // =========================================================================
 //  DATA DUMMY
@@ -13,15 +15,7 @@ import './ManajemenUser.css';
 // Warna avatar dirotasi berdasarkan indeks user.
 const AVATAR_COLORS = ['#5b5fe8', '#8a6d1f', '#7a4fae', '#4cae8e', '#3f5aa8', '#b5642e'];
 
-// Pilihan hak akses menu — disamakan dengan daftar menu di sidebar admin
-// (AdminSidebar.jsx). Ditata baris-per-baris untuk grid 3 kolom.
-const MENU_ACCESS_OPTIONS = [
-  'Beranda', 'Customize Beranda', 'Pengaturan Menu',
-  'Berita', 'Profil', 'Reformasi Birokrasi',
-  'Dok. Kinerja', 'Pelayanan', 'Program',
-  'PPID', 'Sipers', 'SPAB',
-  'Pengaduan', 'Manajemen User', 'Setting',
-];
+// Pilihan hak akses menu akan di-fetch secara dinamis.
 
 const FIRST_NAMES = [
   'Arya', 'Budi', 'Dewi', 'Eka', 'Fajar', 'Gita', 'Hadi', 'Indah',
@@ -61,21 +55,87 @@ const getInitials = (nama) =>
     .join('');
 
 const PAGE_SIZE = 10;
-const EMPTY_FORM = { nama: '', email: '', password: '', verify: '', access: [] };
+const EMPTY_FORM = { nama: '', email: '', role: 'admin', password: '', verify: '', access: [] };
+
+const getRoleLabel = (user) =>
+  user?.role === 'superadmin' || user?.is_superadmin ? 'Super Admin' : 'Admin';
 
 const ManajemenUser = () => {
-  const [users, setUsers] = useState(buildUsers);
+  const { users, setUsers, loading, error: fetchError, fetchUsers, deleteUser, addUser, editUser } = useUsers();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [menuAccessOptions, setMenuAccessOptions] = useState([]);
+
+  // Ambil data session admin saat ini
+  const currentUser = useMemo(() => {
+    const session = sessionStorage.getItem('adminSession');
+    if (session) {
+      try {
+        return JSON.parse(session);
+      } catch (e) {
+        console.error("Gagal membaca session admin", e);
+      }
+    }
+    return null;
+  }, []);
 
   // Modal form (dipakai untuk mode "add" dan "edit").
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState('add'); // 'add' | 'edit'
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
+  const [expandedAccessGroups, setExpandedAccessGroups] = useState([]);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  // Modal detail akun (klik baris tabel untuk membuka ringkasan profil singkat).
+  const [detailUser, setDetailUser] = useState(null);
 
   // Modal hapus.
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+
+  // Ambil data user dari database saat komponen dimuat
+  useEffect(() => {
+    fetchUsers();
+    
+    // Fetch daftar menu dinamis untuk opsi checkbox hak akses
+    const fetchMenusForAccess = async () => {
+      try {
+        const res = await axiosInstance.get('/api/menus');
+        const data = res.data;
+        
+        // Memisahkan parent dan child menu
+        const parentMenus = data.filter(m => m.induk_id === null).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+        const childMenus = data.filter(m => m.induk_id !== null).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
+        
+        const dynamicMenuTree = parentMenus.map(p => ({
+          label: p.nama_menu,
+          submenus: childMenus.filter(c => c.induk_id === p.id).map(c => c.nama_menu)
+        }));
+
+        // Gabungkan menu statis (kecuali Beranda & Setting) dengan menu dinamis
+        const staticMenus = [
+          { label: 'Customize Beranda', submenus: [] },
+          { label: 'Pengaturan Menu', submenus: [] },
+          { label: 'Manajemen User', submenus: [] }
+        ];
+        
+        setMenuAccessOptions([...staticMenus, ...dynamicMenuTree]);
+      } catch (err) {
+        console.error('Gagal mengambil daftar menu:', err);
+        // Fallback default bila gagal
+        setMenuAccessOptions([
+          { label: 'Customize Beranda', submenus: [] },
+          { label: 'Pengaturan Menu', submenus: [] },
+          { label: 'Manajemen User', submenus: [] }
+        ]);
+      }
+    };
+    fetchMenusForAccess();
+  }, [fetchUsers]);
 
   // --- Filter + pagination ---
   const filtered = useMemo(() => {
@@ -94,18 +154,91 @@ const ManajemenUser = () => {
   // --- Handlers form ---
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
-  const toggleAccess = (menu) =>
-    setForm((f) => ({
-      ...f,
-      access: f.access.includes(menu)
-        ? f.access.filter((m) => m !== menu)
-        : [...f.access, menu],
-    }));
+  const handleRoleChange = (e) => {
+    const newRole = e.target.value;
+    setForm(f => {
+      if (newRole === 'superadmin') {
+        let allAccess = [];
+        menuAccessOptions.forEach(menu => {
+          allAccess.push(menu.label);
+          if (menu.submenus) {
+            allAccess.push(...menu.submenus);
+          }
+        });
+        return { ...f, role: newRole, access: allAccess };
+      } else {
+        return { ...f, role: newRole, access: [] };
+      }
+    });
+  };
+
+  const toggleAccess = (menuLabel, parentLabel = null, isParent = false) => {
+    setForm((f) => {
+      let nextAccess = [...f.access];
+      
+      if (isParent) {
+         const parentData = menuAccessOptions.find(m => m.label === menuLabel);
+         const isCurrentlyChecked = nextAccess.includes(menuLabel);
+         
+         if (isCurrentlyChecked) {
+             // Jika menu utama di-uncheck, hilangkan akses dari menu utama beserta seluruh submenu-nya
+             nextAccess = nextAccess.filter(item => item !== menuLabel && !(parentData?.submenus.includes(item)));
+         } else {
+             // Jika menu utama di-check, tambahkan akses ke menu utama beserta seluruh submenu-nya
+             if (!nextAccess.includes(menuLabel)) nextAccess.push(menuLabel);
+             if (parentData && parentData.submenus) {
+                 parentData.submenus.forEach(child => {
+                     if (!nextAccess.includes(child)) nextAccess.push(child);
+                 });
+             }
+             // Auto expand jika di check
+             setExpandedAccessGroups(prev => prev.includes(menuLabel) ? prev : [...prev, menuLabel]);
+         }
+      } else {
+
+         // Logika untuk submenu (atau menu utama yang tidak memiliki submenu)
+         const isCurrentlyChecked = nextAccess.includes(menuLabel);
+         
+         if (isCurrentlyChecked) {
+             // Uncheck submenu
+             nextAccess = nextAccess.filter(item => item !== menuLabel);
+             // Karena ada submenu yang di-uncheck, maka menu utama juga harus ikut di-uncheck
+             if (parentLabel) {
+                 nextAccess = nextAccess.filter(item => item !== parentLabel);
+             }
+         } else {
+             // Check submenu
+             nextAccess.push(menuLabel);
+             // Periksa apakah seluruh submenu di bawah menu utama ini sekarang sudah ter-check semua
+             if (parentLabel) {
+                 const parentData = menuAccessOptions.find(m => m.label === parentLabel);
+                 if (parentData && parentData.submenus) {
+                     const allChildrenChecked = parentData.submenus.every(child => nextAccess.includes(child));
+                     // Jika semua submenu ter-check, otomatis check menu utamanya
+                     if (allChildrenChecked && !nextAccess.includes(parentLabel)) {
+                         nextAccess.push(parentLabel);
+                     }
+                 }
+             }
+         }
+      }
+      return { ...f, access: nextAccess };
+    });
+  };
+
+  const toggleExpandGroup = (label, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedAccessGroups(prev => 
+      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
+    );
+  };
 
   const openAdd = () => {
     setFormMode('add');
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setExpandedAccessGroups([]);
     setFormModalOpen(true);
   };
 
@@ -115,45 +248,79 @@ const ManajemenUser = () => {
     setForm({
       nama: user.nama,
       email: user.email,
+      role: user.role === 'superadmin' || user.is_superadmin ? 'superadmin' : 'admin',
       password: '',
       verify: '',
-      // Contoh hak akses tercentang bila user belum punya data akses.
       access: user.access || ['Beranda', 'Berita', 'Dok. Kinerja', 'Pengaduan'],
     });
+    setExpandedAccessGroups([]);
     setFormModalOpen(true);
+  };
+
+  // Klik baris tabel hanya membuka popup detail, tanpa memunculkan tombol
+  // edit/hapus di dalam modal agar tampilannya lebih clean dan bersih.
+  const openDetail = (user) => {
+    setDetailUser(user);
   };
 
   const closeFormModal = () => {
     setFormModalOpen(false);
     setForm(EMPTY_FORM);
     setEditingId(null);
+    setFormError(null);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
+    if (!form.nama || !form.email || !form.role) {
+      setFormError('Nama, email, dan role wajib diisi.');
+      return;
+    }
+
     if (formMode === 'add') {
-      setUsers((prev) => [
-        { id: prev.length ? Math.max(...prev.map((u) => u.id)) + 1 : 1, nama: form.nama, email: form.email, access: form.access },
-        ...prev,
-      ]);
+      if (!form.password || form.password !== form.verify) {
+        setFormError('Password tidak cocok atau kosong.');
+        return;
+      }
+      setSaveLoading(true);
+      setFormError(null);
+      const res = await addUser(form);
+      setSaveLoading(false);
+      if (res.success) {
+        closeFormModal();
+      } else {
+        setFormError(res.error);
+      }
     } else {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingId ? { ...u, nama: form.nama, email: form.email, access: form.access } : u
-        )
-      );
+      if (form.password && form.password !== form.verify) {
+        setFormError('Verifikasi password tidak cocok.');
+        return;
+      }
+      setSaveLoading(true);
+      setFormError(null);
+      const res = await editUser(editingId, form);
+      setSaveLoading(false);
+      if (res.success) {
+        closeFormModal();
+      } else {
+        setFormError(res.error);
+      }
     }
-    closeFormModal();
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget) {
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setDeleteError(null);
+      const result = await deleteUser(deleteTarget.id);
+      if (result.success) {
+        setDeleteTarget(null);
+      } else {
+        setDeleteError(result.error);
+      }
     }
-    setDeleteTarget(null);
   };
 
   // Simpan dinonaktifkan bila belum ada menu tersedia (empty state).
-  const noMenuAvailable = MENU_ACCESS_OPTIONS.length === 0;
+  const noMenuAvailable = menuAccessOptions.length === 0;
 
   // --- Pagination buttons ---
   // Selalu tampilkan halaman 1 & terakhir, plus jendela di sekitar halaman
@@ -233,7 +400,19 @@ const ManajemenUser = () => {
                 </tr>
               </thead>
               <tbody>
-                {visibleUsers.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row">
+                      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i> Memuat data pengguna...
+                    </td>
+                  </tr>
+                ) : fetchError ? (
+                  <tr>
+                    <td colSpan={4} className="mu-empty-row" style={{ color: '#ef4444' }}>
+                      <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '8px' }}></i> {fetchError}
+                    </td>
+                  </tr>
+                ) : visibleUsers.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="mu-empty-row">
                       Tidak ada user yang cocok dengan pencarian.
@@ -241,7 +420,11 @@ const ManajemenUser = () => {
                   </tr>
                 ) : (
                   visibleUsers.map((user, i) => (
-                    <tr key={user.id}>
+                    <tr
+                      key={user.id}
+                      className="mu-clickable-row"
+                      onClick={() => setDetailUser(user)}
+                    >
                       <td className="mu-col-no">{startIdx + i + 1}</td>
                       <td>
                         <div className="mu-user-cell">
@@ -260,17 +443,26 @@ const ManajemenUser = () => {
                           <button
                             className="mu-action-btn"
                             title="Edit"
-                            onClick={() => openEdit(user)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEdit(user);
+                            }}
                           >
                             <i className="fa-solid fa-pen"></i>
                           </button>
-                          <button
-                            className="mu-action-btn"
-                            title="Hapus"
-                            onClick={() => setDeleteTarget(user)}
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
+                          {currentUser && currentUser.role === 'superadmin' && Number(user.id) !== Number(currentUser.id) && (
+                            <button
+                              className="mu-action-btn"
+                              title="Hapus"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteError(null);
+                                setDeleteTarget(user);
+                              }}
+                            >
+                              <i className="fa-solid fa-trash-can"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -337,6 +529,12 @@ const ManajemenUser = () => {
             </div>
 
             <div className="modal-body">
+              {formError && (
+                <div style={{ padding: '12px', background: 'rgba(255, 68, 68, 0.1)', color: '#ff4444', borderRadius: '8px', marginBottom: '16px', fontSize: '13.5px', fontWeight: '500', border: '1px solid rgba(255, 68, 68, 0.2)' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '8px' }}></i>
+                  {formError}
+                </div>
+              )}
               <div className="mu-form-grid">
                 <div className="form-group">
                   <label>NAMA</label>
@@ -359,28 +557,86 @@ const ManajemenUser = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>PASSWORD</label>
-                  <input
-                    type="password"
+                  <label>ROLE</label>
+                  <select
                     className="form-input"
-                    placeholder="Masukkan Password"
-                    value={form.password}
-                    onChange={(e) => setField('password', e.target.value)}
-                  />
+                    value={form.role}
+                    onChange={handleRoleChange}
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Super Admin</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>PASSWORD</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="form-input"
+                      placeholder="Masukkan Password"
+                      value={form.password}
+                      onChange={(e) => setField('password', e.target.value)}
+                      style={{ paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>VERIFIKASI PASSWORD</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    placeholder="Masukkan Password Sekali Lagi"
-                    value={form.verify}
-                    onChange={(e) => setField('verify', e.target.value)}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showVerify ? 'text' : 'password'}
+                      className="form-input"
+                      placeholder="Masukkan Password Sekali Lagi"
+                      value={form.verify}
+                      onChange={(e) => setField('verify', e.target.value)}
+                      style={{ paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowVerify(!showVerify)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <i className={`fa-solid ${showVerify ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="mu-access-section">
+              <div 
+                className="mu-access-section"
+                style={{
+                  opacity: form.role === 'superadmin' ? 0.55 : 1,
+                  pointerEvents: form.role === 'superadmin' ? 'none' : 'auto',
+                  transition: 'opacity 0.3s ease'
+                }}
+              >
                 <label className="mu-access-title">HAK AKSES MENU</label>
 
                 {noMenuAvailable ? (
@@ -389,30 +645,198 @@ const ManajemenUser = () => {
                   </div>
                 ) : (
                   <div className="mu-access-grid">
-                    {MENU_ACCESS_OPTIONS.map((menu) => (
-                      <label key={menu} className="mu-access-item">
-                        <input
-                          type="checkbox"
-                          checked={form.access.includes(menu)}
-                          onChange={() => toggleAccess(menu)}
-                        />
-                        <span>{menu}</span>
-                      </label>
-                    ))}
+                    {menuAccessOptions.map((menuObj) => {
+                      const hasSubmenus = menuObj.submenus.length > 0;
+                      const isExpanded = expandedAccessGroups.includes(menuObj.label);
+                      const isChecked = form.access.includes(menuObj.label);
+                      const selectedChildCount = menuObj.submenus.filter(c => form.access.includes(c)).length;
+                      
+                      // Warna aksen aktif saat dropdown dibuka
+                      const activeBorderColor = 'rgba(91, 95, 232, 0.4)';
+                      const currentBorder = isExpanded ? `1px solid ${activeBorderColor}` : '1px solid var(--border-soft)';
+                      
+                      return (
+                        <div 
+                          key={menuObj.label} 
+                          className="mu-access-group-container"
+                          style={{
+                            border: currentBorder,
+                            borderBottom: isExpanded ? 'none' : currentBorder, // Hilangkan border bawah agar menyatu dengan body
+                            borderRadius: isExpanded ? '10px 10px 0 0' : '10px',
+                            background: 'var(--bg-card)',
+                            position: 'relative',
+                            transition: 'all 0.2s ease',
+                            zIndex: isExpanded ? 50 : 1, // Naikkan z-index agar bayangannya menutupi elemen sekitar
+                          }}
+                        >
+                          <div 
+                            className={`mu-access-group-header${hasSubmenus ? ' mu-access-group-header-clickable' : ''}`}
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              padding: '12px 14px',
+                              background: isChecked ? 'rgba(91, 95, 232, 0.08)' : 'transparent',
+                              borderRadius: isExpanded ? '9px 9px 0 0' : '9px',
+                              cursor: hasSubmenus ? 'pointer' : 'default',
+                              transition: 'all 0.2s ease'
+                            }}
+                            // Dropdown submenu sekarang dibuka/ditutup lewat KLIK yang eksplisit
+                            // (fungsi toggleExpandGroup), bukan hover — supaya tidak berkedip
+                            // atau terbuka sendiri hanya karena kursor melintas di atas kotaknya.
+                            onClick={(e) => hasSubmenus && toggleExpandGroup(menuObj.label, e)}
+                          >
+                            <label 
+                              className="mu-access-item" 
+                              style={{ 
+                                fontWeight: hasSubmenus ? '600' : 'normal',
+                                margin: 0,
+                                flex: 1
+                              }}
+                              onClick={(e) => e.stopPropagation()} // Prevent double trigger
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleAccess(menuObj.label, null, hasSubmenus)}
+                              />
+                              <span>{menuObj.label}</span>
+                            </label>
+
+                            {hasSubmenus && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {selectedChildCount > 0 && !isChecked && (
+                                  <span style={{
+                                    fontSize: '11px',
+                                    fontWeight: '600',
+                                    background: 'var(--purple)',
+                                    color: '#fff',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    lineHeight: 1
+                                  }}>
+                                    {selectedChildCount}/{menuObj.submenus.length}
+                                  </span>
+                                )}
+                                <i 
+                                  className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'}`}
+                                  style={{ 
+                                    fontSize: '11px', 
+                                    color: isExpanded ? 'var(--purple)' : 'var(--text-faint)',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                ></i>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Konten Submenu (Absolute Overlay, Menyatu dengan Header) */}
+                          {hasSubmenus && (
+                            <div 
+                              className="mu-access-group-body"
+                              style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '-1px', // Sejajarkan dengan border container
+                                right: '-1px',
+                                background: 'var(--bg-card)',
+                                border: currentBorder,
+                                borderTop: `1px dashed ${activeBorderColor}`, // Garis putus-putus sebagai pemisah estetik
+                                borderRadius: '0 0 10px 10px',
+                                boxShadow: '0 16px 32px rgba(0,0,0,0.18)',
+                                maxHeight: isExpanded ? '500px' : '0',
+                                opacity: isExpanded ? 1 : 0,
+                                overflow: 'hidden', // Ganti overflowY auto menjadi hidden untuk hilangkan glitch scrollbar
+                                transition: 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease', // Diperhalus dan diperlambat
+                                display: 'flex',
+                                flexDirection: 'column',
+                                zIndex: 100,
+                                pointerEvents: isExpanded ? 'auto' : 'none'
+                              }}
+                            >
+                              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {menuObj.submenus.map(childLabel => (
+                                  <label key={childLabel} className="mu-access-item" style={{ margin: 0 }}>
+                                    <input
+                                      type="checkbox"
+                                      checked={form.access.includes(childLabel)}
+                                      onChange={() => toggleAccess(childLabel, menuObj.label, false)}
+                                    />
+                                    <span style={{ fontSize: '13.5px', color: 'var(--text-sub)' }}>{childLabel}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </div>
 
             <div className="modal-footer">
-              <button className="btn-batal" onClick={closeFormModal}>Batal</button>
-              <button
-                className="btn-simpan"
-                disabled={noMenuAvailable}
-                onClick={handleSaveUser}
-              >
-                Simpan User
+              <button className="btn-batal" onClick={closeFormModal} disabled={saveLoading}>
+                Batal
               </button>
+              <button className="btn-simpan" onClick={handleSaveUser} disabled={saveLoading || noMenuAvailable}>
+                {saveLoading ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Simpan User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: DETAIL AKUN ================= */}
+      {detailUser && (
+        <div className="modal-overlay" data-lenis-prevent="true" onClick={() => setDetailUser(null)}>
+          <div className="modal-box mu-detail-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header mu-detail-modal-header">
+              <div className="mu-detail-modal-title-wrap">
+                <h3>Informasi Akun</h3>
+                <p className="mu-modal-sub">Detail profil pengguna yang terdaftar pada sistem.</p>
+              </div>
+              <button className="modal-close mu-detail-modal-close" onClick={() => setDetailUser(null)} aria-label="Tutup detail akun">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="mu-detail-hero">
+                <div
+                  className="mu-detail-avatar"
+                  style={{ background: AVATAR_COLORS[(detailUser.id - 1) % AVATAR_COLORS.length] }}
+                >
+                  {getInitials(detailUser.nama)}
+                </div>
+
+                <div className="mu-detail-identity">
+                  <span className="mu-detail-kicker">Akun Terdaftar</span>
+                  <h4>{detailUser.nama}</h4>
+                  <p>{detailUser.email}</p>
+                </div>
+
+                <div className={`mu-status-badge ${detailUser.role === 'superadmin' || detailUser.is_superadmin ? 'mu-status-superadmin' : 'mu-status-admin'}`}>
+                  {getRoleLabel(detailUser)}
+                </div>
+              </div>
+
+              <div className="mu-detail-grid">
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Nama Pengguna</span>
+                  <strong className="mu-detail-info-value">{detailUser.nama}</strong>
+                </div>
+                <div className="mu-detail-info-card">
+                  <span className="mu-detail-info-label">Email</span>
+                  <strong className="mu-detail-info-value">{detailUser.email}</strong>
+                </div>
+                <div className="mu-detail-info-card mu-detail-info-card-wide">
+                  <span className="mu-detail-info-label">Status</span>
+                  <strong className="mu-detail-info-value">{getRoleLabel(detailUser)}</strong>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -441,6 +865,25 @@ const ManajemenUser = () => {
                   <span className="mu-user-name">{deleteTarget.nama}</span>
                 </div>
               </div>
+
+              {deleteError && (
+                <div className="mu-delete-error" style={{
+                  color: '#ef4444',
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginTop: '16px',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  <span>{deleteError}</span>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">

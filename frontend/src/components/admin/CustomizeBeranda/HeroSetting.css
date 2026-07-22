@@ -1,0 +1,124 @@
+.admin-layout .cb-preview-caption {
+    margin-top: 20px;
+}
+
+.admin-layout .cb-bg-preview {
+    position: relative;
+    height: 200px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.admin-layout .cb-bg-remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+    background: rgba(15, 18, 28, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.admin-layout .cb-bg-remove:hover {
+    background: rgba(214, 90, 90, 0.9);
+    transform: translateY(-1px);
+}
+
+.admin-layout .cb-bg-remove i {
+    font-size: 14px;
+    color: #fff;
+}
+
+.admin-layout .cb-bg-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admin-layout .cb-bg-preview i {
+    font-size: 30px;
+    color: var(--text-faint);
+}
+
+/* ---------- UPLOAD LOGO 1 & 2 (kompak, tinggi ≈ dropdown lama) ---------- */
+.admin-layout .hero-logo-upload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-layout .hero-logo-preview {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--text-faint);
+}
+
+.admin-layout .hero-logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.admin-layout .hero-logo-preview > i {
+    font-size: 16px;
+}
+
+.admin-layout .hero-logo-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+    background: rgba(15, 18, 28, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    transition: background 0.15s ease;
+}
+
+.admin-layout .hero-logo-remove:hover {
+    background: rgba(214, 90, 90, 0.9);
+}
+
+.admin-layout .hero-logo-remove i {
+    font-size: 9px;
+}
+
+/* Tombol upload berdiri sendiri (bukan di dalam cb-upload-row) → beri border
+   penuh + radius agar rapi. */
+.admin-layout .hero-logo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    white-space: nowrap;
+}

@@ -1,27 +1,81 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
+import axiosInstance from '../../api/axiosInstance';
 
-// Import assets
-import WOWOK from '../../assets/source/WOWOK.jpg';
-import Mitra4 from '../../assets/source/Mitra (4).png';
-import Mitra5 from '../../assets/source/Mitra (5).png';
-import Background from '../../assets/source/section-landing.png';
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getFullUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('blob:') || url.startsWith('http')) return url;
+    return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+const DEFAULT_HERO = {
+    judul: 'Judul Website',
+    subjudul: 'Deskripsi Website',
+    url_gambar: null,
+    logo_1: '',
+    logo_2: '',
+};
+
+const pseudoRandom = (seed) => {
+    const value = Math.sin(seed) * 10000;
+    return value - Math.floor(value);
+};
 
 const HeroSection = () => {
+    const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
     const [showSubtitle, setShowSubtitle] = useState(false);
-    const fullText = "Balai Penjaminan Mutu Pendidikan Provinsi Lampung";
-    const heroImageRef = useRef(null);
+    const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
+    const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
+    const fullText = heroContent.judul || DEFAULT_HERO.judul;
+    const subtitle = heroContent.subjudul || DEFAULT_HERO.subjudul;
+    const heroImage = heroContent.url_gambar || null;
+    // logo_1/logo_2 berisi URL gambar upload. Hanya render bila benar URL/path
+    // (kosong / data lama berupa nama = tidak menampilkan logo apa pun).
+    const selectedLogos = [heroContent.logo_1, heroContent.logo_2]
+        .filter((v) => v && (v.startsWith('/') || v.startsWith('http')))
+        .map((v, index) => ({
+            id: `logo-${index}`,
+            name: `Logo ${index + 1}`,
+            src: getFullUrl(v),
+        }));
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadHeroContent = async () => {
+            try {
+                const response = await axiosInstance.get('/api/beranda/hero');
+                const hero = response.data?.data;
+                if (!hero || !isMounted) return;
+
+                setHeroContent({
+                    ...DEFAULT_HERO,
+                    ...hero,
+                    url_gambar: hero.url_gambar || null,
+                });
+            } catch (error) {
+                console.error('Gagal mengambil Hero Beranda:', error);
+            }
+        };
+
+        loadHeroContent();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     // EFEK PARTIKEL
     const particles = useMemo(() => {
         const particleCount = 50;
         return Array.from({ length: particleCount }).map((_, i) => {
-            const size = Math.random() * 1 + 4; // Ukuran antara 1px dan 4px
-            const duration = Math.random() * 8 + 3; // Durasi antara 10s dan 20s
-            const delay = Math.random() * 3; // Delay hingga 20s
-            const left = Math.random() * 120; // Posisi horizontal acak
+            const size = pseudoRandom(i + 1) * 1 + 3; // Ukuran antara 1px dan 4px
+            const duration = pseudoRandom(i + 101) * 10 + 3; // Durasi antara 10s dan 20s
+            const delay = pseudoRandom(i + 201) * 3; // Delay hingga 20s
+            const left = pseudoRandom(i + 301) * 150; // Posisi horizontal acak
 
             return (
                 <div
@@ -45,6 +99,9 @@ const HeroSection = () => {
         let typingInterval;
 
         const startDelay = setTimeout(() => {
+            setTypedText('');
+            setShowSubtitle(false);
+
             typingInterval = setInterval(() => {
                 if (i < fullText.length) {
                     setTypedText(fullText.substring(0, i + 1));
@@ -66,41 +123,44 @@ const HeroSection = () => {
     useEffect(() => {
         let animationFrame;
 
+        // REVISI: Ambil ref untuk wadah kanan dan gambar di dalamnya
+        const rightContainer = heroRightCmsRef.current;
         const rightImage = heroImageRef.current;
         const leftContent = heroLeftContentRef.current;
 
-        if (rightImage) {
-            rightImage.style.transformOrigin = 'right bottom';
-        }
-
         const animateHero = () => {
-            // Pastikan kedua elemen ada sebelum melanjutkan
-            if (!rightImage || !leftContent) return;
+            // Pastikan semua elemen yang dibutuhkan ada sebelum melanjutkan
+            if (!leftContent) return;
 
             const scrollY = window.scrollY;
 
-            // --- Kalkulasi untuk Gambar Kanan (Gedung) ---
-            const rightTranslateY = Math.min(scrollY * 1.5 , 1820); // Tingkatkan kecepatan "tenggelam"
-            const scale = Math.max(1 - scrollY * 0.00012, 0.93);
-            const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
+            // --- REVISI: Logika animasi untuk wadah kanan dan gambar ---
+            if (rightContainer && rightImage) {
+                const rightTranslateY = Math.min(scrollY * 1.5, 1820); // Kecepatan "tenggelam"
+                // REVISI: Ubah efek dari bergeser/mengecil menjadi zoom-in (upscale)
+                const scale = 1 + scrollY * 0.00015; // Nilai akan bertambah saat scroll untuk efek zoom
+                const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-            rightImage.style.transform = `translateY(${rightTranslateY}px) scale(${scale})`;
-            rightImage.style.filter = `brightness(${brightness})`;
+                // 1. Terapkan gerakan vertikal ke seluruh wadah (.hero-right-cms)
+                rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
+                // 2. Terapkan efek zoom-in dan kecerahan hanya pada gambar di dalamnya
+                rightImage.style.transform = `scale(${scale})`;
+                rightImage.style.filter = `brightness(${brightness})`;
+            }
 
             // 2. Tambahkan kalkulasi untuk Konten Kiri
-            const leftTranslateY = scrollY * 1.90; // Nilai Y dipertahankan
-            const leftTranslateX = scrollY * -0.500;   // Tambahkan parameter X untuk gerakan diagonal
+            const leftTranslateX = scrollY * -0.500;   // Gerakan horizontal ke kiri
             const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
 
-            // Gabungkan X dan Y untuk menciptakan gerakan diagonal
-            leftContent.style.transform = `translate(${leftTranslateX}px`;
+            // REVISI: Terapkan gerakan horizontal murni
+            leftContent.style.transform = `translateX(${leftTranslateX}px)`;
             leftContent.style.opacity = leftOpacity;
 
             animationFrame = requestAnimationFrame(animateHero);
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, []);
+    }, [heroImage]); // Dependensi tetap, karena efek hanya aktif jika ada gambar
 
     return (
         <div className="landing-wrapper">
@@ -117,34 +177,36 @@ const HeroSection = () => {
                         </h1>
 
                         <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
-                            Kementerian Pendidikan Dasar dan Menengah
+                            {subtitle}
                         </p>
 
                         {/* Pembungkus terluar untuk menjaga tata letak agar tetap terkunci */}
                         <div className="hero-logos-wrapper-cms">
                             {/* Kontainer untuk daftar logo mitra, akan menjadi wadah dinamis */}
                             <div className={`hero-logos-flex ${showSubtitle ? 'entrance-fade-up-delay' : 'opacity-0'}`}>
-                                {/* Setiap logo dibungkus dalam div-nya sendiri untuk pengelolaan CMS yang lebih baik */}
-                                <div className="logo-item-cms">
-                                    {/* Gambar logo mitra pertama */}
-                                    <img src={Mitra4} alt="Pendidikan Bermutu" className="bottom-logo" />
-                                </div>
-                                <div className="logo-item-cms">
-                                    {/* Gambar logo mitra kedua */}
-                                    <img src={Mitra5} alt="Kemendikdasmen Ramah" className="bottom-logo" />
-                                </div>
+                                {selectedLogos.map((logo) => (
+                                    <div className="logo-item-cms" key={logo.id}>
+                                        <img src={logo.src} alt={logo.name} className="bottom-logo" />
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
 
-                    <div className="hero-right-cms">
-                        <img
-                            ref={heroImageRef}
-                            src={Background}
-                            alt="Visual Gedung dan Latar Belakang BPMP"
-                            className="cms-dynamic-image"
-                        />
-                    </div>
+                    {heroImage && (
+                        <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                            <div className="hero-right-cms">
+                                <div className="bingkai-gambar-cms">
+                                    <img
+                                        ref={heroImageRef}
+                                        src={heroImage}
+                                        alt="Visual Gedung dan Latar Belakang BPMP"
+                                        className="cms-dynamic-image"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
         </div>

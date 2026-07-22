@@ -7,11 +7,13 @@
    box-sizing: border-box;
 }
 
+
 /* =========================================
    PAGE WRAPPER (Mencegah Overflow)
    ========================================= */
-.beranda-page-wrapper {
-   overflow-x: clip;
+.beranda-container {
+   width: 100%;
+   background: var(--bg-primary);
 }
 
 /* =========================================
