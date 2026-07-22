@@ -150,4 +150,28 @@ router.post(
   UploadController.uploadImage
 );
 
+// Upload DOKUMEN dari editor (tombol kustom "Sisipkan Dokumen"). Diproteksi login.
+router.post(
+  '/upload/dokumen',
+  authMiddleware,
+  (req, res, next) => {
+    uploadMiddleware.dokumen(req, res, (err) => {
+      if (err) {
+        const message =
+          err.code === 'LIMIT_FILE_SIZE'
+            ? 'Ukuran dokumen melebihi batas 10 MB.'
+            : err.message || 'Gagal mengunggah dokumen.';
+        return res.status(400).json({ error: { message } });
+      }
+      next();
+    });
+  },
+  UploadController.uploadDokumen
+);
+
+// Penyaji berkas untuk PRATINJAU dokumen di halaman pengunjung — URL tanpa
+// ekstensi + Content-Type netral supaya tidak "dicuri" download manager (IDM).
+// Publik (konten tampil di halaman pengunjung).
+router.get('/berkas/:base', UploadController.serveInline);
+
 module.exports = router;

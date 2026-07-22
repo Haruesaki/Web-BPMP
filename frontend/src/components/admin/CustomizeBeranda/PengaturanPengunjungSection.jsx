@@ -7,6 +7,9 @@ const PengaturanPengunjungSection = ({ triggerAlert }) => {
   const [totalPengunjung, setTotalPengunjung] = useState(0);
   const [isSynced, setIsSynced] = useState(true);
   const [loading, setLoading] = useState(false);
+  // Baseline nilai terakhir-tersimpan untuk deteksi perubahan tombol Simpan —
+  // menyamakan perilaku dengan section lain di Customize Beranda.
+  const [baseData, setBaseData] = useState({ hariIni: 0, total: 0, synced: true });
 
   const formatNumberId = (val) => {
     if (!val) return '';
@@ -32,6 +35,11 @@ const PengaturanPengunjungSection = ({ triggerAlert }) => {
         setPengunjungHariIni(formatNumberId(hIni));
         setTotalPengunjung(formatNumberId(hTot));
         setIsSynced(data.is_synced);
+        setBaseData({
+          hariIni: formatNumberId(hIni),
+          total: formatNumberId(hTot),
+          synced: data.is_synced,
+        });
       }
     } catch (err) {
       console.error('Gagal mengambil pengaturan pengunjung:', err);
@@ -63,6 +71,13 @@ const PengaturanPengunjungSection = ({ triggerAlert }) => {
       setLoading(false);
     }
   };
+
+  // Berubah bila salah satu nilai berbeda dari yang terakhir tersimpan; kembali
+  // normal otomatis bila diketik lalu dikembalikan ke nilai semula.
+  const isDirty =
+    pengunjungHariIni !== baseData.hariIni ||
+    totalPengunjung !== baseData.total ||
+    isSynced !== baseData.synced;
 
   return (
     <div className="cb-pengunjung-section-form">
@@ -109,10 +124,18 @@ const PengaturanPengunjungSection = ({ triggerAlert }) => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-        <button className="cb-btn cb-btn-simpan" onClick={handleSave} disabled={loading}>
+        <button
+          className={`cb-btn cb-btn-simpan ${isDirty ? 'is-dirty' : ''}`}
+          onClick={handleSave}
+          disabled={loading || !isDirty}
+        >
           {loading ? (
             <>
               <i className="fa-solid fa-spinner fa-spin"></i> Menyimpan...
+            </>
+          ) : isDirty ? (
+            <>
+              <i className="fa-solid fa-save"></i> Simpan Perubahan
             </>
           ) : (
             <>

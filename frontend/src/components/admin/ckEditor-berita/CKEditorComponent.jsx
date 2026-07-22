@@ -69,6 +69,7 @@ import {
 
 import 'ckeditor5/ckeditor5.css';
 import { CustomUploadAdapterPlugin } from '../../../utils/CustomUploadAdapter';
+import { InsertDocumentPlugin } from '../../../utils/InsertDocumentPlugin';
 import axiosInstance from '../../../api/axiosInstance';
 import './CKEditorComponent.css';
 
@@ -97,7 +98,7 @@ const editorConfig = {
       'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'removeFormat',
       '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
       '|', 'alignment', 'blockQuote', 'codeBlock',
-      '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed',
+      '|', 'link', 'insertImage', 'insertDocument', 'insertTable', 'mediaEmbed',
       '|', 'horizontalLine', 'specialCharacters', 'pageBreak',
     ],
     shouldNotGroupWhenFull: true,
@@ -220,7 +221,8 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
     () => ({
       ...editorConfig,
       extraPlugins: [
-        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg)
+        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg),
+        InsertDocumentPlugin('/api/upload/dokumen'),
       ]
     }),
     []

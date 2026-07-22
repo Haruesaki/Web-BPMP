@@ -14,7 +14,10 @@
 /* --- Default Content Styling --- */
 .default-content {
     text-align: left;
-    margin-top: 100px;
+    /* Ruang atas sudah diberi .generic-page-container (padding-top 100px) +
+       wrapper flex (padding 40px), jadi margin-top di sini tidak perlu lagi
+       agar jarak ke navbar normal (tidak dobel). */
+    margin-top: 0;
 }
 
 @keyframes lightswap {
@@ -212,4 +215,131 @@
 
 .default-description-container .article-quote::after {
     content: '\201D';
+}
+
+/* =========================================================================
+   PREVIEW DOKUMEN (hasil tombol "Sisipkan Dokumen" di editor)
+   ========================================================================= */
+.doc-embed {
+    margin: 24px 0;
+}
+
+/* Wadah hasil render PDF (canvas) / DOCX (html). Dibatasi tinggi & bisa
+   discroll agar dokumen panjang tidak mendorong seluruh halaman. */
+.docv-canvas-wrap {
+    max-height: 720px;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid var(--border-soft, rgba(0, 0, 0, 0.15));
+    border-radius: 10px;
+    background: #525659; /* abu gelap khas latar viewer PDF */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    /* Scroll roda mouse tetap "terkurung" di dalam wadah dokumen saat kursor
+       berada di atasnya — tidak merembet menggerakkan seluruh halaman. */
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+
+/* Slot per halaman PDF: berukuran tepat sebesar halaman (agar scrollbar akurat)
+   walau canvas-nya belum digambar (lazy render). */
+.docv-canvas-wrap .docv-page-slot {
+    flex-shrink: 0;
+    max-width: 100%;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Canvas halaman mengisi penuh slot-nya. */
+.docv-canvas-wrap .docv-page {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Hasil render DOCX diberi latar putih seperti kertas. */
+.docv-canvas-wrap .docx-wrapper,
+.docv-canvas-wrap .docv-docx {
+    background: transparent;
+    width: 100%;
+    /* Biarkan wadah luar (.docv-canvas-wrap) yang jadi satu-satunya area scroll.
+       Tanpa ini, docx-preview membuat konteks overflow sendiri sehingga roda
+       mouse "tertangkap" di wrapper dan dokumen terasa tak bisa discroll. */
+    overflow: visible;
+    max-height: none;
+    height: auto;
+    /* Roda mouse yang jatuh di atas konten docx diteruskan ke wadah scroll. */
+    pointer-events: auto;
+}
+
+/* Kanvas & konten di dalam viewer tidak boleh "menelan" event roda mouse,
+   supaya scroll selalu diteruskan ke .docv-canvas-wrap. */
+.docv-canvas-wrap .docv-page-slot,
+.docv-canvas-wrap .docv-page {
+    touch-action: pan-y;
+}
+
+.docv-status {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-sub, #c7c4d8);
+    font-size: 14px;
+}
+
+.docv-status.docv-error {
+    color: #ff6b6b;
+}
+
+.docv-status a {
+    color: var(--purple, #5b5fe8);
+    font-weight: 600;
+}
+
+.doc-embed-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--purple, #5b5fe8);
+}
+
+.doc-embed-open:hover {
+    text-decoration: underline;
+}
+
+/* Non-PDF: kartu unduh */
+.doc-embed-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--border-soft, rgba(0, 0, 0, 0.15));
+    border-radius: 12px;
+    background: rgba(91, 95, 232, 0.06);
+}
+
+.doc-embed-icon {
+    font-size: 34px;
+    color: var(--purple, #5b5fe8);
+    flex-shrink: 0;
+}
+
+.doc-embed-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.doc-embed-name {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.doc-embed-card .doc-embed-open {
+    margin-top: 0;
 }

@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs/promises');
+const fsSync = require('fs');
 const crypto = require('crypto');
 const sharp = require('sharp');
 const MediaModel = require('../models/mediaModel');
@@ -74,6 +75,78 @@ class UploadController {
         .status(500)
         .json({ error: { message: 'Gagal memproses gambar di server.' } });
     }
+  }
+
+  // Upload DOKUMEN (PDF/DOC/XLS/PPT/dll). Berbeda dari gambar: berkas disimpan
+  // apa adanya tanpa diproses sharp. Balas { url, name } — name dipakai editor
+  // sebagai teks tautan yang tampil ke admin & pengunjung.
+  static async uploadDokumen(req, res) {
+    if (req.fileValidationError) {
+      return res.status(400).json({ error: { message: req.fileValidationError } });
+    }
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ error: { message: 'Tidak ada berkas dokumen yang dikirim.' } });
+    }
+
+    try {
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
+
+      // Pertahankan ekstensi asli agar URL bisa dikenali (mis. .pdf untuk preview).
+      const ext = (path.extname(req.file.originalname || '') || '').toLowerCase();
+      const namaBerkas = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+      const lokasiSimpan = path.join(UPLOAD_DIR, namaBerkas);
+
+      await fs.writeFile(lokasiSimpan, req.file.buffer);
+
+      const url = `${req.protocol}://${req.get('host')}/uploads/${namaBerkas}`;
+
+      try {
+        await MediaModel.create({
+          jenis_pemilik: 'halaman_konten',
+          pemilik_id: null,
+          url_berkas: url,
+          jenis_media: 'dokumen',
+        });
+      } catch (dbErr) {
+        console.error('Gagal mencatat dokumen ke DB (berkas tetap tersimpan):', dbErr);
+      }
+
+      return res.status(200).json({ url, name: req.file.originalname || namaBerkas });
+    } catch (error) {
+      console.error('Error saat memproses upload dokumen:', error);
+      return res
+        .status(500)
+        .json({ error: { message: 'Gagal menyimpan dokumen di server.' } });
+    }
+  }
+
+  // Sajikan berkas untuk PRATINJAU (dibaca pdf.js/docx-preview). URL sengaja
+  // TANPA ekstensi (.pdf dsb.) dan Content-Type netral (octet-stream) agar
+  // download manager seperti IDM tidak mengenalinya sebagai berkas unduhan.
+  // Byte tetap utuh sehingga viewer di sisi klien bisa merendernya.
+  static serveInline(req, res) {
+    const { base } = req.params;
+    // Hanya izinkan karakter nama berkas hasil generator (cegah path traversal).
+    if (!/^[A-Za-z0-9_-]+$/.test(base || '')) {
+      return res.status(400).json({ error: { message: 'Nama berkas tidak valid.' } });
+    }
+
+    let found = null;
+    try {
+      found = fsSync.readdirSync(UPLOAD_DIR).find((f) => f.startsWith(`${base}.`));
+    } catch (_) {
+      /* folder belum ada */
+    }
+    if (!found) {
+      return res.status(404).json({ error: { message: 'Berkas tidak ditemukan.' } });
+    }
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-store');
+    fsSync.createReadStream(path.join(UPLOAD_DIR, found)).pipe(res);
   }
 }
 
