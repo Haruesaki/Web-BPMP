@@ -40,25 +40,30 @@ class HalamanKontenController {
       const oldCount = parseInt(oldContents?.cnt || 0, 10);
       const newCount = contents.length;
 
-      // Delete old contents for this menu
-      await db('halaman_konten').where('menu_id', menu_id).del();
+      // Hapus konten lama lalu insert ulang seluruh list. Dibungkus TRANSACTION
+      // agar atomik: bila ada dua permintaan simpan berbarengan, keduanya
+      // di-serialisasikan sehingga delete+insert tidak bisa saling menyela
+      // (biang data ganda). Bila salah satu langkah gagal, seluruhnya dibatalkan.
+      await db.transaction(async (trx) => {
+        await trx('halaman_konten').where('menu_id', menu_id).del();
 
-      if (newCount > 0) {
-        const newRows = contents.map((c, index) => {
-          // Generate unique kunci_halaman
-          let finalKunci = kunci_halaman ? `${kunci_halaman}-${index}` : `post-${menu_id}-${index}`;
-          return {
-            menu_id,
-            judul: c.judul || 'Tanpa Judul',
-            deskripsi_kaya: c.konten || '',
-            kunci_halaman: finalKunci,
-            dibuat_oleh: req.user?.id || null,
-            status: c.status || 'terbit',
-            urutan_tampil: index
-          };
-        });
-        await db('halaman_konten').insert(newRows);
-      }
+        if (newCount > 0) {
+          const newRows = contents.map((c, index) => {
+            // Generate unique kunci_halaman
+            let finalKunci = kunci_halaman ? `${kunci_halaman}-${index}` : `post-${menu_id}-${index}`;
+            return {
+              menu_id,
+              judul: c.judul || 'Tanpa Judul',
+              deskripsi_kaya: c.konten || '',
+              kunci_halaman: finalKunci,
+              dibuat_oleh: req.user?.id || null,
+              status: c.status || 'terbit',
+              urutan_tampil: index
+            };
+          });
+          await trx('halaman_konten').insert(newRows);
+        }
+      });
 
       const menuInfo = await db('menu').select('nama_menu').where('id', menu_id).first();
       const namaMenu = menuInfo ? menuInfo.nama_menu : `ID ${menu_id}`;

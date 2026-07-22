@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import CKEditorDefault from '../../ckEditor-default/CKEditorComponent';
 import CKEditorBerita from '../../ckEditor-berita/CKEditorComponent';
 import './PostDefault.css';
@@ -46,8 +46,16 @@ const PostDefault = ({
   const [konten, setKonten] = useState(() => initialContents?.[0]?.konten || '');
   const [coverUrl, setCoverUrl] = useState(() => initialContents?.[0]?.coverUrl || '');
   const [formError, setFormError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSimpan = () => {
+  // Guard anti klik-ganda. Pakai ref (bukan hanya state) karena ref berubah
+  // SINKRON — klik kedua di tick yang sama langsung tertahan sebelum sempat
+  // mengirim request kedua (biang data ganda di DB).
+  const savingRef = useRef(false);
+
+  const handleSimpan = async () => {
+    if (savingRef.current) return; // sudah ada proses simpan berjalan → abaikan
+
     setFormError('');
     if (setSaveStatus) {
       setSaveStatus({ error: false, message: '' });
@@ -77,8 +85,19 @@ const PostDefault = ({
     // Kirim data sebagai array dengan satu item untuk menjaga kompatibilitas
     // dengan komponen induk (MenuContentEditor, PostBeritaCard).
     const data = { contents: [currentContent] };
-    if (onSave) onSave(data);
-    else console.log(data); // fallback standalone
+    if (!onSave) {
+      console.log(data); // fallback standalone
+      return;
+    }
+
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      await onSave(data);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   const handleBatal = () => {
@@ -158,11 +177,11 @@ const PostDefault = ({
 
         {/* ---------- AKSI SIMPAN SELURUH DAFTAR ---------- */}
         <div className="pd-actions">
-          <button className="pd-btn pd-btn-batal" onClick={handleBatal}>
+          <button className="pd-btn pd-btn-batal" onClick={handleBatal} disabled={isSaving}>
             Batal
           </button>
-          <button className="pd-btn pd-btn-simpan" onClick={handleSimpan}>
-            Simpan
+          <button className="pd-btn pd-btn-simpan" onClick={handleSimpan} disabled={isSaving}>
+            {isSaving ? 'Menyimpan…' : 'Simpan'}
           </button>
         </div>
       </main>
