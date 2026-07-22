@@ -49,6 +49,8 @@ const Beranda = ({ lenisRef }) => {
         return <InstagramSection key="ig" igProfile={igProfile} loading={igLoading} />;
       case 'Preview Media Sosial YouTube':
         return <YoutubeSection key="yt" ytVideos={ytVideos} ytChannel={ytChannel} />;
+      case 'Jumlah Pengunjung':
+        return <JumlahPengunjung key="pengunjung" />;
       default:
         return null;
     }
@@ -59,6 +61,7 @@ const Beranda = ({ lenisRef }) => {
     { nama_section: 'Logo Mitra', is_visible: true },
     { nama_section: 'Preview Media Sosial Instagram', is_visible: true },
     { nama_section: 'Preview Media Sosial YouTube', is_visible: true },
+    { nama_section: 'Jumlah Pengunjung', is_visible: true },
   ];
 
   const sectionsToRender = sectionOrder.length > 0 ? sectionOrder : defaultOrder;
@@ -71,9 +74,6 @@ const Beranda = ({ lenisRef }) => {
         if (!section.is_visible) return null;
         return renderSection(section.nama_section);
       })}
-
-      <JumlahPengunjung/>
-
     </>
   );
 };

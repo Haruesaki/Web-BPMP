@@ -36,6 +36,7 @@ const MENU_OPTIONS = [
   'Logo Mitra',
   'Preview Media Sosial Instagram',
   'Preview Media Sosial YouTube',
+  'Jumlah Pengunjung',
 ];
 
 const SAVED_LOGO_OPTIONS = ['Dinas Pendidikan', 'Kemendikdasmen', 'BPMP Lampung'];
@@ -634,8 +635,8 @@ const [tautan, setTautan] = useState([
           setMitraList={setMitraList}
           handleSaveOrder={handleSaveOrder}
           isSavingOrder={isSavingOrder}
+          triggerAlert={showAlert}
         />
-
 
       {/* ---------- FOOTER ---------- */}
       <FooterSetting

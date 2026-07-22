@@ -14,6 +14,7 @@ const BeritaController = require('../controllers/beritaController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
 const BerandaBeritaController = require('../controllers/berandaBeritaController');
+const BerandaPengunjungController = require('../controllers/berandaPengunjungController');
 const LogoMitraController = require('../controllers/logoMitraController');
 const InfoKontakController = require('../controllers/infoKontakController');
 const TautanFooterController = require('../controllers/tautanFooterController');
@@ -56,6 +57,8 @@ router.get('/beranda/berita', BerandaBeritaController.getBeritaBeranda);
 router.patch('/beranda/berita/reorder', authMiddleware, BerandaBeritaController.reorderBerita);
 router.patch('/beranda/berita/:sumber/:id/thumbnail', authMiddleware, BerandaBeritaController.updateThumbnail);
 router.delete('/beranda/berita/:sumber/:id', authMiddleware, BerandaBeritaController.removeFromBeranda);
+router.get('/beranda/pengunjung', BerandaPengunjungController.getPengaturan);
+router.put('/beranda/pengunjung', authMiddleware, BerandaPengunjungController.updatePengaturan);
 
 router.get('/beranda/mitra', LogoMitraController.getLogoMitra);
 router.post(

@@ -1,7 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../../../api/axiosInstance";
 import "./JumlahPengunjung.css";
 
 const JumlahPengunjung = () => {
+  const [visitorData, setVisitorData] = useState({
+    pengunjung_hari_ini: 0,
+    total_pengunjung: 0
+  });
+
+  useEffect(() => {
+    const fetchVisitorData = async () => {
+      try {
+        const res = await axiosInstance.get('/api/beranda/pengunjung');
+        if (res.data && res.data.data) {
+          setVisitorData({
+            pengunjung_hari_ini: res.data.data.pengunjung_hari_ini,
+            total_pengunjung: res.data.data.total_pengunjung
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data pengunjung:", err);
+      }
+    };
+    fetchVisitorData();
+  }, []);
 
   return (
     <div className="visitor-counter-wrapper">
@@ -16,8 +38,8 @@ const JumlahPengunjung = () => {
             <span className="visitor-text">Total Pengunjung</span>
           </div>
           <div className="visitor-content right">
-            <span className="visitor-text">: 123</span>
-            <span className="visitor-text">: 107030</span>
+            <span className="visitor-text">: {visitorData.pengunjung_hari_ini.toLocaleString('id-ID')}</span>
+            <span className="visitor-text">: {visitorData.total_pengunjung.toLocaleString('id-ID')}</span>
           </div>
         </div>
       </div>
