@@ -146,11 +146,16 @@ const Navbar = () => {
     // Ini akan selalu memicu re-render dan re-animasi.
     const targetElement = e.currentTarget;
     const rect = targetElement.getBoundingClientRect();
+    
+    // KUNCI PERBAIKAN: Tentukan posisi top secara kondisional berdasarkan lebar layar.
+    // <= 640px: Panel di bawah menu (seperti mobile).
+    // > 640px: Panel di samping menu (sejajar).
+    const topPosition = window.innerWidth <= 640 ? rect.bottom + 5 : rect.top;
 
     // 1. Update konten dan posisi untuk menu baru.
     setActiveDropdown(menu.id);
     setSubmenuPanelContent({ title: menu.title, items: menu.submenu || [] });
-    setSubmenuPanelPosition({ top: rect.bottom });
+    setSubmenuPanelPosition({ top: topPosition });
 
     // 2. Pastikan panel dianggap 'tertutup' sebelum kita mengganti kuncinya.
     setIsSubmenuPanelOpen(false);
@@ -215,12 +220,15 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSubmenuPanelOpen]); // Efek ini hanya bergantung pada state panel.
 
-  // EFEK BARU: Menjaga posisi panel submenu tetap sinkron saat window di-resize
+  // EFEK REVISI: Menjaga posisi panel submenu tetap sinkron saat window di-resize DAN saat sidebar di-scroll
   useEffect(() => {
     // Hanya jalankan jika panel terbuka
     if (!isSubmenuPanelOpen) return;
 
+    // Dapatkan referensi ke elemen sidebar yang bisa di-scroll
+    const sidebar = sidebarRef.current;
     let animationFrameId = null;
+
     const updatePanelPosition = () => {
       // Pastikan ada menu dropdown yang aktif untuk dicari
       if (!activeDropdown) return;
@@ -230,8 +238,11 @@ const Navbar = () => {
       
       if (parentMenuItem) {
         const rect = parentMenuItem.getBoundingClientRect();
+        // Terapkan logika kondisional yang sama di sini untuk sinkronisasi saat scroll/resize.
+        const topPosition = window.innerWidth <= 640 ? rect.bottom + 5 : rect.top;
+
         // Update state posisi 'top' dari panel agar selalu sejajar
-        setSubmenuPanelPosition({ top: rect.bottom });
+        setSubmenuPanelPosition({ top: topPosition });
       }
     };
 
@@ -252,7 +263,20 @@ const Navbar = () => {
       animationFrameId = requestAnimationFrame(updatePanelPosition);
     };
 
+    // REVISI: Handler untuk scroll kini memanggil update secara LANGSUNG
+    // untuk menghilangkan efek 'tertinggal' dan membuatnya real-time.
+    // REVISI FINAL: Buat perilaku konsisten. Scrolling di sidebar akan selalu menutup panel submenu.
+    const handleScroll = () => {
+      handleCloseSubmenuPanel();
+    };
+
     window.addEventListener('resize', handleResize);
+    // Tambahkan listener scroll ke elemen sidebar.
+    // Opsi { passive: true } adalah optimasi untuk memberitahu browser
+    // bahwa handler ini tidak akan membatalkan event scroll.
+    if (sidebar) {
+      sidebar.addEventListener('scroll', handleScroll);
+    }
 
     // Cleanup function untuk menghapus listener saat komponen unmount atau panel tertutup
     return () => {
@@ -260,6 +284,10 @@ const Navbar = () => {
         cancelAnimationFrame(animationFrameId);
       }
       window.removeEventListener('resize', handleResize);
+      // Hapus listener scroll dari elemen sidebar
+      if (sidebar) {
+        sidebar.removeEventListener('scroll', handleScroll);
+      }
     };
   }, [isSubmenuPanelOpen, activeDropdown]); // Jalankan efek ini saat panel terbuka atau menu aktif berubah
 
