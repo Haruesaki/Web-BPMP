@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import CKEditorDefault from '../../ckEditor-default/CKEditorComponent';
 import CKEditorBerita from '../../ckEditor-berita/CKEditorComponent';
 import './PostDefault.css';
@@ -35,21 +35,17 @@ const PostDefault = ({
   setSaveStatus,
 }) => {
   // --- STATE FORM (untuk menambah / mengedit satu konten) ---
-  const [judul, setJudul] = useState('');
-  const [konten, setKonten] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
+  // Inisialisasi SEKALI saat mount dari initialContents (lazy init). Sengaja
+  // TIDAK memakai useEffect untuk men-seed ulang: setKonten "dari luar" akan
+  // membuat prop `data` CKEditor berbeda dari isi editor, memicu wrapper
+  // memanggil editor.data.set() (reset editor + kursor) di render berikutnya —
+  // itulah biang bug "klik Simpan harus 2x" saat mengedit. Dengan lazy init,
+  // `konten` HANYA berubah lewat onChange editor (seperti mode Tambah yang sudah
+  // benar). Pergantian item edit ditangani lewat `key` di Default (remount).
+  const [judul, setJudul] = useState(() => initialContents?.[0]?.judul || '');
+  const [konten, setKonten] = useState(() => initialContents?.[0]?.konten || '');
+  const [coverUrl, setCoverUrl] = useState(() => initialContents?.[0]?.coverUrl || '');
   const [formError, setFormError] = useState('');
-
-  // Efek untuk memuat data awal ke dalam form saat komponen dimuat
-  // (terutama untuk mode edit).
-  useEffect(() => {
-    const initialContent = initialContents?.[0];
-    if (initialContent) {
-      setJudul(initialContent.judul || '');
-      setKonten(initialContent.konten || '');
-      setCoverUrl(initialContent.coverUrl || '');
-    }
-  }, [initialContents]);
 
   const handleSimpan = () => {
     setFormError('');

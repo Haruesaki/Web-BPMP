@@ -160,12 +160,17 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
     return result;
   };
 
-  if (isEditorActive) {
-    const editing = isEditMode ? kontenList.find((b) => String(b.id) === String(editId)) : null;
-    const initialForEditor = editing ? [editing] : [];
+  // Konten yang sedang diedit + data awal editor (identitas stabil via useMemo).
+  const editing = isEditMode ? kontenList.find((b) => String(b.id) === String(editId)) : null;
+  const initialForEditor = useMemo(() => (editing ? [editing] : []), [editing]);
 
+  if (isEditorActive) {
     return (
+      // key: remount PostDefault saat ganti item edit / pindah tambah↔edit,
+      // supaya form di-inisialisasi ulang dari data item yang benar (PostDefault
+      // meng-init state SEKALI saat mount, tanpa efek seeding).
       <PostDefault
+        key={isEditMode ? `edit-${editId}` : 'tambah'}
         heading={editing ? 'Edit Konten' : 'Tambah Konten'}
         subheading={
           editing
