@@ -3,6 +3,7 @@ import LogoMitraSectionForm from './LogoMitraSectionForm';
 import InstagramSectionForm from './InstagramSectionForm';
 import YouTubeSectionNotice from './YouTubeSectionNotice';
 import BeritaSectionForm from './BeritaSectionForm';
+import PengaturanPengunjungSection from './PengaturanPengunjungSection';
 import './SectionOrderSetting.css';
 
 const SectionOrderSetting = ({
@@ -15,6 +16,7 @@ const SectionOrderSetting = ({
   setMitraList,
   handleSaveOrder,
   isSavingOrder,
+  triggerAlert,
 }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isDraggable, setIsDraggable] = useState(false);
@@ -164,6 +166,10 @@ const SectionOrderSetting = ({
 
                 {section.menu === 'Preview Media Sosial YouTube' && (
                   <YouTubeSectionNotice />
+                )}
+
+                {section.menu === 'Jumlah Pengunjung' && (
+                  <PengaturanPengunjungSection triggerAlert={triggerAlert} />
                 )}
               </div>
             </div>

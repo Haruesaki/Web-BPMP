@@ -18,6 +18,12 @@ const Navbar = () => {
   const location = useLocation(); // Hook untuk mendapatkan info URL saat ini
 
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState(null);
@@ -29,7 +35,7 @@ const Navbar = () => {
   const [submenuPanelPosition, setSubmenuPanelPosition] = useState({ top: 0 });
   const [submenuPanelKey, setSubmenuPanelKey] = useState(0); // Kunci untuk re-animasi
 
-  const searchWrapperRef = useRef(null);
+  const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
@@ -100,8 +106,40 @@ const Navbar = () => {
   }, []);
 
   const handleSearchToggle = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setIsSearchActive(!isSearchActive);
+    if (!isSearchActive && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current.focus();
+      }, 300);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSearchInput = async (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    
+    if (val.trim().length === 0) {
+      setSearchResults([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSearching(true);
+    setShowSuggestions(true);
+    try {
+      const res = await axiosInstance.get(`/api/search?q=${encodeURIComponent(val)}`);
+      console.log('Search API Response:', res.data);
+      setSearchResults(res.data.data || []);
+      setSearchError(null);
+    } catch (err) {
+      console.error('Search error', err);
+      setSearchError(err.message || 'Error occurred');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   // --- FUNGSI BARU: Mengendalikan hover dropdown di desktop ---
@@ -178,8 +216,9 @@ const Navbar = () => {
   // Efek Klik di Luar untuk Search
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target)) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setIsSearchActive(false);
+        setShowSuggestions(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -472,11 +511,62 @@ const Navbar = () => {
         </div>
 
         <div className="header-actions">
-          <div className={`search-wrapper ${isSearchActive ? 'active' : ''}`} ref={searchWrapperRef}>
-            <input type="text" className="search-input" placeholder="Cari informasi..." ref={searchInputRef} />
-            <button className="search-trigger" aria-label="Pencarian" onClick={handleSearchToggle}>
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </button>
+          <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={searchContainerRef}>
+            <div className={`search-wrapper ${isSearchActive ? 'active' : ''}`}>
+              <input 
+                type="text" 
+                className="search-input" 
+                placeholder="Cari informasi..." 
+                ref={searchInputRef} 
+                value={searchQuery}
+                onChange={handleSearchInput}
+                onFocus={() => { if (searchQuery.trim().length > 0) setShowSuggestions(true); }}
+              />
+              <button className="search-trigger" aria-label="Pencarian" onClick={handleSearchToggle}>
+                <i className="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </div>
+
+            {/* DROPDOWN SEARCH SUGGESTIONS */}
+            {showSuggestions && (
+              <div 
+                className="search-suggestions-dropdown"
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+              >
+                {searchError ? (
+                  <div className="search-suggestion-item empty" style={{ color: 'red' }}>Error: {searchError}</div>
+                ) : isSearching ? (
+                  <div className="search-suggestion-item loading">Mencari...</div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((result, idx) => (
+                    <Link 
+                      key={idx} 
+                      to={result.path} 
+                      className="search-suggestion-item" 
+                      onClick={() => {
+                        setIsSearchActive(false);
+                        setShowSuggestions(false);
+                        setSearchQuery('');
+                        setSearchResults([]);
+                      }}
+                    >
+                      <div className="search-suggestion-title">{result.title}</div>
+                      <div className="search-suggestion-meta">
+                        <span className="search-suggestion-type">{result.type}</span>
+                        {result.location && (
+                          <span className="search-suggestion-location">{result.location}</span>
+                        )}
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="search-suggestion-item empty">
+                    Pencarian tidak ditemukan.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <button className={`btn-voice ${isActive ? 'active' : ''}`} aria-label={isActive ? "Matikan Suara" : "Tulisan Ke Suara"} onClick={toggle}>
             <span className="voice-text">{isActive ? "Suara Aktif" : "Tulisan Ke Suara"}</span>
