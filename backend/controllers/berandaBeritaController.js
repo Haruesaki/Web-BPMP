@@ -18,7 +18,12 @@ class BerandaBeritaController {
           'menu.jenis_menu',
           'menu.slug_atau_tautan as layout'
         )
-        .where('berita.status', 'terbit');
+        .where('berita.status', 'terbit')
+        // Abaikan konten YATIM. Foreign key menu_id memakai ON DELETE SET NULL,
+        // sehingga saat sebuah menu dihapus barisnya tetap ada dengan menu_id
+        // NULL dan status masih 'terbit'. Konten seperti itu tidak punya halaman
+        // tujuan, jadi tidak boleh tampil di beranda maupun panel admin.
+        .whereNotNull('berita.menu_id');
 
       // 2. Ambil data dari tabel halaman_konten yang statusnya 'terbit'
       const kontenRaw = await db('halaman_konten')
@@ -36,7 +41,9 @@ class BerandaBeritaController {
           'menu.jenis_menu',
           'menu.slug_atau_tautan as layout'
         )
-        .where('halaman_konten.status', 'terbit');
+        .where('halaman_konten.status', 'terbit')
+        // Alasan sama seperti pada query berita di atas.
+        .whereNotNull('halaman_konten.menu_id');
 
       // 3. Format & Gabungkan
       const formattedBerita = beritaRaw.map(b => ({

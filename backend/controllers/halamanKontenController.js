@@ -72,8 +72,11 @@ class HalamanKontenController {
       await logActivityInternal(pName, pRole, `${aksiKata} halaman konten pada menu "${namaMenu}"`);
       return res.status(200).json({ pesan: 'Konten berhasil disimpan' });
     } catch (error) {
+      // Detail teknis cukup dicatat di log server. Mengirim error.message /
+      // error.stack ke klien membocorkan struktur database (nama tabel, kolom,
+      // bahkan query mentah) ke browser admin.
       console.error('Error upsertKonten:', error);
-      res.status(500).json({ pesan: 'Gagal menyimpan konten ke database', detail: error.message, stack: error.stack });
+      res.status(500).json({ pesan: 'Gagal menyimpan konten ke database' });
     }
   }
 

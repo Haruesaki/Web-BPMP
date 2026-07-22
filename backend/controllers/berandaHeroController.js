@@ -75,10 +75,10 @@ class BerandaHeroController {
         data: normalizeHero(savedHero),
       });
     } catch (error) {
+      // Detail teknis cukup di log server, tidak dikirim ke klien.
       console.error('Error updateHero Beranda:', error);
       return res.status(500).json({
         pesan: 'Gagal menyimpan pengaturan hero beranda',
-        detail: error.message,
       });
     }
   }
