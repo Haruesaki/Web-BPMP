@@ -39,6 +39,7 @@ const Navbar = () => {
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
+  const submenuPanelRef = useRef(null); // REF BARU untuk panel submenu
 
   useEffect(() => {
     let isMounted = true;
@@ -183,11 +184,16 @@ const Navbar = () => {
     // Ini akan selalu memicu re-render dan re-animasi.
     const targetElement = e.currentTarget;
     const rect = targetElement.getBoundingClientRect();
+    
+    // KUNCI PERBAIKAN: Tentukan posisi top secara kondisional berdasarkan lebar layar.
+    // <= 640px: Panel di bawah menu (seperti mobile).
+    // > 640px: Panel di samping menu (sejajar).
+    const topPosition = window.innerWidth <= 640 ? rect.bottom + 5 : rect.top;
 
     // 1. Update konten dan posisi untuk menu baru.
     setActiveDropdown(menu.id);
     setSubmenuPanelContent({ title: menu.title, items: menu.submenu || [] });
-    setSubmenuPanelPosition({ top: rect.top });
+    setSubmenuPanelPosition({ top: topPosition });
 
     // 2. Pastikan panel dianggap 'tertutup' sebelum kita mengganti kuncinya.
     setIsSubmenuPanelOpen(false);
@@ -253,12 +259,15 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSubmenuPanelOpen]); // Efek ini hanya bergantung pada state panel.
 
-  // EFEK BARU: Menjaga posisi panel submenu tetap sinkron saat window di-resize
+  // EFEK REVISI: Menjaga posisi panel submenu tetap sinkron saat window di-resize DAN saat sidebar di-scroll
   useEffect(() => {
     // Hanya jalankan jika panel terbuka
     if (!isSubmenuPanelOpen) return;
 
+    // Dapatkan referensi ke elemen sidebar yang bisa di-scroll
+    const sidebar = sidebarRef.current;
     let animationFrameId = null;
+
     const updatePanelPosition = () => {
       // Pastikan ada menu dropdown yang aktif untuk dicari
       if (!activeDropdown) return;
@@ -268,8 +277,11 @@ const Navbar = () => {
       
       if (parentMenuItem) {
         const rect = parentMenuItem.getBoundingClientRect();
+        // Terapkan logika kondisional yang sama di sini untuk sinkronisasi saat scroll/resize.
+        const topPosition = window.innerWidth <= 640 ? rect.bottom + 5 : rect.top;
+
         // Update state posisi 'top' dari panel agar selalu sejajar
-        setSubmenuPanelPosition({ top: rect.top });
+        setSubmenuPanelPosition({ top: topPosition });
       }
     };
 
@@ -290,7 +302,20 @@ const Navbar = () => {
       animationFrameId = requestAnimationFrame(updatePanelPosition);
     };
 
+    // REVISI: Handler untuk scroll kini memanggil update secara LANGSUNG
+    // untuk menghilangkan efek 'tertinggal' dan membuatnya real-time.
+    // REVISI FINAL: Buat perilaku konsisten. Scrolling di sidebar akan selalu menutup panel submenu.
+    const handleScroll = () => {
+      handleCloseSubmenuPanel();
+    };
+
     window.addEventListener('resize', handleResize);
+    // Tambahkan listener scroll ke elemen sidebar.
+    // Opsi { passive: true } adalah optimasi untuk memberitahu browser
+    // bahwa handler ini tidak akan membatalkan event scroll.
+    if (sidebar) {
+      sidebar.addEventListener('scroll', handleScroll);
+    }
 
     // Cleanup function untuk menghapus listener saat komponen unmount atau panel tertutup
     return () => {
@@ -298,6 +323,10 @@ const Navbar = () => {
         cancelAnimationFrame(animationFrameId);
       }
       window.removeEventListener('resize', handleResize);
+      // Hapus listener scroll dari elemen sidebar
+      if (sidebar) {
+        sidebar.removeEventListener('scroll', handleScroll);
+      }
     };
   }, [isSubmenuPanelOpen, activeDropdown]); // Jalankan efek ini saat panel terbuka atau menu aktif berubah
 
@@ -354,6 +383,27 @@ const Navbar = () => {
       if (overlay) overlay.removeEventListener('wheel', handleWheelOverlay);
     };
   }, [isMobileMenuOpen]); // Efek ini bergantung pada status buka/tutup menu.
+
+  // --- EFEK PERBAIKAN: Mengisolasi scroll di dalam panel submenu ---
+  useEffect(() => {
+    const submenuPanel = submenuPanelRef.current;
+  
+    // Handler untuk menghentikan "bocoran" scroll dari panel submenu
+    const handleWheelSubmenuPanel = (e) => {
+      e.stopPropagation();
+    };
+  
+    if (isSubmenuPanelOpen && submenuPanel) {
+      submenuPanel.addEventListener('wheel', handleWheelSubmenuPanel);
+    }
+  
+    // Cleanup: Hapus listener saat komponen unmount atau panel tertutup
+    return () => {
+      if (submenuPanel) {
+        submenuPanel.removeEventListener('wheel', handleWheelSubmenuPanel);
+      }
+    };
+  }, [isSubmenuPanelOpen]); // Efek ini hanya bergantung pada status buka/tutup panel submenu.
 
   // EFEK BARU: Logika selector yang sadar akan perubahan rute (URL)
   useEffect(() => {
@@ -533,6 +583,7 @@ const Navbar = () => {
 
       {/* PANEL SUBMENU BARU UNTUK TAMPILAN TABLET */}
       <div
+        ref={submenuPanelRef} // Lampirkan ref di sini
         className={`tablet-submenu-panel ${isSubmenuPanelOpen ? 'open' : ''}`}
         key={submenuPanelKey} // KUNCI: Menggunakan key untuk me-remount & re-animasi
         style={{ top: `${submenuPanelPosition.top}px` }}
@@ -540,7 +591,6 @@ const Navbar = () => {
         <div className="tablet-submenu-header">
           <button onClick={handleCloseSubmenuPanel} className="tablet-submenu-back-btn">
             <i className="fa-solid fa-chevron-left"></i>
-            <span>{submenuPanelContent.title}</span>
           </button>
         </div>
         <div className="tablet-submenu-list">
