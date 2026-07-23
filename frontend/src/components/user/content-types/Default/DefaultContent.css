@@ -36,9 +36,10 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 40px 50px;
-    border-radius: 15px;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.473);
+    padding: 22px 50px; /* padding atas-bawah dikecilkan agar pas dengan judul */
+    /* Hanya sudut atas yang membulat; sudut bawah rata agar menyatu dengan
+       kontainer konten di bawahnya (tanpa kesan kartu terpisah/berlipat). */
+    border-radius: 15px 15px 0 0;
     z-index: 2;
     overflow: hidden;
 
@@ -62,8 +63,9 @@
 }
 
 .default-banner-title {
-    font-size: 2.5rem;
+    font-size: 1.9rem;
     font-weight: 700;
+    line-height: 1.25; /* judul multi-baris tidak terlalu renggang */
     margin: 0;
     /* Pecah kata super panjang tanpa spasi agar judul tidak meluber. */
     overflow-wrap: anywhere;
@@ -73,12 +75,16 @@
 .default-description-container {
     position: relative;
     z-index: 1;
-    top: -15px;
+    /* top:-15px sebelumnya menarik kontainer ke atas → menyisakan "lip" 15px di
+       bagian bawah kartu (efek berlipat). Dibuat 0 agar konten menempel rata di
+       bawah banner sekaligus mengisi penuh sampai dasar kartu. */
+    top: 0;
     color: white;
     background-color: rgba(35, 47, 114, 0.7); /* Warna biru dengan transparansi */
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 3px solid rgba(255, 255, 255, 0.188);
+    border-top: none; /* menyatu dengan banner di atasnya */
     padding: 50px 35px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     border-bottom-left-radius: 15px;
@@ -120,7 +126,7 @@
     }
 
     .default-banner-title {
-        font-size: 2em;
+        font-size: 1.5em;
     }
 }
 
