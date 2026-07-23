@@ -58,7 +58,9 @@ class HalamanKontenController {
               kunci_halaman: finalKunci,
               dibuat_oleh: req.user?.id || null,
               status: c.status || 'terbit',
-              urutan_tampil: index
+              urutan_tampil: index,
+              url_foto: c.coverUrl || null,
+              urutan_beranda: c.urutan_beranda || 0
             };
           });
           await trx('halaman_konten').insert(newRows);

@@ -56,6 +56,8 @@ const MenuContentEditor = ({ layout: layoutProp }) => {
               id: d.id,
               judul: d.judul,
               konten: d.deskripsi_kaya,
+              coverUrl: d.url_foto,
+              urutan_beranda: d.urutan_beranda,
               pembuat_nama: d.pembuat_nama,
               pembuat_email: d.pembuat_email,
               status: d.status
