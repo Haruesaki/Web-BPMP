@@ -130,23 +130,48 @@
     }
 }
 
+/* ---- WADAH GAMBAR ADAPTIF (kelas rasio dipilih via JS di DefaultContent.jsx) ----
+   Base: gaya bersama. Ukuran/rasio spesifik ada di varian --landscape/--square/
+   --portrait. Gambar kecil sengaja DIPAKSA memenuhi wadah (boleh ter-upscale). */
 .default-description-container .image-frame {
-    width: 100%; /* Frame mengambil lebar penuh kontainer */
-    max-width: 600px; /* Batasi lebar frame jika tidak ingin 100% selalu */
-    height: 500px; /* Tentukan tinggi frame */
-    overflow: hidden; /* Penting! Menyembunyikan bagian gambar yang keluar dari frame */
-    border-radius: 8px; /* Contoh: beri sudut melengkung pada frame */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Contoh: beri bayangan */
-    display: block; /* Agar margin auto berfungsi */
-    position: relative; /* Jika ada elemen lain di dalam frame */
+    width: 100%;
+    overflow: hidden; /* memotong kelebihan object-fit: cover */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    display: block;
+    margin-left: auto;   /* pusatkan bila lebih sempit dari max-width */
+    margin-right: auto;
+    position: relative;
 }
 
 .default-description-container .image-frame img {
-    width: 100%; /* Gambar mengisi lebar frame */
-    height: 100%; /* Gambar mengisi tinggi frame */
-    object-fit: cover; /* Penting! Gambar akan mengisi frame, memotong bagian yang tidak perlu */
-    /* object-fit: contain; // Alternatif: Gambar akan menyesuaikan diri di dalam frame tanpa terpotong, mungkin menyisakan ruang kosong */
-    display: block; /* Menghilangkan spasi tambahan */
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Landscape → penuh lebar konten induk; tinggi mengikuti rasio tapi dibatasi
+   500px (kelebihan di-crop lewat object-fit: cover). */
+.default-description-container .image-frame--landscape {
+    max-width: none;
+}
+.default-description-container .image-frame--landscape img {
+    height: auto;
+    max-height: 500px;
+}
+
+/* Kotak → 500×500 (menyusut proporsional di layar sempit). */
+.default-description-container .image-frame--square {
+    max-width: 500px;
+    aspect-ratio: 1 / 1;
+}
+
+/* Portrait → box portrait, tinggi maks 500px; kelebihan di-crop (cover). */
+.default-description-container .image-frame--portrait {
+    max-width: 400px;
+    aspect-ratio: 4 / 5;
+    max-height: 500px;
 }
 
 /* =========================================================================
