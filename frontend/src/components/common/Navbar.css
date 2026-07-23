@@ -193,7 +193,7 @@ body.body-no-scroll {
   overscroll-behavior: contain;
   touch-action: pan-y; /* Meningkatkan pengalaman scroll di perangkat sentuh */
   overflow: hidden;
-  background: rgba(11, 19, 43, 0.65); /* KUNCI: Opasitas dikurangi agar efek blur lebih terlihat */
+  background: rgb(28, 35, 63); /* KUNCI: Opasitas dikurangi agar efek blur lebih terlihat */
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(18px); /* KUNCI: Radius blur ditingkatkan */
   -webkit-backdrop-filter: blur(18px);
