@@ -4,6 +4,41 @@ import axiosInstance from "../../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "./DocumentViewer";
 
+// Klasifikasi rasio gambar → kelas wadah adaptif (CSS tidak bisa mendeteksi
+// rasio konten gambar, jadi diukur via naturalWidth/naturalHeight):
+//   landscape → penuh lebar konten induk (tinggi maks 500px, crop bila lewat)
+//   square (kotak) → 500×500
+//   portrait → box portrait (tinggi maks 500px, kelebihan di-crop)
+const classifyRatio = (w, h) => {
+  if (!w || !h) return "image-frame--landscape";
+  const r = w / h;
+  if (r > 1.15) return "image-frame--landscape";
+  if (r < 0.85) return "image-frame--portrait";
+  return "image-frame--square";
+};
+
+// Wadah gambar adaptif: memilih kelas sesuai rasio gambar saat dimuat.
+// Ref callback menangani gambar dari cache (sudah `complete` saat mount).
+const ContentImage = ({ imgProps }) => {
+  const [variant, setVariant] = useState("image-frame--landscape");
+  const apply = (img) => {
+    if (img && img.naturalWidth) {
+      setVariant(classifyRatio(img.naturalWidth, img.naturalHeight));
+    }
+  };
+  return (
+    <div className={`image-frame ${variant}`}>
+      <img
+        {...imgProps}
+        onLoad={(e) => apply(e.currentTarget)}
+        ref={(el) => {
+          if (el && el.complete) apply(el);
+        }}
+      />
+    </div>
+  );
+};
+
 const DefaultContent = ({ menuId, viewLayout }) => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,9 +74,9 @@ const DefaultContent = ({ menuId, viewLayout }) => {
       delete cleanedAttribs.style;
 
       return (
-        <div className="image-frame">
-          <img {...cleanedAttribs} src={imgSrc} alt={node.attribs.alt || ""} />
-        </div>
+        <ContentImage
+          imgProps={{ ...cleanedAttribs, src: imgSrc, alt: node.attribs.alt || "" }}
+        />
       );
     }
 
@@ -213,8 +248,62 @@ const DefaultContent = ({ menuId, viewLayout }) => {
       justifyContent: 'center'
     }}>
       {content.map(c => {
-        const parsedContent = parse(c.deskripsi_kaya || '', {
-          replace: transformNode,
+        const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
+        const parsedContent = parse(wrappedHtml, {
+          replace: (node) => {
+            if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
+              const newChildren = [];
+              let currentGroup = [];
+
+              const flushGroup = () => {
+                if (currentGroup.length > 1) {
+                  // Chunk into groups of up to 3
+                  for (let i = 0; i < currentGroup.length; i += 3) {
+                    const chunk = currentGroup.slice(i, i + 3);
+                    if (chunk.length > 1) {
+                      newChildren.push({
+                        type: 'tag',
+                        name: 'div',
+                        attribs: { class: `image-gallery-grid cols-${chunk.length}` },
+                        children: chunk
+                      });
+                    } else {
+                      newChildren.push(chunk[0]);
+                    }
+                  }
+                } else if (currentGroup.length === 1) {
+                  newChildren.push(currentGroup[0]);
+                }
+                currentGroup = [];
+              };
+
+              node.children.forEach(child => {
+                // Ignore empty text nodes between images
+                if (child.type === 'text' && !child.data.trim()) {
+                  if (currentGroup.length > 0) return;
+                  newChildren.push(child);
+                  return;
+                }
+
+                const isImage = child.type === 'tag' && (
+                  (child.name === 'figure' && child.attribs?.class?.includes('image')) ||
+                  child.name === 'img'
+                );
+
+                if (isImage) {
+                  currentGroup.push(child);
+                } else {
+                  if (currentGroup.length > 0) flushGroup();
+                  newChildren.push(child);
+                }
+              });
+              if (currentGroup.length > 0) flushGroup();
+              node.children = newChildren;
+              return; // Let html-react-parser continue with new children
+            }
+            
+            return transformNode(node);
+          },
         });
 
         return (
