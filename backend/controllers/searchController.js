@@ -8,7 +8,7 @@ class SearchController {
         return res.json({ success: true, data: [] });
       }
 
-      const keyword = `%${q.trim().toLowerCase()}%`;
+      const keyword = `${q.trim().toLowerCase()}%`;
       const results = [];
 
       // 1. Cari di nama menu (induk atau submenu)

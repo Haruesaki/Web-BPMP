@@ -102,30 +102,35 @@ const Navbar = () => {
     }
   };
 
-  const handleSearchInput = async (e) => {
-    const val = e.target.value;
-    setSearchQuery(val);
-    
-    if (val.trim().length === 0) {
+  // Debounce effect untuk pencarian
+  useEffect(() => {
+    // Jika query kosong, langsung reset state tanpa delay
+    if (searchQuery.trim().length === 0) {
       setSearchResults([]);
       setShowSuggestions(false);
+      setIsSearching(false);
       return;
     }
 
-    setIsSearching(true);
+    // Tampilkan dropdown dan status loading segera saat mulai mengetik
     setShowSuggestions(true);
-    try {
-      const res = await axiosInstance.get(`/api/search?q=${encodeURIComponent(val)}`);
-      console.log('Search API Response:', res.data);
-      setSearchResults(res.data.data || []);
-      setSearchError(null);
-    } catch (err) {
-      console.error('Search error', err);
-      setSearchError(err.message || 'Error occurred');
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    setIsSearching(true);
+
+    const searchHandler = setTimeout(async () => {
+      try {
+        const res = await axiosInstance.get(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        setSearchResults(res.data.data || []);
+        setSearchError(null);
+      } catch (err) {
+        console.error('Search error', err);
+        setSearchError(err.message || 'Error occurred');
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400); // Jeda 400ms sebelum request API
+
+    return () => clearTimeout(searchHandler); // Bersihkan timeout jika user mengetik lagi
+  }, [searchQuery]);
 
   const handleMouseEnter = (menuName) => {
     if (window.innerWidth > 1290) {
@@ -136,6 +141,16 @@ const Navbar = () => {
   const handleMouseLeave = () => {
     if (window.innerWidth > 1290) {
       setActiveDesktopDropdown(null);
+    }
+  };
+
+  const handleNavbarScrollContain = (e) => {
+    e.stopPropagation();
+  };
+
+  const handleDropdownScrollContain = (e) => {
+    if (window.innerWidth > 1290) {
+      e.stopPropagation();
     }
   };
 
@@ -192,12 +207,7 @@ const Navbar = () => {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
-    const sidebar = sidebarRef.current;
     const overlay = overlayRef.current;
-
-    const handleWheelSidebar = (e) => {
-      e.stopPropagation();
-    };
 
     const handleWheelOverlay = (e) => {
       e.preventDefault();
@@ -205,16 +215,17 @@ const Navbar = () => {
     };
 
     if (isMobileMenuOpen) {
+      document.documentElement.classList.add('no-scroll');
       document.body.classList.add('body-no-scroll');
-      if (sidebar) sidebar.addEventListener('wheel', handleWheelSidebar);
       if (overlay) overlay.addEventListener('wheel', handleWheelOverlay);
     } else {
+      document.documentElement.classList.remove('no-scroll');
       document.body.classList.remove('body-no-scroll');
     }
 
     return () => {
+      document.documentElement.classList.remove('no-scroll');
       document.body.classList.remove('body-no-scroll');
-      if (sidebar) sidebar.removeEventListener('wheel', handleWheelSidebar);
       if (overlay) overlay.removeEventListener('wheel', handleWheelOverlay);
     };
   }, [isMobileMenuOpen]);
@@ -314,14 +325,14 @@ const Navbar = () => {
         <div className="header-actions">
           <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }} ref={searchContainerRef}>
             <div className={`search-wrapper ${isSearchActive ? 'active' : ''}`}>
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Cari informasi..." 
-                ref={searchInputRef} 
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Cari informasi..."
+                ref={searchInputRef}
                 value={searchQuery}
-                onChange={handleSearchInput}
-                onFocus={() => { if (searchQuery.trim().length > 0) setShowSuggestions(true); }}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={() => { if (searchQuery.trim().length > 0) setShowSuggestions(true); }}
               />
               <button className="search-trigger" aria-label="Pencarian" onClick={handleSearchToggle}>
                 <i className="fa-solid fa-magnifying-glass"></i>
@@ -337,13 +348,22 @@ const Navbar = () => {
                 {searchError ? (
                   <div className="search-suggestion-item empty" style={{ color: 'red' }}>Error: {searchError}</div>
                 ) : isSearching ? (
-                  <div className="search-suggestion-item loading">Mencari...</div>
+                  // --- PERUBAHAN: Gunakan Skeleton Loading, bukan teks "Mencari..." ---
+                  <>
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="search-suggestion-item skeleton">
+                        <div className="skeleton-title"></div>
+                        <div className="skeleton-meta"></div>
+                      </div>
+                    ))}
+                  </>
                 ) : searchResults.length > 0 ? (
                   searchResults.map((result, idx) => (
                     <Link 
                       key={idx} 
                       to={result.path} 
-                      className="search-suggestion-item" 
+                      className="search-suggestion-item"
+                      style={{ '--animation-delay': `${idx * 0.07}s` }}
                       onClick={() => {
                         setIsSearchActive(false);
                         setShowSuggestions(false);
@@ -354,9 +374,6 @@ const Navbar = () => {
                       <div className="search-suggestion-title">{result.title}</div>
                       <div className="search-suggestion-meta">
                         <span className="search-suggestion-type">{result.type}</span>
-                        {result.location && (
-                          <span className="search-suggestion-location">{result.location}</span>
-                        )}
                       </div>
                     </Link>
                   ))
@@ -390,7 +407,12 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div className="mobile-nav-content">
+        <div
+          className="mobile-nav-content"
+          data-lenis-prevent
+          onWheel={handleNavbarScrollContain}
+          onTouchMove={handleNavbarScrollContain}
+        >
           {navData.map(item => {
             if (item.type === 'link') {
               const isExternal = item.path.startsWith('http');
@@ -418,7 +440,12 @@ const Navbar = () => {
                   <a href={item.path} className="nav-link" data-path-group={item.dataPath} onClick={(e) => handleDropdownClick(e, item)}>
                     {item.title} <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
                   </a>
-                  <div className="dropdown-menu">
+                  <div
+                    className="dropdown-menu"
+                    data-lenis-prevent
+                    onWheel={handleDropdownScrollContain}
+                    onTouchMove={handleDropdownScrollContain}
+                  >
                     {item.submenu.map((subItem, index) => {
                       const isExternal = subItem.path.startsWith('http');
                       const animationStyle = {
