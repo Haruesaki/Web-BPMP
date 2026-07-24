@@ -25,6 +25,7 @@ const pseudoRandom = (seed) => {
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 1040);
     const [showSubtitle, setShowSubtitle] = useState(false);
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
     const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
@@ -119,6 +120,16 @@ const HeroSection = () => {
         };
     }, [fullText]);
 
+    // DETEKSI UKURAN LAYAR UNTUK ANIMASI KONDISIONAL
+    useEffect(() => {
+        const handleResize = () => {
+            // Breakpoint 65rem (1040px) sesuai dengan CSS
+            setIsMobileView(window.innerWidth <= 1040);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // EFEK HERO PARALLAX
     useEffect(() => {
         let animationFrame;
@@ -133,34 +144,40 @@ const HeroSection = () => {
             if (!leftContent) return;
 
             const scrollY = window.scrollY;
+            const scaleDown = Math.max(1 - scrollY * 0.0001, 0.8); // Mulai dari 1, mengecil hingga minimum 0.5
 
             // --- REVISI: Logika animasi untuk wadah kanan dan gambar ---
             if (rightContainer && rightImage) {
-                const rightTranslateY = Math.min(scrollY * 1.5, 1820); // Kecepatan "tenggelam"
-                // REVISI: Ubah efek dari bergeser/mengecil menjadi zoom-in (upscale)
-                const scale = 1 + scrollY * 0.00015; // Nilai akan bertambah saat scroll untuk efek zoom
+                const rightTranslateY = Math.min(scrollY * 1, 2000); // Kecepatan "tenggelam"
                 const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-                // 1. Terapkan gerakan vertikal ke seluruh wadah (.hero-right-cms)
-                rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
-                // 2. Terapkan efek zoom-in dan kecerahan hanya pada gambar di dalamnya
-                rightImage.style.transform = `scale(${scale})`;
+                // 1. Terapkan gerakan vertikal DAN EFEK MENCIUT ke seluruh wadah (.hero-right-cms)
+                rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
+                // 2. Hapus efek zoom-in pada gambar, pertahankan efek kecerahan
+                rightImage.style.transform = `scale(1)`;
                 rightImage.style.filter = `brightness(${brightness})`;
             }
 
-            // 2. Tambahkan kalkulasi untuk Konten Kiri
-            const leftTranslateX = scrollY * -0.500;   // Gerakan horizontal ke kiri
-            const leftOpacity = Math.max(1 - scrollY * 0.00200, 0); // Sesuaikan kecepatan menghilang
-
-            // REVISI: Terapkan gerakan horizontal murni
-            leftContent.style.transform = `translateX(${leftTranslateX}px)`;
-            leftContent.style.opacity = leftOpacity;
+            // --- REVISI: Animasi Konten Kiri yang Adaptif ---
+            if (isMobileView) {
+                // Tampilan Mobile: Gunakan translateX untuk gerakan horizontal
+                const leftOpacity = Math.max(1 - scrollY * 0.00200, 0);
+                leftContent.style.opacity = leftOpacity;
+                const leftTranslateX = scrollY * -0.500;
+                leftContent.style.transform = `translateX(${leftTranslateX}px)`;
+            } else {
+                // Tampilan Desktop/Tablet: Gunakan translateY untuk gerakan vertikal
+                leftContent.style.opacity = 1; // Hilangkan efek menghilang di desktop
+                const leftTranslateY = Math.min(scrollY * 1, 2000) // Kecepatan "tenggelam" sama dengan gambar
+                // Terapkan gerakan vertikal DAN EFEK MENCIUT
+                leftContent.style.transform = `translateY(${leftTranslateY}px) scale(${scaleDown})`;
+            }
 
             animationFrame = requestAnimationFrame(animateHero);
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, [heroImage]); // Dependensi tetap, karena efek hanya aktif jika ada gambar
+    }, [heroImage, isMobileView]); // Tambahkan isMobileView sebagai dependensi
 
     return (
         <div className="landing-wrapper">
