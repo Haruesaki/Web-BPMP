@@ -24,6 +24,7 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState(null);
   const [headerLogoUrl, setHeaderLogoUrl] = useState(null);
+  const [forceMobileView, setForceMobileView] = useState(false);
 
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -133,19 +134,17 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleMouseEnter = (menuName) => {
-    if (window.innerWidth > 1290) {
+    // KUNCI: Hover hanya aktif jika BUKAN mode mobile (baik karena lebar layar maupun karena wrap)
+    if (window.innerWidth > 1290 && !forceMobileView) {
       setActiveDesktopDropdown(menuName);
     }
   };
 
   const handleMouseLeave = () => {
-    if (window.innerWidth > 1290) {
+    // KUNCI: Hover hanya aktif jika BUKAN mode mobile
+    if (window.innerWidth > 1290 && !forceMobileView) {
       setActiveDesktopDropdown(null);
     }
-  };
-
-  const handleNavbarScrollContain = (e) => {
-    e.stopPropagation();
   };
 
   const handleDropdownScrollContain = (e) => {
@@ -161,9 +160,10 @@ const Navbar = () => {
 
   const handleDropdownClick = (e, menu) => {
     e.preventDefault();
-    if (window.innerWidth > 1290) return;
-
-    setActiveDropdown(prevId => (prevId === menu.id ? null : menu.id));
+    // KUNCI: Klik untuk dropdown hanya aktif JIKA dalam mode mobile (baik karena lebar layar maupun wrap)
+    if (window.innerWidth <= 1290 || forceMobileView) {
+      setActiveDropdown(prevId => (prevId === menu.id ? null : menu.id));
+    }
   };
 
   // Fungsi Toggle Hamburger
@@ -299,10 +299,61 @@ const Navbar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [location.pathname, navData]); // KUNCI: Efek ini berjalan setiap kali URL atau menu dinamis berubah
+  }, [location.pathname, navData]);
+
+  // KUNCI: Efek untuk mendeteksi "wrap" pada navigasi desktop dan memaksa tampilan mobile
+  useEffect(() => {
+    const navContainer = sidebarRef.current;
+    // Jangan jalankan jika container belum ada atau menu belum terisi
+    if (!navContainer || navData.length <= 1) return;
+
+    const checkNavWrap = () => {
+      const navContainer = sidebarRef.current;
+      if (!navContainer) return;
+
+      // Kondisi 1: Layar <= 1290px, selalu non-aktifkan mode paksa.
+      if (window.innerWidth <= 1290) {
+        if (forceMobileView) setForceMobileView(false);
+        return;
+      }
+
+      // Kondisi 2: Layar > 1290px, lakukan kalkulasi lebar.
+      const navItems = navContainer.querySelectorAll('.mobile-nav-content > .nav-link, .mobile-nav-content > .nav-item');
+      
+      if (navItems.length < 2) {
+        if (forceMobileView) setForceMobileView(false);
+        return;
+      }
+
+      const gap = parseFloat(getComputedStyle(navContainer).gap) || 16; // Fallback 16px
+      let totalWidth = 0;
+      navItems.forEach(item => {
+        totalWidth += item.offsetWidth;
+      });
+      totalWidth += (navItems.length - 1) * gap;
+
+      const containerWidth = navContainer.offsetWidth;
+      const shouldWrap = totalWidth > (containerWidth - 50); // Toleransi 50px
+
+      if (shouldWrap !== forceMobileView) {
+        setForceMobileView(shouldWrap);
+      }
+    };
+
+    let resizeTimer;
+    const debouncedCheck = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(checkNavWrap, 150);
+    };
+
+    const initialCheckTimeout = setTimeout(checkNavWrap, 100);
+    window.addEventListener('resize', debouncedCheck);
+
+    return () => { window.removeEventListener('resize', debouncedCheck); clearTimeout(resizeTimer); clearTimeout(initialCheckTimeout); };
+  }, [navData, forceMobileView]); // KUNCI: Jalankan ulang jika data menu atau state wrap berubah
 
   return (
-    <header className="unified-header">
+    <header className={`unified-header ${forceMobileView ? 'force-mobile-view' : ''}`}>
       <div className="header-top">
         <div className="header-menu">
           <button
@@ -410,8 +461,6 @@ const Navbar = () => {
         <div
           className="mobile-nav-content"
           data-lenis-prevent
-          onWheel={handleNavbarScrollContain}
-          onTouchMove={handleNavbarScrollContain}
         >
           {navData.map(item => {
             if (item.type === 'link') {
