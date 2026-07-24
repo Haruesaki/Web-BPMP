@@ -164,7 +164,7 @@
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
   -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
+  mask-size: 100% 101%;
   
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
