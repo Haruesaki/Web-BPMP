@@ -1,24 +1,41 @@
+/* =========================================
+   Global & Root Styles
+   ========================================= */
 html,
 body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 :root {
   --bg-subPanel : rgba(6, 23, 79, 0.289);
 }
-
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
 }
-
 html.no-scroll,
 body.no-scroll,
 body.body-no-scroll {
   overflow: hidden;
 }
-
+.measurement-ghost {
+  position: absolute;
+  visibility: hidden;
+  top: -9999px;
+  left: -9999px;
+  height: auto;
+  width: auto;
+  white-space: nowrap;
+  font-size: clamp(12px, 1vw, 15px);
+  font-weight: 500;
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
+  padding: 8px 20px;
+  z-index: -100;
+  pointer-events: none;
+}
+/* =========================================
+   Main Header Layout
+   ========================================= */
 .unified-header {
   margin: 0px;
   position: sticky;
@@ -29,7 +46,6 @@ body.body-no-scroll {
   display: flex;
   flex-direction: column;
 }
-
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -44,7 +60,9 @@ body.body-no-scroll {
     position: relative;
     z-index: 100;
 }
-
+/* =========================================
+   Header Logo
+   ========================================= */
 .header-logo {
   height: clamp(45px, 4vw, 65px);
   width: clamp(250px, 22vw, 380px);
@@ -53,7 +71,6 @@ body.body-no-scroll {
   justify-content: center;
   overflow: hidden;
 }
-
 .logo-container {
   display: flex;
   justify-content: flex-start;
@@ -61,7 +78,6 @@ body.body-no-scroll {
   width: 100%;
   height: 100%;
 }
-
 .header-logo .main-logo {
   height: auto;
   width: auto;
@@ -70,17 +86,14 @@ body.body-no-scroll {
   object-fit: contain;
   display: block;
 }
-
 .header-menu {
   display: flex;
 }
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
 .header-actions button {
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
@@ -91,13 +104,14 @@ body.body-no-scroll {
   justify-content: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 .header-actions button:hover {
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
-
+/* =========================================
+   Main Navigation Bar
+   ========================================= */
 .main-navbar {
   position: sticky;
   top: 84px;
@@ -118,27 +132,31 @@ body.body-no-scroll {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
-
+/* =========================================
+   Active Menu Indicator
+   ========================================= */
 .nav-selector {
   position: absolute;
   top: 0;
   left: 0;
   background: linear-gradient(
     135deg,
-    rgba(30, 45, 85, 0.8) 0%,
-    rgba(15, 25, 55, 0.6) 100%
+    rgba(69, 93, 211, 0.651) 0%,
+    rgba(13, 26, 66, 0.786) 100%
   );
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid rgba(149, 185, 252, 0.55);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   border-radius: 30px;
-  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: -1;
   pointer-events: none;
 }
 .nav-selector.no-transition {
   transition: none !important;
 }
-
+/* =========================================
+   Navigation Links
+   ========================================= */
 .nav-link {
   position: relative;
   color: #ffffff;
@@ -155,27 +173,25 @@ body.body-no-scroll {
   white-space: nowrap;
   z-index: 2;
 }
-
 .nav-link:hover {
   color: #a9cce3;
 }
-
 .nav-link.active {
   font-weight: 500;
   color: #ffffff;
 }
-
+.nav-item {
+  position: relative;
+}
+/* =========================================
+   Desktop Dropdown Menu
+   ========================================= */
 .dropdown-icon {
   width: 10px;
   height: auto;
   object-fit: contain;
   transition: transform 0.3s ease;
 }
-
-.nav-item {
-  position: relative;
-}
-
 .nav-item:hover .dropdown-icon,
 .nav-item.desktop-dropdown-open .dropdown-icon {
   transform: rotate(180deg);
@@ -185,37 +201,37 @@ body.body-no-scroll {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 0;
-
-  width: 250px;
-  max-height: 0; 
-  /* KUNCI: Mencegah scroll "bocor" ke halaman utama saat scroll di dalam panel ini. */
+  margin-top: 10px;
+  width: 220px;
+  max-height: 0;
   overscroll-behavior: contain;
-  touch-action: pan-y; /* Meningkatkan pengalaman scroll di perangkat sentuh */
+  touch-action: pan-y;
   overflow: hidden;
-  background: rgb(28, 35, 63); /* KUNCI: Opasitas dikurangi agar efek blur lebih terlihat */
+  background: rgb(29, 38, 71);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px); /* KUNCI: Radius blur ditingkatkan */
+  border-top:1px solid rgba(250, 250, 250, 0.856);
+  backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-radius: 15px;
+  border-radius: 5px;
   display: flex;
   z-index: 9999;
   flex-direction: column;
-  padding: 0 0 10px;
+  padding: 0 0 0 0;
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.95);
+  transform: scale(1);
   transform-origin: top center;
   transition:
     opacity 0.1s ease-out,
     transform 0.25s ease-out,
     visibility 0s linear 0.25s;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  /* KUNCI: Petunjuk optimasi untuk browser agar menyiapkan layer terpisah,
-     seringkali memperbaiki bug rendering pada backdrop-filter. */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+              inset 0 50px 40px -50px rgba(160, 188, 255, 0.77),
+              inset 0 30px 50px -55px rgba(255, 253, 253, 0.912),
+              inset 0 -40px 50px -55px rgba(0, 0, 0, 0)
+              ;
   will-change: transform, opacity;
 }
-
 .nav-item.has-dropdown::after {
   display: none;
   content: "";
@@ -228,35 +244,22 @@ body.body-no-scroll {
   z-index: 10;
   pointer-events: auto;
 }
-
-/* KUNCI: Atasi glitch scrollbar muncul-hilang saat dropdown panjang dibuka.
-   Animasi ini menahan `overflow-y: hidden` selama transisi `max-height`
-   berlangsung, lalu menggantinya ke `auto` TEPAT setelah selesai. */
 @keyframes delayed-overflow {
   0%, 99% { overflow-y: hidden; }
   100% { overflow-y: auto; }
 }
-
 .nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu {
-  /* 
-    SOLUSI: Menggunakan `calc` dan `vh` (viewport height).
-    - `85vh`: Batasi tinggi dropdown maksimal 85% dari tinggi layar.
-    - `- 100px`: Beri ruang untuk header/navbar di atasnya (sekitar 100px).
-    Ini memastikan dropdown tidak akan pernah keluar dari bawah layar.
-  */
-  max-height: max(150px, calc(90vh - 180px)); /* Lebih tangguh: minimal 150px, atau 100vh dikurangi tinggi header */
+  max-height: max(150px, calc(90vh - 180px));
   overflow-y: auto;
   overflow-x: hidden;
   opacity: 1;
   visibility: visible;
   transform: scale(1);
   transition:
-    opacity 0.2s ease-in, transform 0.6s cubic-bezier(0.2, 1.8, 0.4, 1),
-    visibility 0s linear 0s, max-height 0.4s ease-out; /* Tambahkan transisi max-height */
-  /* Terapkan animasi overflow. Durasi (0.4s) HARUS sama dengan transisi max-height. */
-  animation: delayed-overflow 0.4s forwards;
+    opacity 0.2s ease-in, transform 0.1s cubic-bezier(0.2, 1.8, 0.4, 1),
+    visibility 0s linear 0s, max-height 0.7s ease;
+  animation: delayed-overflow 1s forwards;
 }
-
 .dropdown-menu a {
   color: #ffffff;
   text-decoration: none;
@@ -265,16 +268,13 @@ body.body-no-scroll {
   font-weight: 400;
   font-family: "Poppins", Arial, Helvetica, sans-serif;
   opacity: 0;
-  transform: translateX(-20px);
-  /* KUNCI: Memastikan teks panjang akan wrap ke baris baru */
+  transform: translateX(-30px);
   white-space: normal;
   overflow-wrap: break-word;
 }
-
 .dropdown-menu a + a {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .nav-item.has-dropdown.desktop-dropdown-open .dropdown-menu a {
   opacity: 1;
   transform: translateX(0);
@@ -284,14 +284,15 @@ body.body-no-scroll {
     background-color 0.25s ease,
     padding-left 0.25s ease;
 }
-
 .dropdown-menu a:hover {
-  background-color: rgba(91, 95, 232, 0.15); /* Hover lebih konsisten dengan tema */
+  background-color: rgba(91, 95, 232, 0.15);
   padding-left: 20px;
   color: #ffffff;
   font-weight: 500;
 }
-
+/* =========================================
+   Search Bar
+   ========================================= */
 .search-wrapper {
   position: relative;
   display: flex;
@@ -309,17 +310,14 @@ body.body-no-scroll {
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 .search-wrapper:hover,
 .search-wrapper.active {
   background: rgba(42, 60, 105, 0.8);
   border-color: rgba(255, 255, 255, 0.5);
 }
-
 .search-wrapper.active {
   width: 280px;
 }
-
 .search-input {
   flex: 1;
   width: 100%;
@@ -336,17 +334,14 @@ body.body-no-scroll {
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
-
 .search-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
-
 .search-wrapper.active .search-input {
   opacity: 1;
   pointer-events: auto;
   transition-delay: 0.15s;
 }
-
 .navbar-actions .search-trigger,
 .header-actions .search-trigger {
   position: absolute;
@@ -366,14 +361,15 @@ body.body-no-scroll {
   font-size: 20px;
   transition: transform 0.4s ease;
 }
-
 .navbar-actions .search-trigger:hover,
 .header-actions .search-trigger:hover {
   transform: scale(1.1);
   border: none;
   box-shadow: none;
 }
-
+/* =========================================
+   Text-to-Speech Button
+   ========================================= */
 .btn-voice {
   border-radius: 30px;
   padding-left: 17px;
@@ -390,7 +386,6 @@ body.body-no-scroll {
     background 5.4s ease,
     width 2.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .btn-voice.active {
   background: linear-gradient(
     135deg,
@@ -398,19 +393,16 @@ body.body-no-scroll {
     rgba(15, 55, 25, 0.8) 100%
   );
 }
-
 .btn-voice span {
   font-family: "Poppins", sans-serif;
   font-size: clamp(12px, 1.2vw, 14px);
   font-weight: 500;
   white-space: nowrap;
 }
-
 .btn-voice img {
   height: auto;
   width: 40px;
 }
-
 .btn-voice:hover {
   background: linear-gradient(
     135deg,
@@ -418,7 +410,6 @@ body.body-no-scroll {
     rgba(30, 45, 85, 0.8) 100%
   );
 }
-
 .btn-voice.active:hover {
   background: linear-gradient(
     135deg,
@@ -426,7 +417,9 @@ body.body-no-scroll {
     rgba(30, 85, 45, 0.9) 100%
   );
 }
-
+/* =========================================
+   Mobile Menu Elements
+   ========================================= */
 .hamburger-btn {
   display: none;
   background: transparent;
@@ -437,23 +430,21 @@ body.body-no-scroll {
   transition: transform 0.3s ease;
   margin-right: 25px;
 }
-
 .hamburger-btn:hover {
   transform: scale(1.1);
 }
-
 .mobile-menu-overlay {
   display: none;
 }
-
 .mobile-nav-header {
   display: none;
 }
-
 .mobile-nav-content {
   display: contents;
 }
-
+/* =========================================
+   Search Suggestions Dropdown
+   ========================================= */
 .search-suggestions-dropdown {
   position: absolute;
   top: 100%;
@@ -474,31 +465,24 @@ body.body-no-scroll {
   display: flex;
   flex-direction: column;
   pointer-events: auto;
-
-  /* --- Styling Scrollbar Modern --- */
-  /* Untuk Firefox */
   scrollbar-width: thin;
   scrollbar-color: rgba(248, 248, 248, 0.425) rgba(1, 2, 34, 0.342);
-
 }
-
-/* Untuk Chrome, Safari, dan Edge (berbasis WebKit) */
 .search-suggestions-dropdown::-webkit-scrollbar {
-  width: 2px !important; /* Diberi !important untuk memastikan override */
+  width: 2px !important;
 }
 .search-suggestions-dropdown::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3); /* Diberi warna agar thumb lebih menonjol */
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
 .search-suggestions-dropdown::-webkit-scrollbar-thumb {
-  background-color: rgba(5, 11, 192, 0.486); /* Dibuat lebih pekat */
+  background-color: rgba(5, 11, 192, 0.486);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .search-suggestions-dropdown::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 5, 156, 0.9);
 }
-
 .search-suggestion-item {
   padding: 12px 16px;
   text-decoration: none;
@@ -512,27 +496,22 @@ body.body-no-scroll {
   overflow: hidden;
   flex-shrink: 0;
   font-family: 'Poppins', sans-serif;
-  /* Animasi staggered slide-in */
   opacity: 0;
   animation: slideInFromLeft 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   animation-delay: var(--animation-delay, 0s);
 }
-
 .search-suggestion-item.empty {
   color: rgba(255, 255, 255, 0.6);
   text-align: center;
   pointer-events: none;
   padding: 20px;
 }
-
 .search-suggestion-item:last-child {
   border-bottom: none;
 }
-
 .search-suggestion-item:hover {
   background: rgba(91, 95, 232, 0.12);
 }
-
 .search-suggestion-title {
   font-size: clamp(0.75rem, 0.3rem + 0.75vw, 0.85rem);
   font-weight: 600;
@@ -545,7 +524,6 @@ body.body-no-scroll {
   white-space: normal;
   word-break: break-word;
 }
-
 .search-suggestion-meta {
   display: flex;
   justify-content: space-between;
@@ -556,7 +534,6 @@ body.body-no-scroll {
   color: rgba(255, 255, 255, 0.6);
   margin-top: 4px;
 }
-
 .search-suggestion-type {
   background-color: rgba(91, 95, 232, 0.2);
   padding: 4px 8px;
@@ -568,7 +545,6 @@ body.body-no-scroll {
   line-height: 1.2;
   max-width: 100%;
 }
-
 .search-suggestion-item.empty {
   text-align: center;
   color: var(--text-muted, #fcfafa);
@@ -577,8 +553,6 @@ body.body-no-scroll {
   font-weight: 500;
   pointer-events: none;
 }
-
-/* --- Skeleton Loading untuk Hasil Pencarian --- */
 @keyframes slideInFromLeft {
   from {
     opacity: 0;
@@ -593,25 +567,22 @@ body.body-no-scroll {
   0% { background-position: -468px 0; }
   100% { background-position: 468px 0; }
 }
-
 .search-suggestion-item.skeleton {
   pointer-events: none;
 }
-
 .search-suggestion-item.skeleton .skeleton-title,
 .search-suggestion-item.skeleton .skeleton-meta {
   background-color: rgba(255, 255, 255, 0.08);
-  background-image: linear-gradient(to right, 
-    rgba(255, 255, 255, 0.08) 0%, 
-    rgba(255, 255, 255, 0.15) 20%, 
-    rgba(255, 255, 255, 0.08) 40%, 
+  background-image: linear-gradient(to right,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.08) 40%,
     rgba(255, 255, 255, 0.08) 100%);
   background-repeat: no-repeat;
   background-size: 800px 104px;
   animation: shimmer 1.5s linear infinite;
   border-radius: 4px;
 }
-
 .search-suggestion-item.skeleton .skeleton-title {
   width: 80%;
   height: 1.2em;
@@ -620,22 +591,19 @@ body.body-no-scroll {
   width: 40%;
   height: 0.9em;
 }
-
-
-/* BREAKPOINT: <= 1290px (Tablet & Laptop Kecil) */
+/* =========================================
+   Breakpoint: <= 1290px
+   ========================================= */
 @media (max-width: 1290px) {
   .hamburger-btn {
     display: block;
   }
-
   .header-top {
     justify-content: flex-start;
   }
-
   .header-actions {
     margin-left: auto;
   }
-
   .mobile-menu-overlay.active {
     display: block;
     position: fixed;
@@ -648,14 +616,13 @@ body.body-no-scroll {
     -webkit-backdrop-filter: blur(5px);
     z-index: 9998;
   }
-
   .main-navbar {
     position: fixed;
     top: 0;
     left: -420px;
     width: 370px;
     height: 100vh;
-    flex-direction: column; 
+    flex-direction: column;
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: flex-start;
@@ -668,11 +635,9 @@ body.body-no-scroll {
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
     z-index: 9999;
   }
-
   .main-navbar.mobile-open {
     left: 0;
   }
-
   .mobile-nav-header {
     position: sticky;
     top: 0;
@@ -685,22 +650,20 @@ body.body-no-scroll {
     box-sizing: border-box;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
-
   .mobile-nav-content {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-    flex-grow: 1; /* Ganti height: 100% */
-    min-height: 0; /* Tambahkan untuk stabilitas flexbox */
+    flex-grow: 1;
+    gap: 1rem;
+    min-height: 0;
     overflow-y: auto;
     padding: 15px 30px 30px 30px;
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.351) transparent;
     scrollbar-gutter: stable;
-    /* KUNCI: Mencegah scroll "bocor" ke halaman utama saat sidebar di-scroll.
-       Ini adalah solusi CSS standar dan paling andal untuk masalah ini. */
     overscroll-behavior: contain;
   }
   .mobile-nav-content::-webkit-scrollbar {
@@ -714,7 +677,6 @@ body.body-no-scroll {
     border-radius: 3px;
     transition: background-color 0.2s ease;
   }
-
   .mobile-nav-close-btn {
     background: transparent;
     border: none;
@@ -729,22 +691,18 @@ body.body-no-scroll {
     padding: 0;
     margin: 0;
   }
-
   .nav-selector {
     display: none !important;
   }
-
   .nav-item {
     width: 100%;
   }
-
   .nav-link:hover {
     color: #ffffff;
     font-weight:700;
     padding-left: 15px;
     background-color: #7373731d;
   }
-
   .nav-link.active {
     background-color: rgba(69, 147, 236, 0.256);
     color: #ffffff;
@@ -753,7 +711,6 @@ body.body-no-scroll {
     box-shadow: 0px 0px 20px -10px rgba(255, 255, 255, 0.202);
     padding-left: 15px;
   }
-
   .nav-link {
     width: 100%;
     letter-spacing: 0px;
@@ -766,67 +723,57 @@ body.body-no-scroll {
       color 0.3s ease,
       background-color 0.5s ease,
       padding 0.2s ease;
-    /* KUNCI: Izinkan teks untuk wrap, menimpa 'nowrap' dari style desktop. */
     white-space: normal;
   }
-
-  /* KUNCI: Izinkan teks di dalam <span> untuk menyusut dan membungkus
-     dengan benar di dalam kontainer flex (.nav-link), mencegah overflow
-     horizontal saat teks menu sangat panjang. */
   .nav-link > span {
     min-width: 0;
     overflow-wrap: break-word;
   }
-
   .nav-item.has-dropdown.dropdown-open > .nav-link {
     background-color: rgba(91, 95, 232, 0.2);
     color: #fff;
     padding-left: 15px;
     font-weight: 600;
+    border-bottom-color: transparent; /* Sembunyikan border saat terbuka */
   }
-
   .nav-item.has-dropdown:hover .dropdown-icon {
     transform: none;
   }
-
   .dropdown-menu {
     display: block;
     position: static;
     width: 100%;
-    background: transparent; /* Changed to transparent */
+    background: transparent;
     box-shadow: none;
     border: none;
     border-radius: 8px;
     padding: 0;
-    margin-top: 8px;
+    margin-top: 0; /* Hapus margin atas, biarkan padding panel yg memberi jarak */
     max-height: 0;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: 
+    transition:
       max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       opacity 0.2s ease-in-out,
       padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       visibility 0s linear 0.3s;
   }
-
   .nav-item.has-dropdown.dropdown-open .dropdown-menu {
     max-height: 1000px;
     overflow: visible;
-    padding: 10px 0;
+    padding-bottom: 0;
     opacity: 1;
     visibility: visible;
-    transition: 
+    transition:
       max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       opacity 0.2s ease-in-out,
       padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       visibility 0s linear 0s;
   }
-
   .nav-item.has-dropdown.dropdown-open .dropdown-icon {
     transform: rotate(180deg);
   }
-
   .dropdown-menu a {
     display: flex;
     font-size: 13px;
@@ -835,24 +782,20 @@ body.body-no-scroll {
     opacity: 0;
     transform: translateX(-20px);
     background-color: transparent;
-    transition: 
+    transition:
       opacity 0.25s ease-out,
       transform 0.25s ease-out,
       background-color 0.3s ease,
       padding-left 0.25s ease,
       color 0.25s ease,
       font-weight 0.25s ease;
-    /* KUNCI: Memastikan teks panjang akan wrap ke baris baru (mobile) */
     white-space: normal;
     overflow-wrap: break-word;
   }
-
-  /* KUNCI: Izinkan teks di dalam <span> untuk menyusut dan membungkus
-     dengan benar di dalam kontainer flex (<a>). */
   .dropdown-menu a span {
     min-width: 0;
+    color:white;
   }
-  
   .dropdown-menu a:hover {
     background-color: transparent;
     padding-left: 25px;
@@ -860,18 +803,16 @@ body.body-no-scroll {
     font-weight: 700;
     transition-delay: 0s !important;
   }
-
   .dropdown-menu a::before {
     content: '\2022';
     margin-right: 12px;
     font-size: 20px;
     color: rgb(255, 255, 255);
   }
-
   .nav-item.has-dropdown.dropdown-open .dropdown-menu a {
     opacity: 1;
     transform: translateX(0);
-    transition: 
+    transition:
       opacity 0.15s ease-out calc(var(--animation-delay, 0s) + 0.2s), 
       transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) calc(var(--animation-delay, 0s) + 0.2s),
       background-color 0.3s ease 0s,
@@ -880,24 +821,22 @@ body.body-no-scroll {
       font-weight 0.25s ease 0s;
   }
 }
-
-/* BREAKPOINT: <= 888px (Mobile Layout) */
+/* =========================================
+   Breakpoint: <= 888px
+   ========================================= */
 @media (max-width: 888px) {
   .header-top {
     display: flex;
     padding: 10px 4vw clamp(5px, 1.2vw, 10px) 4vw;
     flex-direction: column;
-    justify-content: center; 
+    justify-content: center;
     align-items: flex-start;
     row-gap: 8px;
   }
-
   .logo-container {
     align-items: center;
     justify-content: flex-end;
-
   }
-
   .header-logo {
     height: clamp(32px, 7vw, 45px);
     width: clamp(180px, 45vw, 300px);
@@ -907,7 +846,6 @@ body.body-no-scroll {
     font-size: 18px;
     margin-right: 15px;
   }
-
   .header-menu {
     justify-content: space-between;
     align-items: center;
@@ -915,7 +853,6 @@ body.body-no-scroll {
     padding-bottom: 10px;
     border-bottom: 1.2px solid rgba(255, 255, 255, 0.375);
   }
-
   .header-actions {
     display: flex;
     flex-direction: row;
@@ -923,7 +860,6 @@ body.body-no-scroll {
     margin-left: 0;
     gap: clamp(10px, 2vw, 15px);
   }
-
   .header-actions .search-wrapper {
     width: clamp(30px, 6vw, 37px);
     width: auto;
@@ -932,7 +868,6 @@ body.body-no-scroll {
     flex-grow: 0;
     transition: max-width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
-
   .header-actions .search-wrapper.active {
     max-width: 200px;
     flex-grow: 1;
@@ -941,41 +876,32 @@ body.body-no-scroll {
     padding: 0px 20px;
     font-size: clamp(8.4px, 2vw, 12px);
   }
-
-  /* Penyesuaian ukuran font di dalam panel sugesti untuk layar kecil */
   .search-suggestion-title {
-    font-size: clamp(0.60rem, 2.5vw, 0.75rem); /* Override clamp() untuk ukuran yang lebih pas */
-    -webkit-line-clamp: 2; /* Batasi hanya 2 baris */
+    font-size: clamp(0.60rem, 2.5vw, 0.75rem);
+    -webkit-line-clamp: 2;
   }
-
   .search-suggestion-item {
     padding: 10px 12px;
   }
-
   .search-suggestion-meta {
     margin: 0px;
-    font-size: clamp(0.40rem, 2.14vw, 0.55rem); /* Override clamp() untuk ukuran yang lebih pas */
+    font-size: clamp(0.40rem, 2.14vw, 0.55rem);
   }
-
   .header-actions .search-trigger {
     width: clamp(27px, 7vw, 35px);
     height: clamp(30px, 7vw, 37px);
   }
-
   .header-actions .search-trigger i {
     font-size: clamp(11px, 3vw, 15px);
   }
-
   .header-actions .btn-voice {
     padding: 0px;
     padding-left: 15px;
     gap: clamp(6px, 1.2vw, 12px);
   }
-
   .header-actions .btn-voice .voice-text {
     font-size: clamp(9px, 1.5vw, 11px);
   }
-
   .header-actions .btn-voice img {
     width: clamp(26px, 6vw, 38px);
   }
@@ -986,20 +912,19 @@ body.body-no-scroll {
   .tablet-submenu-panel {
     display: none !important;
   }
-
   .nav-item.has-dropdown.dropdown-open:hover .dropdown-menu {
     max-height: 1000px;
     opacity: 1;
     visibility: visible;
   }
 }
-
-/* BREAKPOINT: <= 390px (Top Menu & Dropdown Panel Sub Menu) */
+/* =========================================
+   Breakpoint: <= 390px
+   ========================================= */
 @media (max-width: 390px) {
   .header-actions {
     gap: 10px;
   }
-
   .main-navbar {
     left: 0;
     top: -100%;
@@ -1012,44 +937,29 @@ body.body-no-scroll {
     border-bottom-right-radius: 20px;
     transition-property: top;
   }
-
   .main-navbar.mobile-open {
     top: 0px;
     left: 0;
   }
-
   .mobile-nav-header {
     padding: 20px 20px 15px 20px;
   }
-
   .mobile-nav-content {
     max-height: calc(50vh - 64px);
     overflow-y: auto;
   }
-
   .nav-link {
     font-size: 0.625rem;
     padding: 12px 0;
   }
-
   .dropdown-menu a {
     font-size: 0.6875rem;
     padding: 8px 0 8px 15px;
   }
 }
-
-/* ========================================================================
-   FORCE MOBILE VIEW (ketika item menu desktop "wrap" ke baris baru)
-   ========================================================================
-   Aturan di bawah ini adalah duplikat dari blok `@media (max-width: 1290px)`.
-   Ini digunakan untuk secara paksa mengubah navbar desktop menjadi tampilan
-   mobile (ikon hamburger + sidebar) ketika fungsi JavaScript mendeteksi
-   bahwa item menu terlalu panjang dan "turun baris" (wrap).
-   Pendekatan ini memastikan tampilan yang dihasilkan 100% konsisten
-   dengan tampilan mobile yang sebenarnya.
-*/
-
-/* Tampilkan tombol hamburger dan atur layout header atas */
+/* =========================================
+   Force Mobile View Styles
+   ========================================= */
 .force-mobile-view .hamburger-btn {
   display: block;
 }
@@ -1059,8 +969,6 @@ body.body-no-scroll {
 .force-mobile-view .header-actions {
   margin-left: auto;
 }
-
-/* Tampilkan overlay saat sidebar aktif */
 .force-mobile-view .mobile-menu-overlay.active {
   display: block;
   position: fixed;
@@ -1073,20 +981,16 @@ body.body-no-scroll {
   -webkit-backdrop-filter: blur(5px);
   z-index: 9998;
 }
-
-/* Sembunyikan nav-selector desktop */
 .force-mobile-view .nav-selector {
   display: none !important;
 }
-
-/* Ubah .main-navbar dari bar horizontal menjadi sidebar tersembunyi */
 .force-mobile-view .main-navbar {
   position: fixed;
   top: 0;
   left: -420px;
   width: 370px;
   height: 100vh;
-  flex-direction: column; 
+  flex-direction: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start;
@@ -1098,17 +1002,12 @@ body.body-no-scroll {
   transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
   z-index: 9999;
-  /* KUNCI: Override 'display: flex' dari desktop agar bisa dianimasikan */
-  display: block; 
+  display: block;
 }
-
-/* Tampilkan sidebar saat .mobile-open aktif */
 .force-mobile-view .main-navbar.mobile-open {
   left: 0;
-  display: flex; /* Kembalikan display flex untuk layout internal sidebar */
+  display: flex;
 }
-
-/* Tampilkan header di dalam sidebar */
 .force-mobile-view .mobile-nav-header {
   position: sticky;
   top: 0;
@@ -1121,14 +1020,13 @@ body.body-no-scroll {
   box-sizing: border-box;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-/* Atur konten scrollable di dalam sidebar */
 .force-mobile-view .mobile-nav-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
   flex-grow: 1;
+  gap: 1rem;
   min-height: 0;
   overflow-y: auto;
   padding: 15px 30px 30px 30px;
@@ -1138,8 +1036,6 @@ body.body-no-scroll {
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
 }
-
-/* Duplikat styling scrollbar dari media query */
 .force-mobile-view .mobile-nav-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -1151,8 +1047,6 @@ body.body-no-scroll {
   border-radius: 3px;
   transition: background-color 0.2s ease;
 }
-
-/* Duplikat tombol close dari media query */
 .force-mobile-view .mobile-nav-close-btn {
   background: transparent;
   border: none;
@@ -1167,17 +1061,12 @@ body.body-no-scroll {
   padding: 0;
   margin: 0;
 }
-
 .force-mobile-view .mobile-nav-close-btn:hover {
-  /* Menambahkan interaksi hover yang mungkin ada atau akan ditambahkan */
   opacity: 0.8;
 }
-
-/* Atur item-item menu di dalam sidebar */
 .force-mobile-view .nav-item {
   width: 100%;
 }
-
 .force-mobile-view .nav-link {
   width: 100%;
   letter-spacing: 0px;
@@ -1192,8 +1081,6 @@ body.body-no-scroll {
     padding 0.2s ease;
   white-space: normal;
 }
-
-/* Duplikat state hover & active dari media query */
 .force-mobile-view .nav-link:hover {
   color: #ffffff;
   font-weight:700;
@@ -1209,30 +1096,22 @@ body.body-no-scroll {
   box-shadow: 0px 0px 20px -10px rgba(255, 255, 255, 0.202);
   padding-left: 15px;
 }
-
-/* Duplikat aturan untuk text-wrapping di dalam flex */
 .force-mobile-view .nav-link > span {
   min-width: 0;
   overflow-wrap: break-word;
 }
-
-/* Duplikat style untuk link dropdown yang terbuka */
 .force-mobile-view .nav-item.has-dropdown.dropdown-open > .nav-link {
   background-color: rgba(91, 95, 232, 0.2);
   color: #fff;
   padding-left: 15px;
   font-weight: 600;
 }
-
-/* Atur dropdown di dalam sidebar */
 .force-mobile-view .nav-item.has-dropdown:hover .dropdown-icon {
   transform: none;
 }
-
 .force-mobile-view .nav-item.has-dropdown.dropdown-open .dropdown-icon {
   transform: rotate(180deg);
 }
-
 .force-mobile-view .dropdown-menu {
   display: block;
   position: static;
@@ -1242,32 +1121,30 @@ body.body-no-scroll {
   border: none;
   border-radius: 8px;
   padding: 0;
-  margin-top: 8px;
+  margin-top: 0; /* Hapus margin atas, biarkan padding panel yg memberi jarak */
   max-height: 0;
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transition: 
+  transition:
     max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.2s ease-in-out,
     padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s linear 0.3s;
 }
-
 .force-mobile-view .nav-item.has-dropdown.dropdown-open .dropdown-menu {
   max-height: 1000px;
   overflow: visible;
-  padding: 10px 0;
+  padding-top: 0px;
+  padding-bottom: 0;
   opacity: 1;
   visibility: visible;
-  transition: 
+  transition:
     max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.2s ease-in-out,
     padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s linear 0s;
 }
-
-/* Duplikat styling untuk item submenu (dropdown a) */
 .force-mobile-view .dropdown-menu a {
   display: flex;
   font-size: 13px;
@@ -1276,7 +1153,7 @@ body.body-no-scroll {
   opacity: 0;
   transform: translateX(-20px);
   background-color: transparent;
-  transition: 
+  transition:
     opacity 0.25s ease-out,
     transform 0.25s ease-out,
     background-color 0.3s ease,
@@ -1286,11 +1163,9 @@ body.body-no-scroll {
   white-space: normal;
   overflow-wrap: break-word;
 }
-
 .force-mobile-view .dropdown-menu a span {
   min-width: 0;
 }
-
 .force-mobile-view .dropdown-menu a:hover {
   background-color: transparent;
   padding-left: 25px;
@@ -1298,19 +1173,17 @@ body.body-no-scroll {
   font-weight: 700;
   transition-delay: 0s !important;
 }
-
 .force-mobile-view .dropdown-menu a::before {
   content: '\2022';
   margin-right: 12px;
   font-size: 20px;
   color: rgb(255, 255, 255);
 }
-
 .force-mobile-view .nav-item.has-dropdown.dropdown-open .dropdown-menu a {
   opacity: 1;
   transform: translateX(0);
-  transition: 
-    opacity 0.15s ease-out calc(var(--animation-delay, 0s) + 0.2s), 
+  transition:
+    opacity 0.15s ease-out calc(var(--animation-delay, 0s) + 0.2s),
     transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) calc(var(--animation-delay, 0s) + 0.2s),
     background-color 0.3s ease 0s,
     padding-left 0.25s ease 0s,

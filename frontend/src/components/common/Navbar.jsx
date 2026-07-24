@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
@@ -7,49 +7,59 @@ import Dropdown from "../../assets/source/Dropdown.png";
 import IconTextToSpeech from "../../assets/source/Ikon-TextToSpeech.png";
 import { useTTS } from "../../context/TTSContext";
 const Navbar = () => {
+  // --- State Management & Refs ---
+  // State untuk data navigasi, status TTS, dan info lokasi/URL
   const [navData, setNavData] = useState([
     { id: 'beranda', title: 'Beranda', path: '/', type: 'link', dataPath: 'beranda' }
   ]);
   const { isActive, toggle } = useTTS();
-  const location = useLocation(); // Hook untuk mendapatkan info URL saat ini
+  const location = useLocation();
 
+  // State untuk fungsionalitas pencarian
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchError, setSearchError] = useState(null);
-
+  
+  // State untuk menu mobile dan dropdown
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState(null);
+
+  // State untuk data dinamis dari API dan UI responsif
   const [headerLogoUrl, setHeaderLogoUrl] = useState(null);
   const [forceMobileView, setForceMobileView] = useState(false);
 
+  // Refs untuk interaksi DOM dan manajemen timeout
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
   const leaveTimeoutRef = useRef(null);
   const overlayRef = useRef(null);
+  const headerRef = useRef(null);
+  const measurementRef = useRef(null); 
 
+  // --- Effect: Initial Data Fetching ---
+  // Mengambil data logo dan menu dari API saat komponen pertama kali dimuat.
   useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     const loadHeaderLogo = async () => {
       try {
-        const response = await axiosInstance.get('/api/beranda/header');
+        const response = await axiosInstance.get('/api/beranda/header', { signal });
         const logoUrl = response.data?.data?.url_logo_header || null;
-        if (isMounted) setHeaderLogoUrl(logoUrl);
+        setHeaderLogoUrl(logoUrl);
       } catch (error) {
-        console.error('Gagal mengambil logo header:', error);
+        if (error.name !== 'CanceledError') console.error('Gagal mengambil logo header:', error);
       }
     };
-
     const fetchMenus = async () => {
       try {
-        const response = await axiosInstance.get('/api/menus');
-        if (isMounted) {
-          const rawMenus = response.data || [];
+        const response = await axiosInstance.get('/api/menus', { signal });
+        const rawMenus = response.data || [];
           const mainMenus = rawMenus.filter(m => !m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
           const subMenus = rawMenus.filter(m => m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
           
@@ -78,9 +88,8 @@ const Navbar = () => {
             { id: 'beranda', title: 'Beranda', path: '/', type: 'link', dataPath: 'beranda' },
             ...dynamicMenus
           ]);
-        }
       } catch (error) {
-        console.error("Gagal mengambil menu navigasi:", error);
+        if (error.name !== 'CanceledError') console.error("Gagal mengambil menu navigasi:", error);
       }
     };
 
@@ -88,10 +97,12 @@ const Navbar = () => {
     fetchMenus();
 
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, []);
 
+  // --- Search Functionality ---
+  // Mengelola state, debounce, dan interaksi UI untuk fitur pencarian.
   const handleSearchToggle = (e) => {
     if (e) e.preventDefault();
     setIsSearchActive(!isSearchActive);
@@ -104,20 +115,15 @@ const Navbar = () => {
     }
   };
 
-  // Debounce effect untuk pencarian
   useEffect(() => {
-    // Jika query kosong, langsung reset state tanpa delay
     if (searchQuery.trim().length === 0) {
       setSearchResults([]);
       setShowSuggestions(false);
       setIsSearching(false);
       return;
     }
-
-    // Tampilkan dropdown dan status loading segera saat mulai mengetik
     setShowSuggestions(true);
     setIsSearching(true);
-
     const searchHandler = setTimeout(async () => {
       try {
         const res = await axiosInstance.get(`/api/search?q=${encodeURIComponent(searchQuery)}`);
@@ -129,59 +135,10 @@ const Navbar = () => {
       } finally {
         setIsSearching(false);
       }
-    }, 400); // Jeda 400ms sebelum request API
+    }, 400);
 
-    return () => clearTimeout(searchHandler); // Bersihkan timeout jika user mengetik lagi
+    return () => clearTimeout(searchHandler);
   }, [searchQuery]);
-
-  const handleMouseEnter = (menuName) => {
-    // Batalkan timer penutupan yang mungkin sedang berjalan.
-    clearTimeout(leaveTimeoutRef.current);
-    
-    // Langsung atur menu yang aktif. Penundaan ada pada saat 'mouseleave',
-    // bukan 'mouseenter'. Ini mencegah konflik saat berpindah antar menu.
-    if (window.innerWidth > 1290 && !forceMobileView) {
-      setActiveDesktopDropdown(menuName);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    // Mulai timer untuk menutup panel. Jeda ini (grace period) memberi waktu
-    // bagi kursor untuk pindah ke panel submenu sebelum menu tertutup.
-    leaveTimeoutRef.current = setTimeout(() => {
-      if (window.innerWidth > 1290 && !forceMobileView) {
-        setActiveDesktopDropdown(null);
-      }
-    }, 200);
-  };
-
-  const handleDropdownScrollContain = (e) => {
-    if (window.innerWidth > 1290) {
-      e.stopPropagation();
-    }
-  };
-
-  const handleLinkClick = () => {
-    setActiveDesktopDropdown(null);
-    if (isMobileMenuOpen) toggleMobileMenu();
-  };
-
-  const handleDropdownClick = (e, menu) => {
-    e.preventDefault();
-    // KUNCI: Klik untuk dropdown hanya aktif JIKA dalam mode mobile (baik karena lebar layar maupun wrap)
-    if (window.innerWidth <= 1290 || forceMobileView) {
-      setActiveDropdown(prevId => (prevId === menu.id ? null : menu.id));
-    }
-  };
-
-  // Fungsi Toggle Hamburger
-  const toggleMobileMenu = () => {
-    const nextState = !isMobileMenuOpen;
-    setIsMobileMenuOpen(nextState);
-    if (!nextState) {
-      setActiveDropdown(null);
-    }
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -191,18 +148,56 @@ const Navbar = () => {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    if (isSearchActive && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSearchActive]);
+  }, []);
+
+  // --- Desktop Dropdown Logic ---
+  // Mengelola interaksi hover (mouseenter/mouseleave) untuk dropdown di mode desktop.
+  const handleMouseEnter = (menuName) => {
+    clearTimeout(leaveTimeoutRef.current);
+    if (window.innerWidth > 1290 && !forceMobileView) {
+      setActiveDesktopDropdown(menuName);
+    }
+  };
+  const handleMouseLeave = () => {
+    leaveTimeoutRef.current = setTimeout(() => {
+      if (window.innerWidth > 1290 && !forceMobileView) {
+        setActiveDesktopDropdown(null);
+      }
+    }, 200);
+  };
+  const handleDropdownScrollContain = (e) => {
+    if (window.innerWidth > 1290) {
+      e.stopPropagation();
+    }
+  };
+
+  // --- Mobile Menu & Navigation Handlers ---
+  // Mengelola pembukaan/penutupan menu mobile, klik link, dan scroll lock.
+  const handleLinkClick = () => {
+    setActiveDesktopDropdown(null);
+    if (isMobileMenuOpen) toggleMobileMenu();
+  };
+
+  const handleDropdownClick = (e, menu) => {
+    e.preventDefault();
+    if (window.innerWidth <= 1290 || forceMobileView) {
+      setActiveDropdown(prevId => (prevId === menu.id ? null : menu.id));
+    }
+  };
+
+  const toggleMobileMenu = () => {
+    const nextState = !isMobileMenuOpen;
+    setIsMobileMenuOpen(nextState);
+    if (!nextState) {
+      setActiveDropdown(null);
+    }
+  };
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
-
     const handleResize = () => {
       if (window.innerWidth > 1290) {
-        // Memanggil toggleMobileMenu akan menutup menu karena isMobileMenuOpen saat ini true
         toggleMobileMenu();
       }
     };
@@ -216,12 +211,10 @@ const Navbar = () => {
 
   useEffect(() => {
     const overlay = overlayRef.current;
-
     const handleWheelOverlay = (e) => {
       e.preventDefault();
       e.stopPropagation();
     };
-
     if (isMobileMenuOpen) {
       document.documentElement.classList.add('no-scroll');
       document.body.classList.add('body-no-scroll');
@@ -230,7 +223,6 @@ const Navbar = () => {
       document.documentElement.classList.remove('no-scroll');
       document.body.classList.remove('body-no-scroll');
     }
-
     return () => {
       document.documentElement.classList.remove('no-scroll');
       document.body.classList.remove('body-no-scroll');
@@ -238,6 +230,8 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // --- Effect: Active Menu Indicator ---
+  // Mengatur dan menganimasikan indikator menu aktif berdasarkan URL saat ini.
   useEffect(() => {
     const navbar = document.querySelector('.main-navbar');
     const selector = document.querySelector('.nav-selector');
@@ -309,59 +303,67 @@ const Navbar = () => {
 
   }, [location.pathname, navData]);
 
-  // KUNCI: Efek untuk mendeteksi "wrap" pada navigasi desktop dan memaksa tampilan mobile
-  useEffect(() => {
-    const navContainer = sidebarRef.current;
-    // Jangan jalankan jika container belum ada atau menu belum terisi
-    if (!navContainer || navData.length <= 1) return;
+  // --- Effect: Responsive Wrap Detection ---
+  // Mendeteksi jika item navigasi "turun baris" (wrap) dan memaksa tampilan mobile.
+  useLayoutEffect(() => {
+    const headerElement = headerRef.current;
+    const ghostElement = measurementRef.current;
+    if (!headerElement || !ghostElement || navData.length <= 1) return;
 
-    const checkNavWrap = () => {
-      const navContainer = sidebarRef.current;
-      if (!navContainer) return;
+    let animationFrameId = null;
+    const observer = new ResizeObserver(entries => {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(() => {
+        const entry = entries[0];
+        if (!entry) return;
+        // Biarkan media query CSS yang bekerja jika layar sudah kecil (<= 1290px).
+        if (window.innerWidth <= 1290) {
+          if (forceMobileView) setForceMobileView(false);
+          return;
+        }
 
-      // Kondisi 1: Layar <= 1290px, selalu non-aktifkan mode paksa.
-      if (window.innerWidth <= 1290) {
-        if (forceMobileView) setForceMobileView(false);
-        return;
-      }
+        if (navData.length < 2) {
+          if (forceMobileView) setForceMobileView(false);
+          return;
+        }
+        // --- LOGIKA PENGUKURAN---
+        // Mengukur lebar item menggunakan elemen "hantu" yang tidak terpengaruh layout.
+        let totalItemsWidth = 0;
+        navData.forEach(item => {
+          ghostElement.innerText = item.title;
+          let itemWidth = ghostElement.offsetWidth;
 
-      // Kondisi 2: Layar > 1290px, lakukan kalkulasi lebar.
-      const navItems = navContainer.querySelectorAll('.mobile-nav-content > .nav-link, .mobile-nav-content > .nav-item');
-      
-      if (navItems.length < 2) {
-        if (forceMobileView) setForceMobileView(false);
-        return;
-      }
+          if (item.type === 'dropdown') {
+            itemWidth += 13;
+          }
+          totalItemsWidth += itemWidth;
+        });
 
-      const gap = parseFloat(getComputedStyle(navContainer).gap) || 16; // Fallback 16px
-      let totalWidth = 0;
-      navItems.forEach(item => {
-        totalWidth += item.offsetWidth;
+        const gap = window.innerWidth * 0.01;
+        totalItemsWidth += (navData.length - 1) * gap;
+        const navHorizontalPadding = window.innerWidth * 0.08;
+        const availableContentWidth = entry.contentRect.width - navHorizontalPadding;
+
+        const shouldForceMobile = totalItemsWidth > (availableContentWidth - 50);
+
+        if (shouldForceMobile !== forceMobileView) {
+          setForceMobileView(shouldForceMobile);
+        }
       });
-      totalWidth += (navItems.length - 1) * gap;
+    });
+    observer.observe(headerElement);
 
-      const containerWidth = navContainer.offsetWidth;
-      const shouldWrap = totalWidth > (containerWidth - 50); // Toleransi 50px
-
-      if (shouldWrap !== forceMobileView) {
-        setForceMobileView(shouldWrap);
-      }
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
     };
+  }, [navData, forceMobileView]);
 
-    let resizeTimer;
-    const debouncedCheck = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(checkNavWrap, 150);
-    };
-
-    const initialCheckTimeout = setTimeout(checkNavWrap, 100);
-    window.addEventListener('resize', debouncedCheck);
-
-    return () => { window.removeEventListener('resize', debouncedCheck); clearTimeout(resizeTimer); clearTimeout(initialCheckTimeout); };
-  }, [navData, forceMobileView]); // KUNCI: Jalankan ulang jika data menu atau state wrap berubah
-
+  // --- Component Render ---
   return (
-    <header className={`unified-header ${forceMobileView ? 'force-mobile-view' : ''}`}>
+    <header ref={headerRef} className={`unified-header ${forceMobileView ? 'force-mobile-view' : ''}`}>
+      <div ref={measurementRef} className="measurement-ghost"></div>
+
       <div className="header-top">
         <div className="header-menu">
           <button
@@ -407,7 +409,6 @@ const Navbar = () => {
                 {searchError ? (
                   <div className="search-suggestion-item empty" style={{ color: 'red' }}>Error: {searchError}</div>
                 ) : isSearching ? (
-                  // --- PERUBAHAN: Gunakan Skeleton Loading, bukan teks "Mencari..." ---
                   <>
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="search-suggestion-item skeleton">
@@ -502,7 +503,6 @@ const Navbar = () => {
                     data-lenis-prevent
                     onWheel={handleDropdownScrollContain}
                     onTouchMove={handleDropdownScrollContain}
-                    onMouseEnter={() => handleMouseEnter(item.id)}
                   >
                     {item.submenu.map((subItem, index) => {
                       const isExternal = subItem.path.startsWith('http');
