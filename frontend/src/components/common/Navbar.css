@@ -209,7 +209,7 @@ body.body-no-scroll {
   overflow: hidden;
   background: rgb(29, 38, 71);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top:1px solid rgba(250, 250, 250, 0.856);
+  /* border-top:1px solid rgba(250, 250, 250, 0.856); */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-radius: 5px;
@@ -231,6 +231,9 @@ body.body-no-scroll {
               inset 0 -40px 50px -55px rgba(0, 0, 0, 0)
               ;
   will-change: transform, opacity;
+  /* Styling scrollbar untuk Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 .nav-item.has-dropdown::after {
   display: none;
@@ -244,6 +247,22 @@ body.body-no-scroll {
   z-index: 10;
   pointer-events: auto;
 }
+
+/* Styling scrollbar modern untuk Webkit (Chrome, Safari) */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+}
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
 @keyframes delayed-overflow {
   0%, 99% { overflow-y: hidden; }
   100% { overflow-y: auto; }
@@ -256,9 +275,9 @@ body.body-no-scroll {
   visibility: visible;
   transform: scale(1);
   transition:
-    opacity 0.2s ease-in, transform 0.1s cubic-bezier(0.2, 1.8, 0.4, 1),
+    opacity 0.2s ease-in, transform 0.4s cubic-bezier(0.2, 1.8, 0.4, 1),
     visibility 0s linear 0s, max-height 0.7s ease;
-  animation: delayed-overflow 1s forwards;
+  animation: delayed-overflow 0.6s forwards;
 }
 .dropdown-menu a {
   color: #ffffff;
