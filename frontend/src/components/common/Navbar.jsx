@@ -29,6 +29,7 @@ const Navbar = () => {
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
   const sidebarRef = useRef(null);
+  const leaveTimeoutRef = useRef(null);
   const overlayRef = useRef(null);
 
   useEffect(() => {
@@ -134,17 +135,24 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleMouseEnter = (menuName) => {
-    // KUNCI: Hover hanya aktif jika BUKAN mode mobile (baik karena lebar layar maupun karena wrap)
+    // Batalkan timer penutupan yang mungkin sedang berjalan.
+    clearTimeout(leaveTimeoutRef.current);
+    
+    // Langsung atur menu yang aktif. Penundaan ada pada saat 'mouseleave',
+    // bukan 'mouseenter'. Ini mencegah konflik saat berpindah antar menu.
     if (window.innerWidth > 1290 && !forceMobileView) {
       setActiveDesktopDropdown(menuName);
     }
   };
 
   const handleMouseLeave = () => {
-    // KUNCI: Hover hanya aktif jika BUKAN mode mobile
-    if (window.innerWidth > 1290 && !forceMobileView) {
-      setActiveDesktopDropdown(null);
-    }
+    // Mulai timer untuk menutup panel. Jeda ini (grace period) memberi waktu
+    // bagi kursor untuk pindah ke panel submenu sebelum menu tertutup.
+    leaveTimeoutRef.current = setTimeout(() => {
+      if (window.innerWidth > 1290 && !forceMobileView) {
+        setActiveDesktopDropdown(null);
+      }
+    }, 200);
   };
 
   const handleDropdownScrollContain = (e) => {
@@ -494,6 +502,7 @@ const Navbar = () => {
                     data-lenis-prevent
                     onWheel={handleDropdownScrollContain}
                     onTouchMove={handleDropdownScrollContain}
+                    onMouseEnter={() => handleMouseEnter(item.id)}
                   >
                     {item.submenu.map((subItem, index) => {
                       const isExternal = subItem.path.startsWith('http');
