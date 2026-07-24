@@ -95,19 +95,59 @@ body.body-no-scroll {
   gap: 15px;
 }
 .header-actions button {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid rgba(69, 134, 255, 0.756);
   color: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 15px -1px rgba(255, 255, 255, 0.27)
+  ;
+  background: linear-gradient(
+    155deg,
+    rgba(105, 130, 255, 0.651) 0%,
+    rgba(6, 22, 80, 0.604) 80%
+  );
+  border-radius: 20px;
+}
+.header-actions button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%; /* Adjust width for desired shine length */
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-100%) skewX(-30deg); /* Start off-screen to the left, skew for angle */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth animation */
+  pointer-events: none; /* Make sure it doesn't interfere with clicks */
+}
+
+.header-actions button:hover::before {
+  transform: translateX(200%) skewX(-30deg); /* Move across to the right, off-screen */
 }
 .header-actions button:hover {
-  border-color: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(69, 134, 255, 0.756);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547)
+  ;
+  background: linear-gradient(
+    155deg,
+    rgba(24, 63, 255, 0.651) 0%,
+    rgba(12, 47, 174, 0.823) 80%
+  );
+  border-radius: 20px;
 }
 /* =========================================
    Main Navigation Bar
@@ -140,14 +180,19 @@ body.body-no-scroll {
   top: 0;
   left: 0;
   background: linear-gradient(
-    135deg,
-    rgba(69, 93, 211, 0.651) 0%,
-    rgba(13, 26, 66, 0.786) 100%
+    155deg,
+    rgba(105, 130, 255, 0.651) 0%,
+    rgba(6, 22, 80, 0.604) 80%
   );
-  border: 1.5px solid rgba(149, 185, 252, 0.55);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 30px;
-  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  border: 1.5px solid rgba(69, 134, 255, 0.756);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547)
+  ;
+  border-radius: 20px;
+  transition: all 1s cubic-bezier(0.3, 1, 0.5, 1);
   z-index: -1;
   pointer-events: none;
 }
@@ -207,12 +252,12 @@ body.body-no-scroll {
   overscroll-behavior: contain;
   touch-action: pan-y;
   overflow: hidden;
-  background: rgb(29, 38, 71);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  /* border-top:1px solid rgba(250, 250, 250, 0.856); */
+  background: rgb(15, 25, 68);
+  border: 1px solid rgba(18, 53, 148, 0.394);
+  /* border-top:0.8px solid rgba(250, 250, 250, 0.856); */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-radius: 5px;
+  border-radius: 12px;
   display: flex;
   z-index: 9999;
   flex-direction: column;
@@ -226,9 +271,9 @@ body.body-no-scroll {
     transform 0.25s ease-out,
     visibility 0s linear 0.25s;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
-              inset 0 50px 40px -50px rgba(160, 188, 255, 0.77),
-              inset 0 30px 50px -55px rgba(255, 253, 253, 0.912),
-              inset 0 -40px 50px -55px rgba(0, 0, 0, 0)
+              inset 0 50px 40px -50px rgba(160, 188, 255, 0.41),
+              inset 0 24px 9px -25px rgba(255, 253, 253, 0.558),
+              inset 0 21px 2px -20px rgba(255, 254, 254, 0.81)
               ;
   will-change: transform, opacity;
   /* Styling scrollbar untuk Firefox */
@@ -369,36 +414,60 @@ body.body-no-scroll {
   width: 45px;
   height: 45px;
   flex-shrink: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #fff;
   font-size: 20px;
-  transition: transform 0.4s ease;
+  cursor: pointer;
+  overflow: hidden; /* Diperlukan untuk efek kilau */
+  transition: all 0.3s ease;
+
+  /* --- Menerapkan "Formula Gaya" --- */
+  border: 1.5px solid rgba(69, 134, 255, 0.756);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547)
+  ;
+  background: linear-gradient(
+    155deg,
+    rgba(105, 130, 255, 0.651) 0%,
+    rgba(6, 22, 80, 0.604) 80%
+  );
 }
+.navbar-actions .search-trigger::before,
+.header-actions .search-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-100%) skewX(-30deg);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
 .navbar-actions .search-trigger:hover,
 .header-actions .search-trigger:hover {
-  transform: scale(1.1);
-  border: none;
-  box-shadow: none;
+  transform: scale(1);
+  background: linear-gradient( 155deg, rgba(24, 63, 255, 0.651) 0%, rgba(12, 47, 174, 0.823) 80% );
+}
+.navbar-actions .search-trigger:hover::before,
+.header-actions .search-trigger:hover::before {
+  transform: translateX(200%) skewX(-30deg);
 }
 /* =========================================
    Text-to-Speech Button
    ========================================= */
 .btn-voice {
-  border-radius: 30px;
   padding-left: 17px;
   padding-right: 0px;
   gap: 15px;
-  background: linear-gradient(
-    135deg,
-    rgba(30, 45, 85, 0.8) 0%,
-    rgba(15, 25, 55, 0.6) 100%
-  );
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition:
@@ -407,9 +476,9 @@ body.body-no-scroll {
 }
 .btn-voice.active {
   background: linear-gradient(
-    135deg,
-    rgba(0, 140, 37, 0.9) 0%,
-    rgba(15, 55, 25, 0.8) 100%
+    120deg,
+    rgba(2, 192, 52, 0.858) 0%,
+    rgba(5, 74, 22, 0.857) 70%
   );
 }
 .btn-voice span {
@@ -432,8 +501,8 @@ body.body-no-scroll {
 .btn-voice.active:hover {
   background: linear-gradient(
     135deg,
-    rgba(42, 105, 60, 1) 0%,
-    rgba(30, 85, 45, 0.9) 100%
+    rgb(23, 82, 40) 0%,
+    rgba(1, 31, 9, 0.748) 100%
   );
 }
 /* =========================================
