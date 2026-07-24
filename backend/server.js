@@ -1,7 +1,9 @@
 const app = require('./index');
 require('./cron'); // Inisialisasi cron job
-const port = 5000;
+
+// Gunakan PORT dinamis dari environment Hostinger, fallback ke 5000 untuk lokal
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
-    console.log(`Backend berjalan di http://localhost:${port}`);
+    console.log(`Backend berjalan di port ${port}`);
 });
