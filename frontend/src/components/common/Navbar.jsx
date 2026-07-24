@@ -419,13 +419,13 @@ const Navbar = () => {
               if (isExternal) {
                 return (
                   <a key={item.id} href={item.path} target="_blank" rel="noopener noreferrer" className="nav-link" data-path-group={item.dataPath} onClick={handleLinkClick}>
-                    {item.title}
+                    <span>{item.title}</span>
                   </a>
                 );
               }
               return (
                 <Link key={item.id} to={item.path} className="nav-link" data-path-group={item.dataPath} onClick={handleLinkClick}>
-                  {item.title}
+                  <span>{item.title}</span>
                 </Link>
               );
             }
@@ -438,7 +438,7 @@ const Navbar = () => {
                   onMouseLeave={handleMouseLeave}
                 >
                   <a href={item.path} className="nav-link" data-path-group={item.dataPath} onClick={(e) => handleDropdownClick(e, item)}>
-                    {item.title} <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
+                    <span>{item.title}</span> <img src={Dropdown} alt="Dropdown" className="dropdown-icon" />
                   </a>
                   <div
                     className="dropdown-menu"
@@ -453,9 +453,9 @@ const Navbar = () => {
                       };
 
                       if (isExternal) {
-                        return <a key={index} href={subItem.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} style={animationStyle}>{subItem.title}</a>;
+                        return <a key={index} href={subItem.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></a>;
                       }
-                      return <Link key={index} to={subItem.path} onClick={handleLinkClick} style={animationStyle}>{subItem.title}</Link>;
+                      return <Link key={index} to={subItem.path} onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></Link>;
                     })}
                   </div>
                 </div>
