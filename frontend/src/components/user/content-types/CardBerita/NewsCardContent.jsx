@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
 import "./NewsCardContent.css";
 import WOWOK from "../../../../assets/source/JanganKorupsi.png";
 
-const NewsCard = ({ title, date, excerpt, imageSrc }) => (
-  <div className="news-card">
+const NewsCard = ({ title, date, excerpt, imageSrc, link }) => (
+  <Link to={link} style={{ textDecoration: 'none', display: 'block' }}>
+    <div className="news-card">
     <div className="NewsCard-light-sweep"></div>
     <div className="news-shadow-wrapper">
       <div className="news-content-container">
@@ -24,6 +26,7 @@ const NewsCard = ({ title, date, excerpt, imageSrc }) => (
       <p className="CardNewsexcerpt">{excerpt}</p>
     </div>
   </div>
+  </Link>
 );
 
 const NewsCardContent = ({ menuId, viewLayout }) => {
@@ -81,6 +84,7 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
             date={date} 
             excerpt={excerpt} 
             imageSrc={b.url_foto || WOWOK} 
+            link={`/berita/berita-${b.id}`}
           />
         );
       })}
