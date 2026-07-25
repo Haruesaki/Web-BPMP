@@ -1,8 +1,3 @@
-.hero-pin-container {
-  /* Default (desktop): tidak ada perilaku khusus, hanya sebagai pembungkus. */
-  position: relative;
-}
-
 .landing-wrapper {
   display: flex;
   flex-direction: column;
@@ -202,7 +197,7 @@
   align-self: center;
   flex-shrink: 0;
   display: flex;
-  width: clamp(280px, min(30vw, 45vh), 500px);
+  width: clamp(280px, max(30vw, 50vh), 450px);
   aspect-ratio: 1 / 1;
   /* `transform` diatur oleh JS, jadi transisi dibatasi pada ukuran dan margin. */
   transition:
@@ -432,16 +427,6 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
 } */
 @media (max-width: 1040px) {
   /* 48rem = 768px */
-  .hero-pin-container {
-    height: 200vh; /* Memberi "landasan pacu" untuk scroll pinning */
-  }
-
-  .landing-wrapper {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    min-height: auto; /* Override min-height dari desktop */
-  }
 
   .hero-flex-container {
     flex-direction: column;
@@ -532,7 +517,7 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
     font-size: clamp(0.8rem, min(1.1vw, 1.8vh), 1rem);
   }
   .hero-right-parallax-wrapper {
-    width: clamp(240px, min(40vw, 40vh), 420px);
+    width: clamp(240px, min(30vw, 53vh), 420px);
   }
 }
 
@@ -550,47 +535,43 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
     /* Reset padding vertikal, beri sedikit padding horizontal */
     padding: 0 4vw;
     /* Jarak antar kolom yang sangat kecil */
-    gap: clamp(1rem, 4vw, 2rem);
+    gap: clamp(1.5rem, 5vw, 3rem);
+  }
+
+    .hero-logos-wrapper-cms {
+    height: clamp(40px, 7vh, 55px);
+  }
+
+  .hero-logos-flex{
+    justify-content: flex-start;
   }
 
   /* 2. Kembalikan konten kiri ke alignment desktop */
   .hero-left-content {
-    max-width: 50%;
-    flex-basis: 50%;
+    max-width: 40%;
+    flex-basis: 40%;
     align-items: flex-start;
     text-align: left;
     gap: 0.2rem;
   }
 
   /* 3. Perkecil ukuran font secara agresif menggunakan vh */
-  .welcome-text {
-    font-size: clamp(0.7rem, 2.5vh, 0.9rem);
+   .welcome-text {
+    font-size: clamp(0.9rem, min(1.5vw, 2vh), 1.4rem);
   }
   .main-title {
-    font-size: clamp(1rem, 5vh, 1.5rem);
+    font-size: clamp(1.3rem, min(2.5vw, 3.8vh), 2.4rem);
   }
   .sub-title {
-    font-size: clamp(0.6rem, 2.2vh, 0.8rem);
+    font-size: clamp(0.7rem, min(1.1vw, 1.8vh), 1rem);
   }
 
   /* 4. Perkecil gambar di sisi kanan */
   .hero-right-parallax-wrapper {
-    width: clamp(120px, 35vh, 180px);
+    width: clamp(200px, min(30vw, 53vh), 420px);
   }
-
-    .hero-right-cms {
-  padding: 10px;
 }
 
-.hero-right-cms::after {
-  /* ... properti lain ... */
-  top: 10px;    /* <-- PENDUKUNG AKAR MASALAH */
-  left: 10px;   /* <-- PENDUKUNG AKAR MASALAH */
-  right: 10px;  /* <-- PENDUKUNG AKAR MASALAH */
-  bottom: 10px; /* <-- PENDUKUNG AKAR MASALAH */
-  /* ... properti lain ... */
-}
-}
 /*
  * KONDISI: Pengguna menginginkan lebih sedikit gerakan/animasi.
  * TARGET: Pengguna yang mengaktifkan setelan aksesibilitas di OS mereka.

@@ -25,9 +25,8 @@ const pseudoRandom = (seed) => {
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
-    const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 1040);
+    const [isMobileView, setIsMobileView] = useState(false);
     const [showSubtitle, setShowSubtitle] = useState(false);
-    const pinContainerRef = useRef(null); // Ref untuk container pin
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
     const landingWrapperRef = useRef(null); // Ref untuk wrapper utama
     const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
@@ -125,12 +124,12 @@ const HeroSection = () => {
     // DETEKSI UKURAN LAYAR UNTUK ANIMASI KONDISIONAL
     useEffect(() => {
         const handleResize = () => {
-            // Anggap mobile jika lebar <= 1040px, KECUALI jika tingginya juga < 400px.
             const isPotentiallyMobile = window.innerWidth <= 1040;
-            const isVeryShort = window.innerHeight < 400;
+            const isVeryShortDesktop = window.innerHeight < 400; // Kondisi untuk "desktop mini"
 
-            // Jika lebar kecil TAPI tinggi juga sangat pendek, kita anggap itu "desktop mini", bukan mobile.
-            setIsMobileView(isPotentiallyMobile && !isVeryShort);
+            // 1. Tentukan apakah ini tampilan mobile (bukan "desktop mini")
+            const isMobile = isPotentiallyMobile && !isVeryShortDesktop;
+            setIsMobileView(isMobile);
         };
 
         handleResize(); // Panggil sekali saat mount untuk set state awal yang benar
@@ -179,7 +178,6 @@ const HeroSection = () => {
         const rightContainer = heroRightCmsRef.current;
         const rightImage = heroImageRef.current;
         const leftContent = heroLeftContentRef.current;
-        const pinContainer = pinContainerRef.current;
 
         const animateHero = () => {
             if (!leftContent) return;
@@ -187,45 +185,22 @@ const HeroSection = () => {
             const scrollY = window.scrollY;
 
             if (isMobileView) {
-                // --- Animasi Pinning untuk Mobile ---
-                if (!pinContainer || !rightContainer) {
-                    animationFrame = requestAnimationFrame(animateHero);
-                    return;
-                }
-
-                const pinStart = pinContainer.offsetTop;
-                const pinDuration = pinContainer.offsetHeight - window.innerHeight;
-
-                // Reset style jika di luar jangkauan scroll
-                if (scrollY < pinStart) {
-                    leftContent.style.opacity = '1';
-                    rightContainer.style.transform = 'translateY(100px)';
-                    rightContainer.style.opacity = '1';
-                    leftContent.style.transform = 'translateX(0px)';
-                    leftContent.style.filter = 'none';
-                    rightContainer.style.filter = 'none';
-                } else if (scrollY > pinStart + pinDuration) {
-                    leftContent.style.opacity = '0';
-                    rightContainer.style.transform = 'translateY(0px)';
-                } else {
-                    // Kalkulasi progres selama di-pin
-                    const progress = (scrollY - pinStart) / pinDuration;
-                    const imageTranslateY = 100 * (1 - progress);
-                    rightContainer.style.transform = `translateY(${imageTranslateY}px)`;
-                    rightContainer.style.opacity = '1';
-                    rightContainer.style.filter = 'none';
-                    const textOpacity = 1 - progress * 1.5;
-                    leftContent.style.opacity = Math.max(0, textOpacity).toString();
-                    leftContent.style.transform = 'translateX(0px)';
-                    leftContent.style.filter = 'none';
+                // --- Animasi Scroll Normal untuk Mobile ---
+                const leftOpacity = Math.max(1 - scrollY * 0.002, 0);
+                leftContent.style.opacity = leftOpacity;
+                const leftTranslateX = scrollY * -0.5;
+                leftContent.style.transform = `translateX(${leftTranslateX}px)`;
+                leftContent.style.filter = 'none';
+                if (rightContainer) {
+                    rightContainer.style.transform = `translateX(${scrollY * 0.2}px)`;
                 }
             } else {
                 // --- Animasi Parallax untuk Desktop ---
                 const scaleDown = Math.max(1 - scrollY * 0.0001, 0.6);
-                const blurValue = Math.min(scrollY * 0.003, 5);
+                const blurValue = Math.min(scrollY * 0.007, 10);
                 if (rightContainer && rightImage) {
                     const rightTranslateY = Math.min(scrollY * 1, 2000);
-                    const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
+                    const brightness = Math.max(1 - scrollY * 0.00045, 0.58);
                     rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
                     rightContainer.style.filter = `blur(${blurValue}px)`;
                     rightImage.style.transform = `scale(1)`;
@@ -241,11 +216,10 @@ const HeroSection = () => {
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, [isMobileView]);
+    }, [isMobileView, heroImage]);
 
     return (
-        <div className="hero-pin-container" ref={pinContainerRef}>
-            <div className="landing-wrapper" ref={landingWrapperRef}>
+        <div className="landing-wrapper" ref={landingWrapperRef}>
             <div className="background-glow-container"></div>
             <div className="particle-container">{particles}</div>
             <section className="hero-section">
@@ -291,7 +265,6 @@ const HeroSection = () => {
                     )}
                 </div>
             </section>
-            </div>
         </div>
     );
 };
