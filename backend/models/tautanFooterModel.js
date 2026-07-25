@@ -17,7 +17,9 @@ class TautanFooter {
           url: item.link,
           urutan_tampil: index
         }));
-        return await trx('tautan_footer').insert(insertData).returning('*');
+        await trx('tautan_footer').insert(insertData);
+        // MySQL tidak mendukung RETURNING, jadi daftar terbaru dibaca ulang.
+        return await trx('tautan_footer').orderBy('urutan_tampil', 'asc');
       }
       return [];
     });

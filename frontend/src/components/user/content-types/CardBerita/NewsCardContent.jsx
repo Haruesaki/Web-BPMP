@@ -38,9 +38,15 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
       if (!menuId) return;
       try {
         const res = await axiosInstance.get(`/api/berita/${menuId}`);
-        // Hanya tampilkan berita yang statusnya 'terbit'
-        const published = res.data.filter(b => b.status === 'terbit');
-        setBerita(published);
+        // Tampilkan seluruh berita milik menu ini. Kolom `status` TIDAK dipakai
+        // sebagai penyaring di sini karena pada sistem ini status 'terbit'/'draf'
+        // menandakan tampil-atau-tidaknya berita di Beranda (lihat tombol
+        // "Tampilkan di Beranda" pada panel admin dan removeFromBeranda di
+        // berandaBeritaController), bukan status publikasi halaman menu.
+        // Menyaringnya di sini membuat berita yang baru ditambahkan admin
+        // selalu kosong di sisi pengunjung. Perlakuan ini disamakan dengan
+        // layout post/default (DefaultContent) yang juga tidak menyaring status.
+        setBerita(res.data || []);
       } catch (err) {
         console.error("Gagal memuat berita:", err);
       } finally {
@@ -52,7 +58,7 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
 
   if (loading) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat berita...</div>;
   
-  if (berita.length === 0) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada berita yang diterbitkan.</div>;
+  if (berita.length === 0) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada berita pada halaman ini.</div>;
 
   const isVertical = viewLayout === 'Vertikal';
 
@@ -69,7 +75,13 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
       alignContent: 'flex-start' 
     }}>
       {berita.map(b => {
-        const date = new Date(b.waktu_tayang).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        // `waktu_tayang` baru terisi ketika berita diaktifkan tayang di Beranda,
+        // sehingga berita biasa bernilai null. Tanpa cadangan, `new Date(null)`
+        // akan jatuh ke epoch dan tertulis "1 Januari 1970" pada kartu.
+        const sumberTanggal = b.waktu_tayang || b.dibuat_pada;
+        const date = sumberTanggal
+          ? new Date(sumberTanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : '';
         
         // Ekstrak text polos dari HTML untuk excerpt
         const tmp = document.createElement('div');

@@ -119,11 +119,19 @@ class BerandaBeritaController {
             'berita.deskripsi_kaya as konten',
             'berita.url_foto as coverUrl',
             'berita.waktu_tayang as tanggal',
+            'berita.dibuat_pada',
             'menu.nama_menu as kategori',
             'menu.slug_atau_tautan as layout'
           )
           .where('berita.id', actualId)
           .first();
+
+        // `waktu_tayang` baru terisi saat berita diaktifkan tayang di Beranda,
+        // jadi pakai tanggal pembuatan sebagai cadangan. Tanpa ini halaman
+        // detail menampilkan "1 Januari 1970" akibat new Date(null).
+        if (data) {
+          data.tanggal = data.tanggal || data.dibuat_pada;
+        }
       } else if (sumber === 'konten') {
         data = await db('halaman_konten')
           .leftJoin('menu', 'halaman_konten.menu_id', 'menu.id')

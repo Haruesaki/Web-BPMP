@@ -27,19 +27,13 @@ class BerandaHeaderController {
 
       const existing = await db('pengaturan_tema').where({ id: 1 }).first();
 
-      let savedSettings;
+      // MySQL tidak mendukung RETURNING, jadi baris disimpan dulu lalu dibaca ulang.
       if (existing) {
-        const [updated] = await db('pengaturan_tema')
-          .where({ id: 1 })
-          .update(payload)
-          .returning('*');
-        savedSettings = updated;
+        await db('pengaturan_tema').where({ id: 1 }).update(payload);
       } else {
-        const [inserted] = await db('pengaturan_tema')
-          .insert({ id: 1, ...payload })
-          .returning('*');
-        savedSettings = inserted;
+        await db('pengaturan_tema').insert({ id: 1, ...payload });
       }
+      const savedSettings = await db('pengaturan_tema').where({ id: 1 }).first();
 
       const pName = req.user?.nama || 'System';
       const pRole = req.user?.role || 'Unknown';
