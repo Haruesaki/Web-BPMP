@@ -185,14 +185,19 @@ const HeroSection = () => {
             const scrollY = window.scrollY;
 
             if (isMobileView) {
-                // --- Animasi Scroll Normal untuk Mobile ---
+                // --- Animasi Scroll untuk Mobile ---
+                // Konten Teks (kiri) tetap bergerak ke samping
                 const leftOpacity = Math.max(1 - scrollY * 0.002, 0);
                 leftContent.style.opacity = leftOpacity;
-                const leftTranslateX = scrollY * -0.5;
-                leftContent.style.transform = `translateX(${leftTranslateX}px)`;
+                const leftTranslateY = scrollY * 0.5;
+                leftContent.style.transform = `translateY(${leftTranslateY}px)`;
                 leftContent.style.filter = 'none';
+                // Konten Gambar (kanan) diubah menjadi animasi tenggelam
                 if (rightContainer) {
-                    rightContainer.style.transform = `translateX(${scrollY * 0.2}px)`;
+                    const rightTranslateY = scrollY * 0.6; // Kecepatan tenggelam
+                    const rightOpacity = Math.max(1 - scrollY * 0.0025, 1); // Kecepatan menghilang
+                    rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
+                    rightContainer.style.opacity = rightOpacity;
                 }
             } else {
                 // --- Animasi Parallax untuk Desktop ---
