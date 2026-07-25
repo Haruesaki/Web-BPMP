@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import './HeroSection.css';
 import axiosInstance from '../../api/axiosInstance';
 
@@ -27,7 +27,9 @@ const HeroSection = () => {
     const [typedText, setTypedText] = useState('');
     const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 1040);
     const [showSubtitle, setShowSubtitle] = useState(false);
+    const pinContainerRef = useRef(null); // Ref untuk container pin
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
+    const landingWrapperRef = useRef(null); // Ref untuk wrapper utama
     const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
     const fullText = heroContent.judul || DEFAULT_HERO.judul;
@@ -123,56 +125,114 @@ const HeroSection = () => {
     // DETEKSI UKURAN LAYAR UNTUK ANIMASI KONDISIONAL
     useEffect(() => {
         const handleResize = () => {
-            // Breakpoint 65rem (1040px) sesuai dengan CSS
-            setIsMobileView(window.innerWidth <= 1040);
+            // Anggap mobile jika lebar <= 1040px, KECUALI jika tingginya juga < 400px.
+            const isPotentiallyMobile = window.innerWidth <= 1040;
+            const isVeryShort = window.innerHeight < 400;
+
+            // Jika lebar kecil TAPI tinggi juga sangat pendek, kita anggap itu "desktop mini", bukan mobile.
+            setIsMobileView(isPotentiallyMobile && !isVeryShort);
         };
+
+        handleResize(); // Panggil sekali saat mount untuk set state awal yang benar
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // EFEK ADAPTIF TERHADAP TINGGI NAVBAR
+    useLayoutEffect(() => {
+        const header = document.querySelector('.unified-header');
+        const wrapper = landingWrapperRef.current;
+
+        if (!header || !wrapper) return;
+
+        let animationFrameId = null;
+
+        const observer = new ResizeObserver(entries => {
+            // Gunakan rAF untuk mencegah layout thrashing dan memastikan animasi mulus
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(() => {
+                const entry = entries[0];
+                if (entry) {
+                    const height = entry.contentRect.height;
+                    // Secara dinamis mengatur margin negatif untuk menarik background ke atas
+                    // dan padding positif untuk mendorong konten ke bawah,
+                    // agar konten selalu dimulai tepat di bawah navbar.
+                    wrapper.style.marginTop = `-${height}px`;
+                    wrapper.style.paddingTop = `${height}px`;
+                }
+            });
+        });
+
+        observer.observe(header);
+
+        // Cleanup function untuk menghentikan observasi saat komponen di-unmount
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            observer.disconnect();
+        };
+    }, []); // Dependensi kosong agar hanya berjalan sekali saat komponen dimuat
 
     // EFEK HERO PARALLAX
     useEffect(() => {
         let animationFrame;
 
-        // REVISI: Ambil ref untuk wadah kanan dan gambar di dalamnya
         const rightContainer = heroRightCmsRef.current;
         const rightImage = heroImageRef.current;
         const leftContent = heroLeftContentRef.current;
+        const pinContainer = pinContainerRef.current;
 
         const animateHero = () => {
-            // Pastikan semua elemen yang dibutuhkan ada sebelum melanjutkan
             if (!leftContent) return;
 
             const scrollY = window.scrollY;
-            const scaleDown = Math.max(1 - scrollY * 0.00010, 0.6); // Faktor scale down saat scroll
-            const blurValue = Math.min(scrollY * 0.003, 5); // Efek blur dari 0px hingga 5px
 
-            // --- REVISI: Logika animasi untuk wadah kanan dan gambar ---
-            if (rightContainer && rightImage) {
-                const rightTranslateY = Math.min(scrollY * 1, 2000); // Kecepatan "tenggelam"
-                const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
-
-                // 1. Terapkan gerakan vertikal, EFEK MENCIUT, dan BLUR ke seluruh wadah (.hero-right-cms)
-                rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
-                rightContainer.style.filter = `blur(${blurValue}px)`;
-                // 2. Hapus efek zoom-in pada gambar, pertahankan efek kecerahan
-                rightImage.style.transform = `scale(1)`;
-                rightImage.style.filter = `brightness(${brightness})`;
-            }
-
-            // --- REVISI: Animasi Konten Kiri yang Adaptif ---
             if (isMobileView) {
-                // Tampilan Mobile: Gunakan translateX untuk gerakan horizontal
-                const leftOpacity = Math.max(1 - scrollY * 0.00200, 0);
-                leftContent.style.opacity = leftOpacity;
-                const leftTranslateX = scrollY * -0.500;
-                leftContent.style.transform = `translateX(${leftTranslateX}px)`;
-                leftContent.style.filter = 'none'; // Pastikan tidak ada blur di mobile
+                // --- Animasi Pinning untuk Mobile ---
+                if (!pinContainer || !rightContainer) {
+                    animationFrame = requestAnimationFrame(animateHero);
+                    return;
+                }
+
+                const pinStart = pinContainer.offsetTop;
+                const pinDuration = pinContainer.offsetHeight - window.innerHeight;
+
+                // Reset style jika di luar jangkauan scroll
+                if (scrollY < pinStart) {
+                    leftContent.style.opacity = '1';
+                    rightContainer.style.transform = 'translateY(100px)';
+                    rightContainer.style.opacity = '1';
+                    leftContent.style.transform = 'translateX(0px)';
+                    leftContent.style.filter = 'none';
+                    rightContainer.style.filter = 'none';
+                } else if (scrollY > pinStart + pinDuration) {
+                    leftContent.style.opacity = '0';
+                    rightContainer.style.transform = 'translateY(0px)';
+                } else {
+                    // Kalkulasi progres selama di-pin
+                    const progress = (scrollY - pinStart) / pinDuration;
+                    const imageTranslateY = 100 * (1 - progress);
+                    rightContainer.style.transform = `translateY(${imageTranslateY}px)`;
+                    rightContainer.style.opacity = '1';
+                    rightContainer.style.filter = 'none';
+                    const textOpacity = 1 - progress * 1.5;
+                    leftContent.style.opacity = Math.max(0, textOpacity).toString();
+                    leftContent.style.transform = 'translateX(0px)';
+                    leftContent.style.filter = 'none';
+                }
             } else {
-                // Tampilan Desktop/Tablet: Gunakan translateY untuk gerakan vertikal
-                leftContent.style.opacity = 1; // Hilangkan efek menghilang di desktop
-                const leftTranslateY = Math.min(scrollY * 1, 2000) // Kecepatan "tenggelam" sama dengan gambar
-                // Terapkan gerakan vertikal, EFEK MENCIUT, dan BLUR
+                // --- Animasi Parallax untuk Desktop ---
+                const scaleDown = Math.max(1 - scrollY * 0.0001, 0.6);
+                const blurValue = Math.min(scrollY * 0.003, 5);
+                if (rightContainer && rightImage) {
+                    const rightTranslateY = Math.min(scrollY * 1, 2000);
+                    const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
+                    rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
+                    rightContainer.style.filter = `blur(${blurValue}px)`;
+                    rightImage.style.transform = `scale(1)`;
+                    rightImage.style.filter = `brightness(${brightness})`;
+                }
+                leftContent.style.opacity = '1';
+                const leftTranslateY = Math.min(scrollY * 1, 2000);
                 leftContent.style.transform = `translateY(${leftTranslateY}px) scale(${scaleDown})`;
                 leftContent.style.filter = `blur(${blurValue}px)`;
             }
@@ -181,10 +241,11 @@ const HeroSection = () => {
         };
         animationFrame = requestAnimationFrame(animateHero);
         return () => cancelAnimationFrame(animationFrame);
-    }, [heroImage, isMobileView]); // Tambahkan isMobileView sebagai dependensi
+    }, [isMobileView]);
 
     return (
-        <div className="landing-wrapper">
+        <div className="hero-pin-container" ref={pinContainerRef}>
+            <div className="landing-wrapper" ref={landingWrapperRef}>
             <div className="background-glow-container"></div>
             <div className="particle-container">{particles}</div>
             <section className="hero-section">
@@ -230,6 +291,7 @@ const HeroSection = () => {
                     )}
                 </div>
             </section>
+            </div>
         </div>
     );
 };
