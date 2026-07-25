@@ -24,12 +24,12 @@ exports.up = async function (knex) {
   const hasQuotes = await knex.schema.hasColumn('profil_pegawai', 'quotes');
   if (!hasQuotes) {
     await knex.schema.alterTable('profil_pegawai', function (table) {
-      table.text('quotes');
+      table.text('quotes', 'longtext');
     });
   }
 
   await knex.schema.alterTable('halaman_konten', function (table) {
-    table.text('judul').notNullable().alter();
+    table.text('judul', 'longtext').notNullable().alter();
     table.string('kunci_halaman', 255).notNullable().alter();
   });
 };

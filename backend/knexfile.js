@@ -2,7 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   development: {
-    client: 'pg',
+    client: 'mysql2',
     connection: {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
@@ -18,14 +18,13 @@ module.exports = {
     }
   },
   production: {
-    client: 'pg',
+    client: 'mysql2',
     connection: {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: { rejectUnauthorized: false } // Wajib jika menggunakan database cloud seperti Supabase/Neon
+      database: process.env.DB_NAME
     },
     pool: {
       min: 2,

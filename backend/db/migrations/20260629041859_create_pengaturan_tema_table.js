@@ -9,8 +9,6 @@ exports.up = function(knex) {
     table.string('font_pilihan', 100).notNullable().defaultTo('Inter');
     table.string('url_logo_header', 500);
     table.timestamp('diperbarui_pada', { useTz: true }).notNullable().defaultTo(knex.fn.now());
-  }).then(() => {
-    return knex.raw('ALTER TABLE pengaturan_tema ADD CONSTRAINT ck_pengaturan_tema_tunggal CHECK (id = 1)');
   });
 };
 exports.down = function(knex) {

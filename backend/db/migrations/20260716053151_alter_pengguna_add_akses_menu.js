@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.alterTable('pengguna', (table) => {
-    table.jsonb('akses_menu').notNullable().defaultTo('[]');
+    table.jsonb('akses_menu').nullable();
   });
 };
 
