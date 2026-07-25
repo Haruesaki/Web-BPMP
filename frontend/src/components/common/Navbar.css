@@ -172,6 +172,19 @@ body.body-no-scroll {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
+
+@keyframes navSelectorEnter {
+  from {
+    /* Mulai dari posisi sedikit ke kiri dan transparan */
+    transform: translateY(-5vh);
+    opacity: 1;
+  }
+  to {
+    /* Selesai di posisi normalnya (di dalam container) dan terlihat penuh */
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 /* =========================================
    Active Menu Indicator
    ========================================= */
@@ -179,6 +192,24 @@ body.body-no-scroll {
   position: absolute;
   top: 0;
   left: 0;
+  /* Container ini HANYA untuk diatur posisinya oleh JavaScript */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 20px; /* Jaga radius untuk diwarisi pseudo-element */
+  transition: all 1s cubic-bezier(0.3, 1, 0.5, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.nav-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Semua gaya visual dipindahkan ke pseudo-element ini */
   background: linear-gradient(
     155deg,
     rgba(105, 130, 255, 0.651) 0%,
@@ -186,15 +217,14 @@ body.body-no-scroll {
   );
   border: 1.5px solid rgba(69, 134, 255, 0.756);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
-              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
-              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
-              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
-              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547)
-  ;
+    inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+    inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+    -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+    -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547);
   border-radius: 20px;
-  transition: all 1s cubic-bezier(0.3, 1, 0.5, 1);
-  z-index: -1;
-  pointer-events: none;
+  /* Animasi masuk hanya diterapkan di sini, tidak akan konflik dengan JS */
+  opacity: 0;
+  animation: navSelectorEnter 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.8s forwards;
 }
 .nav-selector.no-transition {
   transition: none !important;

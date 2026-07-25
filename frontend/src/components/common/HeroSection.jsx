@@ -144,15 +144,17 @@ const HeroSection = () => {
             if (!leftContent) return;
 
             const scrollY = window.scrollY;
-            const scaleDown = Math.max(1 - scrollY * 0.0001, 0.8); // Mulai dari 1, mengecil hingga minimum 0.5
+            const scaleDown = Math.max(1 - scrollY * 0.00010, 0.6); // Faktor scale down saat scroll
+            const blurValue = Math.min(scrollY * 0.003, 5); // Efek blur dari 0px hingga 5px
 
             // --- REVISI: Logika animasi untuk wadah kanan dan gambar ---
             if (rightContainer && rightImage) {
                 const rightTranslateY = Math.min(scrollY * 1, 2000); // Kecepatan "tenggelam"
                 const brightness = Math.max(1 - scrollY * 0.00045, 0.78);
 
-                // 1. Terapkan gerakan vertikal DAN EFEK MENCIUT ke seluruh wadah (.hero-right-cms)
+                // 1. Terapkan gerakan vertikal, EFEK MENCIUT, dan BLUR ke seluruh wadah (.hero-right-cms)
                 rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
+                rightContainer.style.filter = `blur(${blurValue}px)`;
                 // 2. Hapus efek zoom-in pada gambar, pertahankan efek kecerahan
                 rightImage.style.transform = `scale(1)`;
                 rightImage.style.filter = `brightness(${brightness})`;
@@ -165,12 +167,14 @@ const HeroSection = () => {
                 leftContent.style.opacity = leftOpacity;
                 const leftTranslateX = scrollY * -0.500;
                 leftContent.style.transform = `translateX(${leftTranslateX}px)`;
+                leftContent.style.filter = 'none'; // Pastikan tidak ada blur di mobile
             } else {
                 // Tampilan Desktop/Tablet: Gunakan translateY untuk gerakan vertikal
                 leftContent.style.opacity = 1; // Hilangkan efek menghilang di desktop
                 const leftTranslateY = Math.min(scrollY * 1, 2000) // Kecepatan "tenggelam" sama dengan gambar
-                // Terapkan gerakan vertikal DAN EFEK MENCIUT
+                // Terapkan gerakan vertikal, EFEK MENCIUT, dan BLUR
                 leftContent.style.transform = `translateY(${leftTranslateY}px) scale(${scaleDown})`;
+                leftContent.style.filter = `blur(${blurValue}px)`;
             }
 
             animationFrame = requestAnimationFrame(animateHero);

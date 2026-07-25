@@ -3,8 +3,9 @@
   flex-direction: column;
   width: 100%;
   min-height: 101vh;
-  --main-bg-color: #0b132b;
-  background-color: var(--main-bg-color);
+  --main-bg-color: #01081a;
+  --main-bg-gradient: linear-gradient(to top, var(--main-bg-color) 20%, #172755 120%);
+  background: var(--main-bg-gradient);
   position: relative;
   margin-top: -160px;
   padding-top: 165px;
