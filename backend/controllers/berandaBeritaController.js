@@ -101,6 +101,80 @@ class BerandaBeritaController {
     }
   }
 
+  static async getBeritaDetail(req, res) {
+    const { id } = req.params; // format: 'berita-1' or 'konten-2'
+    try {
+      const parts = id.split('-');
+      const sumber = parts[0];
+      const actualId = parts[1];
+
+      let data = null;
+
+      if (sumber === 'berita') {
+        data = await db('berita')
+          .leftJoin('menu', 'berita.menu_id', 'menu.id')
+          .select(
+            'berita.id',
+            'berita.judul',
+            'berita.deskripsi_kaya as konten',
+            'berita.url_foto as coverUrl',
+            'berita.waktu_tayang as tanggal',
+            'berita.dibuat_pada',
+            'menu.nama_menu as kategori',
+            'menu.slug_atau_tautan as layout'
+          )
+          .where('berita.id', actualId)
+          .first();
+
+        // `waktu_tayang` baru terisi saat berita diaktifkan tayang di Beranda,
+        // jadi pakai tanggal pembuatan sebagai cadangan. Tanpa ini halaman
+        // detail menampilkan "1 Januari 1970" akibat new Date(null).
+        if (data) {
+          data.tanggal = data.tanggal || data.dibuat_pada;
+        }
+      } else if (sumber === 'konten') {
+        data = await db('halaman_konten')
+          .leftJoin('menu', 'halaman_konten.menu_id', 'menu.id')
+          .select(
+            'halaman_konten.id',
+            'halaman_konten.judul',
+            'halaman_konten.deskripsi_kaya as konten',
+            'halaman_konten.url_foto as coverUrl',
+            'halaman_konten.tanggal_terbit as tanggal',
+            'halaman_konten.diperbarui_pada',
+            'menu.nama_menu as kategori',
+            'menu.slug_atau_tautan as layout'
+          )
+          .where('halaman_konten.id', actualId)
+          .first();
+
+        if (data) {
+          data.tanggal = data.tanggal || data.diperbarui_pada;
+        }
+      }
+
+      if (!data) {
+        return res.status(404).json({ success: false, pesan: 'Berita tidak ditemukan' });
+      }
+
+      // Format response uniformly
+      const formattedData = {
+        id: id,
+        judul: data.judul,
+        konten: data.konten,
+        coverUrl: data.coverUrl,
+        tanggal: data.tanggal,
+        kategori: data.kategori || 'Informasi',
+        layout: data.layout
+      };
+
+      res.json({ success: true, data: formattedData });
+    } catch (error) {
+      console.error('Error getBeritaDetail:', error);
+      res.status(500).json({ success: false, pesan: 'Gagal mengambil detail berita' });
+    }
+  }
+
   static async updateThumbnail(req, res) {
     const { sumber, id } = req.params;
     const { coverUrl } = req.body;

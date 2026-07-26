@@ -54,17 +54,16 @@ class BerandaHeroController {
         .orderBy('id', 'asc')
         .first();
 
-      let savedHero;
+      // MySQL tidak mendukung RETURNING, jadi baris disimpan dulu lalu dibaca ulang.
+      let idHero;
       if (existing) {
-        const [updated] = await db('banner_beranda')
-          .where({ id: existing.id })
-          .update(payload)
-          .returning('*');
-        savedHero = updated;
+        await db('banner_beranda').where({ id: existing.id }).update(payload);
+        idHero = existing.id;
       } else {
-        const [inserted] = await db('banner_beranda').insert(payload).returning('*');
-        savedHero = inserted;
+        const [insertId] = await db('banner_beranda').insert(payload);
+        idHero = insertId;
       }
+      const savedHero = await db('banner_beranda').where({ id: idHero }).first();
 
       const pName = req.user?.nama || 'System';
       const pRole = req.user?.role || 'Unknown';

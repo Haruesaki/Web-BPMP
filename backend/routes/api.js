@@ -58,6 +58,7 @@ router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHead
 router.get('/beranda/hero', BerandaHeroController.getHero);
 router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
 router.get('/beranda/berita', BerandaBeritaController.getBeritaBeranda);
+router.get('/beranda/berita/:id', BerandaBeritaController.getBeritaDetail);
 router.patch('/beranda/berita/reorder', authMiddleware, BerandaBeritaController.reorderBerita);
 router.patch('/beranda/berita/:sumber/:id/thumbnail', authMiddleware, BerandaBeritaController.updateThumbnail);
 router.delete('/beranda/berita/:sumber/:id', authMiddleware, BerandaBeritaController.removeFromBeranda);

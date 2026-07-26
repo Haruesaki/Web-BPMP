@@ -7,7 +7,7 @@ exports.up = function(knex) {
     table.increments('id').primary();
     table.string('nama_admin').notNullable();
     table.string('role_admin').notNullable();
-    table.text('aksi').notNullable();
+    table.text('aksi', 'longtext').notNullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
 };

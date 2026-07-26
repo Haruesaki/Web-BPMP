@@ -2,7 +2,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('pengguna', (table) => {
     table.increments('id').primary();
-    table.integer('peran_id').notNullable().references('id').inTable('peran').onDelete('RESTRICT');
+    table.integer('peran_id').unsigned().notNullable().references('id').inTable('peran').onDelete('RESTRICT');
     table.string('nama_pengguna', 100).notNullable().unique();
     table.string('email', 150).notNullable().unique();
     table.string('kata_sandi_hash', 255).notNullable();

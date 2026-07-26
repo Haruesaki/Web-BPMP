@@ -24,8 +24,9 @@ class AuthModel {
             .first();
     }
 
+    // MySQL tidak mendukung RETURNING, jadi baris hasil diambil ulang lewat insertId.
     static async createOtp(email, otpCode, expiresAt, cooldownSeconds) {
-        const [inserted] = await db('otp_reset_password').insert({
+        const [insertId] = await db('otp_reset_password').insert({
             email,
             otp_code: otpCode,
             expires_at: expiresAt,
@@ -33,16 +34,15 @@ class AuthModel {
             cooldown_seconds: cooldownSeconds,
             attempts: 0,
             is_verified: false
-        }).returning('*');
-        return inserted;
+        });
+        return await db('otp_reset_password').where('id', insertId).first();
     }
 
     static async updateOtp(id, data) {
-        const [updated] = await db('otp_reset_password')
+        await db('otp_reset_password')
             .where('id', id)
-            .update(data)
-            .returning('*');
-        return updated;
+            .update(data);
+        return await db('otp_reset_password').where('id', id).first();
     }
 
     static async updateUserPassword(email, passwordHash) {

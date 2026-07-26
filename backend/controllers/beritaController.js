@@ -13,7 +13,11 @@ class BeritaController {
           'pengguna.nama_pengguna as pembuat_nama'
         )
         .where('berita.menu_id', menu_id)
-        .orderBy('berita.waktu_tayang', 'desc');
+        // `waktu_tayang` hanya terisi saat berita diaktifkan tayang di Beranda,
+        // sehingga bernilai NULL untuk berita biasa dan membuat urutannya tidak
+        // menentu. Pakai tanggal pembuatan sebagai cadangan agar berita terbaru
+        // tetap berada di urutan teratas.
+        .orderByRaw('COALESCE(berita.waktu_tayang, berita.dibuat_pada) DESC');
       res.json(data);
     } catch (error) {
       console.error('Error getBerita:', error);
@@ -33,7 +37,8 @@ class BeritaController {
 
       const status = statusTayang ? 'terbit' : 'draf';
 
-      const [inserted] = await db('berita').insert({
+      // MySQL tidak mendukung RETURNING, jadi baris baru dibaca ulang lewat insertId.
+      const [insertId] = await db('berita').insert({
         menu_id,
         penulis_id: req.user?.id || null,
         judul,
@@ -41,7 +46,8 @@ class BeritaController {
         url_foto: coverUrl || null,
         status,
         waktu_tayang: waktuTayang || null
-      }).returning('*');
+      });
+      const inserted = await db('berita').where({ id: insertId }).first();
 
       await logActivityInternal(pName, pRole, `Menambahkan berita baru: "${judul}"`);
       res.status(201).json({ pesan: 'Berita berhasil dibuat', data: inserted });
@@ -66,9 +72,13 @@ class BeritaController {
       if (waktuTayang !== undefined) updateData.waktu_tayang = waktuTayang;
       if (coverUrl !== undefined) updateData.url_foto = coverUrl;
 
-      const [updated] = await db('berita').where({ id }).update(updateData).returning('*');
-      
-      if (!updated) return res.status(404).json({ pesan: 'Berita tidak ditemukan' });
+      // Pastikan beritanya ada sebelum diperbarui, karena MySQL tidak bisa
+      // mengembalikan baris hasil update (tidak mendukung RETURNING).
+      const existing = await db('berita').where({ id }).first();
+      if (!existing) return res.status(404).json({ pesan: 'Berita tidak ditemukan' });
+
+      await db('berita').where({ id }).update(updateData);
+      const updated = await db('berita').where({ id }).first();
 
       await logActivityInternal(pName, pRole, `Memperbarui berita: "${updated.judul}"`);
       res.json({ pesan: 'Berita berhasil diperbarui', data: updated });

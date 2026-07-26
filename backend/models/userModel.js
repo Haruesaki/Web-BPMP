@@ -37,15 +37,16 @@ class UserModel {
         const peran = await db('peran').where('nama_peran', userData.role).first();
         if (!peran) throw new Error(`Peran ${userData.role} tidak ditemukan.`);
 
-        const [id] = await db('pengguna').insert({
+        // MySQL mengembalikan ID baru langsung dari insert (tanpa RETURNING).
+        const [insertId] = await db('pengguna').insert({
             peran_id: peran.id,
             nama_pengguna: userData.nama,
             email: userData.email,
             kata_sandi_hash: userData.password_hash,
             akses_menu: JSON.stringify(userData.access || []),
             is_aktif: true
-        }).returning('id');
-        return id.id || id;
+        });
+        return insertId;
     }
 
     static async updateUser(id, userData) {

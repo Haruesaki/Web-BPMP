@@ -8,7 +8,7 @@ exports.up = function(knex) {
     table.string('ip_address', 50).notNullable();
     table.date('tanggal').notNullable();
     table.integer('hits').defaultTo(1);
-    table.text('user_agent');
+    table.text('user_agent', 'longtext');
     table.timestamps(true, true);
     table.unique(['ip_address', 'tanggal']);
   });

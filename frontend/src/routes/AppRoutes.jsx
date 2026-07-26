@@ -5,6 +5,7 @@ import Beranda from '../pages/user/Beranda/Beranda';
 // import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
 // import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi'; // Komponen ini sekarang digantikan oleh GenericPage
 import GenericPage from '../pages/user/GenericPage/GenericPage';
+import BeritaDetail from '../pages/user/BeritaDetail/BeritaDetail';
 
 // Halaman Admin
 import Login from '../pages/Admin/Login/Login';
@@ -31,6 +32,8 @@ const AppRoutes = ({ lenisRef }) => {
                 <Route path="/" element={<Beranda lenisRef={lenisRef} />} />
                 {/* Rute dinamis untuk menampilkan layout berdasarkan ID menu (CMS) */}
                 <Route path="/halaman/:menuId" element={<GenericPage lenisRef={lenisRef} />} />
+                {/* Rute untuk detail berita dari beranda */}
+                <Route path="/berita/:id" element={<BeritaDetail lenisRef={lenisRef} />} />
                 {/* Rute lama statis untuk testing */}
                 <Route path="/profil/visi-misi" element={<GenericPage lenisRef={lenisRef} />} />
             </Route>

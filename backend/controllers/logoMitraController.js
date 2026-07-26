@@ -44,7 +44,7 @@ const createLogoMitra = async (req, res) => {
       urutan_tampil: 0
     });
 
-    res.json({ success: true, data: newLogo[0] });
+    res.json({ success: true, data: newLogo });
   } catch (error) {
     console.error('Error createLogoMitra:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -83,7 +83,7 @@ const updateLogoMitra = async (req, res) => {
     }
 
     const updated = await LogoMitra.update(id, { url_logo });
-    res.json({ success: true, data: updated[0] });
+    res.json({ success: true, data: updated });
   } catch (error) {
     console.error('Error updateLogoMitra:', error);
     res.status(500).json({ success: false, message: 'Server error' });

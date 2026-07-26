@@ -2,10 +2,10 @@
 exports.up = function(knex) {
   return knex.schema.createTable('bagian_konten', (table) => {
     table.increments('id').primary();
-    table.integer('halaman_konten_id').notNullable().references('id').inTable('halaman_konten').onDelete('CASCADE');
+    table.integer('halaman_konten_id').unsigned().notNullable().references('id').inTable('halaman_konten').onDelete('CASCADE');
     table.string('jenis_bagian', 50).notNullable().defaultTo('default');
     table.string('judul', 255);
-    table.text('deskripsi');
+    table.text('deskripsi', 'longtext');
     table.string('warna_latar_override', 20);
     table.integer('urutan_tampil').notNullable().defaultTo(0);
     table.timestamp('dibuat_pada', { useTz: true }).notNullable().defaultTo(knex.fn.now());
