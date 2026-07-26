@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Proyek disajikan dari subfolder: bpmplampung.com/instansi/
+  RewriteBase /instansi/
+
+  # File / folder yang benar-benar ada tetap disajikan apa adanya
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Sisanya diarahkan ke index.html agar React Router (SPA) yang menangani rute
+  RewriteRule . /instansi/index.html [L]
+</IfModule>

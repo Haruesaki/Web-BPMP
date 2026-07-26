@@ -53,8 +53,12 @@ const LenisProvider = ({ children }) => {
 };
 
 function App() {
+  // Ikut nilai `base` dari Vite: '/' saat dev lokal, '/instansi' saat build produksi.
+  // Semua navigasi internal (navigate/to/href) otomatis diberi prefix ini oleh React Router.
+  const basename = import.meta.env.BASE_URL.replace(/\/+$/, '') || '/';
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <LenisProvider />
     </BrowserRouter>
   );
