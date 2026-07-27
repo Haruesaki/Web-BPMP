@@ -293,7 +293,7 @@ body.body-no-scroll {
   top: 100%;
   left: 0;
   margin-top: 10px;
-  width: 220px;
+  width: 250px;
   /* Hapus max-height dan overflow, biarkan ukurannya mengikuti konten */
   max-height: 0; /* Tetap untuk animasi buka/tutup awal */
   overflow: hidden; /* Tetap untuk menyembunyikan konten saat tertutup */
@@ -322,7 +322,7 @@ body.body-no-scroll {
   max-height: max(150px, calc(90vh - 180px));
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 3px 10px;
+  padding: 7px 10px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(248, 248, 248, 0.425) rgba(1, 2, 34, 0.342);
