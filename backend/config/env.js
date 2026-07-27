@@ -1,0 +1,151 @@
+require('dotenv').config();
+
+// =========================================================================
+//  ENV — satu-satunya pintu pembacaan `process.env` bagi aplikasi.
+//  -----------------------------------------------------------------------
+//  Tujuannya dua:
+//
+//    1. Menyatukan konfigurasi. Sebelumnya `process.env` dibaca tersebar di
+//       index.js, server.js, authController, authMiddleware, dan controller
+//       lain — sehingga mustahil memastikan kelengkapannya di satu tempat.
+//
+//    2. Menggagalkan lebih awal (fail fast). Di production, konfigurasi yang
+//       keliru dihentikan saat boot, bukan dibiarkan meledak diam-diam saat
+//       pengguna sedang memakai aplikasi. Contoh nyata yang dicegah: bila
+//       JWT_SECRET luput dipasang, sebelumnya aplikasi tetap berjalan memakai
+//       kunci cadangan yang tertulis di kode sumber — siapa pun yang tahu
+//       nilainya bisa menempa token superadmin.
+//
+//  Di development validasi hanya memberi peringatan supaya pengujian di
+//  localhost tidak terhambat. Perbedaan perlakuan inilah yang membuat satu
+//  basis kode bisa melayani dua mode tanpa mengubah struktur kode.
+//
+//  CATATAN: modul ini TIDAK PERNAH mencetak nilai variabel, hanya namanya.
+//  Log peladen bukan tempat yang aman bagi rahasia.
+// =========================================================================
+
+const NODE_ENV = (process.env.NODE_ENV || 'development').trim().toLowerCase();
+const isProduction = NODE_ENV === 'production';
+const isDevelopment = !isProduction;
+
+// Baca sebagai untai yang sudah dirapikan; `undefined` menjadi untai kosong
+// agar pemeriksaan "kosong" cukup satu cara.
+const baca = (nama, cadangan = '') => String(process.env[nama] ?? cadangan).trim();
+
+const JWT_SECRET = baca('JWT_SECRET');
+const CORS_ORIGIN_MENTAH = baca('CORS_ORIGIN');
+
+const env = {
+  NODE_ENV,
+  isProduction,
+  isDevelopment,
+
+  // Hostinger menetapkan PORT sendiri; 5000 hanya cadangan untuk lokal.
+  PORT: Number(baca('PORT', '5000')) || 5000,
+  TZ: baca('TZ', 'Asia/Jakarta'),
+
+  DB: {
+    host: baca('DB_HOST'),
+    port: Number(baca('DB_PORT', '3306')) || 3306,
+    user: baca('DB_USER'),
+    // Sengaja tidak diwajibkan: MySQL lokal lazim dipakai tanpa kata sandi.
+    password: baca('DB_PASSWORD'),
+    name: baca('DB_NAME'),
+  },
+
+  JWT_SECRET,
+
+  // Alamat publik situs, dipakai Tahap 4 untuk urusan aset.
+  PUBLIC_BASE_URL: baca('PUBLIC_BASE_URL'),
+
+  // Dipecah menjadi larik agar Tahap 5 tinggal memakainya untuk menyaring origin.
+  CORS_ORIGIN: CORS_ORIGIN_MENTAH
+    ? CORS_ORIGIN_MENTAH.split(',').map((o) => o.trim()).filter(Boolean)
+    : [],
+
+  RESEND: {
+    apiKey: baca('RESEND_API_KEY'),
+    fromEmail: baca('RESEND_FROM_EMAIL'),
+  },
+
+  YOUTUBE: {
+    apiKey: baca('YOUTUBE_API_KEY'),
+    channelId: baca('YOUTUBE_CHANNEL_ID'),
+  },
+
+  RAPIDAPI_KEY: baca('RAPIDAPI_KEY'),
+
+  // Penjaga seeder (dipakai Tahap 3). Seeder menolak jalan di production
+  // kecuali variabel ini bernilai 'true' secara eksplisit.
+  ALLOW_PRODUCTION_SEED: baca('ALLOW_PRODUCTION_SEED').toLowerCase() === 'true',
+};
+
+// ------------------------------------------------------------------ validasi
+
+const PANJANG_MINIMUM_JWT = 32;
+
+const galat = [];
+const peringatan = [];
+
+// Wajib pada kedua mode — tanpa ini aplikasi tidak dapat bekerja sama sekali.
+const WAJIB_SELALU = ['DB_HOST', 'DB_USER', 'DB_NAME', 'JWT_SECRET'];
+
+// Wajib khusus production. Di development ketiadaannya wajar: CORS longgar,
+// aset memakai localhost, dan pengiriman surel jarang diuji.
+const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'PUBLIC_BASE_URL', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
+
+for (const nama of WAJIB_SELALU) {
+  if (!baca(nama)) galat.push(`${nama} belum diisi.`);
+}
+
+if (isProduction) {
+  for (const nama of WAJIB_PRODUCTION) {
+    if (!baca(nama)) galat.push(`${nama} wajib diisi saat NODE_ENV=production.`);
+  }
+
+  // Kunci cadangan yang dulu tertulis di authController & authMiddleware.
+  // Nilainya sudah tersebar di riwayat repositori, jadi tidak boleh dipakai.
+  if (JWT_SECRET === 'fallback_secret_key') {
+    galat.push('JWT_SECRET masih memakai nilai cadangan lama yang tertulis di kode sumber. Ganti dengan nilai acak yang kuat.');
+  }
+
+  if (JWT_SECRET && JWT_SECRET.length < PANJANG_MINIMUM_JWT) {
+    galat.push(`JWT_SECRET terlalu pendek (${JWT_SECRET.length} karakter). Minimal ${PANJANG_MINIMUM_JWT} karakter.`);
+  }
+
+  // Peringatan, bukan galat: pada shared hosting Hostinger, basis data justru
+  // lazim berada di mesin yang sama sehingga 'localhost' memang benar.
+  if (/^(localhost|127\.0\.0\.1)$/i.test(env.DB.host)) {
+    peringatan.push('DB_HOST menunjuk localhost saat production. Pastikan memang demikian pada peladen Anda.');
+  }
+} else {
+  // Development: cukup diingatkan supaya kekurangannya diketahui sejak dini,
+  // tanpa menghambat pengujian di localhost.
+  for (const nama of WAJIB_PRODUCTION) {
+    if (!baca(nama)) peringatan.push(`${nama} belum diisi (dibiarkan di development, tetapi WAJIB saat production).`);
+  }
+
+  if (JWT_SECRET && JWT_SECRET.length < PANJANG_MINIMUM_JWT) {
+    peringatan.push(`JWT_SECRET hanya ${JWT_SECRET.length} karakter. Production menuntut minimal ${PANJANG_MINIMUM_JWT} karakter.`);
+  }
+}
+
+if (peringatan.length) {
+  console.warn(`[env] Peringatan konfigurasi (mode ${NODE_ENV}):`);
+  peringatan.forEach((p) => console.warn(`  - ${p}`));
+}
+
+if (galat.length) {
+  console.error(`[env] Konfigurasi tidak sah (mode ${NODE_ENV}):`);
+  galat.forEach((g) => console.error(`  - ${g}`));
+
+  if (isProduction) {
+    console.error('[env] Proses dihentikan. Perbaiki variabel di atas pada pengelola environment, lalu jalankan ulang.');
+    console.error('[env] Rujukan nama variabel: backend/.env.example');
+    process.exit(1);
+  }
+
+  console.warn('[env] Mode development: proses tetap dilanjutkan, tetapi sebagian fitur dapat gagal.');
+}
+
+module.exports = env;

@@ -1,4 +1,7 @@
-require('dotenv').config();
+// Dimuat paling awal: modul ini memuat dotenv sekaligus memvalidasi
+// kelengkapan konfigurasi. Di production, konfigurasi yang bolong akan
+// menghentikan proses di sini — sebelum satu pun rute sempat didaftarkan.
+const env = require('./config/env');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +23,7 @@ app.use('/api', apiRoutes);
 
 // --- KONFIGURASI PRODUCTION UNTUK FRONTEND ---
 // Di production (Hostinger), Express akan menyajikan file build React secara statis
-if (process.env.NODE_ENV === 'production') {
+if (env.isProduction) {
     const dirDist = path.join(__dirname, '../frontend/dist');
 
     app.use(express.static(dirDist));

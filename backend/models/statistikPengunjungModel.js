@@ -1,9 +1,11 @@
 const knex = require('../config/database');
+const { tanggalHariIni } = require('../utils/waktu');
 
 const incrementVisitor = async (ipAddress, userAgent) => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(now - offset).toISOString().split('T')[0];
+    // Tanggal dihitung menurut zona waktu aplikasi (WIB), bukan zona waktu
+    // proses. Lihat utils/waktu.js — di peladen UTC, cara lama membuat
+    // kunjungan dini hari tercatat pada tanggal sebelumnya.
+    const localISOTime = tanggalHariIni();
 
     // UPSERT pada kombinasi (ip_address, tanggal) — 1 baris per IP per hari.
     // MySQL memakai ON DUPLICATE KEY UPDATE, yang bersandar pada indeks unik

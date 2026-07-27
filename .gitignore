@@ -4,5 +4,9 @@
 .log/
 **/.env
 **/.env.*
+# Berkas contoh sengaja dilacak: isinya hanya nama variabel beserta
+# keterangan, tanpa nilai rahasia. Pengecualian harus berada SETELAH
+# pola **/.env.* di atas agar berlaku.
+!**/.env.example
 .claude/
 /.deploy_plan

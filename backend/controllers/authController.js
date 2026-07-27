@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const AuthModel = require('../models/authModel');
+const env = require('../config/env');
 
 class AuthController {
     static async login(req, res) {
@@ -42,11 +43,12 @@ class AuthController {
             }
 
             // 5. Generate token JWT
-            const secretKey = process.env.JWT_SECRET || 'fallback_secret_key';
+            // Kunci berasal dari modul env (sudah divalidasi saat boot). Nilai
+            // cadangan dihapus — lihat alasannya di config/env.js.
             const accessArray = typeof user.akses_menu === 'string' ? JSON.parse(user.akses_menu) : (user.akses_menu || []);
             const token = jwt.sign(
                 { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran, access: accessArray },
-                secretKey,
+                env.JWT_SECRET,
                 { expiresIn: '1d' }
             );
 

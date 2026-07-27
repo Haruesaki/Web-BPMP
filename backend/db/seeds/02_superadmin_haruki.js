@@ -1,16 +1,21 @@
 const bcrypt = require('bcryptjs');
+const { pastikanBolehMenjalankanSeeder, ambilSandiSeeder } = require('../../utils/penjagaSeeder');
 
 exports.seed = async function(knex) {
+  // Tolak lebih dulu bila dijalankan di production tanpa izin eksplisit.
+  pastikanBolehMenjalankanSeeder();
+
   // Ambil data peran superadmin
   const peranSuperadmin = await knex('peran').where({ nama_peran: 'superadmin' }).first();
-  
+
   if (!peranSuperadmin) {
     throw new Error('Peran superadmin tidak ditemukan. Jalankan migrasi terlebih dahulu.');
   }
 
-  // Hash kata sandi "oysterizer"
+  // Kata sandi diambil dari SEED_ADMIN_PASSWORD_2. Nilai cadangan di bawah HANYA
+  // berlaku di development; di production variabel tersebut wajib diisi.
   const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash('oysterizer', salt);
+  const hash = await bcrypt.hash(ambilSandiSeeder('SEED_ADMIN_PASSWORD_2', 'oysterizer'), salt);
 
   // Hapus pengguna lama jika sudah ada dengan email yang sama untuk menghindari duplikasi
   await knex('pengguna').where({ email: 'ahmaddonijalaludin@gmail.com' }).del();
