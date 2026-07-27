@@ -9,8 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrasi": "knex migrate:latest --env production",
     "migrasi:status": "knex migrate:status --env production",
+    "cek:env": "node scripts/cek-env.js",
     "cek:sharp": "node -e \"const s=require('sharp');console.log('sharp OK', s.versions)\"",
-    "cek:db": "node -e \"const k=require('./config/database');k.raw(\\\"SELECT DATABASE() AS basis_data, @@character_set_connection AS charset, @@session.time_zone AS zona_sesi, DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') AS waktu_wib\\\").then(([r])=>{console.table(r);return k.destroy()}).catch(e=>{console.error(e.message);process.exit(1)})\""
+    "cek:db": "node scripts/cek-db.js"
   },
   "keywords": [],
   "author": "",

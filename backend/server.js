@@ -23,4 +23,14 @@ const port = env.PORT;
 
 app.listen(port, () => {
     console.log(`Backend berjalan di port ${port} (mode ${env.NODE_ENV})`);
+
+    // Diagnosis sambungan basis data atas permintaan, lewat variabel
+    // DIAGNOSA_DB. Dijalankan SETELAH peladen menyala supaya situs tidak
+    // tertunda menunggu pemeriksaan, dan kegagalannya sengaja hanya dicatat —
+    // menjatuhkan seluruh layanan gara-gara alat diagnosis jelas tidak sepadan.
+    if (env.DIAGNOSA_DB) {
+        require('./scripts/cek-db')
+            .jalankan()
+            .catch((e) => console.error('[diagnosa] Gagal menjalankan pemeriksaan basis data:', e.message));
+    }
 });

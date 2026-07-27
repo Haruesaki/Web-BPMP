@@ -1,4 +1,6 @@
-require('dotenv').config();
+// Pemuatan .env dipusatkan di muatEnv.js — lihat penjelasannya di sana,
+// terutama alasan berkas .env dibuat menimpa nilai dari pengelola environment.
+require('./muatEnv');
 
 // =========================================================================
 //  ENV — satu-satunya pintu pembacaan `process.env` bagi aplikasi.
@@ -51,11 +53,19 @@ const env = {
     // Sengaja tidak diwajibkan: MySQL lokal lazim dipakai tanpa kata sandi.
     password: baca('DB_PASSWORD'),
     name: baca('DB_NAME'),
+    // Jalur soket Unix. Bila kosong, knexfile mencari sendiri pada jalur yang
+    // lazim; isi 'none' untuk memaksa TCP. Lihat penjelasan lengkap di
+    // knexfile.js — ringkasnya, mysql2 selalu memakai TCP sehingga MySQL
+    // mengenali sambungan sebagai @'127.0.0.1', bukan @'localhost'.
+    socketPath: baca('DB_SOCKET_PATH'),
   },
 
   JWT_SECRET,
 
-  // Alamat publik situs, dipakai Tahap 4 untuk urusan aset.
+  // Alamat publik situs. TIDAK DIBACA oleh satu berkas kode pun saat ini, dan
+  // karena itu TIDAK diwajibkan — lihat catatan pada WAJIB_PRODUCTION di bawah.
+  // Tetap disediakan karena murah dan berguna bila kelak ada keperluan URL
+  // absolut, misalnya tautan di dalam surel atau berkas sitemap.
   PUBLIC_BASE_URL: baca('PUBLIC_BASE_URL'),
 
   // Letak hasil build frontend (Tahap 7). Bila kosong, dipakai penataan baku
@@ -91,6 +101,14 @@ const env = {
   // Penjaga seeder (dipakai Tahap 3). Seeder menolak jalan di production
   // kecuali variabel ini bernilai 'true' secara eksplisit.
   ALLOW_PRODUCTION_SEED: baca('ALLOW_PRODUCTION_SEED').toLowerCase() === 'true',
+
+  // Bila bernilai 'true', server menjalankan pemeriksaan sambungan basis data
+  // sekali saat boot dan mencetak hasilnya ke log. Disediakan karena sebagian
+  // paket hosting tidak menyediakan akses terminal sama sekali, sehingga log
+  // peladen menjadi satu-satunya saluran keluaran diagnosis yang tersedia.
+  // Nyalakan seperlunya saja, lalu kembalikan ke kosong — pemeriksaan ini
+  // mencetak nama pengguna dan basis data ke log.
+  DIAGNOSA_DB: baca('DIAGNOSA_DB').toLowerCase() === 'true',
 };
 
 // ------------------------------------------------------------------ validasi
@@ -105,7 +123,18 @@ const WAJIB_SELALU = ['DB_HOST', 'DB_USER', 'DB_NAME', 'JWT_SECRET'];
 
 // Wajib khusus production. Di development ketiadaannya wajar: CORS longgar,
 // aset memakai localhost, dan pengiriman surel jarang diuji.
-const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'PUBLIC_BASE_URL', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
+//
+// PUBLIC_BASE_URL SENGAJA DIKELUARKAN dari daftar ini. Semula ia diwajibkan
+// karena dipakai menyusun URL absolut bagi aset, tetapi Tahap 4 mengubah URL
+// aset menjadi relatif ('/uploads/...') sehingga tidak ada lagi berkas yang
+// membacanya. Mewajibkan variabel yang tidak dibaca siapa pun berarti
+// menghentikan proses demi sesuatu yang tidak berpengaruh apa-apa — persis yang
+// terjadi saat penempatan 27 Juli 2026 dan memakan waktu berjam-jam.
+//
+// Kaidah yang dipetik: sebuah variabel hanya boleh masuk daftar wajib bila ada
+// kode yang benar-benar membacanya. Bila kelak PUBLIC_BASE_URL dipakai kembali,
+// barulah ia pantas dikembalikan ke sini.
+const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
 
 for (const nama of WAJIB_SELALU) {
   if (!baca(nama)) galat.push(`${nama} belum diisi.`);
