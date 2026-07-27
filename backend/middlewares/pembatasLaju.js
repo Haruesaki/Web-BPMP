@@ -71,9 +71,20 @@ const batasPengunjung = buat({
   pesan: 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
 });
 
+// Titik akhir cron (Tahap 7). Pemakaian sahnya hanya dua kali sehari, sehingga
+// angka ini sudah sangat longgar. Tujuannya menahan penebakan CRON_SECRET
+// secara beruntun — penjaganya sendiri sudah membandingkan secara setara waktu,
+// tetapi membatasi laju percobaan membuat penebakan menjadi tidak praktis.
+const batasCron = buat({
+  jendela: 15 * MENIT,
+  maksimum: 20,
+  pesan: 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
+});
+
 module.exports = {
   batasLogin,
   batasOtp,
   batasVerifikasiOtp,
   batasPengunjung,
+  batasCron,
 };

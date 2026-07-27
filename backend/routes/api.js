@@ -24,7 +24,9 @@ const SearchController = require('../controllers/searchController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
-const { batasLogin, batasOtp, batasVerifikasiOtp, batasPengunjung } = require('../middlewares/pembatasLaju');
+const CronController = require('../controllers/cronController');
+const penjagaCron = require('../middlewares/penjagaCron');
+const { batasLogin, batasOtp, batasVerifikasiOtp, batasPengunjung, batasCron } = require('../middlewares/pembatasLaju');
 
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
@@ -48,6 +50,11 @@ router.get('/youtube', YoutubeController.getVideos);
 router.get('/instagram', InstagramController.getInstagramProfile);
 router.put('/instagram/update-username', authMiddleware, InstagramController.updateInstagramUsername);
 router.put('/instagram/update-embeds', authMiddleware, InstagramController.updateEmbedLinks);
+
+// ================= CRON (dipanggil penjadwal hPanel) =================
+// Dilindungi rahasia bersama lewat tajuk `X-Cron-Secret`, bukan token JWT:
+// penjadwal bukan pengguna yang dapat masuk. Lihat middlewares/penjagaCron.js.
+router.post('/cron/instagram', batasCron, penjagaCron, CronController.segarkanInstagram);
 // Rute autentikasi dilindungi pembatas laju per alamat IP — lihat
 // middlewares/pembatasLaju.js untuk alasan pemilihan angkanya.
 router.post('/auth/login', batasLogin, AuthController.login);

@@ -58,6 +58,13 @@ const env = {
   // Alamat publik situs, dipakai Tahap 4 untuk urusan aset.
   PUBLIC_BASE_URL: baca('PUBLIC_BASE_URL'),
 
+  // Letak hasil build frontend (Tahap 7). Bila kosong, dipakai penataan baku
+  // `../frontend/dist` relatif terhadap folder backend. Variabel ini menjadi
+  // jalan keluar bila penataan folder di peladen tidak memungkinkan backend
+  // dan frontend bersebelahan — lebih baik daripada memaksakan bentuk folder
+  // yang tidak didukung panel hosting.
+  FRONTEND_DIST_PATH: baca('FRONTEND_DIST_PATH'),
+
   // Dipecah menjadi larik agar Tahap 5 tinggal memakainya untuk menyaring origin.
   CORS_ORIGIN: CORS_ORIGIN_MENTAH
     ? CORS_ORIGIN_MENTAH.split(',').map((o) => o.trim()).filter(Boolean)
@@ -74,6 +81,12 @@ const env = {
   },
 
   RAPIDAPI_KEY: baca('RAPIDAPI_KEY'),
+
+  // Rahasia bersama bagi titik akhir cron (Tahap 7). Penjadwal hPanel berada
+  // di luar proses dan tidak memegang token JWT, sehingga memerlukan penjaga
+  // tersendiri. Bila kosong, titik akhirnya menolak seluruh permintaan —
+  // lihat middlewares/penjagaCron.js.
+  CRON_SECRET: baca('CRON_SECRET'),
 
   // Penjaga seeder (dipakai Tahap 3). Seeder menolak jalan di production
   // kecuali variabel ini bernilai 'true' secara eksplisit.

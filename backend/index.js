@@ -134,7 +134,23 @@ app.use('/api', apiRoutes);
 // --- KONFIGURASI PRODUCTION UNTUK FRONTEND ---
 // Di production (Hostinger), Express akan menyajikan file build React secara statis
 if (env.isProduction) {
-    const dirDist = path.join(__dirname, '../frontend/dist');
+    // Penataan baku mengandaikan `backend/` dan `frontend/` bersebelahan.
+    // FRONTEND_DIST_PATH menjadi jalan keluar bila peladen memaksa bentuk lain.
+    const dirDist = env.FRONTEND_DIST_PATH
+        ? path.resolve(env.FRONTEND_DIST_PATH)
+        : path.join(__dirname, '../frontend/dist');
+
+    // Diperiksa saat boot, bukan dibiarkan sampai ada permintaan masuk.
+    // Tanpa pemeriksaan ini, folder build yang salah letak hanya tampak sebagai
+    // galat pada SETIAP halaman sementara /api tetap sehat — gejala yang
+    // menyesatkan dan memakan waktu untuk dilacak. Prosesnya sengaja TIDAK
+    // dihentikan: API masih berfungsi penuh, dan menghentikan proses akan
+    // menjatuhkan seluruh layanan hanya karena satu folder belum terunggah.
+    if (!require('fs').existsSync(path.join(dirDist, 'index.html'))) {
+        console.error('[frontend] index.html tidak ditemukan pada:', dirDist);
+        console.error('[frontend] Seluruh halaman akan gagal tampil, meskipun /api tetap berfungsi.');
+        console.error('[frontend] Periksa penataan folder, atau tetapkan FRONTEND_DIST_PATH ke letak folder dist yang sebenarnya.');
+    }
 
     app.use(express.static(dirDist));
 
