@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.alterTable('info_kontak', (table) => {
-    table.text('url_google_map');
+    table.text('url_google_map', 'longtext');
   });
 };
 

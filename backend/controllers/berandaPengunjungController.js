@@ -7,12 +7,13 @@ class BerandaPengunjungController {
       let pengaturan = await db('pengaturan_jumlah_pengunjung').first();
       
       if (!pengaturan) {
-        const [inserted] = await db('pengaturan_jumlah_pengunjung').insert({
+        // MySQL tidak mendukung RETURNING, jadi baris baru dibaca ulang lewat insertId.
+        const [insertId] = await db('pengaturan_jumlah_pengunjung').insert({
           pengunjung_hari_ini: 123,
           total_pengunjung: 107030,
           is_synced: true
-        }).returning('*');
-        pengaturan = inserted;
+        });
+        pengaturan = await db('pengaturan_jumlah_pengunjung').where('id', insertId).first();
       }
 
       // Simpan nilai manual murni sebelum di-override (untuk UI admin)
@@ -69,18 +70,19 @@ class BerandaPengunjungController {
         updateData.total_pengunjung = parseInt(total_pengunjung, 10) || 0;
       }
 
+      // MySQL tidak mendukung RETURNING, jadi baris disimpan dulu lalu dibaca ulang.
       let pengaturan = await db('pengaturan_jumlah_pengunjung').first();
-      let updated;
+      let idPengaturan;
       if (pengaturan) {
-        [updated] = await db('pengaturan_jumlah_pengunjung')
+        await db('pengaturan_jumlah_pengunjung')
           .where('id', pengaturan.id)
-          .update(updateData)
-          .returning('*');
+          .update(updateData);
+        idPengaturan = pengaturan.id;
       } else {
-        [updated] = await db('pengaturan_jumlah_pengunjung')
-          .insert(updateData)
-          .returning('*');
+        const [insertId] = await db('pengaturan_jumlah_pengunjung').insert(updateData);
+        idPengaturan = insertId;
       }
+      const updated = await db('pengaturan_jumlah_pengunjung').where('id', idPengaturan).first();
 
       await logActivityInternal(pName, pRole, 'Memperbarui pengaturan jumlah pengunjung di beranda');
 

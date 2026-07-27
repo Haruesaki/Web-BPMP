@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './NewsSection.css';
 import NewsCard from './NewsCard';
 import axiosInstance from '../../../api/axiosInstance';
@@ -7,6 +8,7 @@ const ITEMS_PER_PAGE = 4;
 const AUTO_SLIDE_INTERVAL = 5000; // 5 detik
 
 const NewsSection = ({ previewData }) => {
+    const navigate = useNavigate();
     const [allNewsData, setAllNewsData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedNews, setPaginatedNews] = useState([]);
@@ -162,7 +164,8 @@ const NewsSection = ({ previewData }) => {
                                     <div
                                         className="featured-card"
                                         key={news.id}
-                                        style={{ transform: `translateX(${(index - featuredIndex) * 100}%)` }}
+                                        style={{ transform: `translateX(${(index - featuredIndex) * 100}%)`, cursor: 'pointer' }}
+                                        onClick={() => navigate(`/berita/${news.id}`)}
                                     >
                                         <img src={news.image} alt={news.title} className="featured-img" />
                                         <div className="featured-overlay">
@@ -212,6 +215,7 @@ const NewsSection = ({ previewData }) => {
                                 key={news.id}
                                 title={news.title}
                                 date={news.date}
+                                link={`/berita/${news.id}`}
                                 onMouseEnter={() => handleSetFeatured(news)}
                                 onFocus={() => handleSetFeatured(news)} // Prop onFocus untuk aksesibilitas
                             />

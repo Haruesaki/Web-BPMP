@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './NewsCard.css';
 
 const NewsCard = ({ title, date, link = "#", onMouseEnter, onFocus }) => {
   return (
-    <a
-      href={link}
+    <Link
+      to={link}
       className="news-item"
       onMouseEnter={onMouseEnter}
       onFocus={onFocus}
@@ -18,7 +19,7 @@ const NewsCard = ({ title, date, link = "#", onMouseEnter, onFocus }) => {
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 

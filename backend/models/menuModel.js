@@ -10,19 +10,19 @@ class MenuModel {
     return await query;
   }
 
-  // Buat menu baru
+  // Buat menu baru.
+  // MySQL tidak mendukung RETURNING, jadi baris utuh diambil ulang lewat insertId.
   static async create(data) {
-    const [result] = await db('menu').insert(data).returning('*');
-    return result;
+    const [insertId] = await db('menu').insert(data);
+    return await db('menu').where('id', insertId).first();
   }
 
-  // Update menu
+  // Update menu, lalu kembalikan baris terbarunya.
   static async update(id, data) {
-    const [result] = await db('menu')
+    await db('menu')
       .where('id', id)
-      .update({ ...data, diperbarui_pada: db.fn.now() })
-      .returning('*');
-    return result;
+      .update({ ...data, diperbarui_pada: db.fn.now() });
+    return await db('menu').where('id', id).first();
   }
 
   // Update urutan secara batch
@@ -66,16 +66,16 @@ class MenuModel {
   static async convertToSubmenu(idMenuUtama, namaSubmenuBaru, ikonSubmenuBaru, jenisMenuUtama, slugAtauTautanUtama) {
     const trx = await db.transaction();
     try {
-      // 1. Buat submenu baru
-      const [newSubmenu] = await trx('menu').insert({
+      // 1. Buat submenu baru.
+      // Pada MySQL, insert hanya mengembalikan ID barunya — bukan baris utuh —
+      // sehingga ID dipakai langsung dan barisnya diambil ulang di akhir.
+      const [idSubmenu] = await trx('menu').insert({
         nama_menu: namaSubmenuBaru,
         ikon_menu: ikonSubmenuBaru,
         jenis_menu: jenisMenuUtama,
         slug_atau_tautan: slugAtauTautanUtama,
         induk_id: idMenuUtama
-      }).returning('*');
-
-      const idSubmenu = newSubmenu.id;
+      });
 
       // 2. Transfer kepemilikan konten di 3 tabel yang terikat menu_id
       await trx('halaman_konten').where('menu_id', idMenuUtama).update({ menu_id: idSubmenu });
@@ -86,6 +86,8 @@ class MenuModel {
       await trx('berita').where('menu_id', idMenuUtama).update({ menu_id: idSubmenu });
 
       // Menu Utama tetap seperti semula (masih memiliki tipe post/link), tapi di frontend ia akan di-render sbg gerbang krn sdh punya submenu.
+      const newSubmenu = await trx('menu').where('id', idSubmenu).first();
+
       await trx.commit();
       return newSubmenu;
     } catch (error) {

@@ -18,17 +18,16 @@ class MediaModel {
     teks_alternatif = null,
     urutan_tampil = 0,
   }) {
-    const [row] = await db('media_konten')
-      .insert({
-        jenis_pemilik,
-        pemilik_id,
-        url_berkas,
-        jenis_media,
-        teks_alternatif,
-        urutan_tampil,
-      })
-      .returning('*');
-    return row;
+    // MySQL tidak mendukung RETURNING, jadi baris utuh diambil ulang lewat insertId.
+    const [insertId] = await db('media_konten').insert({
+      jenis_pemilik,
+      pemilik_id,
+      url_berkas,
+      jenis_media,
+      teks_alternatif,
+      urutan_tampil,
+    });
+    return await db('media_konten').where('id', insertId).first();
   }
 }
 

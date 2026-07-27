@@ -1,0 +1,67 @@
+.berita-detail-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.berita-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.berita-detail-back:hover {
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.berita-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.berita-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.berita-meta-item i {
+  color: #ffde59;
+}
+
+.berita-main-cover {
+  width: 100%;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.berita-main-cover img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
+.berita-parsed-content {
+  font-size: 1.1em;
+  line-height: 1.7;
+}
