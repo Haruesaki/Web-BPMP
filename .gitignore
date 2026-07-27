@@ -8,5 +8,9 @@
 # keterangan, tanpa nilai rahasia. Pengecualian harus berada SETELAH
 # pola **/.env.* di atas agar berlaku.
 !**/.env.example
+# Catatan: pengecualian bagi frontend/.env.production TIDAK dapat ditulis di
+# sini, sebab frontend/.gitignore memuat pola `.env.*` dan berkas .gitignore
+# yang lebih dekat selalu mengalahkan yang di akar. Pengecualiannya dipasang
+# langsung di frontend/.gitignore.
 .claude/
 /.deploy_plan

@@ -9,6 +9,17 @@ const apiRoutes = require('./routes/api');
 
 const app = express();
 
+// Di Hostinger, permintaan HTTPS diterima proxy lebih dulu lalu diteruskan ke
+// proses Node melalui HTTP internal. Tanpa ini Express mengabaikan header
+// X-Forwarded-Proto sehingga `req.protocol` mengembalikan 'http' walau
+// pengunjung membuka situs lewat https — dan alamat IP yang terbaca adalah IP
+// proxy, bukan IP pengunjung (penting bagi pembatas laju pada Tahap 5).
+// Hanya di production: di localhost tidak ada proxy di depan aplikasi, jadi
+// memercayai header yang tidak ada justru menyesatkan.
+if (env.isProduction) {
+    app.set('trust proxy', 1);
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));

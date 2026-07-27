@@ -52,8 +52,12 @@ class UploadController {
         .webp({ quality: WEBP_QUALITY })
         .toFile(lokasiSimpan);
 
-      // URL absolut agar <img src> tetap valid dibuka dari browser mana pun.
-      const url = `${req.protocol}://${req.get('host')}/uploads/${namaBerkas}`;
+      // Path RELATIF, bukan URL absolut. URL absolut mengikat berkas pada host
+      // saat unggahan terjadi, sehingga seluruh rujukan lama menunjuk alamat
+      // yang tak terjangkau begitu domain berpindah (inilah sebabnya data lama
+      // memuat http://localhost:5000). Path relatif kebal terhadap perpindahan
+      // domain, penambahan subdomain, maupun peralihan HTTP ke HTTPS.
+      const url = `/uploads/${namaBerkas}`;
 
       // Catat ke pustaka media. Gagal mencatat TIDAK membatalkan upload —
       // berkasnya sudah tersimpan & URL sudah bisa dipakai editor.
@@ -100,7 +104,8 @@ class UploadController {
 
       await fs.writeFile(lokasiSimpan, req.file.buffer);
 
-      const url = `${req.protocol}://${req.get('host')}/uploads/${namaBerkas}`;
+      // Path relatif — alasannya sama seperti pada uploadImage di atas.
+      const url = `/uploads/${namaBerkas}`;
 
       try {
         await MediaModel.create({

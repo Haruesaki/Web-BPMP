@@ -4,7 +4,7 @@ import './InstagramSection.css';
 import Logo from "../../../assets/source/Logo.png";
 import Instagram from "../../../assets/source/instagram.png";
 
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const backendUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 const getFullUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('blob:') || url.startsWith('http')) return url;

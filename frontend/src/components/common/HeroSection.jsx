@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import './HeroSection.css';
 import axiosInstance from '../../api/axiosInstance';
 
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const backendUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 const getFullUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('blob:') || url.startsWith('http')) return url;

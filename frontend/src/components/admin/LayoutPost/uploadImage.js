@@ -7,7 +7,7 @@
 // =========================================================================
 
 // URL endpoint upload (samakan dengan konfigurasi CKEditor di PostDefault).
-export const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/gambar`;
+export const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/upload/gambar`;
 
 // Ambil token dari sesi admin; endpoint upload diproteksi authMiddleware.
 const getAuthToken = () => {

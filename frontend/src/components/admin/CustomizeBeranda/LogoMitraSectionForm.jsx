@@ -4,7 +4,7 @@ import PartnerSection from '../../user/partner/PartnerSection';
 import ThemeAlert from '../ThemeAlert';
 import './LogoMitraSectionForm.css';
 
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const backendUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 const getFullUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('blob:') || url.startsWith('http')) return url;
