@@ -1489,3 +1489,421 @@ body.body-no-scroll {
   min-width: 0;
   color: white;
 }
+
+/* =================================================================== */
+/* BREAKPOINT: KETINGGIAN LAYAR PENDEK (<= 700px)                      */
+/* Tahap 1: Penskalaan elemen Header & Navigasi Bar untuk Desktop      */
+/* =================================================================== */
+@media (max-height: 700px) {
+  /* --- Header Atas --- */
+  .header-top {
+    /* Kurangi padding vertikal */
+    padding-top: 12px;
+    padding-bottom: 12px;
+    /* Kurangi bayangan */
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* --- Logo --- */
+  .header-logo {
+    /* Buat logo sedikit lebih pendek */
+    height: clamp(40px, 3.6vw, 58px);
+  }
+
+  /* --- Tombol Aksi di Header (Search & TTS) --- */
+  .header-actions {
+    /* Kurangi jarak antar tombol */
+    gap: 12px;
+  }
+
+  /* --- Tombol TTS --- */
+  .btn-voice {
+    padding-left: 15px;
+    gap: 12px;
+  }
+  .btn-voice img {
+    width: 36px; /* Sedikit lebih kecil */
+  }
+  .btn-voice span {
+    font-size: clamp(10px, 1.2vw, 12px); /* Sedikit lebih kecil */
+  }
+
+  /* --- Wrapper & Tombol Pencarian --- */
+  .search-wrapper,
+  .header-actions .search-trigger {
+    width: 40px;
+    height: 40px;
+  }
+
+   .header-actions .search-trigger {
+    width: clamp(27px, 7vw, 35px);
+    height: clamp(30px, 7vw, 37px);
+  }
+  .header-actions .search-trigger i {
+    font-size: clamp(11px, 3vw, 15px);
+  }
+
+  .search-wrapper.active {
+    width: 250px; /* Lebar saat aktif juga dikurangi */
+  }
+  .search-input {
+    padding-left: 22px;
+    padding-right: 58px;
+  }
+
+  /* --- Bar Navigasi Utama --- */
+  .main-navbar {
+    /* Posisikan sedikit lebih tinggi karena header atas lebih pendek */
+    top: 76px;
+    /* Kurangi padding vertikal */
+    padding-top: 8px;
+    padding-bottom: 12px;
+    /* Kurangi jarak antar item menu */
+    gap: 0.9vw;
+  }
+
+  /* --- Item & Link Menu Navigasi --- */
+  .nav-link {
+    /* Kurangi padding vertikal & horizontal */
+    padding: 7px 18px;
+    /* Kecilkan sedikit ukuran font */
+    font-size: clamp(11px, 0.9vw, 14px);
+  }
+
+  /* --- Indikator Menu Aktif --- */
+  .nav-selector {
+    /* Kurangi radius agar sesuai dengan link yang lebih kecil */
+    border-radius: 18px;
+  }
+  .nav-selector::before {
+    border-radius: 18px;
+  }
+
+  /* --- Dropdown Desktop --- */
+  .dropdown-menu {
+    /* Kurangi jarak dari menu utama */
+    margin-top: 8px;
+    /* Tambahan: Kecilkan lebar dan radius */
+    width: 230px;
+    border-radius: 10px;
+  }
+
+  /* Tambahan: Kecilkan panel scroll dropdown */
+  .dropdown-scroll-container {
+    max-height: max(135px, calc(85vh - 170px));
+    padding: 6px 9px;
+  }
+
+  /* Tambahan: Kecilkan font dan padding item dropdown */
+  .dropdown-menu a {
+    padding: 13px 5px;
+    font-size: 13px;
+  }
+
+  .dropdown-menu a:hover {
+    padding-left: 13px;
+    border-radius: 9px;
+  }
+
+  /* --- Panel Saran Pencarian --- */
+  .search-suggestions-dropdown {
+    margin-top: 8px;
+    max-height: 300px;
+    border-radius: 10px;
+  }
+
+  .search-suggestion-item {
+    padding: 10px 14px;
+  }
+
+  .search-suggestion-item.empty {
+    padding: 18px;
+    font-size: 0.75rem;
+  }
+
+  .search-suggestion-title {
+    font-size: clamp(0.7rem, 0.25rem + 0.75vw, 0.8rem);
+  }
+
+  .search-suggestion-meta {
+    font-size: clamp(0.5rem, 0.25rem + 0.42vw, 0.6rem);
+  }
+
+  /* =================================================================== */
+  /* Tahap 2: Penanganan SideNavBar pada Ketinggian Layar Pendek         */
+  /* =================================================================== */
+  @media (max-width: 1290px) {
+    /* Ini adalah salinan dari blok @media (max-width: 1290px) utama. */
+    /* Kita akan menyesuaikan nilai-nilai ini pada langkah berikutnya. */
+    .hamburger-btn { /* Ukuran dari Tahap 1 sudah cukup */
+      display: block;
+    }
+    .header-top { /* Ukuran dari Tahap 1 sudah cukup */
+      justify-content: flex-start;
+    }
+    .header-actions {
+      margin-left: auto;
+    }
+    .mobile-menu-overlay.active {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.362);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 9998;
+    }
+    .main-navbar {
+      position: fixed; /* Layout tetap, hanya ukuran yang disesuaikan */
+      top: 0;
+      left: -380px; /* Sedikit lebih sempit */
+      width: 300px; /* Sedikit lebih sempit */
+      height: 100vh;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      box-sizing: border-box;
+      background: rgba(11, 19, 43, 0.98);
+      padding: 0;
+      overflow: hidden;
+      overscroll-behavior: contain;
+      transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 9px 0 27px rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+    }
+    .main-navbar.mobile-open {
+      left: 0;
+    }
+    .mobile-nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(0, 9, 34, 0.689);
+      backdrop-filter: blur(15px);
+      display: flex;
+      width: 100%;
+      padding: 36px 27px 14px 27px; /* Padding dikecilkan */
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .mobile-nav-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      flex-grow: 1;
+      gap: 0.9rem; /* Jarak antar item dikecilkan */
+      min-height: 0;
+      overflow-y: auto;
+      padding: 14px 27px 27px 27px; /* Padding dikecilkan */
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.351) transparent;
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
+    }
+    .mobile-nav-content::-webkit-scrollbar {
+      width: 5px; /* Scrollbar lebih tipis */
+    }
+    .mobile-nav-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .mobile-nav-content::-webkit-scrollbar-thumb {
+      background-color: rgb(255, 255, 255);
+      border-radius: 3px;
+      transition: background-color 0.2s ease;
+    }
+    .mobile-nav-close-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 12px; /* Font lebih kecil */
+      font-family: "Poppins", sans-serif;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 11px; /* Jarak ikon dan teks dikecilkan */
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+    .nav-selector {
+      display: none !important;
+    }
+    .nav-item {
+      width: 100%;
+    }
+    .nav-link:hover {
+      color: #ffffff;
+      font-weight:700;
+      padding-left: 14px;
+      background-color: #7373731d;
+    }
+    .nav-link.active {
+      background-color: rgba(69, 147, 236, 0.256);
+      color: #ffffff;
+      text-shadow: 0px 0px 3px  rgba(3, 3, 3, 0.744);
+      font-weight: 600;
+      box-shadow: 0px 0px 20px -10px rgba(255, 255, 255, 0.202);
+      padding-left: 14px;
+    }
+    .nav-link {
+      width: 100%;
+      letter-spacing: 0px;
+      font-size: 10px; /* Font lebih kecil */
+      padding: 14px 0; /* Padding vertikal dikecilkan */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 7px; /* Radius lebih kecil */
+      justify-content: space-between;
+      transition:
+        color 0.3s ease,
+        background-color 0.5s ease,
+        padding 0.2s ease;
+      white-space: normal;
+    }
+    .nav-item.has-dropdown.dropdown-open > .nav-link {
+      background-color: rgba(91, 95, 232, 0.2);
+      color: #fff;
+      padding-left: 14px;
+      font-weight: 600;
+      border-bottom-color: transparent; /* Sembunyikan border saat terbuka */
+    }
+    .nav-item.has-dropdown:hover .dropdown-icon {
+      transform: none;
+    }
+    .dropdown-menu {
+      display: block;
+      position: relative;
+      top: 0px; /* Font lebih kecil */
+      z-index: 1;
+      width: 100%;
+      max-height: 0;
+      margin-top: 0px;
+      padding: 0 0 0 0px;
+      background: transparent;
+      border-radius: 7px; /* Radius lebih kecil */
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      transform: none;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition:
+        margin-top 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease-out,
+        visibility 0s linear 0.4s;
+    }
+    .dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 25, 55, 0.839);
+      box-shadow: 0 7px 29px rgba(0, 0, 0, 0.3);
+      border-radius: inherit;
+      z-index: -1;
+    }
+    .dropdown-menu a {
+      font-size: 10px;
+    }
+
+    .nav-item.has-dropdown.dropdown-open .dropdown-menu a{
+      font-size: 10px;
+    }
+  
+
+    /* KUNCI PERBAIKAN: Terapkan "Formula" mobile ke scroll container. */
+    /* Ini akan menghapus batas tinggi dan scrollbar internal dari panel submenu, */
+    /* membiarkannya mengembang penuh di dalam sidebar. */
+    .dropdown-scroll-container {
+      max-height: none;
+      overflow: visible;
+    }
+    .nav-item.has-dropdown.dropdown-open .dropdown-scroll-container {
+      padding: 9px; /* Kecilkan padding saat terbuka */
+    }
+  }
+
+  /* =================================================================== */
+  /* Tahap 3: Penanganan TopBar pada Ketinggian Layar Pendek             */
+  /* =================================================================== */
+  @media (max-width: 390px) {
+    /* Ini adalah salinan dari blok @media (max-width: 390px) utama. */
+    /* Kita akan menyesuaikan nilai-nilai ini pada langkah berikutnya. */
+    .header-actions {
+      gap: 10px;
+    }
+    .main-navbar {
+      left: 0;
+      top: -100%;
+      width: 100%;
+      height: auto;
+      max-height: 50vh;
+      padding-top: 0;
+      transition: top 1s cubic-bezier(0.25, 1, 0.5, 1);
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      transition-property: top;
+    }
+    .main-navbar.mobile-open {
+      top: 0px;
+      left: 0;
+    }
+    .mobile-nav-header {
+      padding: 20px 20px 15px 20px;
+    }
+    .mobile-nav-content {
+      max-height: calc(50vh - 64px);
+      overflow-y: auto;
+    }
+
+    .dropdown-menu {
+      display: block;
+      position: relative;
+      top: 0px;
+      z-index: 1;
+      width: 100%;
+      max-height: 0;
+      margin-top: 0px;
+      padding: 0 0 0 0px;
+      background: transparent;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      transform: none;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition: margin-top 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease-out, visibility 0s linear 0.4s;
+    }
+    .nav-item.has-dropdown.dropdown-open .dropdown-menu {
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    .nav-link {
+      font-size: 0.625rem;
+      padding: 12px 0;
+    }
+    .dropdown-menu a {
+      font-size: 0.5875rem;
+      padding: 8px 0 8px 15px;
+    }
+  }
+}
