@@ -9,3 +9,9 @@
     width: 100%;
     padding: 20px 100px; /* Memberi ruang di sisi kiri dan kanan */
 }
+
+@media (max-width: 768px) {
+    .generic-page-container {
+        padding: 20px 35px; /* Mengurangi padding untuk layar kecil */
+    }
+}

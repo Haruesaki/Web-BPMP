@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../../api/axiosInstance';
 import CardContent from './CardContent';
 import './CardContent.css'; 
+import LazyLoadWrapper from './LazyLoadWrapper';
 
 const ProfileLayout = ({ menuId, viewLayout }) => {
   const [profiles, setProfiles] = useState([]);
@@ -44,13 +45,18 @@ const ProfileLayout = ({ menuId, viewLayout }) => {
       }}
     >
       {profiles.map((profile, index) => (
-        <CardContent 
+        <LazyLoadWrapper 
           key={profile.id || profile.nama_lengkap || index}
-          name={profile.nama_lengkap}
-          role={profile.jabatan}
-          quote={profile.quotes}
-          imageSrc={profile.url_foto}
-        />
+          placeholderHeight="408.5px" // 43em * 9.5px
+          placeholderWidth="323px"    // 34em * 9.5px
+        >
+          <CardContent 
+            name={profile.nama_lengkap}
+            role={profile.jabatan}
+            quote={profile.quotes}
+            imageSrc={profile.url_foto}
+          />
+        </LazyLoadWrapper>
       ))}
     </div>
   );
