@@ -240,7 +240,7 @@ const Navbar = () => {
     if (!navbar || !selector || allLinks.length === 0) return;
 
     const moveSelector = (targetElement) => {
-      if (!targetElement || window.innerWidth <= 1290) {
+      if (!targetElement || window.innerWidth <= 1290 || forceMobileView) {
         selector.style.opacity = '0';
         return;
       };
@@ -301,7 +301,7 @@ const Navbar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [location.pathname, navData]);
+  }, [location.pathname, navData, forceMobileView]);
 
   // --- Effect: Responsive Wrap Detection ---
   // Mendeteksi jika item navigasi "turun baris" (wrap) dan memaksa tampilan mobile.
@@ -311,51 +311,79 @@ const Navbar = () => {
     if (!headerElement || !ghostElement || navData.length <= 1) return;
 
     let animationFrameId = null;
-    const observer = new ResizeObserver(entries => {
+    let resizeTimeoutId = null;
+
+    const performCheck = () => {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = requestAnimationFrame(() => {
-        const entry = entries[0];
-        if (!entry) return;
-        // Biarkan media query CSS yang bekerja jika layar sudah kecil (<= 1290px).
+        // Guard clause: Biarkan CSS yang bekerja jika layar sudah masuk mode mobile/tablet.
         if (window.innerWidth <= 1290) {
           if (forceMobileView) setForceMobileView(false);
           return;
         }
 
+        // Guard clause: Jangan lakukan pengukuran jika data menu belum siap.
         if (navData.length < 2) {
           if (forceMobileView) setForceMobileView(false);
           return;
         }
+
         // --- LOGIKA PENGUKURAN---
-        // Mengukur lebar item menggunakan elemen "hantu" yang tidak terpengaruh layout.
         let totalItemsWidth = 0;
         navData.forEach(item => {
           ghostElement.innerText = item.title;
           let itemWidth = ghostElement.offsetWidth;
-
           if (item.type === 'dropdown') {
             itemWidth += 13;
           }
           totalItemsWidth += itemWidth;
         });
 
+        // Kalkulasi lebar total termasuk jarak antar item.
         const gap = window.innerWidth * 0.01;
         totalItemsWidth += (navData.length - 1) * gap;
-        const navHorizontalPadding = window.innerWidth * 0.08;
-        const availableContentWidth = entry.contentRect.width - navHorizontalPadding;
 
-        const shouldForceMobile = totalItemsWidth > (availableContentWidth - 50);
+        // Gunakan lebar header yang sebenarnya untuk kalkulasi ruang yang tersedia.
+        const headerRect = headerElement.getBoundingClientRect();
+        const navHorizontalPadding = window.innerWidth * 0.08;
+        const availableContentWidth = headerRect.width - navHorizontalPadding;
+
+        // --- PENGECEKAN KONDISI ---
+        // Kondisi 1: Navigasi "turun baris" (wrap)
+        const isWrapping = totalItemsWidth > (availableContentWidth - 50);
+        // Kondisi 2: Tinggi layar di bawah 480px
+        const isShortScreen = window.innerHeight < 480;
+
+        // Gabungkan kedua kondisi dengan logika "ATAU"
+        const shouldForceMobile = isWrapping || isShortScreen;
 
         if (shouldForceMobile !== forceMobileView) {
           setForceMobileView(shouldForceMobile);
         }
       });
-    });
+    };
+
+    // Buat handler yang di-debounce untuk efisiensi performa saat resize.
+    const debouncedCheck = () => {
+      clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = setTimeout(performCheck, 150);
+    };
+
+    // Observer untuk perubahan ukuran elemen (mencakup perubahan lebar).
+    const observer = new ResizeObserver(debouncedCheck);
     observer.observe(headerElement);
+
+    // Event listener untuk perubahan ukuran jendela (mencakup perubahan tinggi).
+    window.addEventListener('resize', debouncedCheck);
+
+    // Lakukan pengecekan awal saat komponen dimuat.
+    performCheck();
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      clearTimeout(resizeTimeoutId);
       observer.disconnect();
+      window.removeEventListener('resize', debouncedCheck);
     };
   }, [navData, forceMobileView]);
 
