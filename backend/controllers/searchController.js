@@ -8,7 +8,12 @@ class SearchController {
         return res.json({ success: true, data: [] });
       }
 
-      const keyword = `${q.trim().toLowerCase()}%`;
+      // Pola dikurung `%` di kedua sisi agar kata kunci ditemukan di posisi mana
+      // pun, bukan hanya di awal teks. Dengan pola lama (`kata%`) pencarian
+      // "ciki" pada judul "aku suka makan ciki" tidak pernah cocok, dan
+      // pencarian pada `deskripsi_kaya` praktis mustahil berhasil karena isinya
+      // selalu dibuka oleh tag HTML seperti `<p>` atau `<figure>`.
+      const keyword = `%${q.trim().toLowerCase()}%`;
       const results = [];
 
       // 1. Cari di nama menu (induk atau submenu)
