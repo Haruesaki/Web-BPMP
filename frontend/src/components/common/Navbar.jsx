@@ -501,20 +501,20 @@ const Navbar = () => {
                   <div
                     className="dropdown-menu"
                     data-lenis-prevent
-                    onWheel={handleDropdownScrollContain}
-                    onTouchMove={handleDropdownScrollContain}
                   >
-                    {item.submenu.map((subItem, index) => {
-                      const isExternal = subItem.path.startsWith('http');
-                      const animationStyle = {
-                        '--animation-delay': `${index * 0.07}s`
-                      };
+                    <div className="dropdown-scroll-container" onWheel={handleDropdownScrollContain} onTouchMove={handleDropdownScrollContain}>
+                        {item.submenu.map((subItem, index) => {
+                          const isExternal = subItem.path.startsWith('http');
+                          const animationStyle = {
+                            '--animation-delay': `${index * 0.07}s`
+                          };
 
-                      if (isExternal) {
-                        return <a key={index} href={subItem.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></a>;
-                      }
-                      return <Link key={index} to={subItem.path} onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></Link>;
-                    })}
+                          if (isExternal) {
+                            return <a key={index} href={subItem.path} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></a>;
+                          }
+                          return <Link key={index} to={subItem.path} onClick={handleLinkClick} style={animationStyle}><span>{subItem.title}</span></Link>;
+                        })}
+                    </div>
                   </div>
                 </div>
               );
