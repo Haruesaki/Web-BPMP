@@ -21,11 +21,44 @@ app.use('/api', apiRoutes);
 // --- KONFIGURASI PRODUCTION UNTUK FRONTEND ---
 // Di production (Hostinger), Express akan menyajikan file build React secara statis
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-    
-    // Tangkap semua route yang tidak ada di /api dan serahkan ke React Router
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+    const dirDist = path.join(__dirname, '../frontend/dist');
+
+    app.use(express.static(dirDist));
+
+    // Tangkap semua route yang tidak ada di /api dan serahkan ke React Router.
+    //
+    // Dipasang sebagai middleware TANPA pola, bukan `app.get('*')`. Sejak
+    // Express 5 (path-to-regexp v8) tanda '*' tidak lagi sah sebagai wildcard
+    // dan melempar PathError begitu rute didaftarkan — artinya proses mati saat
+    // modul ini dimuat, bukan saat permintaan masuk. Middleware tanpa pola tidak
+    // bersandar pada tata bahasa path sama sekali, sehingga aman terhadap
+    // perubahan tata bahasa pada versi Express berikutnya.
+    app.use((req, res, next) => {
+        // Permintaan ke /api yang tidak dikenali harus dijawab 404 JSON, jangan
+        // dibalas index.html. Bila tertelan, klien menyangka permintaannya
+        // berhasil (status 200) padahal endpoint-nya memang tidak ada.
+        // Perbandingan sengaja memakai '/api/' agar jalur lain yang kebetulan
+        // berawalan sama (misal '/apixyz') tidak ikut terjaring.
+        if (req.path === '/api' || req.path.startsWith('/api/')) {
+            return res.status(404).json({ pesan: 'Endpoint tidak ditemukan' });
+        }
+
+        // Berkas unggahan yang tidak ada pun sebaiknya 404 apa adanya. Kalau
+        // dibalas index.html, tag <img> menerima HTML berstatus 200 sehingga
+        // gambar tampak rusak tanpa petunjuk penyebabnya saat ditelusuri.
+        if (req.path.startsWith('/uploads/')) {
+            return res.status(404).json({ pesan: 'Berkas tidak ditemukan' });
+        }
+
+        // Hanya permintaan halaman yang wajar dibalas index.html. Metode tulis
+        // ke jalur acak tidak boleh menerima HTML.
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+            return res.status(404).json({ pesan: 'Halaman tidak ditemukan' });
+        }
+
+        return res.sendFile(path.join(dirDist, 'index.html'), (err) => {
+            if (err) next(err);
+        });
     });
 }
 
