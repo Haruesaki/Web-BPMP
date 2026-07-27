@@ -127,7 +127,7 @@ const getInstagramProfile = async (req, res) => {
     // Jika belum ada di DB (cron belum jalan), panggil API manual pertama kali
     console.log('[Instagram] Cache kosong, melakukan penarikan pertama kali...');
     const result = await fetchAndCacheInstagramProfile();
-    
+
     if (result.success) {
       const newCache = await instagramModel.getCache();
       return res.status(200).json({
@@ -135,16 +135,27 @@ const getInstagramProfile = async (req, res) => {
         data: newCache.profile_data,
         diperbarui_pada: newCache.diperbarui_pada
       });
-    } else {
-      return res.status(500).json({
-        success: false,
-        pesan: 'Gagal mendapatkan data instagram dari cache maupun API eksternal'
-      });
     }
 
+    // Tembolok kosong DAN layanan luar gagal. Sengaja tidak membalas 500:
+    // kegagalan pihak ketiga tidak boleh menjatuhkan Beranda. Frontend membaca
+    // datanya memakai optional chaining beserta nilai bawaan, sehingga `null`
+    // dirender dengan wajar sebagai bagian yang kosong.
+    console.warn('[Instagram] Tembolok kosong dan layanan luar gagal dihubungi.');
+    return res.status(200).json({
+      success: true,
+      data: null,
+      catatan: 'layanan Instagram gagal dihubungi dan tembolok masih kosong'
+    });
+
   } catch (error) {
-    console.error('[Instagram API Error]', error);
-    res.status(500).json({ success: false, pesan: 'Terjadi kesalahan pada server' });
+    console.error('[Instagram] Galat:', error?.response?.data || error.message);
+    // Alasan sama seperti di atas — Beranda tetap harus tampil.
+    return res.status(200).json({
+      success: true,
+      data: null,
+      catatan: 'terjadi kesalahan saat mengambil data Instagram'
+    });
   }
 };
 

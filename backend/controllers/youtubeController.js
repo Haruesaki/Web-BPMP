@@ -1,38 +1,55 @@
 const axios = require('axios');
 const YoutubeModel = require('../models/youtubeModel');
 
+// Membaca isi tembolok dengan aman. Kolomnya bertipe json sehingga mysql2 bisa
+// mengembalikannya sebagai objek maupun untai, bergantung penyetelan sambungan.
+const bacaTembolok = (cacheData) => {
+    if (!cacheData) return null;
+    try {
+        const data = typeof cacheData.videos_data === 'string'
+            ? JSON.parse(cacheData.videos_data)
+            : cacheData.videos_data;
+        // Struktur lama berupa larik; abaikan karena tidak lagi dikenali frontend.
+        return Array.isArray(data) ? null : data;
+    } catch (e) {
+        return null;
+    }
+};
+
+// Bentuk kosong yang tetap dapat dirender frontend dengan wajar, dipakai saat
+// tembolok belum pernah terisi sama sekali (pemasangan baru).
+const DATA_KOSONG = { videos: [], channel: null };
+
 class YoutubeController {
     static async getVideos(req, res) {
-        console.log("Menerima request /api/youtube");
+        // Tembolok dibaca lebih dulu dan dipegang sepanjang proses, supaya masih
+        // tersedia sebagai cadangan bila panggilan ke YouTube gagal di tengah jalan.
+        let temboloklama = null;
+
         try {
-            console.log("Menghubungi DB...");
             const cacheData = await YoutubeModel.getLatestCache();
-            console.log("DB response received!");
+            temboloklama = bacaTembolok(cacheData);
             const CACHE_DURATION_MS = 15 * 60 * 1000; // 15 Menit (dipercepat agar video baru cepat muncul)
-            
-            if (cacheData) {
+
+            if (cacheData && temboloklama) {
                 const now = new Date();
                 const updatedAt = new Date(cacheData.updated_at);
-                
+
                 if (now - updatedAt < CACHE_DURATION_MS) {
-                    console.log("Menggunakan data dari cache PostgreSQL (Knex)...");
-                    const data = typeof cacheData.videos_data === 'string' ? JSON.parse(cacheData.videos_data) : cacheData.videos_data;
-                    
-                    // Cek jika struktur data masih format lama (array), abaikan cache
-                    if (!Array.isArray(data)) {
-                        return res.json({ success: true, data: data, cached: true });
-                    }
+                    return res.json({ success: true, data: temboloklama, cached: true });
                 }
             }
-            
-            console.log("Mengambil data baru dari YouTube API...");
+
             const API_KEY = process.env.YOUTUBE_API_KEY;
             const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
-            
+
             if (!API_KEY || !CHANNEL_ID) {
-                return res.status(500).json({ error: "YouTube API Key atau Channel ID tidak dikonfigurasi." });
+                // Konfigurasi yang belum lengkap tidak boleh menjatuhkan Beranda.
+                // Sajikan tembolok bila ada, kalau tidak balas struktur kosong.
+                console.warn('[YouTube] YOUTUBE_API_KEY atau YOUTUBE_CHANNEL_ID belum diisi. Menyajikan tembolok.');
+                return res.json({ success: true, data: temboloklama || DATA_KOSONG, cached: true, catatan: 'konfigurasi belum lengkap' });
             }
-            
+
             // Langkah 1: Ambil detail channel, termasuk 'contentDetails' untuk mendapatkan ID playlist upload resmi.
             const channelUrl = `https://www.googleapis.com/youtube/v3/channels?key=${API_KEY}&id=${CHANNEL_ID}&part=snippet,statistics,contentDetails`;
             const channelResponse = await axios.get(channelUrl);
@@ -103,8 +120,18 @@ class YoutubeController {
             
             res.json({ success: true, data: finalData, cached: false });
         } catch (error) {
-            console.error("Error fetching YouTube API:", error?.response?.data || error.message);
-            res.status(500).json({ success: false, error: "Gagal mengambil data dari YouTube" });
+            // Kegagalan layanan luar TIDAK BOLEH menjatuhkan Beranda. Penyebab
+            // yang lazim: kuota harian YouTube Data API habis, jaringan peladen
+            // terganggu, atau kunci API dibatasi. Dalam keadaan itu tembolok lama
+            // — walau sudah kedaluwarsa — jauh lebih baik daripada bagian yang
+            // kosong, apalagi galat 500 yang membuat pengunjung melihat halaman rusak.
+            console.error('[YouTube] Gagal mengambil data:', error?.response?.data || error.message);
+
+            if (temboloklama) {
+                return res.json({ success: true, data: temboloklama, cached: true, catatan: 'tembolok kedaluwarsa dipakai karena layanan YouTube gagal dihubungi' });
+            }
+
+            return res.json({ success: true, data: DATA_KOSONG, cached: false, catatan: 'layanan YouTube gagal dihubungi dan tembolok masih kosong' });
         }
     }
 }

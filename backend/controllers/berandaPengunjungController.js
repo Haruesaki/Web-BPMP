@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const { logActivityInternal } = require('./aktivitasAdminController');
+const { tanggalHariIni } = require('../utils/waktu');
 
 class BerandaPengunjungController {
   static async getPengaturan(req, res) {
@@ -28,12 +29,11 @@ class BerandaPengunjungController {
           .first();
         const realTotal = totalPengunjungData.total ? parseInt(totalPengunjungData.total, 10) : 0;
 
-        // Ambil data hari ini (waktu server local/UTC)
-        // Kita sesuaikan dengan timezone offset lokal seperti di statistikPengunjungModel
-        const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        const hariIni = new Date(now - offset).toISOString().split('T')[0];
-        
+        // Ambil data hari ini menurut zona waktu aplikasi (WIB).
+        // Memakai helper yang sama dengan statistikPengunjungModel agar angka di
+        // Beranda tidak pernah berselisih dengan isi tabel statistik.
+        const hariIni = tanggalHariIni();
+
         const hariIniData = await db('statistik_pengunjung')
           .where('tanggal', hariIni)
           .count('id as total_hari_ini')

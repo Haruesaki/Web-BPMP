@@ -163,7 +163,7 @@ const getAuthToken = () => {
   }
 };
 
-const UPLOAD_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/gambar`;
+const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/upload/gambar`;
 
 const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) => {
   const editorRef = useRef(null);

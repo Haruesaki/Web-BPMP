@@ -25,6 +25,12 @@ dist-ssr
 
 .env
 .env.*
+# Konfigurasi build untuk production sengaja DILACAK. Isinya hanya VITE_API_URL
+# yang dikosongkan agar permintaan menjadi same-origin — tidak ada rahasia di
+# dalamnya. Wajib ikut ter-commit karena Vite menyisipkan nilainya SAAT BUILD:
+# tanpa berkas ini, build dari repositori bersih (rekan tim atau build di
+# peladen) akan memakai nilai cadangan http://localhost:5000.
+!.env.production
 
 # Playwright / e2e testing — lokal saja, JANGAN dibagikan ke tim
 /test-results/

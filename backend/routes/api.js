@@ -24,6 +24,9 @@ const SearchController = require('../controllers/searchController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
+const CronController = require('../controllers/cronController');
+const penjagaCron = require('../middlewares/penjagaCron');
+const { batasLogin, batasOtp, batasVerifikasiOtp, batasPengunjung, batasCron } = require('../middlewares/pembatasLaju');
 
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
@@ -33,7 +36,7 @@ router.get('/salam', (req, res) => {
 router.get('/search', SearchController.globalSearch);
 
 // ================= PENGUNJUNG & AKTIVITAS =================
-router.post('/pengunjung', StatistikPengunjungController.increment);
+router.post('/pengunjung', batasPengunjung, StatistikPengunjungController.increment);
 router.get('/pengunjung/stats', authMiddleware, (req, res, next) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -47,10 +50,17 @@ router.get('/youtube', YoutubeController.getVideos);
 router.get('/instagram', InstagramController.getInstagramProfile);
 router.put('/instagram/update-username', authMiddleware, InstagramController.updateInstagramUsername);
 router.put('/instagram/update-embeds', authMiddleware, InstagramController.updateEmbedLinks);
-router.post('/auth/login', AuthController.login);
-router.post('/auth/forgot-password', AuthController.requestOtp);
-router.post('/auth/verify-otp', AuthController.verifyOtp);
-router.post('/auth/reset-password', AuthController.resetPassword);
+
+// ================= CRON (dipanggil penjadwal hPanel) =================
+// Dilindungi rahasia bersama lewat tajuk `X-Cron-Secret`, bukan token JWT:
+// penjadwal bukan pengguna yang dapat masuk. Lihat middlewares/penjagaCron.js.
+router.post('/cron/instagram', batasCron, penjagaCron, CronController.segarkanInstagram);
+// Rute autentikasi dilindungi pembatas laju per alamat IP — lihat
+// middlewares/pembatasLaju.js untuk alasan pemilihan angkanya.
+router.post('/auth/login', batasLogin, AuthController.login);
+router.post('/auth/forgot-password', batasOtp, AuthController.requestOtp);
+router.post('/auth/verify-otp', batasVerifikasiOtp, AuthController.verifyOtp);
+router.post('/auth/reset-password', batasVerifikasiOtp, AuthController.resetPassword);
 
 // ================= BERANDA CMS ROUTES =================
 router.get('/beranda/header', BerandaHeaderController.getHeader);

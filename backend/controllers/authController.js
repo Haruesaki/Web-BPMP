@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const AuthModel = require('../models/authModel');
+const env = require('../config/env');
 
 class AuthController {
     static async login(req, res) {
@@ -42,11 +43,12 @@ class AuthController {
             }
 
             // 5. Generate token JWT
-            const secretKey = process.env.JWT_SECRET || 'fallback_secret_key';
+            // Kunci berasal dari modul env (sudah divalidasi saat boot). Nilai
+            // cadangan dihapus — lihat alasannya di config/env.js.
             const accessArray = typeof user.akses_menu === 'string' ? JSON.parse(user.akses_menu) : (user.akses_menu || []);
             const token = jwt.sign(
                 { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran, access: accessArray },
-                secretKey,
+                env.JWT_SECRET,
                 { expiresIn: '1d' }
             );
 
@@ -121,8 +123,15 @@ class AuthController {
             const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 menit
 
             // 4. Kirim email via Resend API
-            const apiKey = process.env.RESEND_API_KEY;
-            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+            //
+            // Nilai cadangan 'onboarding@resend.dev' sengaja DIHAPUS. Domain uji
+            // bawaan Resend hanya diizinkan mengirim ke alamat pemilik akun
+            // Resend, sehingga bila variabelnya luput dipasang, fitur ini akan
+            // gagal bagi setiap admin lain — dan gagalnya senyap, tanpa
+            // peringatan apa pun. Keberadaan kedua variabel ini kini sudah
+            // dijaring saat boot oleh config/env.js untuk mode production.
+            const apiKey = env.RESEND.apiKey;
+            const fromEmail = env.RESEND.fromEmail;
 
             const axios = require('axios');
             try {
@@ -155,14 +164,30 @@ class AuthController {
                     }
                 });
             } catch (emailError) {
-                console.error('Gagal mengirim email via Resend:', emailError.response ? emailError.response.data : emailError.message);
+                // Pencatatan diperkaya dengan kode status dan badan balasan dari
+                // Resend, sebab pesan galat bawaan axios sering hanya berbunyi
+                // "Request failed with status code 4xx" yang tidak menjelaskan
+                // apa pun. Penyebab tersering: domain pengirim belum diverifikasi,
+                // atau alamat tujuan di luar akun saat memakai domain uji bawaan.
+                const status = emailError.response?.status;
+                const rincian = emailError.response?.data;
+                console.error(
+                    '[Resend] Gagal mengirim OTP.',
+                    status ? `HTTP ${status}.` : '',
+                    rincian ? `Balasan: ${JSON.stringify(rincian)}` : emailError.message
+                );
+
+                // Pesan ke klien sengaja tetap umum — rincian konfigurasi peladen
+                // tidak boleh bocor ke pengguna.
                 return res.status(500).json({
                     status: 'error',
-                    message: 'Gagal mengirim kode OTP ke email. Silakan periksa konfigurasi API Resend Anda.'
+                    message: 'Gagal mengirim kode OTP ke email. Silakan coba beberapa saat lagi atau hubungi pengelola situs.'
                 });
             }
 
-            // 5. Simpan ke database jika email sukses dikirim
+            // 5. Simpan ke database jika email sukses dikirim.
+            // Urutan ini disengaja: bila pengiriman gagal, tidak ada OTP
+            // menggantung yang membuat cooldown pengguna terkunci sia-sia.
             await AuthModel.createOtp(email, otpCode, expiresAt, cooldown);
 
             return res.status(200).json({
