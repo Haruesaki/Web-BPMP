@@ -2,12 +2,11 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
-  --main-bg-color: #0b132b;
-  background-color: var(--main-bg-color);
+  min-height: 101vh;
+  --main-bg-color: #01081a;
+  --main-bg-gradient: linear-gradient(to top, var(--main-bg-color) 20%, #172755 120%);
+  background: var(--main-bg-gradient);
   position: relative;
-  margin-top: -165px;
-  padding-top: 165px;
 }
 
 .background-glow-container {
@@ -198,7 +197,7 @@
   align-self: center;
   flex-shrink: 0;
   display: flex;
-  width: clamp(320px, min(40vw, 45vh), 500px);
+  width: clamp(280px, max(30vw, 50vh), 450px);
   aspect-ratio: 1 / 1;
   /* `transform` diatur oleh JS, jadi transisi dibatasi pada ukuran dan margin. */
   transition:
@@ -214,24 +213,24 @@
   opacity: 0;
   transform: translateY(150px);
   animation:
-    buildingSlideUp 4s cubic-bezier(0.34, 1, 0.5, 1) 0.3s forwards,
-    smoothFloat 15s ease-in-out 4s infinite alternate;
-  background: rgba(255, 255, 255, 0.05);
+    buildingSlideUp 3s cubic-bezier(0.25, 0.8, 0.38, 1) 0.3s forwards,
+    smoothFloat 11s ease-in-out 3.09s infinite alternate;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(254, 253, 253, 0.46);
+  --p-bingkai: clamp(20px, min(3vh, 2vw), 38px);
   border-radius: 15%;
-  padding: 20px;
-  box-shadow:
-    inset 0 0 10px rgba(14, 1, 84, 0.623),
-    inset 0 0 12px rgba(66, 180, 251, 0.742),
-    inset 0 0 5px rgba(252, 252, 252, 0.54),
-    inset 0 0 15px rgb(14, 14, 14),
-    0 0 20px -2px rgba(254, 254, 254, 0.148),
-    0 0 20px 0px rgba(0, 0, 0, 0.732);
+  padding: var(--p-bingkai);
   display: flex;
   position: relative;
   overflow: hidden;
+  /* --- Menerapkan "Formula Gaya" --- */
+  /* border: 0.5px solid rgba(52, 122, 252, 0.756); */
+  box-shadow: 1px 5px 20px rgba(8, 41, 174, 0.729),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547);
+  background: linear-gradient( 155deg, rgba(101, 127, 255, 0.946) 0%, rgba(3, 20, 77, 0.857) 80% );
 }
 
 .hero-right-cms::before {
@@ -245,8 +244,8 @@
     from 0deg,
     transparent 0%,
     transparent 70%,
-    rgba(81, 151, 255, 0.347) 80%,
-    transparent 90%
+    rgba(15, 95, 255, 0.66) 88%,
+    transparent 100%
   );
   animation: borderSweep 8s linear infinite;
   z-index: 1;
@@ -255,10 +254,10 @@
 .hero-right-cms::after {
   content: "";
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  bottom: 20px;
+  top: var(--p-bingkai);
+  left: var(--p-bingkai);
+  right: var(--p-bingkai);
+  bottom: var(--p-bingkai);
   background: var(--main-bg-color);
   border-radius: 14%;
   z-index: 2;
@@ -314,11 +313,11 @@
   border-radius: 14%;
   overflow: hidden;
   box-shadow:
-    0 0 20px rgba(40, 40, 40, 0.415),
-    0 0 10px rgba(32, 101, 211, 0.556);
+    -2px -2px 12px 5px rgba(5, 3, 93, 0.746),
+    0 0 10px rgba(1, 51, 131, 0.556);
   position: relative;
   z-index: 3;
-  border: 1px solid rgba(255, 255, 255, 0.585);
+  border: 1px solid rgba(135, 163, 255, 0.913);
 }
 
 .cms-dynamic-image {
@@ -426,13 +425,14 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
     flex-direction: column;
   }
 } */
-@media (max-width: 65rem) {
+@media (max-width: 1040px) {
   /* 48rem = 768px */
+
   .hero-flex-container {
     flex-direction: column;
     padding-top: clamp(1rem, 5vh, 2rem);
     padding-bottom: clamp(2rem, 8vh, 4rem);
-    gap: clamp(1rem, 4vh, 2rem);
+    gap: clamp(1rem, 5.3vh, 10rem);
   }
 
   .hero-left-content {
@@ -443,8 +443,21 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
     gap: 0.5rem;
   }
 
+  .hero-right-cms {
+  padding: 17px;
+}
+
+.hero-right-cms::after {
+  /* ... properti lain ... */
+  top: 17px;    /* <-- PENDUKUNG AKAR MASALAH */
+  left: 17px;   /* <-- PENDUKUNG AKAR MASALAH */
+  right: 17px;  /* <-- PENDUKUNG AKAR MASALAH */
+  bottom: 17px; /* <-- PENDUKUNG AKAR MASALAH */
+  /* ... properti lain ... */
+}
+
   .hero-right-parallax-wrapper {
-    width: clamp(180px, min(70vw, 30vh), 320px);
+    width: clamp(220px, min(53vw, 40vh), 380px);
     margin: 0;
   }
 
@@ -485,56 +498,78 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
 }
 
 /*
- * BREAKPOINT: Tablet (Landscape) & Desktop Kecil ke atas
- * TARGET: ~1024px+
- * FUNGSI: Memberi lebih banyak ruang, memperbesar font.
+ * KONDISI: Layar Desktop/Laptop yang Pendek
+ * TARGET: Layar dengan lebar > 1040px tapi tinggi <= 800px.
+ * FUNGSI: Mengecilkan elemen vertikal agar tidak sesak.
 */
-@media (min-width: 64rem) {
-  /* 64rem = 1024px */
-
-  /* CONTOH PENGGUNAAN:
-  .hero-left-content {
-    max-width: 45%;
-  }
-  .main-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-  }
-  */
-}
-
-/*
- * BREAKPOINT: Desktop Besar ke atas
- * TARGET: ~1280px+
- * FUNGSI: Optimasi untuk layar lebar.
-*/
-@media (min-width: 80rem) {
-  /* 80rem = 1280px */
-  /* CONTOH PENGGUNAAN:
+@media (max-height: 800px) and (min-width: 1041px) {
   .hero-flex-container {
-    padding: 0 8vw;
+    /* Kurangi jarak horizontal antar konten */
+    gap: clamp(2rem, 10vw, 10rem);
   }
-  */
+  .welcome-text {
+    font-size: clamp(1rem, min(1.5vw, 2vh), 1.4rem);
+  }
+  .main-title {
+    font-size: clamp(1.7rem, min(2.5vw, 3.8vh), 2.4rem);
+  }
+  .sub-title {
+    font-size: clamp(0.8rem, min(1.1vw, 1.8vh), 1rem);
+  }
+  .hero-right-parallax-wrapper {
+    width: clamp(240px, min(30vw, 53vh), 420px);
+  }
 }
 
 /*
-----------------------------------------------------------------------
-  2. KONDISI SPESIFIK (Rasio Aspek & Preferensi Pengguna)
-     Untuk penanganan kasus khusus yang membuat UI/UX lebih baik.
-----------------------------------------------------------------------
+ * KONDISI: Layar Sangat Pendek & Sempit (Ponsel Landscape)
+ * TARGET: Lebar < 1040px DAN Tinggi < 400px.
+ * FUNGSI: Memaksa layout kembali ke horizontal (desktop mini) untuk mencegah konten terpotong.
 */
-
-/*
- * KONDISI: Orientasi Landscape pada layar yang tidak terlalu lebar
- * TARGET: Smartphone atau Tablet saat diputar miring.
- * FUNGSI: Mencegah elemen menjadi terlalu besar dan aneh.
-*/
-@media (max-width: 63.9375rem) and (orientation: landscape) {
-  /* Di bawah 1024px */
-  /* CONTOH PENGGUNAAN:
-  .main-title {
-    font-size: clamp(1.5rem, 8vh, 2.2rem); // Gunakan 'vh' karena tinggi layar terbatas
+@media  (min-width:620px) and (max-width: 1041px) and (max-height: 520px) {
+  /* 1. Kembalikan layout ke mode horizontal */
+  .hero-flex-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    /* Reset padding vertikal, beri sedikit padding horizontal */
+    padding: 0 4vw;
+    /* Jarak antar kolom yang sangat kecil */
+    gap: clamp(1.5rem, 5vw, 3rem);
   }
-  */
+
+    .hero-logos-wrapper-cms {
+    height: clamp(40px, 10vh, 65px);
+  }
+
+  .hero-logos-flex{
+    justify-content: flex-start;
+  }
+
+  /* 2. Kembalikan konten kiri ke alignment desktop */
+  .hero-left-content {
+    max-width: 40%;
+    flex-basis: 40%;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.2rem;
+  }
+
+  /* 3. Perkecil ukuran font secara agresif menggunakan vh */
+   .welcome-text {
+    font-size: clamp(0.9rem, min(1.6vw, 4vh), 5rem);
+  }
+  .main-title {
+    font-size: clamp(1.3rem, min(2.5vw, 5.8vh), 7rem);
+  }
+  .sub-title {
+    font-size: clamp(0.7rem, min(1.4vw, 3.8vh), 4rem);
+  }
+
+  /* 4. Perkecil gambar di sisi kanan */
+  .hero-right-parallax-wrapper {
+    width: clamp(200px, min(30vw, 53vh), 420px);
+  }
 }
 
 /*
