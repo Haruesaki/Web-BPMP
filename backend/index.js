@@ -5,6 +5,8 @@ const env = require('./config/env');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -20,14 +22,111 @@ if (env.isProduction) {
     app.set('trust proxy', 1);
 }
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// ---------------------------------------------------------------- KEAMANAN
+// Sumber pihak ketiga yang memang dipakai situs. Bila kelak ada penambahan
+// (misal peta atau pemutar video lain), daftarkan di sini juga.
+const SUMBER_SKRIP = ["'self'", "'unsafe-inline'", 'https://kit.fontawesome.com', 'https://*.fontawesome.com', 'https://www.instagram.com'];
+const SUMBER_GAYA = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://*.fontawesome.com'];
+const SUMBER_FONT = ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://*.fontawesome.com'];
+const SUMBER_BINGKAI = ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://www.instagram.com', 'https://www.google.com', 'https://player.vimeo.com'];
+
+app.use(
+    helmet({
+        // CSP sengaja dipasang sebagai LAPORAN SAJA (report-only), belum menegakkan.
+        //
+        // Alasannya: kebijakan yang terlalu ketat akan mematikan sematan Instagram,
+        // YouTube, dan iframe Google Maps tanpa galat di sisi peladen — gejalanya
+        // hanya tampak di konsol peramban, sehingga mudah lolos dari pengujian dan
+        // baru ketahuan setelah pengunjung mengeluh. Dengan report-only, seluruh
+        // pelanggaran tercatat di konsol peramban tanpa memblokir apa pun.
+        //
+        // CARA MENEGAKKAN setelah diperiksa di peramban: ganti
+        // `reportOnly: true` menjadi `false`. Periksa lebih dulu halaman Beranda
+        // (sematan Instagram & YouTube), footer (iframe Google Maps), halaman
+        // konten bergambar, serta pratinjau dokumen.
+        contentSecurityPolicy: {
+            reportOnly: true,
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: SUMBER_SKRIP,
+                styleSrc: SUMBER_GAYA,
+                fontSrc: SUMBER_FONT,
+                // Longgar dengan sengaja: gambar sematan berasal dari CDN pihak
+                // ketiga yang namanya berubah-ubah (Instagram, thumbnail YouTube),
+                // sehingga mustahil didaftarkan satu per satu.
+                imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+                frameSrc: SUMBER_BINGKAI,
+                connectSrc: ["'self'", 'https:'],
+                objectSrc: ["'none'"],
+                upgradeInsecureRequests: env.isProduction ? [] : null,
+            },
+        },
+        // Sematan pihak ketiga memuat sumber lintas asal; kebijakan bawaan helmet
+        // di sini terlalu ketat dan akan memutus embed.
+        crossOriginEmbedderPolicy: false,
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    })
+);
+
+// Memadatkan balasan. Berpengaruh nyata karena bundel frontend berukuran besar.
+app.use(compression());
+
+// CORS bersyarat menurut mode.
+const opsiCors = {
+    origin(origin, callback) {
+        // Permintaan tanpa header Origin (peralatan baris perintah, pemeriksa
+        // kesehatan, permintaan same-origin) sengaja diizinkan agar pemantauan
+        // dan penyajian berkas tidak ikut tertolak.
+        if (!origin) return callback(null, true);
+
+        // Development: bebaskan localhost apa pun portanya supaya pengembangan
+        // dan pengujian di lokal tidak terhambat.
+        if (env.isDevelopment) {
+            if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return callback(null, true);
+            return callback(null, true); // di lokal tetap longgar
+        }
+
+        // Production: hanya asal yang tercantum pada CORS_ORIGIN.
+        if (env.CORS_ORIGIN.includes(origin)) return callback(null, true);
+        return callback(new Error('Asal permintaan tidak diizinkan oleh kebijakan CORS.'));
+    },
+    credentials: true,
+};
+app.use(cors(opsiCors));
+
+// ------------------------------------------------------------ MUATAN MASUK
+// Batas muatan dibuat BERLAPIS. Sebelumnya 50 MB berlaku bagi seluruh aplikasi,
+// sehingga titik seperti /api/auth/login pun ikut menerima kiriman sebesar itu —
+// pemborosan memori yang mudah disalahgunakan untuk melelahkan peladen.
+// Batas longgar kini hanya untuk rute yang memang menyimpan konten kaya
+// (`deskripsi_kaya` bertipe longtext yang memuat HTML panjang).
+const BATAS_KONTEN_KAYA = '50mb';
+const BATAS_UMUM = '1mb';
+
+const JALUR_KONTEN_KAYA = ['/api/halaman-konten', '/api/berita', '/api/profil-pegawai'];
+const parserKontenKayaJson = express.json({ limit: BATAS_KONTEN_KAYA });
+const parserKontenKayaForm = express.urlencoded({ extended: true, limit: BATAS_KONTEN_KAYA });
+
+app.use((req, res, next) => {
+    if (!JALUR_KONTEN_KAYA.some((j) => req.path.startsWith(j))) return next();
+    // Dua parser dirangkai; yang kedua otomatis melewati bila yang pertama
+    // sudah membaca badan permintaan.
+    return parserKontenKayaJson(req, res, (err) => (err ? next(err) : parserKontenKayaForm(req, res, next)));
+});
+
+app.use(express.json({ limit: BATAS_UMUM }));
+app.use(express.urlencoded({ extended: true, limit: BATAS_UMUM }));
 
 // Sajikan berkas hasil upload (gambar dari editor) sebagai file statis.
 // Contoh: /uploads/1720-abc.webp → backend/uploads/1720-abc.webp
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Tembolok aman dipasang karena nama berkas mengandung stempel waktu beserta
+// byte acak, sehingga tidak pernah dipakai ulang untuk isi yang berbeda.
+app.use(
+    '/uploads',
+    express.static(path.join(__dirname, 'uploads'), {
+        maxAge: env.isProduction ? '30d' : 0,
+    })
+);
 
 // Routes
 app.use('/api', apiRoutes);
@@ -75,6 +174,49 @@ if (env.isProduction) {
         });
     });
 }
+
+// ------------------------------------------------------- PENANGAN GALAT
+// Dipasang PALING AKHIR, setelah seluruh rute. Express mengenali middleware
+// bergalat dari jumlah argumennya yang empat — `next` wajib ditulis walau
+// tidak dipakai, jangan dihapus.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    // Penolakan CORS sengaja dibedakan agar terbaca jelas oleh pemanggilnya.
+    if (err && /kebijakan CORS/i.test(err.message || '')) {
+        return res.status(403).json({ pesan: 'Asal permintaan tidak diizinkan.' });
+    }
+
+    // Muatan melampaui batas — beri pesan yang menjelaskan, bukan galat umum.
+    if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+        return res.status(413).json({ pesan: 'Data yang dikirim terlalu besar.' });
+    }
+
+    // Badan JSON yang rusak.
+    if (err && err.type === 'entity.parse.failed') {
+        return res.status(400).json({ pesan: 'Format data tidak sah.' });
+    }
+
+    // Rincian teknis cukup di log peladen. Jejak tumpukan TIDAK PERNAH dikirim
+    // ke klien di production karena dapat membocorkan struktur internal.
+    console.error('[galat tak tertangani]', req.method, req.originalUrl, '-', err && err.stack ? err.stack : err);
+
+    const status = err && Number.isInteger(err.status) ? err.status : 500;
+    return res.status(status).json({ pesan: 'Terjadi kesalahan pada server.' });
+});
+
+// Jaring pengaman terakhir. Tanpa ini, satu janji yang gagal tanpa penangkap
+// dapat mematikan proses di shared hosting — dan galat aslinya hilang tanpa
+// jejak sehingga sangat sukar ditelusuri.
+process.on('unhandledRejection', (alasan) => {
+    console.error('[unhandledRejection]', alasan instanceof Error ? alasan.stack : alasan);
+});
+
+process.on('uncaughtException', (galat) => {
+    console.error('[uncaughtException]', galat && galat.stack ? galat.stack : galat);
+    // Proses sengaja TIDAK dimatikan seketika: pada shared hosting, mematikan
+    // diri membuat situs tidak dapat diakses sampai pengelola proses
+    // menghidupkannya kembali. Galatnya dicatat agar dapat ditindaklanjuti.
+});
 
 // Ekspor app untuk digunakan di server.js (Pemisahan MVC)
 module.exports = app;

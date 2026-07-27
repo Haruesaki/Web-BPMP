@@ -17,8 +17,7 @@ exports.getFooterInfo = async (req, res) => {
 exports.updateFooterInfo = async (req, res) => {
   try {
     const { alamat, telepon, email, googleMaps } = req.body;
-    console.log("updateFooterInfo req.body:", req.body);
-    
+
     // Process Google Maps URL to ensure it is an embed link
     let urlGoogleMap = googleMaps || '';
     if (urlGoogleMap) {
@@ -75,11 +74,8 @@ exports.updateFooterInfo = async (req, res) => {
       posel: email || '',
       url_google_map: urlGoogleMap
     };
-    console.log("updateData to DB:", updateData);
-
     const updated = await InfoKontak.updateInfo(updateData);
-    console.log("DB update result:", updated);
-    
+
     // Log activity
     if (req.user) {
       const pName = req.user?.nama || 'System';
