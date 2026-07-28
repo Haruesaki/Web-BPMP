@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import './YoutubeSection.css';
 
-import Youtube from "../../../assets/source/youtube.png";
+import MediaKosong from "../../common/MediaKosong";
 
 // Komponen Iframe Player
 const IframePlayer = ({ videoId, isMain }) => (
@@ -92,7 +92,11 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
         <section className="youtube-section">
             <div className="yt-header-bar">
                 <div className="yt-profile-left">
-                    <img src={ytChannel?.thumbnails?.default?.url || Youtube} alt="YouTube Icon" className="yt-icon" style={ytChannel?.thumbnails ? { borderRadius: '50%' } : {}} />
+                    {ytChannel?.thumbnails?.default?.url ? (
+                        <img src={ytChannel.thumbnails.default.url} alt="YouTube Icon" className="yt-icon" style={{ borderRadius: '50%' }} loading="lazy" decoding="async" />
+                    ) : (
+                        <MediaKosong className="yt-icon" label="Ikon kanal YouTube belum tersedia" />
+                    )}
                     <span className="yt-channel-name">
                         {ytChannel?.title || "Memuat..."}
                     </span>

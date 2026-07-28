@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
 import "./NewsCardContent.css";
-import WOWOK from "../../../../assets/source/JanganKorupsi.png";
+import MediaKosong from "../../../common/MediaKosong";
 
 const NewsCard = ({ title, date, excerpt, imageSrc, link }) => (
   <Link to={link} style={{ textDecoration: 'none', display: 'block' }}>
@@ -11,7 +11,11 @@ const NewsCard = ({ title, date, excerpt, imageSrc, link }) => (
     <div className="news-shadow-wrapper">
       <div className="news-content-container">
         <div className="news-image-container">
-          {imageSrc && <img src={imageSrc} alt="News Thumbnail" loading="lazy" decoding="async" />}
+          {imageSrc ? (
+            <img src={imageSrc} alt="News Thumbnail" loading="lazy" decoding="async" />
+          ) : (
+            <MediaKosong fill label="Gambar berita belum tersedia" />
+          )}
         </div>
       </div>
     </div>
@@ -95,7 +99,7 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
             title={b.judul} 
             date={date} 
             excerpt={excerpt} 
-            imageSrc={b.url_foto || WOWOK} 
+            imageSrc={b.url_foto || null}
             link={`/berita/berita-${b.id}`}
           />
         );
