@@ -115,29 +115,57 @@ const Navbar = () => {
     }
   };
 
+  // --- Effect: Search Query Handling ---
+  // Debounces input, fetches search results from the API, filters them for relevance,
+  // and handles race conditions using an AbortController.
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     if (searchQuery.trim().length === 0) {
       setSearchResults([]);
       setShowSuggestions(false);
       setIsSearching(false);
       return;
     }
+
     setShowSuggestions(true);
     setIsSearching(true);
+    setSearchError(null);
+
     const searchHandler = setTimeout(async () => {
       try {
-        const res = await axiosInstance.get(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-        setSearchResults(res.data.data || []);
-        setSearchError(null);
-      } catch (err) {
-        console.error('Search error', err);
-        setSearchError(err.message || 'Error occurred');
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
+        const response = await axiosInstance.get(
+          `/api/search?q=${encodeURIComponent(searchQuery)}`,
+          { signal }
+        );
+        const backendResults = response.data.data || [];
+        
+        // Filter results client-side to ensure the title is relevant to the query.
+        // This provides a better user experience by removing items that match on
+        // content but not on the visible title.
+        const filteredResults = backendResults.filter(result =>
+          result.title && result.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        
+        setSearchResults(filteredResults);
 
-    return () => clearTimeout(searchHandler);
+      } catch (error) {
+        if (error.name !== 'CanceledError') {
+          console.error('Search error:', error);
+          setSearchError('Gagal melakukan pencarian.');
+        }
+      } finally {
+        if (!signal.aborted) {
+          setIsSearching(false);
+        }
+      }
+    }, 400); // Debounce time
+
+    return () => {
+      clearTimeout(searchHandler);
+      controller.abort();
+    };
   }, [searchQuery]);
 
   useEffect(() => {
@@ -387,6 +415,29 @@ const Navbar = () => {
     };
   }, [navData, forceMobileView]);
 
+  // --- Helper: Search Result Highlighter ---
+  // Highlights the search query within a given text, case-insensitively.
+  // Returns the text with matching parts wrapped in a <strong> tag.
+  const getHighlightedText = (text, highlight) => {
+    if (!highlight.trim() || !text) {
+      return text || ''; // Return empty string if text is null/undefined
+    }
+    const escapedHighlight = highlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escapedHighlight})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <strong key={i} className="highlighted-text">
+              {part}
+            </strong>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
   // --- Component Render ---
   return (
     <header ref={headerRef} className={`unified-header ${forceMobileView ? 'force-mobile-view' : ''}`}>
@@ -459,9 +510,22 @@ const Navbar = () => {
                         setSearchResults([]);
                       }}
                     >
-                      <div className="search-suggestion-title">{result.title}</div>
+                      <div className="search-suggestion-title">
+                        {getHighlightedText(result.title, searchQuery)}
+                      </div>
                       <div className="search-suggestion-meta">
-                        <span className="search-suggestion-type">{result.type}</span>
+                        {result.menu_location && (
+                          <div className="location-row">
+                            <span className="location-label">Menu :</span>
+                            <span className="location-value menu">{result.menu_location}</span>
+                          </div>
+                        )}
+                        {result.submenu_location && (
+                          <div className="location-row">
+                            <span className="location-label">SubMenu :</span>
+                            <span className="location-value submenu">{result.submenu_location}</span>
+                          </div>
+                        )}
                       </div>
                     </Link>
                   ))
