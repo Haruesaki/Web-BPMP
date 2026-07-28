@@ -18,21 +18,7 @@ body.no-scroll,
 body.body-no-scroll {
   overflow: hidden;
 }
-.measurement-ghost {
-  position: absolute;
-  visibility: hidden;
-  top: -9999px;
-  left: -9999px;
-  height: auto;
-  width: auto;
-  white-space: nowrap;
-  font-size: clamp(12px, 1vw, 15px);
-  font-weight: 500;
-  font-family: "Poppins", Arial, Helvetica, sans-serif;
-  padding: 8px 20px;
-  z-index: -100;
-  pointer-events: none;
-}
+
 /* =========================================
    Main Header Layout
    ========================================= */
