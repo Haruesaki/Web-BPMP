@@ -24,7 +24,11 @@
   content: "";
   position: absolute;
   top: 0;
-  left: -100%;
+  /* Posisi awal DITETAPKAN di sini; gerakannya lewat transform, bukan `left`.
+     Menganimasikan `left` memaksa layout tiap frame → dihitung sebagai layout
+     shift terus-menerus (CLS). `transform` diproses GPU dan tidak menggeser tata
+     letak. Gerakan visual tetap identik. */
+  left: -70%;
   width: 30%;
   height: 100%;
   background: linear-gradient(
@@ -36,17 +40,20 @@
     transparent 100%
   );
   filter: blur(40px);
-  transform: skewX(35deg);
+  transform: translateX(0) skewX(35deg);
   animation: lightSweep 11s infinite;
 }
 
+/* Semula menganimasikan `left` dari -70% ke 150% (rentang 220% lebar kontainer).
+   Lebar element = 30% kontainer, sehingga 220% kontainer = ~733% lebar element.
+   Jarak & waktu sama → sapuan cahaya terlihat persis sama, tanpa memicu CLS. */
 @keyframes lightSweep {
   0% {
-    left: -70%;
+    transform: translateX(0) skewX(35deg);
   }
 
   100% {
-    left: 150%;
+    transform: translateX(733%) skewX(35deg);
   }
 }
 
