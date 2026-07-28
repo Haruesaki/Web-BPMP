@@ -144,20 +144,30 @@ const HeroSection = () => {
 
         if (!header || !wrapper) return;
 
+        // Menarik background ke atas (margin negatif) dan mendorong konten ke bawah
+        // (padding positif) sebesar tinggi navbar, agar konten mulai tepat di bawahnya.
+        const terapkan = (height) => {
+            wrapper.style.marginTop = `-${height}px`;
+            wrapper.style.paddingTop = `${height}px`;
+        };
+
+        // Terapkan SEKALI secara sinkron di sini — useLayoutEffect berjalan SEBELUM
+        // browser menggambar, sehingga nilai awal sudah terpasang saat paint pertama
+        // dan tidak ada pergeseran tata letak (CLS). Sebelumnya penulisan pertama
+        // tertunda ke frame berikutnya lewat rAF di observer, membuat seluruh hero
+        // "turun" sekali setelah tampil. Hasil visual tetap identik.
+        terapkan(header.getBoundingClientRect().height);
+
         let animationFrameId = null;
 
         const observer = new ResizeObserver(entries => {
             // Gunakan rAF untuk mencegah layout thrashing dan memastikan animasi mulus
+            // pada perubahan BERIKUTNYA (mis. navbar berubah tinggi saat resize).
             cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
                 const entry = entries[0];
                 if (entry) {
-                    const height = entry.contentRect.height;
-                    // Secara dinamis mengatur margin negatif untuk menarik background ke atas
-                    // dan padding positif untuk mendorong konten ke bawah,
-                    // agar konten selalu dimulai tepat di bawah navbar.
-                    wrapper.style.marginTop = `-${height}px`;
-                    wrapper.style.paddingTop = `${height}px`;
+                    terapkan(entry.contentRect.height);
                 }
             });
         });
