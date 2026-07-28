@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
@@ -30,7 +30,6 @@ const Navbar = () => {
 
   // State untuk data dinamis dari API dan UI responsif
   const [headerLogoUrl, setHeaderLogoUrl] = useState(null);
-  const [forceMobileView, setForceMobileView] = useState(false);
 
   // Refs untuk interaksi DOM dan manajemen timeout
   const searchContainerRef = useRef(null);
@@ -39,7 +38,7 @@ const Navbar = () => {
   const leaveTimeoutRef = useRef(null);
   const overlayRef = useRef(null);
   const headerRef = useRef(null);
-  const measurementRef = useRef(null); 
+  
 
   // --- Effect: Initial Data Fetching ---
   // Mengambil data logo dan menu dari API saat komponen pertama kali dimuat.
@@ -183,13 +182,13 @@ const Navbar = () => {
   // Mengelola interaksi hover (mouseenter/mouseleave) untuk dropdown di mode desktop.
   const handleMouseEnter = (menuName) => {
     clearTimeout(leaveTimeoutRef.current);
-    if (window.innerWidth > 1290 && !forceMobileView) {
+    if (window.innerWidth > 1290) {
       setActiveDesktopDropdown(menuName);
     }
   };
   const handleMouseLeave = () => {
     leaveTimeoutRef.current = setTimeout(() => {
-      if (window.innerWidth > 1290 && !forceMobileView) {
+      if (window.innerWidth > 1290) {
         setActiveDesktopDropdown(null);
       }
     }, 200);
@@ -209,7 +208,7 @@ const Navbar = () => {
 
   const handleDropdownClick = (e, menu) => {
     e.preventDefault();
-    if (window.innerWidth <= 1290 || forceMobileView) {
+    if (window.innerWidth <= 1290) {
       setActiveDropdown(prevId => (prevId === menu.id ? null : menu.id));
     }
   };
@@ -268,7 +267,7 @@ const Navbar = () => {
     if (!navbar || !selector || allLinks.length === 0) return;
 
     const moveSelector = (targetElement) => {
-      if (!targetElement || window.innerWidth <= 1290 || forceMobileView) {
+      if (!targetElement || window.innerWidth <= 1290) {
         selector.style.opacity = '0';
         return;
       };
@@ -329,91 +328,7 @@ const Navbar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [location.pathname, navData, forceMobileView]);
-
-  // --- Effect: Responsive Wrap Detection ---
-  // Mendeteksi jika item navigasi "turun baris" (wrap) dan memaksa tampilan mobile.
-  useLayoutEffect(() => {
-    const headerElement = headerRef.current;
-    const ghostElement = measurementRef.current;
-    if (!headerElement || !ghostElement || navData.length <= 1) return;
-
-    let animationFrameId = null;
-    let resizeTimeoutId = null;
-
-    const performCheck = () => {
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = requestAnimationFrame(() => {
-        // Guard clause: Biarkan CSS yang bekerja jika layar sudah masuk mode mobile/tablet.
-        if (window.innerWidth <= 1290) {
-          if (forceMobileView) setForceMobileView(false);
-          return;
-        }
-
-        // Guard clause: Jangan lakukan pengukuran jika data menu belum siap.
-        if (navData.length < 2) {
-          if (forceMobileView) setForceMobileView(false);
-          return;
-        }
-
-        // --- LOGIKA PENGUKURAN---
-        let totalItemsWidth = 0;
-        navData.forEach(item => {
-          ghostElement.innerText = item.title;
-          let itemWidth = ghostElement.offsetWidth;
-          if (item.type === 'dropdown') {
-            itemWidth += 13;
-          }
-          totalItemsWidth += itemWidth;
-        });
-
-        // Kalkulasi lebar total termasuk jarak antar item.
-        const gap = window.innerWidth * 0.01;
-        totalItemsWidth += (navData.length - 1) * gap;
-
-        // Gunakan lebar header yang sebenarnya untuk kalkulasi ruang yang tersedia.
-        const headerRect = headerElement.getBoundingClientRect();
-        const navHorizontalPadding = window.innerWidth * 0.08;
-        const availableContentWidth = headerRect.width - navHorizontalPadding;
-
-        // --- PENGECEKAN KONDISI ---
-        // Kondisi 1: Navigasi "turun baris" (wrap)
-        const isWrapping = totalItemsWidth > (availableContentWidth - 50);
-        // Kondisi 2: Tinggi layar di bawah 480px
-        const isShortScreen = window.innerHeight < 480;
-
-        // Gabungkan kedua kondisi dengan logika "ATAU"
-        const shouldForceMobile = isWrapping || isShortScreen;
-
-        if (shouldForceMobile !== forceMobileView) {
-          setForceMobileView(shouldForceMobile);
-        }
-      });
-    };
-
-    // Buat handler yang di-debounce untuk efisiensi performa saat resize.
-    const debouncedCheck = () => {
-      clearTimeout(resizeTimeoutId);
-      resizeTimeoutId = setTimeout(performCheck, 150);
-    };
-
-    // Observer untuk perubahan ukuran elemen (mencakup perubahan lebar).
-    const observer = new ResizeObserver(debouncedCheck);
-    observer.observe(headerElement);
-
-    // Event listener untuk perubahan ukuran jendela (mencakup perubahan tinggi).
-    window.addEventListener('resize', debouncedCheck);
-
-    // Lakukan pengecekan awal saat komponen dimuat.
-    performCheck();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      clearTimeout(resizeTimeoutId);
-      observer.disconnect();
-      window.removeEventListener('resize', debouncedCheck);
-    };
-  }, [navData, forceMobileView]);
+  }, [location.pathname, navData]);
 
   // --- Helper: Search Result Highlighter ---
   // Highlights the search query within a given text, case-insensitively.
@@ -440,8 +355,7 @@ const Navbar = () => {
   };
   // --- Component Render ---
   return (
-    <header ref={headerRef} className={`unified-header ${forceMobileView ? 'force-mobile-view' : ''}`}>
-      <div ref={measurementRef} className="measurement-ghost"></div>
+    <header ref={headerRef} className="unified-header">
 
       <div className="header-top">
         <div className="header-menu">
