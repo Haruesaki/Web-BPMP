@@ -254,8 +254,11 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {heroImage && (
-                        <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                    {/* Wrapper SELALU dirender agar ruangnya dipesan sejak paint pertama
+                        (mencegah konten kiri melompat 55%→44% saat gambar datang dari fetch).
+                        Hanya isi bingkai + gambar yang menunggu data hero. */}
+                    <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                        {heroImage && (
                             <div className="hero-right-cms">
                                 <div className="bingkai-gambar-cms">
                                     <img
@@ -263,11 +266,15 @@ const HeroSection = () => {
                                         src={heroImage}
                                         alt="Visual Gedung dan Latar Belakang BPMP"
                                         className="cms-dynamic-image"
+                                        width="600"
+                                        height="600"
+                                        decoding="async"
+                                        fetchPriority="high"
                                     />
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </section>
         </div>
