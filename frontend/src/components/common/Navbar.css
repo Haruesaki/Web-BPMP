@@ -1093,7 +1093,7 @@ body.body-no-scroll {
     gap: clamp(10px, 2vw, 15px);
   }
   .header-actions .search-wrapper {
-    width: clamp(30px, 6vw, 37px);
+    /* width: clamp(30px, 0vw, 37px); */
     width: auto;
     height: clamp(30px, 7vw, 37px);
     max-width: clamp(30px, 7vw, 37px);
@@ -1120,8 +1120,11 @@ body.body-no-scroll {
     font-size: clamp(0.40rem, 2.14vw, 0.55rem);
   }
   .header-actions .search-trigger {
-    width: clamp(27px, 7vw, 35px);
-    height: clamp(30px, 7vw, 37px);
+    width: clamp(30px, 7vw, 35px);
+    height: clamp(30px, 7vw, 35px);
+    top: -1px;
+    right: -1px;
+    border: none
   }
   .header-actions .search-trigger i {
     font-size: clamp(11px, 3vw, 15px);
