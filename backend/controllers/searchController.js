@@ -1,5 +1,42 @@
 const db = require('../config/database');
 
+// --- HELPER: Mengambil dan memetakan hierarki menu untuk pencarian cepat ---
+const getMenuHierarchy = async () => {
+  const allMenus = await db('menu').where('is_aktif', true);
+  const menuMap = new Map(allMenus.map(m => [m.id, m]));
+  return menuMap;
+};
+
+// --- HELPER: Menentukan lokasi menu dari ID ---
+const getMenuLocation = (menuId, menuMap) => {
+  const menu = menuMap.get(menuId);
+  if (!menu) return { menu_location: null, submenu_location: null };
+
+  if (menu.induk_id) {
+    const parent = menuMap.get(menu.induk_id);
+    return {
+      menu_location: parent ? parent.nama_menu : null,
+      submenu_location: menu.nama_menu,
+    };
+  }
+  return {
+    menu_location: menu.nama_menu,
+    submenu_location: null,
+  };
+};
+
+// --- HELPER: Menentukan path/link dari sebuah item menu ---
+const getMenuPath = (menu, menuMap) => {
+  if (menu.jenis_menu === 'link') return menu.slug_atau_tautan || '#';
+
+  // Cek apakah menu ini adalah parent dari submenu lain
+  const hasChildren = [...menuMap.values()].some(m => m.induk_id === menu.id);
+  if (!menu.induk_id && hasChildren) {
+    return '#'; // Menu dropdown utama tidak bisa diklik
+  }
+  return `/halaman/${menu.id}`;
+};
+
 class SearchController {
   static async globalSearch(req, res) {
     try {
@@ -8,145 +45,76 @@ class SearchController {
         return res.json({ success: true, data: [] });
       }
 
-      // Pola dikurung `%` di kedua sisi agar kata kunci ditemukan di posisi mana
-      // pun, bukan hanya di awal teks. Dengan pola lama (`kata%`) pencarian
-      // "ciki" pada judul "aku suka makan ciki" tidak pernah cocok, dan
-      // pencarian pada `deskripsi_kaya` praktis mustahil berhasil karena isinya
-      // selalu dibuka oleh tag HTML seperti `<p>` atau `<figure>`.
       const keyword = `%${q.trim().toLowerCase()}%`;
       const results = [];
 
+      // OPTIMASI: Ambil semua menu sekali saja, hindari N+1 query
+      const menuMap = await getMenuHierarchy();
+
       // 1. Cari di nama menu (induk atau submenu)
-      const menus = await db('menu')
+      const menus = await db.from('menu')
         .whereRaw('LOWER(nama_menu) LIKE ?', [keyword])
         .andWhere('is_aktif', true);
 
       for (let m of menus) {
-        let typeVal = '';
-        let locationVal = '';
+        const location = getMenuLocation(m.id, menuMap);
 
+        // Jika hasil pencarian adalah sebuah submenu, jangan tampilkan
+        // lokasi submenu-nya lagi karena sudah terwakili oleh judul.
         if (m.induk_id) {
-          const parent = await db('menu').where('id', m.induk_id).first();
-          if (parent) {
-            typeVal = `Menu: ${parent.nama_menu}`;
-            locationVal = `Sub Menu: ${m.nama_menu}`;
-          }
-        } else {
-          typeVal = `Menu: ${m.nama_menu}`;
-          locationVal = '';
-        }
-
-        let link = `/halaman/${m.id}`;
-        if (m.jenis_menu === 'link') {
-            link = m.slug_atau_tautan || '#';
-        } else if (m.jenis_menu === 'default') {
-            link = `/halaman/${m.id}`;
-        } else {
-            link = `/halaman/${m.id}`; // default
-        }
-
-        // Jika ini adalah submenu, dropdown tidak punya path yang bisa diklik.
-        const isParent = !m.induk_id;
-        const hasChildren = await db('menu').where('induk_id', m.id).first();
-        if (isParent && hasChildren) {
-          link = '#';
+          location.submenu_location = null;
         }
 
         results.push({
           title: m.nama_menu,
-          type: typeVal,
-          location: locationVal,
-          path: link
+          type: 'Menu',
+          path: getMenuPath(m, menuMap),
+          ...location,
         });
       }
 
       // 2. Cari di halaman_konten
       const halamanKonten = await db('halaman_konten')
-        .join('menu', 'halaman_konten.menu_id', 'menu.id')
         .whereRaw('LOWER(halaman_konten.judul) LIKE ? OR LOWER(halaman_konten.deskripsi_kaya) LIKE ?', [keyword, keyword])
-        .andWhere('menu.is_aktif', true)
-        .select('halaman_konten.*', 'menu.nama_menu', 'menu.induk_id', 'menu.jenis_menu');
+        .select('judul', 'menu_id');
 
       for (let hk of halamanKonten) {
-        let typeVal = '';
-        let locationVal = '';
-
-        if (hk.induk_id) {
-          const parent = await db('menu').where('id', hk.induk_id).first();
-          if (parent) {
-            typeVal = `Menu: ${parent.nama_menu}`;
-            locationVal = `Sub Menu: ${hk.nama_menu}`;
-          }
-        } else {
-          typeVal = `Menu: ${hk.nama_menu}`;
-          locationVal = '';
-        }
-
+        const location = getMenuLocation(hk.menu_id, menuMap);
         results.push({
           title: hk.judul,
-          type: typeVal,
-          location: locationVal,
-          path: `/halaman/${hk.menu_id}`
+          type: 'Halaman',
+          path: `/halaman/${hk.menu_id}`,
+          ...location,
         });
       }
 
       // 3. Cari di berita
       const beritaList = await db('berita')
-        .join('menu', 'berita.menu_id', 'menu.id')
         .whereRaw('LOWER(berita.judul) LIKE ? OR LOWER(berita.deskripsi_kaya) LIKE ?', [keyword, keyword])
-        .andWhere('menu.is_aktif', true)
-        .select('berita.*', 'menu.nama_menu', 'menu.induk_id');
+        .select('judul', 'menu_id');
 
       for (let b of beritaList) {
-        let typeVal = '';
-        let locationVal = '';
-
-        if (b.induk_id) {
-          const parent = await db('menu').where('id', b.induk_id).first();
-          if (parent) {
-            typeVal = `Menu: ${parent.nama_menu}`;
-            locationVal = `Sub Menu: ${b.nama_menu}`;
-          }
-        } else {
-          typeVal = `Menu: ${b.nama_menu}`;
-          locationVal = '';
-        }
-
+        const location = getMenuLocation(b.menu_id, menuMap);
         results.push({
           title: b.judul,
-          type: typeVal,
-          location: locationVal,
-          path: `/halaman/${b.menu_id}`
+          type: 'Berita',
+          path: `/halaman/${b.menu_id}`,
+          ...location,
         });
       }
 
       // 4. Cari di profil_pegawai
       const pegawaiList = await db('profil_pegawai')
-        .join('menu', 'profil_pegawai.menu_id', 'menu.id')
         .whereRaw('LOWER(profil_pegawai.nama_lengkap) LIKE ? OR LOWER(profil_pegawai.jabatan) LIKE ? OR LOWER(profil_pegawai.quotes) LIKE ?', [keyword, keyword, keyword])
-        .andWhere('menu.is_aktif', true)
-        .select('profil_pegawai.*', 'menu.nama_menu', 'menu.induk_id');
+        .select('nama_lengkap', 'menu_id');
 
       for (let p of pegawaiList) {
-        let typeVal = '';
-        let locationVal = '';
-
-        if (p.induk_id) {
-          const parent = await db('menu').where('id', p.induk_id).first();
-          if (parent) {
-            typeVal = `Menu: ${parent.nama_menu}`;
-            locationVal = `Sub Menu: ${p.nama_menu}`;
-          }
-        } else {
-          typeVal = `Menu: ${p.nama_menu}`;
-          locationVal = '';
-        }
-
+        const location = getMenuLocation(p.menu_id, menuMap);
         results.push({
           title: p.nama_lengkap,
-          type: typeVal,
-          location: locationVal,
-          path: `/halaman/${p.menu_id}`
+          type: 'Pegawai',
+          path: `/halaman/${p.menu_id}`,
+          ...location,
         });
       }
 
