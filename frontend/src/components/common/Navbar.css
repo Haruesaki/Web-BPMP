@@ -1534,48 +1534,49 @@ body.body-no-scroll {
   /* --- Logo --- */
   .header-logo {
     /* Buat logo sedikit lebih pendek */
-    height: clamp(40px, 3.6vw, 58px);
+    height: clamp(35px, 3vw, 40px);
   }
 
   /* --- Tombol Aksi di Header (Search & TTS) --- */
   .header-actions {
     /* Kurangi jarak antar tombol */
-    gap: 12px;
+    gap: 15px;
   }
 
   /* --- Tombol TTS --- */
   .btn-voice {
-    padding-left: 15px;
+    padding-left: 20px;
     gap: 12px;
   }
   .btn-voice img {
-    width: 36px; /* Sedikit lebih kecil */
+    width: 28px; /* Sedikit lebih kecil */
   }
   .btn-voice span {
-    font-size: clamp(10px, 1.2vw, 12px); /* Sedikit lebih kecil */
+    font-size: 9px; /* Sedikit lebih kecil */
   }
 
   /* --- Wrapper & Tombol Pencarian --- */
   .search-wrapper,
   .header-actions .search-trigger {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
   }
 
    .header-actions .search-trigger {
-    width: clamp(27px, 7vw, 35px);
-    height: clamp(30px, 7vw, 37px);
+    width: 30px;
+    height: 30px;
   }
   .header-actions .search-trigger i {
-    font-size: clamp(11px, 3vw, 15px);
+    font-size: 12px;
   }
 
   .search-wrapper.active {
-    width: 250px; /* Lebar saat aktif juga dikurangi */
+    width: 200px; /* Lebar saat aktif juga dikurangi */
   }
   .search-input {
     padding-left: 22px;
     padding-right: 58px;
+    font-size: clamp(10px, 1.2vw, 10px); /* Sedikit lebih kecil */
   }
 
   /* --- Bar Navigasi Utama --- */
@@ -1586,7 +1587,7 @@ body.body-no-scroll {
     padding-top: 8px;
     padding-bottom: 12px;
     /* Kurangi jarak antar item menu */
-    gap: 0.9vw;
+    gap: 0.6vw;
   }
 
   /* --- Item & Link Menu Navigasi --- */
@@ -1594,7 +1595,7 @@ body.body-no-scroll {
     /* Kurangi padding vertikal & horizontal */
     padding: 7px 18px;
     /* Kecilkan sedikit ukuran font */
-    font-size: clamp(11px, 0.9vw, 14px);
+    font-size: clamp(8px, 0.9vw, 11px);
   }
 
   /* --- Indikator Menu Aktif --- */
@@ -1624,11 +1625,12 @@ body.body-no-scroll {
   /* Tambahan: Kecilkan font dan padding item dropdown */
   .dropdown-menu a {
     padding: 13px 5px;
-    font-size: 13px;
+    font-size: 10px;
+    font-weight: 500;
   }
 
   .dropdown-menu a:hover {
-    padding-left: 13px;
+    padding-left: 10px;
     border-radius: 9px;
   }
 
@@ -1649,11 +1651,11 @@ body.body-no-scroll {
   }
 
   .search-suggestion-title {
-    font-size: clamp(0.7rem, 0.25rem + 0.75vw, 0.8rem);
+    font-size: clamp(0.50rem,1.6vw, 0.65rem);
   }
 
   .search-suggestion-meta {
-    font-size: clamp(0.5rem, 0.25rem + 0.42vw, 0.6rem);
+    font-size: clamp(0.35rem,1.5vw, 0.5rem);
   }
 
   /* =================================================================== */
@@ -1861,6 +1863,80 @@ body.body-no-scroll {
       padding: 9px; /* Kecilkan padding saat terbuka */
     }
   }
+
+  @media (max-width: 888px) {
+  .header-menu {
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 10px;
+    border-bottom: 1.2px solid rgba(255, 255, 255, 0.375);
+  }
+  .header-actions {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-end;
+    margin-left: 0;
+    gap: clamp(10px, 2vw, 15px);
+  }
+  .header-actions .search-wrapper {
+    /* width: clamp(30px, 0vw, 37px); */
+    width: auto;
+    border:none;
+    height: clamp(26px, 7vw, 32px);
+    max-width: clamp(26px, 7vw, 32px);
+    flex-grow: 0;
+    transition: max-width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .header-actions .search-wrapper.active {
+    max-width: 250px;
+    flex-grow: 1;
+    border:none;
+  }
+  .header-actions .search-wrapper .search-input {
+    padding: 0px 20px;
+    font-size: clamp(8.4px, 2vw, 12px);
+  }
+  .search-suggestion-title {
+    -webkit-line-clamp: 2;
+  }
+  .search-suggestion-item {
+    padding: 10px 12px;
+  }
+  .search-suggestion-meta {
+    margin: 0px;
+  }
+  .header-actions .search-trigger {
+    width: clamp(30px, 8vw, 36px);
+    height: clamp(29px, 9vw, 36px);
+    top: -2px;
+    right: -2px;
+    border: none
+  }
+
+  .header-actions button {
+    border: none;
+  }
+
+  .header-actions button:hover {
+    border: none;
+  }
+
+  .header-actions .search-trigger i {
+    font-size: clamp(10px, 3vw, 13px);
+  }
+  .header-actions .btn-voice {
+    padding: 0px;
+    padding-left: 15px;
+    gap: clamp(6px, 1.2vw, 12px);
+  }
+  .header-actions .btn-voice .voice-text {
+    font-size: clamp(9px, 1.5vw, 9px);
+  }
+  .header-actions .btn-voice img {
+    width: clamp(26px, 6vw, 32px);
+  }
+} 
 
   /* =================================================================== */
   /* Tahap 3: Penanganan TopBar pada Ketinggian Layar Pendek             */
