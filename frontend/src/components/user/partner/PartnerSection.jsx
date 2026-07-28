@@ -301,6 +301,8 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
                                             src={mitra}
                                             alt={`Mitra Kerja BPMP ${index + 1}`}
                                             className="partner-logo"
+                                            loading="lazy"
+                                            decoding="async"
                                         />
                                     </span>
                                 ))}

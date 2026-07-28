@@ -13,7 +13,7 @@ const CardContent = ({
       <div className="card-light-sweep"></div>
 
       <div className="profile-frame">
-        <img src={imageSrc} alt={`Profil ${name}`} />
+        <img src={imageSrc} alt={`Profil ${name}`} loading="lazy" decoding="async" />
       </div>
 
       <div className="card-text">

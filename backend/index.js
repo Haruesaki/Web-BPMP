@@ -182,7 +182,19 @@ if (env.isProduction) {
         console.error('[frontend] Tempatkan folder dist pada salah satu jalur di atas, atau tetapkan FRONTEND_DIST_PATH.');
     }
 
-    app.use(express.static(dirDist));
+    // Aset ber-hash Vite (index-AbC123.js, dst) tidak pernah berubah isi untuk
+    // nama yang sama, sehingga aman di-cache setahun penuh (immutable). Namun
+    // index.html WAJIB no-cache: ia merujuk nama aset ber-hash terbaru, jadi bila
+    // ikut ter-cache lama, pengunjung tetap memuat versi lama setelah deploy baru.
+    app.use(express.static(dirDist, {
+        maxAge: env.isProduction ? '1y' : 0,
+        immutable: env.isProduction,
+        setHeaders: (res, filePath) => {
+            if (filePath.endsWith('index.html')) {
+                res.setHeader('Cache-Control', 'no-cache');
+            }
+        },
+    }));
 
     // Tangkap semua route yang tidak ada di /api dan serahkan ke React Router.
     //
@@ -215,6 +227,8 @@ if (env.isProduction) {
             return res.status(404).json({ pesan: 'Halaman tidak ditemukan' });
         }
 
+        // index.html tidak boleh ter-cache lama (lihat alasan di express.static di atas).
+        res.setHeader('Cache-Control', 'no-cache');
         return res.sendFile(path.join(dirDist, 'index.html'), (err) => {
             if (err) next(err);
         });

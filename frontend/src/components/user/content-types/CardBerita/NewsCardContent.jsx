@@ -11,7 +11,7 @@ const NewsCard = ({ title, date, excerpt, imageSrc, link }) => (
     <div className="news-shadow-wrapper">
       <div className="news-content-container">
         <div className="news-image-container">
-          {imageSrc && <img src={imageSrc} alt="News Thumbnail" />}
+          {imageSrc && <img src={imageSrc} alt="News Thumbnail" loading="lazy" decoding="async" />}
         </div>
       </div>
     </div>

@@ -167,7 +167,7 @@ const NewsSection = ({ previewData }) => {
                                         style={{ transform: `translateX(${(index - featuredIndex) * 100}%)`, cursor: 'pointer' }}
                                         onClick={() => navigate(`/berita/${news.id}`)}
                                     >
-                                        <img src={news.image} alt={news.title} className="featured-img" />
+                                        <img src={news.image} alt={news.title} className="featured-img" loading="lazy" decoding="async" />
                                         <div className="featured-overlay">
                                             {/* title: judul utuh saat hover, karena teks dipotong "…" */}
                                             <h3 title={news.title}>{news.title}</h3>
@@ -197,6 +197,8 @@ const NewsSection = ({ previewData }) => {
                                         src={thumb.image}
                                         alt={`Thumbnail: ${thumb.title}`}
                                         className="thumb-img"
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 </div>
                             ))}
