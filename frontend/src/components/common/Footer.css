@@ -6,32 +6,37 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    /* SATU PATOKAN untuk seluruh footer. Semua ukuran di dalam memakai `em`
+       (relatif ke sini), jadi cukup ubah font-size ini SATU BARIS untuk
+       memperbesar/memperkecil footer secara proporsional. */
+    font-size: 16px;
 }
 
 /* --- Area Utama Footer (3 Kolom) --- */
 .footer-content-area {
     background-color: #0B132B;
-    padding: 60px 8% 40px 8%;
+    /* vertikal pakai em (ikut patokan), horizontal tetap % (ikut lebar). */
+    padding: 3.75em 8% 2.5em 8%;
 }
 
 .footer-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr 1fr;
     /* Kolom pertama sedikit lebih lebar */
-    gap: 40px;
+    gap: 2.5em;
 }
 
 .footer-col {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.5em;
 }
 
 .footer-col-title {
     font-family: 'Poppins', sans-serif;
-    font-size: 20px;
+    font-size: 1.25em;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-bottom: 0.9375em;
     margin-top: 0;
     color: #ffffff;
     letter-spacing: 0.5px;
@@ -41,7 +46,7 @@
 .footer-text,
 .footer-link {
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
+    font-size: 0.875em;
     font-weight: 300;
     color: #D1D5DB;
     /* Abu-abu terang sesuai desain */
@@ -63,6 +68,8 @@
 
 /* Styling Peta Maps */
 .footer-map-wrapper iframe {
+    /* height em → ikut patokan (override atribut height=180 di JSX). */
+    height: 11.25em;
     border-radius: 4px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     filter: contrast(1.1);
@@ -74,12 +81,12 @@
     background-color: #050814;
     /* Biru sangat gelap (nyaris hitam) */
     text-align: center;
-    padding: 25px 0;
+    padding: 1.5625em 0;
 }
 
 .footer-bottom-bar p {
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
+    font-size: 0.875em;
     font-weight: 400;
     color: #ffffff;
     margin: 0;
@@ -91,7 +98,7 @@
     .footer-grid {
         grid-template-columns: 1fr;
         /* Berubah menjadi 1 kolom (atas-bawah) */
-        gap: 50px;
+        gap: 3.125em;
     }
 
     .footer-col {
@@ -101,5 +108,17 @@
 
     .footer-link {
         align-items: center;
+    }
+}
+
+/* Layar pendek (≤700px): cukup UBAH SATU BARIS ini — patokan mengecil, seluruh
+   footer (padding, gap, judul, teks, peta, bottom bar) ikut mengecil proporsional
+   karena semuanya memakai em. Setel angka ini sesuai selera. */
+@media (max-height: 700px) {
+    .main-footer {
+        font-size: 12px;
+    }
+    .footer-content-area {
+        padding: 2em 8% 1em 8%;
     }
 }
