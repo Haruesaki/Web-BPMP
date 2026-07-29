@@ -4,6 +4,7 @@ const fsSync = require('fs');
 const crypto = require('crypto');
 const sharp = require('sharp');
 const MediaModel = require('../models/mediaModel');
+const env = require('../config/env');
 
 // =========================================================================
 //  UPLOAD CONTROLLER — menerima gambar dari CKEditor (SimpleUploadAdapter).
@@ -20,7 +21,7 @@ const MediaModel = require('../models/mediaModel');
 //  memangkas ukuran berkas drastis sehingga halaman user cepat dimuat.
 // =========================================================================
 
-const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
+const UPLOAD_DIR = env.UPLOAD_DIR;
 const MAX_WIDTH = 1600; // px — gambar lebih lebar dari ini diperkecil
 const WEBP_QUALITY = 80; // 0-100, kompromi kualitas vs ukuran
 
