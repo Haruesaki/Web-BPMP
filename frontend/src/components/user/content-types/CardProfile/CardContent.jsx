@@ -30,17 +30,8 @@ const CardContent = ({
       </div>
 
       <div className="wave-shadow-wrapper">
-        <div className="wave-content-container">
-          <div className="orb orb-1"></div>
-          <div className="orb orb-2"></div>
-          <div className="orb orb-3"></div>
-          <div className="orb orb-4"></div>
-          <div className="orb orb-bwh1"></div>
-          <div className="orb orb-bwh2"></div>
-          <div className="orb orb-bwh3"></div>
-          <div className="orb orb-bwh4"></div>
-          <div className="orb orb-7"></div>
-        </div>
+        {/* Latar belakang solid dengan efek gelombang dari mask-image */}
+        <div className="wave-content-container"></div>
       </div>
     </div>
   );
