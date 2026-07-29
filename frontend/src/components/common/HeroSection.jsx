@@ -245,6 +245,14 @@ const HeroSection = () => {
                         <h1 className="main-title">
                             {typedText}
                             <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
+                            {/* Sisa judul yang belum diketik dirender TAK TERLIHAT untuk
+                                memesan tinggi penuh kotak judul sejak awal. Tanpa ini,
+                                efek ketik menumbuhkan judul baris demi baris → mendorong
+                                konten di bawahnya (CLS besar di mobile). Tampilan tetap
+                                sama: yang terlihat hanya teks terketik + kursor. */}
+                            <span className="main-title-reservasi" aria-hidden="true">
+                                {fullText.slice(typedText.length)}
+                            </span>
                         </h1>
 
                         <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>

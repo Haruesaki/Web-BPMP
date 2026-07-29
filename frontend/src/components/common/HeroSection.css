@@ -157,6 +157,13 @@
   max-width: 100%;
 }
 
+/* Sisa judul (belum diketik) — tak terlihat tapi TETAP memakan ruang, agar
+   tinggi kotak judul sudah penuh sejak awal dan efek ketik tidak menggeser
+   tata letak (anti-CLS). */
+.main-title-reservasi {
+  visibility: hidden;
+}
+
 .sub-title {
   font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(0.9rem, min(1.1vw, 2vh), 1.1rem);
