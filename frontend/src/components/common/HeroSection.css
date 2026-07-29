@@ -369,6 +369,16 @@
   display: none;
 }
 
+/*
+  Penahan ruang bagi judul yang sedang diketik — lihat penjelasannya di
+  HeroSection.jsx. Wajib `visibility: hidden`, JANGAN `display: none`:
+  elemen yang tidak ditampilkan tidak memesan ruang sama sekali, sehingga
+  justru meniadakan gunanya.
+*/
+.main-title-reservasi {
+  visibility: hidden;
+}
+
 @keyframes fadeDown {
   0% {
     opacity: 0;

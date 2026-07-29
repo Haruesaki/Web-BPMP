@@ -245,6 +245,23 @@ const HeroSection = () => {
                         <h1 className="main-title">
                             {typedText}
                             <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
+                            {/*
+                              Penahan ruang bagi animasi ketik (perbaikan CLS).
+                              Judul diketik huruf demi huruf, sehingga tingginya bertambah
+                              setiap kali teks berpindah baris — dan seluruh isi di bawahnya
+                              ikut terdorong. Pergeseran itulah yang menjatuhkan skor
+                              Cumulative Layout Shift, terasa paling parah di layar ponsel
+                              yang sempit karena barisnya lebih sering bertambah.
+                              Sisa teks yang belum diketik tetap dirender di sini agar
+                              ruangnya sudah terpesan sejak awal, lalu disembunyikan lewat
+                              `visibility: hidden` — bukan `display: none`, sebab elemen yang
+                              tidak ditampilkan tidak memesan ruang apa pun.
+                              `aria-hidden` dipasang supaya pembaca layar tidak membacakan
+                              judul dua kali.
+                            */}
+                            <span className="main-title-reservasi" aria-hidden="true">
+                                {fullText.slice(typedText.length)}
+                            </span>
                         </h1>
 
                         <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
