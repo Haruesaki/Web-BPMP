@@ -170,6 +170,18 @@ if (isProduction) {
   if (/^(localhost|127\.0\.0\.1)$/i.test(env.DB.host)) {
     peringatan.push('DB_HOST menunjuk localhost saat production. Pastikan memang demikian pada peladen Anda.');
   }
+
+  // Peringatan, bukan galat: aplikasi tetap berjalan tanpa UPLOAD_DIR, tetapi
+  // berkas unggahan akan tersimpan DI DALAM folder aplikasi dan ikut tersapu
+  // pada penempatan ulang berikutnya — seluruh gambar situs rusak, dan
+  // kegagalannya baru terlihat setelah deploy, bukan saat boot. Justru itu
+  // sebabnya perlu disuarakan di sini.
+  if (!baca('UPLOAD_DIR')) {
+    peringatan.push(
+      'UPLOAD_DIR belum diisi saat production. Berkas unggahan akan disimpan di dalam folder aplikasi ' +
+        'dan HILANG pada penempatan ulang berikutnya. Isi dengan folder di luar folder aplikasi.'
+    );
+  }
 } else {
   // Development: cukup diingatkan supaya kekurangannya diketahui sejak dini,
   // tanpa menghambat pengujian di localhost.

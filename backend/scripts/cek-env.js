@@ -25,7 +25,10 @@ const baca = (nama) => String(process.env[nama] ?? '').trim();
 // Daftar ini mengikuti config/env.js. Bila daftar di sana berubah, ubah di sini.
 const WAJIB_SELALU = ['DB_HOST', 'DB_USER', 'DB_NAME', 'JWT_SECRET'];
 const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
-const DIANJURKAN = ['TZ', 'DB_PASSWORD', 'CRON_SECRET', 'YOUTUBE_API_KEY', 'YOUTUBE_CHANNEL_ID', 'RAPIDAPI_KEY'];
+// UPLOAD_DIR sengaja masuk golongan ini: kosongnya tidak menghentikan proses,
+// tetapi di peladen berarti berkas unggahan tersimpan di dalam folder aplikasi
+// dan ikut tersapu setiap penempatan ulang — seluruh gambar situs rusak.
+const DIANJURKAN = ['TZ', 'DB_PASSWORD', 'UPLOAD_DIR', 'CRON_SECRET', 'YOUTUBE_API_KEY', 'YOUTUBE_CHANNEL_ID', 'RAPIDAPI_KEY'];
 // PUBLIC_BASE_URL ada di sini, bukan di daftar wajib: tidak ada berkas kode
 // yang membacanya sejak URL aset diubah menjadi relatif pada Tahap 4.
 const OPSIONAL = ['PORT', 'PUBLIC_BASE_URL', 'FRONTEND_DIST_PATH', 'ALLOW_PRODUCTION_SEED'];

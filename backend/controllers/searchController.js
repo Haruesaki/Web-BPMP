@@ -25,6 +25,23 @@ const getMenuLocation = (menuId, menuMap) => {
   };
 };
 
+// --- HELPER: Apakah konten masih dapat dijangkau lewat menunya? ---
+//
+// Konten hanya layak muncul di hasil pencarian bila menu induknya masih ada
+// dan masih aktif, sebab tautan hasil pencarian selalu berbentuk
+// `/halaman/<menu_id>`. Tanpa penjagaan ini:
+//
+//   - Konten yatim (sisa menu yang sudah dihapus, `menu_id` bernilai NULL)
+//     menghasilkan tautan `/halaman/null` yang berujung pada halaman kosong
+//     bertuliskan "Halaman tidak ditemukan (ID: null)".
+//   - Konten milik menu yang dinonaktifkan tetap dapat ditemukan pengunjung,
+//     padahal menunya sengaja disembunyikan dari navigasi.
+//
+// `menuMap` hanya memuat menu aktif (lihat getMenuHierarchy), sehingga satu
+// pemeriksaan ini menutup kedua keadaan tersebut sekaligus.
+const menuDapatDijangkau = (menuId, menuMap) =>
+  menuId !== null && menuId !== undefined && menuMap.has(menuId);
+
 // --- HELPER: Menentukan path/link dari sebuah item menu ---
 const getMenuPath = (menu, menuMap) => {
   if (menu.jenis_menu === 'link') return menu.slug_atau_tautan || '#';
@@ -79,6 +96,7 @@ class SearchController {
         .select('judul', 'menu_id');
 
       for (let hk of halamanKonten) {
+        if (!menuDapatDijangkau(hk.menu_id, menuMap)) continue;
         const location = getMenuLocation(hk.menu_id, menuMap);
         results.push({
           title: hk.judul,
@@ -94,6 +112,7 @@ class SearchController {
         .select('judul', 'menu_id');
 
       for (let b of beritaList) {
+        if (!menuDapatDijangkau(b.menu_id, menuMap)) continue;
         const location = getMenuLocation(b.menu_id, menuMap);
         results.push({
           title: b.judul,
@@ -109,6 +128,7 @@ class SearchController {
         .select('nama_lengkap', 'menu_id');
 
       for (let p of pegawaiList) {
+        if (!menuDapatDijangkau(p.menu_id, menuMap)) continue;
         const location = getMenuLocation(p.menu_id, menuMap);
         results.push({
           title: p.nama_lengkap,
