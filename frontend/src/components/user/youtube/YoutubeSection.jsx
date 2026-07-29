@@ -3,20 +3,41 @@ import './YoutubeSection.css';
 
 import MediaKosong from "../../common/MediaKosong";
 
-// Komponen Iframe Player
-const IframePlayer = ({ videoId, isMain }) => (
-    <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`}>
-        <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-        ></iframe>
-    </div>
-);
+// Komponen Iframe Player dengan pola "facade":
+// Awalnya HANYA menampilkan thumbnail + tombol play (ringan). Iframe YouTube
+// yang berat (menyeret analitik YouTube + iklan DoubleClick, ~1 MB/video) baru
+// dimuat SAAT DIKLIK. Ini menghapus rantai jaringan kritis ~7 detik di mobile
+// tanpa mengubah tampilan: sebelum diklik pun iframe YouTube hanya menampilkan
+// thumbnail + tombol play yang serupa.
+const IframePlayer = ({ videoId, isMain }) => {
+    const [aktif, setAktif] = React.useState(false);
+
+    return (
+        <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`}>
+            {aktif ? (
+                <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                ></iframe>
+            ) : (
+                <button
+                    type="button"
+                    className="yt-facade"
+                    onClick={() => setAktif(true)}
+                    aria-label="Putar video YouTube"
+                    style={{ backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }}
+                >
+                    <span className="yt-facade-play" aria-hidden="true"></span>
+                </button>
+            )}
+        </div>
+    );
+};
 
 // Komponen Placeholder untuk saat tidak ada video
 const VideoPlaceholder = () => (

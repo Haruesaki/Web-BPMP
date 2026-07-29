@@ -242,7 +242,7 @@ body.body-no-scroll {
   font-size: clamp(12px, 1vw, 15.5px);
   text-shadow: 0px 0px 20px rgb(27, 27, 27);
   font-weight: 500;
-  font-family: "Poppins", Arial, Helvetica, sans-serif;
+  font-family: "Poppins", "Poppins-fallback", Arial, Helvetica, sans-serif;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -389,7 +389,7 @@ body.body-no-scroll {
   position: relative; /* Agar z-index bekerja */
   font-size: 14px;
   font-weight: 400;
-  font-family: "Poppins", Arial, Helvetica, sans-serif;
+  font-family: "Poppins", "Poppins-fallback", Arial, Helvetica, sans-serif;
   opacity: 0;
   transform: translateX(-30px);
   white-space: normal;
@@ -451,7 +451,7 @@ body.body-no-scroll {
   border: none;
   outline: none;
   color: #ffffff;
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(12px, 1.2vw, 14px);
   padding-left: 25px;
   padding-right: 65px;
@@ -544,7 +544,7 @@ body.body-no-scroll {
   );
 }
 .btn-voice span {
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(12px, 1.2vw, 14px);
   font-weight: 500;
   white-space: nowrap;
@@ -645,7 +645,7 @@ body.body-no-scroll {
   width: 100%;
   overflow: hidden;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Poppins-fallback', sans-serif;
   opacity: 0;
   animation: slideInFromLeft 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   animation-delay: var(--animation-delay, 0s);
@@ -859,7 +859,7 @@ body.body-no-scroll {
     border: none;
     color: #ffffff;
     font-size: 15px;
-    font-family: "Poppins", sans-serif;
+    font-family: "Poppins", "Poppins-fallback", sans-serif;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -1341,7 +1341,7 @@ body.body-no-scroll {
   border: none;
   color: #ffffff;
   font-size: 15px;
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -1755,7 +1755,7 @@ body.body-no-scroll {
       border: none;
       color: #ffffff;
       font-size: 12px; /* Font lebih kecil */
-      font-family: "Poppins", sans-serif;
+      font-family: "Poppins", "Poppins-fallback", sans-serif;
       font-weight: 700;
       display: flex;
       align-items: center;

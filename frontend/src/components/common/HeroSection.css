@@ -139,7 +139,7 @@
 }
 
 .welcome-text {
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(1.2rem, min(1.5vw, 2.2vh), 1.7rem);
   font-weight: 500;
   overflow-wrap: break-word;
@@ -148,7 +148,7 @@
 }
 
 .main-title {
-  font-family: "Poppins", serif;
+  font-family: "Poppins", "Poppins-fallback", serif;
   font-size: clamp(2.2rem, min(2.5vw, 4.5vh), 2.8rem);
   line-height: 1.2;
   margin: 0;
@@ -158,7 +158,7 @@
 }
 
 .sub-title {
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(0.9rem, min(1.1vw, 2vh), 1.1rem);
   font-weight: 400;
   margin: 0;

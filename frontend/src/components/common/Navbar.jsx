@@ -370,7 +370,7 @@ const Navbar = () => {
           <div className="header-logo">
             {headerLogoUrl && (
               <div className="logo-container">
-                <img src={headerLogoUrl} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" />
+                <img src={headerLogoUrl} alt="Logo Kemendikdasmen BPMP Lampung" className="main-logo" fetchPriority="high" decoding="async" />
               </div>
             )}
           </div>
