@@ -1,5 +1,6 @@
 const axios = require('axios');
 const instagramModel = require('../models/instagramModel');
+const env = require('../config/env');
 
 /**
  * Fetch profil dari RapidAPI dan simpan ke database (digunakan oleh cron job dan update admin)
@@ -64,7 +65,7 @@ const fetchAndCacheInstagramProfile = async (targetUsername = null) => {
              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
           }
         });
-        const uploadDir = path.join(__dirname, '../uploads');
+        const uploadDir = env.UPLOAD_DIR;
         if (!fs.existsSync(uploadDir)){
             fs.mkdirSync(uploadDir, { recursive: true });
         }

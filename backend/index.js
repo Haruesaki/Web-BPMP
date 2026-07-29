@@ -123,7 +123,7 @@ app.use(express.urlencoded({ extended: true, limit: BATAS_UMUM }));
 // byte acak, sehingga tidak pernah dipakai ulang untuk isi yang berbeda.
 app.use(
     '/uploads',
-    express.static(path.join(__dirname, 'uploads'), {
+    express.static(env.UPLOAD_DIR, {
         maxAge: env.isProduction ? '30d' : 0,
     })
 );

@@ -2,8 +2,9 @@ const LogoMitra = require('../models/LogoMitra');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
+const env = require('../config/env');
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads', 'mitra');
+const UPLOADS_DIR = path.join(env.UPLOAD_DIR, 'mitra');
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }

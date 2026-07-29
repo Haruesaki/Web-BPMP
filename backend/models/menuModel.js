@@ -46,14 +46,43 @@ class MenuModel {
     return await db('menu').where('id', id).first();
   }
 
-  // Hapus menu beserta sub-menunya
+  // Hapus menu beserta sub-menu DAN seluruh konten miliknya.
+  //
+  // Sebelumnya fungsi ini hanya menghapus baris pada tabel `menu`, lalu
+  // menyerahkan nasib kontennya kepada foreign key. Ternyata ketiga tabel
+  // konten TIDAK seragam perilakunya:
+  //
+  //   profil_pegawai  ON DELETE CASCADE   -> ikut terhapus (benar)
+  //   halaman_konten  ON DELETE SET NULL  -> baris BERTAHAN, menu_id jadi NULL
+  //   berita          ON DELETE SET NULL  -> baris BERTAHAN, menu_id jadi NULL
+  //
+  // Akibatnya konten dari menu yang sudah dihapus menjadi yatim: tidak dapat
+  // dijangkau halaman mana pun, tetapi masih terjaring pencarian global dan
+  // menghasilkan tautan `/halaman/null` yang berujung pada halaman kosong.
+  //
+  // Karena itu konten kini dihapus di sini secara eksplisit SEBELUM baris
+  // menunya dihapus. Dengan urutan itu, ON DELETE SET NULL tidak pernah sempat
+  // berjalan, dan ketiga tabel berperilaku sama. Penghapusan `profil_pegawai`
+  // sengaja tetap ditulis walau foreign key-nya sudah CASCADE, supaya perilaku
+  // yang berlaku terbaca langsung di kode dan tidak bergantung pada definisi
+  // skema yang tidak tampak dari sini.
   static async delete(id) {
     const trx = await db.transaction();
     try {
-      // Hapus submenus terlebih dahulu (kalau ada)
+      // ID submenu dikumpulkan LEBIH DULU: begitu baris menunya hilang,
+      // hubungan induk-anak tidak dapat ditelusuri lagi sehingga konten milik
+      // submenu akan tertinggal.
+      const submenus = await trx('menu').where('induk_id', id).select('id');
+      const idTerdampak = [Number(id), ...submenus.map((m) => m.id)];
+
+      await trx('halaman_konten').whereIn('menu_id', idTerdampak).del();
+      await trx('berita').whereIn('menu_id', idTerdampak).del();
+      await trx('profil_pegawai').whereIn('menu_id', idTerdampak).del();
+
+      // Baru menunya: submenu dahulu, lalu menu utama.
       await trx('menu').where('induk_id', id).del();
-      // Baru hapus menu utama
       await trx('menu').where('id', id).del();
+
       await trx.commit();
       return true;
     } catch (error) {

@@ -1,6 +1,7 @@
 // Pemuatan .env dipusatkan di muatEnv.js — lihat penjelasannya di sana,
 // terutama alasan berkas .env dibuat menimpa nilai dari pengelola environment.
 require('./muatEnv');
+const path = require('path');
 
 // =========================================================================
 //  ENV — satu-satunya pintu pembacaan `process.env` bagi aplikasi.
@@ -74,6 +75,15 @@ const env = {
   // dan frontend bersebelahan — lebih baik daripada memaksakan bentuk folder
   // yang tidak didukung panel hosting.
   FRONTEND_DIST_PATH: baca('FRONTEND_DIST_PATH'),
+
+  // Lokasi penyimpanan berkas upload (gambar editor, logo mitra, avatar IG, dll).
+  // Bila diisi (mis. UPLOAD_DIR=/home/uXXXX/upload-img), berkas disimpan DI LUAR
+  // folder aplikasi sehingga TIDAK ikut terhapus saat deploy Node.js Hostinger
+  // menyapu direktori app. Bila kosong, dipakai default `<backend>/uploads` —
+  // cocok untuk pengembangan lokal (tidak ada perubahan perilaku di Laragon).
+  UPLOAD_DIR: process.env.UPLOAD_DIR
+    ? path.resolve(process.env.UPLOAD_DIR)
+    : path.join(__dirname, '..', 'uploads'),
 
   // Dipecah menjadi larik agar Tahap 5 tinggal memakainya untuk menyaring origin.
   CORS_ORIGIN: CORS_ORIGIN_MENTAH
@@ -159,6 +169,18 @@ if (isProduction) {
   // lazim berada di mesin yang sama sehingga 'localhost' memang benar.
   if (/^(localhost|127\.0\.0\.1)$/i.test(env.DB.host)) {
     peringatan.push('DB_HOST menunjuk localhost saat production. Pastikan memang demikian pada peladen Anda.');
+  }
+
+  // Peringatan, bukan galat: aplikasi tetap berjalan tanpa UPLOAD_DIR, tetapi
+  // berkas unggahan akan tersimpan DI DALAM folder aplikasi dan ikut tersapu
+  // pada penempatan ulang berikutnya — seluruh gambar situs rusak, dan
+  // kegagalannya baru terlihat setelah deploy, bukan saat boot. Justru itu
+  // sebabnya perlu disuarakan di sini.
+  if (!baca('UPLOAD_DIR')) {
+    peringatan.push(
+      'UPLOAD_DIR belum diisi saat production. Berkas unggahan akan disimpan di dalam folder aplikasi ' +
+        'dan HILANG pada penempatan ulang berikutnya. Isi dengan folder di luar folder aplikasi.'
+    );
   }
 } else {
   // Development: cukup diingatkan supaya kekurangannya diketahui sejak dini,
