@@ -506,7 +506,6 @@ const Navbar = () => {
                   </a>
                   <div
                     className="dropdown-menu"
-                    data-lenis-prevent
                   >
                     <div className="dropdown-scroll-container" onWheel={handleDropdownScrollContain} onTouchMove={handleDropdownScrollContain}>
                         {item.submenu.map((subItem, index) => {
