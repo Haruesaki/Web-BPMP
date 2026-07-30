@@ -246,7 +246,7 @@
 }
 
 .page-num.active {
-  background-color: var(--theme-accent, #1a3c87);
+  background: linear-gradient(135deg, var(--theme-accent, #1a3c87) 0%, var(--theme-secondary, #10255A) 100%);
   color: #ffffff;
   border: 1px solid #ffffff;
 }
