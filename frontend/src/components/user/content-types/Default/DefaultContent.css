@@ -72,6 +72,16 @@
     word-break: break-word;
 }
 
+.post-date {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #d1d5db; /* Warna abu-abu terang agar kontras dengan latar belakang */
+    margin: 8px 0 0 0; /* Jarak atas dari judul, tanpa margin bawah */
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+}
+
 .default-description-container {
     position: relative;
     z-index: 1;
@@ -496,6 +506,39 @@
     .image-gallery-grid.cols-3 {
         grid-template-columns: 1fr; /* Stack vertically on mobile */
     }
+}
+
+/* Wrapper for the entire default content page layout */
+.default-layout-wrapper {
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 4rem 2rem;
+}
+
+/* Styling for the page title header, consistent with ProfileLayout */
+.page-content-header {
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.page-content-header h1 {
+  color: var(--text-main, #1c1c1c);
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Wrapper for the flexbox content */
+.default-content-wrapper {
+  display: flex;
+  flex-direction: var(--flex-direction, column);
+  flex-wrap: var(--flex-wrap, nowrap);
+  gap: 40px;
+  width: 100%;
+  justify-content: center;
 }
 
 .image-gallery-grid figure.image {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./DefaultContent.css";
 import axiosInstance from "../../../../api/axiosInstance";
 import parse from "html-react-parser";
@@ -39,9 +40,22 @@ const ContentImage = ({ imgProps }) => {
   );
 };
 
-const DefaultContent = ({ menuId, viewLayout }) => {
+const DefaultContent = ({ menuId, viewLayout, menuName }) => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    const targetId = location.hash.substring(1);
+    if (targetId && content.length > 0) {
+      const element = document.getElementById(targetId);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+      }
+    }
+  }, [location.hash, content]);
 
   useEffect(() => {
     if (!menuId) return;
@@ -238,87 +252,112 @@ const DefaultContent = ({ menuId, viewLayout }) => {
   const isVertical = viewLayout === 'Vertikal';
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: isVertical ? 'column' : 'row',
-      flexWrap: isVertical ? 'nowrap' : 'wrap',
-      gap: '40px',
-      padding: '40px',
-      width: '100%',
-      justifyContent: 'center'
-    }}>
-      {content.map(c => {
-        const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
-        const parsedContent = parse(wrappedHtml, {
-          replace: (node) => {
-            if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
-              const newChildren = [];
-              let currentGroup = [];
+    <div className="default-layout-wrapper">
+      {menuName && (
+        <div className="page-content-header">
+          <h1>{menuName}</h1>
+        </div>
+      )}
+      <div
+        className="default-content-wrapper"
+        style={{
+          '--flex-direction': isVertical ? 'column' : 'row',
+          '--flex-wrap': isVertical ? 'nowrap' : 'wrap',
+        }}
+      >
+        {content.map(c => {
+          const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
+          const parsedContent = parse(wrappedHtml, {
+            replace: (node) => {
+              if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
+                const newChildren = [];
+                let currentGroup = [];
 
-              const flushGroup = () => {
-                if (currentGroup.length > 1) {
-                  // Chunk into groups of up to 3
-                  for (let i = 0; i < currentGroup.length; i += 3) {
-                    const chunk = currentGroup.slice(i, i + 3);
-                    if (chunk.length > 1) {
-                      newChildren.push({
-                        type: 'tag',
-                        name: 'div',
-                        attribs: { class: `image-gallery-grid cols-${chunk.length}` },
-                        children: chunk
-                      });
-                    } else {
-                      newChildren.push(chunk[0]);
+                const flushGroup = () => {
+                  if (currentGroup.length > 1) {
+                    // Chunk into groups of up to 3
+                    for (let i = 0; i < currentGroup.length; i += 3) {
+                      const chunk = currentGroup.slice(i, i + 3);
+                      if (chunk.length > 1) {
+                        newChildren.push({
+                          type: 'tag',
+                          name: 'div',
+                          attribs: { class: `image-gallery-grid cols-${chunk.length}` },
+                          children: chunk
+                        });
+                      } else {
+                        newChildren.push(chunk[0]);
+                      }
                     }
+                  } else if (currentGroup.length === 1) {
+                    newChildren.push(currentGroup[0]);
                   }
-                } else if (currentGroup.length === 1) {
-                  newChildren.push(currentGroup[0]);
-                }
-                currentGroup = [];
-              };
+                  currentGroup = [];
+                };
 
-              node.children.forEach(child => {
-                // Ignore empty text nodes between images
-                if (child.type === 'text' && !child.data.trim()) {
-                  if (currentGroup.length > 0) return;
-                  newChildren.push(child);
-                  return;
-                }
+                node.children.forEach(child => {
+                  // Ignore empty text nodes between images
+                  if (child.type === 'text' && !child.data.trim()) {
+                    if (currentGroup.length > 0) return;
+                    newChildren.push(child);
+                    return;
+                  }
 
-                const isImage = child.type === 'tag' && (
-                  (child.name === 'figure' && child.attribs?.class?.includes('image')) ||
-                  child.name === 'img'
-                );
+                  const isImage = child.type === 'tag' && (
+                    (child.name === 'figure' && child.attribs?.class?.includes('image')) ||
+                    child.name === 'img'
+                  );
 
-                if (isImage) {
-                  currentGroup.push(child);
-                } else {
-                  if (currentGroup.length > 0) flushGroup();
-                  newChildren.push(child);
-                }
-              });
-              if (currentGroup.length > 0) flushGroup();
-              node.children = newChildren;
-              return; // Let html-react-parser continue with new children
-            }
-            
-            return transformNode(node);
-          },
-        });
+                  if (isImage) {
+                    currentGroup.push(child);
+                  } else {
+                    if (currentGroup.length > 0) flushGroup();
+                    newChildren.push(child);
+                  }
+                });
+                if (currentGroup.length > 0) flushGroup();
+                node.children = newChildren;
+                return; // Let html-react-parser continue with new children
+              }
+              
+              return transformNode(node);
+            },
+          });
 
-        return (
-          <div key={c.id} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%', minWidth: '300px' }}>
-            <div className="default-banner-wrapper">
-              <h1 className="default-banner-title">{c.judul}</h1>
+          return (
+            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%', minWidth: '300px' }}>
+              <div className="default-banner-wrapper">
+                <h1 className="default-banner-title">{c.judul}</h1>
+                <p className="post-date">
+                  <i className="fa-solid fa-calendar-days" style={{ marginRight: '8px' }}></i>
+                  {formatTanggal(c.dibuat_pada)}
+                </p>
+              </div>
+              <div className="default-description-container">
+                {parsedContent}
+              </div>
             </div>
-            <div className="default-description-container">
-              {parsedContent}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
+};
+
+const formatTanggal = (tanggalISO) => {
+  if (!tanggalISO) return null;
+
+  const date = new Date(tanggalISO);
+  
+  const optionsHari = { weekday: 'long', timeZone: 'Asia/Jakarta' };
+  const optionsTanggalBulanTahun = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' };
+  const optionsPukul = { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' };
+
+  const hari = new Intl.DateTimeFormat('id-ID', optionsHari).format(date);
+  const tanggalBulanTahun = new Intl.DateTimeFormat('id-ID', optionsTanggalBulanTahun).format(date);
+  const pukul = new Intl.DateTimeFormat('id-ID', optionsPukul).format(date);
+
+  return `${hari}, ${tanggalBulanTahun} | ${pukul} WIB`;
 };
 
 export default DefaultContent;

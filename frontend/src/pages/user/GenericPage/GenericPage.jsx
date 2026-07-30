@@ -56,12 +56,12 @@ const GenericPage = () => {
     <div className="generic-page-container">
       {/* Jika menu tersebut bertipe post dan layout-nya profil */}
       {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'profile-card' && (
-        <ProfileLayout menuId={menuData.id} viewLayout={menuData.tampilan} />
+        <ProfileLayout menuId={menuData.id} viewLayout={menuData.tampilan} menuName={menuData.nama_menu} />
       )}
 
       {/* Placeholder untuk layout default */}
       {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'default' && (
-        <DefaultContent menuId={menuData.id} viewLayout={menuData.tampilan} />
+        <DefaultContent menuId={menuData.id} viewLayout={menuData.tampilan} menuName={menuData.nama_menu} />
       )}
 
       {/* Placeholder untuk layout berita */}

@@ -202,18 +202,112 @@
   }
 }
 
+/* Kontainer pembungkus baru untuk layout profil */
+.profile-content-wrapper {
+  /* Mengambil alih properti lebar dan posisi dari grid */
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 4rem 2rem;
+}
+
+/* Styling untuk judul halaman */
+.page-content-header {
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.page-content-header h1 {
+  /* Menggunakan variabel global jika ada, dengan fallback */
+  color: var(--text-main, #1c1c1c);
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
 .profile-layout-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 4rem;
   justify-content: center;
   align-items: center;
-  padding: 4rem 2rem;
-  /* Batasi lebar maksimum untuk menampung 4 kartu + 3 celah */
-  /* Kalkulasi: (4 * 323px) + (3 * 48px) = 1436px */
-  /* (lebar kartu 34em * 9.5px) + (gap 3rem * 16px) */
-  max-width: 1600px;
-  /* Tengahkan container grid di dalam halaman */
-  margin: 0 auto;
+  /* Padding, max-width, dan margin dipindahkan ke .profile-content-wrapper */
   width: 100%;
+}
+
+/* --- Pagination --- */
+/* Kontainer untuk pagination agar bisa diberi margin */
+.pagination-container {
+  margin-top: 4rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-family: "Poppins", sans-serif;
+}
+
+.page-num {
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.page-num:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.page-num.active {
+  background-color: #02002e;
+  color: #ffffff;
+  border-color: #02002e;
+}
+
+.page-arrow {
+  background-color: transparent;
+  color: #555;
+  border: 1.5px solid #ccc;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-arrow:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  color: #000;
+  border-color: #bbb;
+}
+
+.page-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-dots {
+  color: #666;
+  padding: 0 2px;
+  font-size: 14px;
+  align-self: flex-end;
+  line-height: 2;
 }

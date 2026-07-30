@@ -57,6 +57,7 @@ const NewsSection = ({ previewData }) => {
         if (previewData) {
             const formattedPreview = previewData.map(item => ({
                 id: item.id,
+                menuId: item.menu_id,
                 category: item.kategori || 'Informasi',
                 title: item.judul,
                 date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
@@ -72,6 +73,7 @@ const NewsSection = ({ previewData }) => {
                 if (res.data?.success) {
                     const fetchedData = res.data.data.map(item => ({
                         id: item.id,
+                        menuId: item.menu_id,
                         category: item.kategori || 'Informasi',
                         title: item.judul,
                         date: new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
@@ -165,7 +167,7 @@ const NewsSection = ({ previewData }) => {
                                         className="featured-card"
                                         key={news.id}
                                         style={{ transform: `translateX(${(index - featuredIndex) * 100}%)`, cursor: 'pointer' }}
-                                        onClick={() => navigate(`/berita/${news.id}`)}
+                                        onClick={() => news.menuId && navigate(`/halaman/${news.menuId}#content-${news.id}`)}
                                     >
                                         <img src={news.image} alt={news.title} className="featured-img" />
                                         <div className="featured-overlay">
@@ -215,7 +217,7 @@ const NewsSection = ({ previewData }) => {
                                 key={news.id}
                                 title={news.title}
                                 date={news.date}
-                                link={`/berita/${news.id}`}
+                                link={news.menuId ? `/halaman/${news.menuId}#content-${news.id}` : '#'}
                                 onMouseEnter={() => handleSetFeatured(news)}
                                 onFocus={() => handleSetFeatured(news)} // Prop onFocus untuk aksesibilitas
                             />
