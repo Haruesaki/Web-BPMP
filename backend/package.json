@@ -10,6 +10,7 @@
     "migrasi": "knex migrate:latest --env production",
     "migrasi:status": "knex migrate:status --env production",
     "cek:env": "node scripts/cek-env.js",
+    "cek:resend": "node scripts/cek-resend.js",
     "cek:sharp": "node -e \"const s=require('sharp');console.log('sharp OK', s.versions)\"",
     "cek:db": "node scripts/cek-db.js"
   },
