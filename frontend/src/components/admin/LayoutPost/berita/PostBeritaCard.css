@@ -98,7 +98,9 @@
 .postdefault .bc-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 940px;
+    /* Cukup lebar untuk semua kolom + header; bila viewport lebih sempit,
+       .bc-table-scroll memberi scroll horizontal (bukan teks tumpang tindih). */
+    min-width: 1100px;
     /* Lebar kolom jadi batas keras → tabel tidak ikut membengkak saat judul/
        deskripsi panjang diinput (mencegah scroll horizontal dari konten). */
     table-layout: fixed;
@@ -113,7 +115,11 @@
     color: var(--text-sub);
     background: var(--bg-card-soft);
     border-bottom: 1px solid var(--border-soft);
-    white-space: nowrap;
+    /* Header boleh membungkus ke 2 baris agar teks panjang (mis. "Waktu Tayang
+       (Otomatis)", "Tampilkan di Beranda") tidak meluber & tumpang tindih. */
+    white-space: normal;
+    line-height: 1.3;
+    vertical-align: bottom;
 }
 
 .postdefault .bc-table tbody td {
@@ -153,15 +159,17 @@
 }
 
 .postdefault .bc-col-pembuat {
+    width: 110px;
     white-space: nowrap;
 }
 
 .postdefault .bc-col-waktu {
+    width: 140px;
     white-space: nowrap;
 }
 
 .postdefault .bc-col-status {
-    width: 110px;
+    width: 130px;
     text-align: center;
 }
 
