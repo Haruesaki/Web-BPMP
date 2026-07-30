@@ -29,6 +29,13 @@ const getCache = async () => {
   return await knex('instagram_cache').first();
 };
 
+// CATATAN: fungsi ini ikut memperbarui `diperbarui_pada`, padahal yang berubah
+// hanya tautan sematan — bukan data profil dari RapidAPI. Karena kolom itu pula
+// yang dipakai `instagramController` untuk menghitung masa berlaku tembolok,
+// menyunting tautan sematan akan MENUNDA penyegaran profil berikutnya hingga
+// 12 jam sesudah penyuntingan. Dibiarkan demikian dengan sengaja: akibatnya
+// hanya penundaan, sedangkan memisahkannya menuntut kolom stempel waktu
+// tersendiri beserta migrasinya. Bila kelak dirasa mengganggu, itulah jalannya.
 const updateEmbedLinks = async (links) => {
   const existing = await knex('instagram_cache').first();
   if (existing) {
