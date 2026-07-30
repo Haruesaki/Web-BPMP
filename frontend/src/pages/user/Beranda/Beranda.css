@@ -13,7 +13,7 @@
    ========================================= */
 .beranda-container {
    width: 100%;
-   background: var(--bg-primary);
+   background: var(--theme-bg-deep, var(--bg-primary, #070833));
 }
 
 /* =========================================

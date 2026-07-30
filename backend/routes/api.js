@@ -13,6 +13,7 @@ const ProfilPegawaiController = require('../controllers/profilPegawaiController'
 const BeritaController = require('../controllers/beritaController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
+const BerandaTemaController = require('../controllers/berandaTemaController');
 const BerandaBeritaController = require('../controllers/berandaBeritaController');
 const BerandaPengunjungController = require('../controllers/berandaPengunjungController');
 const LogoMitraController = require('../controllers/logoMitraController');
@@ -71,6 +72,8 @@ router.post('/auth/reset-password', batasVerifikasiOtp, AuthController.resetPass
 // ================= BERANDA CMS ROUTES =================
 router.get('/beranda/header', BerandaHeaderController.getHeader);
 router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHeader);
+router.get('/beranda/tema', BerandaTemaController.getTema);
+router.put('/beranda/tema', authMiddleware, BerandaTemaController.updateTema);
 router.get('/beranda/hero', BerandaHeroController.getHero);
 router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
 router.get('/beranda/berita', BerandaBeritaController.getBeritaBeranda);

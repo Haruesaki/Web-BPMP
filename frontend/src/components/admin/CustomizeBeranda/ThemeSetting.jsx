@@ -1,7 +1,9 @@
 import React from 'react';
 import './ThemeSetting.css';
 
-const ThemeSetting = ({ selectedTheme, setSelectedTheme, themes }) => {
+const ThemeSetting = ({ selectedTheme, setSelectedTheme, themes, onSave, isSaving, isDirty }) => {
+  const activeTheme = themes.find((t) => t.id === selectedTheme) || themes[0];
+
   return (
     <section className="cb-card">
       <div className="cb-card-title">
@@ -30,13 +32,45 @@ const ThemeSetting = ({ selectedTheme, setSelectedTheme, themes }) => {
         ))}
       </div>
 
+      {/* Pratinjau palet lengkap dari preset terpilih — meniru tampilan yang
+          akan tampak di halaman pengunjung (latar, teks, aksen). */}
+      {activeTheme && (
+        <div
+          className="cb-theme-preview"
+          style={{ backgroundColor: activeTheme.warna_latar, color: activeTheme.warna_teks }}
+        >
+          <span className="cb-theme-preview-label">Pratinjau</span>
+          <span className="cb-theme-preview-title">Beranda BPMP</span>
+          <span className="cb-theme-preview-dots">
+            <i style={{ backgroundColor: activeTheme.warna_latar }} title="Latar"></i>
+            <i style={{ backgroundColor: activeTheme.warna_sekunder }} title="Sekunder"></i>
+            <i style={{ backgroundColor: activeTheme.warna_utama }} title="Utama"></i>
+            <i style={{ backgroundColor: activeTheme.warna_teks }} title="Teks"></i>
+          </span>
+          <span
+            className="cb-theme-preview-chip"
+            style={{ backgroundColor: activeTheme.warna_utama, color: activeTheme.warna_latar }}
+          >
+            Aksen
+          </span>
+        </div>
+      )}
+
       <div className="cb-card-actions" style={{ marginTop: '24px', width: '100%' }}>
         <button
           type="button"
-          className="cb-btn cb-btn-simpan"
-          style={{ width: '100%' }}
+          className={`cb-btn cb-btn-simpan ${isDirty ? 'is-dirty' : ''}`}
+          style={{ width: '100%', justifyContent: 'center' }}
+          onClick={onSave}
+          disabled={isSaving || !isDirty}
         >
-          Simpan
+          {isSaving ? (
+            <><i className="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</>
+          ) : isDirty ? (
+            <><i className="fa-solid fa-save"></i> Simpan Perubahan</>
+          ) : (
+            <><i className="fa-solid fa-save"></i> Simpan Tema</>
+          )}
         </button>
       </div>
     </section>

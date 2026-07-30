@@ -14,7 +14,7 @@
 
 /* --- Area Utama Footer (3 Kolom) --- */
 .footer-content-area {
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     /* vertikal pakai em (ikut patokan), horizontal tetap % (ikut lebar). */
     padding: 3.75em 8% 2.5em 8%;
 }
@@ -78,7 +78,7 @@
 
 /* --- Bottom Bar Copyright --- */
 .footer-bottom-bar {
-    background-color: #050814;
+    background-color: var(--theme-bg-darker, #050814);
     /* Biru sangat gelap (nyaris hitam) */
     text-align: center;
     padding: 1.5625em 0;

@@ -6,6 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BPMP Provinsi Lampung</title>
 
+    <!-- Terapkan tema beranda SEBELUM paint pertama agar tidak ada kedipan
+         (flash) ke warna default saat refresh. Skrip sinkron ini membaca palet
+         yang di-cache useTema dari localStorage lalu menuliskannya ke :root,
+         sehingga warna tema sudah aktif sebelum React & API dimuat. Aman untuk
+         halaman admin: CSS admin tidak pernah membaca variabel --theme-*. -->
+    <script>
+      (function () {
+        try {
+          var v = JSON.parse(localStorage.getItem('beranda-theme-vars'));
+          if (v && typeof v === 'object') {
+            var r = document.documentElement;
+            for (var k in v) {
+              if (Object.prototype.hasOwnProperty.call(v, k) && k.indexOf('--theme-') === 0) {
+                r.style.setProperty(k, v[k]);
+              }
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- defer: skrip Font Awesome tidak lagi menghambat render awal halaman -->
     <script defer src="https://kit.fontawesome.com/0a07513c61.js" crossorigin="anonymous"></script>
 

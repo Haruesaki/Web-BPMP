@@ -20,7 +20,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 25px 8%;
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     color: #ffffff;
     overflow: hidden;
 }
@@ -130,7 +130,7 @@
 }
 
 .yt-unified-card {
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     border-radius: 12px;
     padding: 35px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
