@@ -65,6 +65,24 @@ app.use(
         // di sini terlalu ketat dan akan memutus embed.
         crossOriginEmbedderPolicy: false,
         crossOriginResourcePolicy: { policy: 'cross-origin' },
+        // WAJIB DISEBUT EKSPLISIT — jangan dihapus dengan anggapan ini bawaan.
+        //
+        // Bawaan helmet adalah `Referrer-Policy: no-referrer`, yang membuat peramban
+        // TIDAK mengirim header Referer sama sekali. YouTube memvalidasi domain
+        // penyemat dari header itu, sehingga tanpa referrer pemutarnya berhenti
+        // dengan "Error 153 — Terjadi error pada konfigurasi pemutar video".
+        // Sematan lain yang memvalidasi hal serupa (Instagram, iframe Google Maps)
+        // menanggung risiko yang sama.
+        //
+        // Kegagalan ini MUSTAHIL tampak di localhost: di sana halaman disajikan Vite,
+        // sedangkan helmet hanya menyentuh balasan Express. Barulah di production,
+        // ketika Express menyajikan frontend/dist, headernya ikut terkirim. Jadi
+        // "aman di lokal" sama sekali bukan bukti aman di peladen untuk header ini.
+        //
+        // `strict-origin-when-cross-origin` adalah bawaan peramban modern: lintas asal
+        // hanya ASAL yang dikirim (https://bpmplampung.com/), tanpa path maupun query,
+        // dan tidak dikirim sama sekali bila turun dari HTTPS ke HTTP.
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     })
 );
 

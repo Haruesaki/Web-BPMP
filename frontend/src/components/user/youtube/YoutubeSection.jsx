@@ -15,11 +15,18 @@ const IframePlayer = ({ videoId, isMain }) => {
     return (
         <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`}>
             {aktif ? (
+                // `referrerPolicy` di bawah adalah LAPIS KEDUA atas Error 153.
+                // Perbaikan pokoknya ada di backend (helmet `referrerPolicy` pada
+                // index.js), tetapi atribut elemen MENANG atas kebijakan dokumen —
+                // sehingga sematan ini tetap hidup seandainya kelak ada yang
+                // mengetatkan header itu kembali. YouTube menolak memutar bila tidak
+                // tahu domain penyematnya, dan gejalanya hanya muncul di production.
                 <iframe
                     width="100%"
                     height="100%"
                     src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
                     title="YouTube video player"
+                    referrerPolicy="strict-origin-when-cross-origin"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
