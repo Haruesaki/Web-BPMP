@@ -247,7 +247,15 @@ if (env.isProduction) {
 
         // index.html tidak boleh ter-cache lama (lihat alasan di express.static di atas).
         res.setHeader('Cache-Control', 'no-cache');
-        return res.sendFile(path.join(dirDist, 'index.html'), (err) => {
+        // `root` + nama file relatif — BUKAN jalur absolut. Sebabnya: di Hostinger
+        // aplikasi berjalan dari dalam `.builds/versions/<id>/nodejs/...`, dan
+        // segmen `.builds` diawali titik. Bila jalur absolut dikirim, pustaka
+        // `send` (default `dotfiles: 'ignore'`) menganggapnya "dotfile" dan
+        // membalas 404 walau index.html jelas ada — sehingga SEMUA deep-link
+        // (/admin, /berita/..) gagal. Dengan `root`, cek dotfile hanya berlaku
+        // pada bagian relatif ('index.html', bersih); `.builds` di atas root
+        // diabaikan — persis cara express.static bekerja.
+        return res.sendFile('index.html', { root: dirDist }, (err) => {
             if (err) next(err);
         });
     });
