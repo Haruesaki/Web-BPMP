@@ -32,5 +32,19 @@ app.listen(port, () => {
         require('./scripts/cek-db')
             .jalankan()
             .catch((e) => console.error('[diagnosa] Gagal menjalankan pemeriksaan basis data:', e.message));
+    } else if (env.isDevelopment) {
+        // Di development pemeriksaan ini SELALU berjalan, tanpa perlu dinyalakan.
+        // Sebabnya konkret: bila MySQL lokal mati, terminal dibanjiri puluhan jejak
+        // tumpukan `ECONNREFUSED` bernama controller — satu untuk setiap endpoint —
+        // dan tidak ada satu pun di antaranya yang menyebut "MySQL tidak berjalan".
+        // Satu baris di sini menggantikan seluruh kebisingan itu.
+        //
+        // Sengaja TIDAK dijalankan di production: di sana pemeriksaan atas permintaan
+        // (DIAGNOSA_DB) sudah tersedia dan lebih lengkap, sementara boot production
+        // sebaiknya tidak menambah kueri yang tidak diminta. Dipakai `else if` agar
+        // ketika DIAGNOSA_DB menyala di localhost tidak ada dua pemeriksaan berjalan.
+        require('./utils/periksaSambunganDb')
+            .periksaSambunganDb()
+            .catch((e) => console.error('[db] Pemeriksaan sambungan gagal dijalankan:', e.message));
     }
 });
