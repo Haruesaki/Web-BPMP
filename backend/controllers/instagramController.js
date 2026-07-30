@@ -2,8 +2,71 @@ const axios = require('axios');
 const instagramModel = require('../models/instagramModel');
 const env = require('../config/env');
 
+// =========================================================================
+//  MASA BERLAKU TEMBOLOK INSTAGRAM
+//  -----------------------------------------------------------------------
+//  Sebelumnya `getInstagramProfile` menyajikan tembolok apa adanya dan hanya
+//  menarik data baru ketika temboloknya KOSONG. Akibatnya, begitu baris
+//  temboloknya ada, datanya BEKU SELAMANYA — jumlah pengikut dan unggahan tidak
+//  pernah berubah lagi, dan tidak ada satu pun galat yang muncul.
+//
+//  Penyegarannya dahulu bergantung sepenuhnya pada penjadwal luar: `cron.js` di
+//  development, dan Cron Job hPanel di production. Pada paket hosting yang tidak
+//  menyediakan penjadwal sama sekali, tidak ada yang pernah memicunya.
+//
+//  Pemeriksaan kedaluwarsa di bawah menghapus ketergantungan itu: tembolok
+//  menyegarkan dirinya sendiri saat ada pengunjung datang sesudah masanya lewat.
+//  Titik akhir /api/cron/instagram tetap ada sebagai pemicu manual, tetapi tidak
+//  lagi menjadi syarat agar fiturnya hidup.
+//
+//  Polanya sengaja menyalin `youtubeController` yang sudah terbukti berjalan di
+//  peladen: segar -> sajikan; basi -> tarik baru; gagal menarik -> sajikan yang
+//  basi. Butir terakhir itu yang menjaga Beranda tetap tampil ketika RapidAPI
+//  sedang bermasalah atau kuotanya habis.
+//
+//  12 jam dipilih menyamai jadwal `cron.js` yang lama ('0 */12 * * *'), sehingga
+//  perilakunya tidak berubah — yang berubah hanya SIAPA yang memicunya.
+// =========================================================================
+const DURASI_TEMBOLOK_MS = 12 * 60 * 60 * 1000; // 12 jam
+
+// Penjaga agar beberapa permintaan yang tiba berbarengan tepat sesudah tembolok
+// basi tidak masing-masing menembak RapidAPI. Hanya berlaku dalam SATU proses —
+// Passenger menjalankan beberapa worker, jadi ini memperkecil, bukan meniadakan.
+// Sekadar penjaga sederhana sudah memadai: kuota RapidAPI terbatas, sedangkan
+// penguncian lintas proses menuntut kerumitan yang tidak sepadan di sini.
+let penyegaranBerjalan = null;
+
+const segarkanSekali = () => {
+  if (!penyegaranBerjalan) {
+    penyegaranBerjalan = fetchAndCacheInstagramProfile().finally(() => {
+      penyegaranBerjalan = null;
+    });
+  }
+  return penyegaranBerjalan;
+};
+
 /**
- * Fetch profil dari RapidAPI dan simpan ke database (digunakan oleh cron job dan update admin)
+ * Menghitung umur tembolok dalam milidetik.
+ * Mengembalikan `null` bila stempel waktunya tidak ada atau tidak terbaca —
+ * pemanggilnya memperlakukan itu sebagai "perlu disegarkan", tetapi tetap
+ * menyediakan tembolok lama sebagai cadangan bila penyegarannya gagal.
+ */
+const umurTembolok = (cache) => {
+  if (!cache || !cache.diperbarui_pada) return null;
+  const waktu = new Date(cache.diperbarui_pada).getTime();
+  if (Number.isNaN(waktu)) return null;
+  const umur = Date.now() - waktu;
+  // Umur negatif berarti stempel waktunya di masa depan (jam peladen bergeser,
+  // atau zona waktu sesi tidak sesuai). Diperlakukan sebagai masih segar, sebab
+  // menganggapnya basi akan memicu penarikan pada SETIAP permintaan dan
+  // menghabiskan kuota RapidAPI tanpa ada yang menyadarinya.
+  return umur < 0 ? 0 : umur;
+};
+
+/**
+ * Fetch profil dari RapidAPI dan simpan ke database.
+ * Dipakai oleh: penyegaran otomatis saat tembolok basi, titik akhir cron
+ * (pemicu manual), dan pembaruan username dari panel admin.
  */
 const fetchAndCacheInstagramProfile = async (targetUsername = null) => {
   try {
@@ -116,20 +179,53 @@ const fetchAndCacheInstagramProfile = async (targetUsername = null) => {
 const getInstagramProfile = async (req, res) => {
   try {
     const cache = await instagramModel.getCache();
-    
+
     if (cache) {
+      const umur = umurTembolok(cache);
+
+      // Masih segar — sajikan tanpa menyentuh RapidAPI sama sekali.
+      if (umur !== null && umur < DURASI_TEMBOLOK_MS) {
+        return res.status(200).json({
+          success: true,
+          data: cache.profile_data,
+          diperbarui_pada: cache.diperbarui_pada
+        });
+      }
+
+      // Sudah basi (atau stempel waktunya tidak terbaca) — coba tarik data baru.
+      console.log('[Instagram] Tembolok kedaluwarsa, menyegarkan dari RapidAPI...');
+      const hasil = await segarkanSekali();
+
+      if (hasil && hasil.success) {
+        const tembolokBaru = await instagramModel.getCache();
+        return res.status(200).json({
+          success: true,
+          data: tembolokBaru.profile_data,
+          diperbarui_pada: tembolokBaru.diperbarui_pada
+        });
+      }
+
+      // Penyegaran gagal — sajikan tembolok basi, JANGAN jatuhkan Beranda.
+      // Data lama jauh lebih baik daripada bagian yang kosong, dan sebab
+      // kegagalannya lazim di luar kendali kita: kuota RapidAPI habis, kunci
+      // dibatasi, atau jaringan peladen terganggu.
+      console.warn('[Instagram] Penyegaran gagal. Menyajikan tembolok kedaluwarsa.');
       return res.status(200).json({
         success: true,
         data: cache.profile_data,
-        diperbarui_pada: cache.diperbarui_pada
+        diperbarui_pada: cache.diperbarui_pada,
+        catatan: 'tembolok kedaluwarsa dipakai karena layanan Instagram gagal dihubungi'
       });
     }
 
-    // Jika belum ada di DB (cron belum jalan), panggil API manual pertama kali
+    // Belum ada baris tembolok sama sekali — penarikan pertama kali.
     console.log('[Instagram] Cache kosong, melakukan penarikan pertama kali...');
-    const result = await fetchAndCacheInstagramProfile();
+    // `fetchAndCacheInstagramProfile` mengembalikan `false` (bukan objek) ketika
+    // RAPIDAPI_KEY belum diisi, sehingga hasilnya wajib diperiksa lebih dulu
+    // sebelum properti `success` dibaca.
+    const result = await segarkanSekali();
 
-    if (result.success) {
+    if (result && result.success) {
       const newCache = await instagramModel.getCache();
       return res.status(200).json({
         success: true,
