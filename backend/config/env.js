@@ -1,6 +1,7 @@
 // Pemuatan .env dipusatkan di muatEnv.js — lihat penjelasannya di sana,
-// terutama alasan berkas .env dibuat menimpa nilai dari pengelola environment.
-require('./muatEnv');
+// terutama urutan kemenangan nilai (pengelola environment MENANG atas .env)
+// dan alasan bentuk nilai perlu dibersihkan.
+const muatEnv = require('./muatEnv');
 const path = require('path');
 
 // =========================================================================
@@ -31,9 +32,25 @@ const NODE_ENV = (process.env.NODE_ENV || 'development').trim().toLowerCase();
 const isProduction = NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
+// Kejanggalan bentuk nilai yang ditemukan saat membaca. Memakai Set karena
+// `baca()` dipanggil lebih dari sekali untuk variabel yang sama (sekali saat
+// menyusun objek env, sekali lagi saat validasi) — tanpa ini keluhan yang sama
+// akan tercetak berulang.
+const keluhanBentuk = new Set();
+
 // Baca sebagai untai yang sudah dirapikan; `undefined` menjadi untai kosong
 // agar pemeriksaan "kosong" cukup satu cara.
-const baca = (nama, cadangan = '') => String(process.env[nama] ?? cadangan).trim();
+//
+// Pembersihan bentuk (tanda kutip pengapit, spasi tersisip) dilakukan
+// muatEnv.bersihkan — lihat penjelasan lengkapnya di sana. Ringkasnya: berkas
+// .env diurai dotenv sehingga tanda kutipnya hilang, sedangkan pengelola
+// environment meneruskan nilai apa adanya. Kunci API yang sah pun menjadi
+// ditolak hanya karena ikut tertempel bersama tanda kutipnya.
+const baca = (nama, cadangan = '') => {
+  const { nilai, keluhan } = muatEnv.bersihkan(nama, process.env[nama] ?? cadangan);
+  keluhan.forEach((k) => keluhanBentuk.add(k));
+  return nilai;
+};
 
 const JWT_SECRET = baca('JWT_SECRET');
 const CORS_ORIGIN_MENTAH = baca('CORS_ORIGIN');
@@ -81,8 +98,12 @@ const env = {
   // folder aplikasi sehingga TIDAK ikut terhapus saat deploy Node.js Hostinger
   // menyapu direktori app. Bila kosong, dipakai default `<backend>/uploads` —
   // cocok untuk pengembangan lokal (tidak ada perubahan perilaku di Laragon).
-  UPLOAD_DIR: process.env.UPLOAD_DIR
-    ? path.resolve(process.env.UPLOAD_DIR)
+  // Dibaca lewat `baca()` — bukan langsung dari process.env — supaya ikut
+  // dibersihkan. Jalur yang terapit tanda kutip akan membuat Node membuat
+  // folder yang namanya benar-benar memuat tanda kutip, dan gambar kembali
+  // hilang tanpa satu pun galat yang mencurigakan.
+  UPLOAD_DIR: baca('UPLOAD_DIR')
+    ? path.resolve(baca('UPLOAD_DIR'))
     : path.join(__dirname, '..', 'uploads'),
 
   // Dipecah menjadi larik agar Tahap 5 tinggal memakainya untuk menyaring origin.
@@ -194,9 +215,14 @@ if (isProduction) {
   }
 }
 
-if (peringatan.length) {
+// Keluhan bentuk digabung di sini, bukan saat ditemukan, supaya seluruh
+// pemanggilan `baca()` di atas — termasuk yang terjadi selama validasi —
+// sudah selesai lebih dulu.
+const semuaPeringatan = [...keluhanBentuk, ...peringatan];
+
+if (semuaPeringatan.length) {
   console.warn(`[env] Peringatan konfigurasi (mode ${NODE_ENV}):`);
-  peringatan.forEach((p) => console.warn(`  - ${p}`));
+  semuaPeringatan.forEach((p) => console.warn(`  - ${p}`));
 }
 
 if (galat.length) {
