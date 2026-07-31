@@ -7,8 +7,8 @@
        ini dipakai di luar konteks tersebut. */
     height: var(--news-card-h, clamp(110px, 8.6vw, 130px));
     align-items: center;
-    background: linear-gradient(90deg, #1A3C87 0%, #10255A 100%);
-    border: 1.5px solid #3498DB;
+    background: linear-gradient(90deg, var(--theme-accent, #1A3C87) 0%, var(--theme-secondary, #10255A) 100%);
+    border: 1.5px solid rgb(var(--theme-highlight-rgb, 52, 152, 219));
     border-radius: 12px;
     padding: clamp(12px, 1.5vw, 16px) 10px clamp(12px, 1.5vw, 16px) clamp(24px, 1.6vw, 45px);
     text-decoration: none;
@@ -72,7 +72,7 @@
 }
 
 .news-date {
-    color: #A9CCE3;
+    color: var(--theme-link-hover, #A9CCE3);
     font-size: clamp(8px, 0.8vw, 13px);
     display: flex;
     align-items: center;

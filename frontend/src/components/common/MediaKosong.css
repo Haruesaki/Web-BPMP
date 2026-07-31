@@ -1,0 +1,26 @@
+/* Tampilan slot media kosong. Sengaja TIDAK menetapkan ukuran sendiri —
+   ukuran diwarisi dari kelas pemanggil (mis. .ig-avatar) atau dari varian --isi. */
+.media-kosong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    color: rgba(150, 165, 200, 0.5);
+    overflow: hidden;
+}
+
+/* Varian: mengisi penuh container induk (untuk slot profil & berita yang
+   wadahnya sudah punya dimensi tetap). border-radius mengikuti wadahnya. */
+.media-kosong--isi {
+    width: 100%;
+    height: 100%;
+    background: rgba(125, 140, 175, 0.14);
+    border-radius: inherit;
+}
+
+.media-kosong > svg {
+    width: 42%;
+    height: 42%;
+    max-width: 56px;
+    max-height: 56px;
+}

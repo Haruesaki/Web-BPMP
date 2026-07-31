@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Outlet } from 'react-router-dom';
 import Layout from '../components/common/Layout'; // 1. Impor Layout baru
 import Beranda from '../pages/user/Beranda/Beranda';
 // import VisiDanMisi from '../pages/user/VisiDanMisi/VisiDanMisi';
@@ -7,23 +7,35 @@ import Beranda from '../pages/user/Beranda/Beranda';
 import GenericPage from '../pages/user/GenericPage/GenericPage';
 import BeritaDetail from '../pages/user/BeritaDetail/BeritaDetail';
 
-// Halaman Admin
-import Login from '../pages/Admin/Login/Login';
-import LupaPassword from '../pages/Admin/Login/LupaPassword';
-import DashboardAdmin from '../pages/Admin/DashboardAdmin/dashboard-admin';
-import ManajemenUser from '../pages/Admin/ManajemenUser/ManajemenUser';
-import PengaturanMenu from '../pages/Admin/PengaturanMenu/PengaturanMenu';
-import CustomizeBeranda from '../pages/Admin/CustomizeBeranda/CustomizeBeranda';
-import Link from '../components/admin/LayoutLink/Link';
-import AdminLayout from '../components/admin/layout/AdminLayout';
+// Halaman Admin — semuanya di-lazy agar seluruh bundel admin (termasuk recharts
+// pada dashboard) TIDAK ikut termuat saat pengunjung membuka halaman publik.
+// ProtectedRoute tetap eager: hanya penjaga autentikasi, ringan, dan menentukan
+// apakah subtree admin dirender sama sekali.
 import ProtectedRoute from './ProtectedRoute';
-import PreviewProfilCard from '../components/admin/LayoutPost/profil/PreviewProfilCard';
-import PostProfileCard from '../components/admin/LayoutPost/profil/PostProfileCard';
-import Setting from '../pages/Admin/Setting/Setting';
+const Login = lazy(() => import('../pages/Admin/Login/Login'));
+const LupaPassword = lazy(() => import('../pages/Admin/Login/LupaPassword'));
+const DashboardAdmin = lazy(() => import('../pages/Admin/DashboardAdmin/dashboard-admin'));
+const ManajemenUser = lazy(() => import('../pages/Admin/ManajemenUser/ManajemenUser'));
+const PengaturanMenu = lazy(() => import('../pages/Admin/PengaturanMenu/PengaturanMenu'));
+const CustomizeBeranda = lazy(() => import('../pages/Admin/CustomizeBeranda/CustomizeBeranda'));
+const Link = lazy(() => import('../components/admin/LayoutLink/Link'));
+const AdminLayout = lazy(() => import('../components/admin/layout/AdminLayout'));
+const PreviewProfilCard = lazy(() => import('../components/admin/LayoutPost/profil/PreviewProfilCard'));
+const PostProfileCard = lazy(() => import('../components/admin/LayoutPost/profil/PostProfileCard'));
+const Setting = lazy(() => import('../pages/Admin/Setting/Setting'));
 
 // Editor konten menu (CKEditor) berukuran besar → lazy-load agar tidak
 // membebani bundle halaman admin lain. Host ini memilih editor sesuai layout.
 const MenuContentEditor = lazy(() => import('../components/admin/LayoutPost/MenuContentEditor'));
+
+// Satu batas Suspense untuk seluruh subtree admin. Karena komponen admin kini
+// lazy, dibutuhkan Suspense di atasnya; menaruhnya via <Outlet/> membuat satu
+// fallback menaungi login, layout, dan semua halaman admin sekaligus.
+const AdminBoundary = () => (
+    <Suspense fallback={<div style={{ padding: 32, color: '#c7c4d8', minHeight: '100vh' }}>Memuat…</div>}>
+        <Outlet />
+    </Suspense>
+);
 
 const AppRoutes = ({ lenisRef }) => {
     return (
@@ -38,6 +50,9 @@ const AppRoutes = ({ lenisRef }) => {
                 <Route path="/profil/visi-misi" element={<GenericPage lenisRef={lenisRef} />} />
             </Route>
 
+            {/* Seluruh rute admin dinaungi satu batas Suspense (AdminBoundary)
+                karena komponennya kini lazy-loaded. */}
+            <Route element={<AdminBoundary />}>
             {/* Rute Admin (tanpa Layout user: punya sidebar/header sendiri) */}
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/lupa-password" element={<LupaPassword />} />
@@ -68,6 +83,7 @@ const AppRoutes = ({ lenisRef }) => {
                         }
                     />
                 </Route>
+            </Route>
             </Route>
         </Routes>
     );

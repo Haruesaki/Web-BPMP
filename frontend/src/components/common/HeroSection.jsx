@@ -144,20 +144,30 @@ const HeroSection = () => {
 
         if (!header || !wrapper) return;
 
+        // Menarik background ke atas (margin negatif) dan mendorong konten ke bawah
+        // (padding positif) sebesar tinggi navbar, agar konten mulai tepat di bawahnya.
+        const terapkan = (height) => {
+            wrapper.style.marginTop = `-${height}px`;
+            wrapper.style.paddingTop = `${height}px`;
+        };
+
+        // Terapkan SEKALI secara sinkron di sini — useLayoutEffect berjalan SEBELUM
+        // browser menggambar, sehingga nilai awal sudah terpasang saat paint pertama
+        // dan tidak ada pergeseran tata letak (CLS). Sebelumnya penulisan pertama
+        // tertunda ke frame berikutnya lewat rAF di observer, membuat seluruh hero
+        // "turun" sekali setelah tampil. Hasil visual tetap identik.
+        terapkan(header.getBoundingClientRect().height);
+
         let animationFrameId = null;
 
         const observer = new ResizeObserver(entries => {
             // Gunakan rAF untuk mencegah layout thrashing dan memastikan animasi mulus
+            // pada perubahan BERIKUTNYA (mis. navbar berubah tinggi saat resize).
             cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
                 const entry = entries[0];
                 if (entry) {
-                    const height = entry.contentRect.height;
-                    // Secara dinamis mengatur margin negatif untuk menarik background ke atas
-                    // dan padding positif untuk mendorong konten ke bawah,
-                    // agar konten selalu dimulai tepat di bawah navbar.
-                    wrapper.style.marginTop = `-${height}px`;
-                    wrapper.style.paddingTop = `${height}px`;
+                    terapkan(entry.contentRect.height);
                 }
             });
         });
@@ -235,6 +245,14 @@ const HeroSection = () => {
                         <h1 className="main-title">
                             {typedText}
                             <span className={`typing-cursor ${showSubtitle ? 'stop-blink' : ''}`}>|</span>
+                            {/* Sisa judul yang belum diketik dirender TAK TERLIHAT untuk
+                                memesan tinggi penuh kotak judul sejak awal. Tanpa ini,
+                                efek ketik menumbuhkan judul baris demi baris → mendorong
+                                konten di bawahnya (CLS besar di mobile). Tampilan tetap
+                                sama: yang terlihat hanya teks terketik + kursor. */}
+                            <span className="main-title-reservasi" aria-hidden="true">
+                                {fullText.slice(typedText.length)}
+                            </span>
                         </h1>
 
                         <p className={`sub-title ${showSubtitle ? 'entrance-fade-up' : 'opacity-0'}`}>
@@ -254,8 +272,11 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {heroImage && (
-                        <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                    {/* Wrapper SELALU dirender agar ruangnya dipesan sejak paint pertama
+                        (mencegah konten kiri melompat 55%→44% saat gambar datang dari fetch).
+                        Hanya isi bingkai + gambar yang menunggu data hero. */}
+                    <div className="hero-right-parallax-wrapper" ref={heroRightCmsRef}>
+                        {heroImage && (
                             <div className="hero-right-cms">
                                 <div className="bingkai-gambar-cms">
                                     <img
@@ -263,11 +284,15 @@ const HeroSection = () => {
                                         src={heroImage}
                                         alt="Visual Gedung dan Latar Belakang BPMP"
                                         className="cms-dynamic-image"
+                                        width="600"
+                                        height="600"
+                                        decoding="async"
+                                        fetchPriority="high"
                                     />
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </section>
         </div>

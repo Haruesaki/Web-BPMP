@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './InstagramSection.css';
 
-import Logo from "../../../assets/source/Logo.png";
+import MediaKosong from "../../common/MediaKosong";
 import Instagram from "../../../assets/source/instagram.png";
 
 const backendUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
@@ -172,17 +172,21 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
         <section className="instagram-section">
             <div className="ig-profile-header">
                 <div className="ig-profile-left">
-                    <img
-                      src={igProfile?.profile_pic_url_hd ? getFullUrl(igProfile.profile_pic_url_hd) : Logo}
-                      alt="Logo BPMP"
-                      className="ig-avatar"
-                      width={65}
-                      height={65}
-                      loading="lazy"
-                      decoding="async"
-                      style={{ borderRadius: '50%', objectFit: 'cover' }}
-                      referrerPolicy="no-referrer"
-                    />
+                    {igProfile?.profile_pic_url_hd ? (
+                      <img
+                        src={getFullUrl(igProfile.profile_pic_url_hd)}
+                        alt="Logo BPMP"
+                        className="ig-avatar"
+                        width={65}
+                        height={65}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ borderRadius: '50%', objectFit: 'cover' }}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <MediaKosong className="ig-avatar" label="Foto profil Instagram belum tersedia" />
+                    )}
                     <span className="ig-username">@{igProfile?.username || 'bpmplampung'}</span>
                 </div>
 

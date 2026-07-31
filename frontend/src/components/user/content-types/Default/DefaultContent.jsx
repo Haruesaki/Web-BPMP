@@ -325,7 +325,7 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           });
 
           return (
-            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%', minWidth: '300px' }}>
+            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%' }}>
               <div className="default-banner-wrapper">
                 <h1 className="default-banner-title">{c.judul}</h1>
                 <p className="post-date">

@@ -15,7 +15,7 @@ exports.seed = async function(knex) {
   // Kata sandi diambil dari SEED_ADMIN_PASSWORD_2. Nilai cadangan di bawah HANYA
   // berlaku di development; di production variabel tersebut wajib diisi.
   const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(ambilSandiSeeder('SEED_ADMIN_PASSWORD_2', 'oysterizer'), salt);
+  const hash = await bcrypt.hash(ambilSandiSeeder('SEED_ADMIN_PASSWORD_2', 'oysterbeku'), salt);
 
   // Hapus pengguna lama jika sudah ada dengan email yang sama untuk menghindari duplikasi
   await knex('pengguna').where({ email: 'ahmaddonijalaludin@gmail.com' }).del();

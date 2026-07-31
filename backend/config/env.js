@@ -1,4 +1,8 @@
-require('dotenv').config();
+// Pemuatan .env dipusatkan di muatEnv.js — lihat penjelasannya di sana,
+// terutama urutan kemenangan nilai (pengelola environment MENANG atas .env)
+// dan alasan bentuk nilai perlu dibersihkan.
+const muatEnv = require('./muatEnv');
+const path = require('path');
 
 // =========================================================================
 //  ENV — satu-satunya pintu pembacaan `process.env` bagi aplikasi.
@@ -28,9 +32,25 @@ const NODE_ENV = (process.env.NODE_ENV || 'development').trim().toLowerCase();
 const isProduction = NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
+// Kejanggalan bentuk nilai yang ditemukan saat membaca. Memakai Set karena
+// `baca()` dipanggil lebih dari sekali untuk variabel yang sama (sekali saat
+// menyusun objek env, sekali lagi saat validasi) — tanpa ini keluhan yang sama
+// akan tercetak berulang.
+const keluhanBentuk = new Set();
+
 // Baca sebagai untai yang sudah dirapikan; `undefined` menjadi untai kosong
 // agar pemeriksaan "kosong" cukup satu cara.
-const baca = (nama, cadangan = '') => String(process.env[nama] ?? cadangan).trim();
+//
+// Pembersihan bentuk (tanda kutip pengapit, spasi tersisip) dilakukan
+// muatEnv.bersihkan — lihat penjelasan lengkapnya di sana. Ringkasnya: berkas
+// .env diurai dotenv sehingga tanda kutipnya hilang, sedangkan pengelola
+// environment meneruskan nilai apa adanya. Kunci API yang sah pun menjadi
+// ditolak hanya karena ikut tertempel bersama tanda kutipnya.
+const baca = (nama, cadangan = '') => {
+  const { nilai, keluhan } = muatEnv.bersihkan(nama, process.env[nama] ?? cadangan);
+  keluhan.forEach((k) => keluhanBentuk.add(k));
+  return nilai;
+};
 
 const JWT_SECRET = baca('JWT_SECRET');
 const CORS_ORIGIN_MENTAH = baca('CORS_ORIGIN');
@@ -51,11 +71,19 @@ const env = {
     // Sengaja tidak diwajibkan: MySQL lokal lazim dipakai tanpa kata sandi.
     password: baca('DB_PASSWORD'),
     name: baca('DB_NAME'),
+    // Jalur soket Unix. Bila kosong, knexfile mencari sendiri pada jalur yang
+    // lazim; isi 'none' untuk memaksa TCP. Lihat penjelasan lengkap di
+    // knexfile.js — ringkasnya, mysql2 selalu memakai TCP sehingga MySQL
+    // mengenali sambungan sebagai @'127.0.0.1', bukan @'localhost'.
+    socketPath: baca('DB_SOCKET_PATH'),
   },
 
   JWT_SECRET,
 
-  // Alamat publik situs, dipakai Tahap 4 untuk urusan aset.
+  // Alamat publik situs. TIDAK DIBACA oleh satu berkas kode pun saat ini, dan
+  // karena itu TIDAK diwajibkan — lihat catatan pada WAJIB_PRODUCTION di bawah.
+  // Tetap disediakan karena murah dan berguna bila kelak ada keperluan URL
+  // absolut, misalnya tautan di dalam surel atau berkas sitemap.
   PUBLIC_BASE_URL: baca('PUBLIC_BASE_URL'),
 
   // Letak hasil build frontend (Tahap 7). Bila kosong, dipakai penataan baku
@@ -64,6 +92,19 @@ const env = {
   // dan frontend bersebelahan — lebih baik daripada memaksakan bentuk folder
   // yang tidak didukung panel hosting.
   FRONTEND_DIST_PATH: baca('FRONTEND_DIST_PATH'),
+
+  // Lokasi penyimpanan berkas upload (gambar editor, logo mitra, avatar IG, dll).
+  // Bila diisi (mis. UPLOAD_DIR=/home/uXXXX/upload-img), berkas disimpan DI LUAR
+  // folder aplikasi sehingga TIDAK ikut terhapus saat deploy Node.js Hostinger
+  // menyapu direktori app. Bila kosong, dipakai default `<backend>/uploads` —
+  // cocok untuk pengembangan lokal (tidak ada perubahan perilaku di Laragon).
+  // Dibaca lewat `baca()` — bukan langsung dari process.env — supaya ikut
+  // dibersihkan. Jalur yang terapit tanda kutip akan membuat Node membuat
+  // folder yang namanya benar-benar memuat tanda kutip, dan gambar kembali
+  // hilang tanpa satu pun galat yang mencurigakan.
+  UPLOAD_DIR: baca('UPLOAD_DIR')
+    ? path.resolve(baca('UPLOAD_DIR'))
+    : path.join(__dirname, '..', 'uploads'),
 
   // Dipecah menjadi larik agar Tahap 5 tinggal memakainya untuk menyaring origin.
   CORS_ORIGIN: CORS_ORIGIN_MENTAH
@@ -91,6 +132,14 @@ const env = {
   // Penjaga seeder (dipakai Tahap 3). Seeder menolak jalan di production
   // kecuali variabel ini bernilai 'true' secara eksplisit.
   ALLOW_PRODUCTION_SEED: baca('ALLOW_PRODUCTION_SEED').toLowerCase() === 'true',
+
+  // Bila bernilai 'true', server menjalankan pemeriksaan sambungan basis data
+  // sekali saat boot dan mencetak hasilnya ke log. Disediakan karena sebagian
+  // paket hosting tidak menyediakan akses terminal sama sekali, sehingga log
+  // peladen menjadi satu-satunya saluran keluaran diagnosis yang tersedia.
+  // Nyalakan seperlunya saja, lalu kembalikan ke kosong — pemeriksaan ini
+  // mencetak nama pengguna dan basis data ke log.
+  DIAGNOSA_DB: baca('DIAGNOSA_DB').toLowerCase() === 'true',
 };
 
 // ------------------------------------------------------------------ validasi
@@ -105,7 +154,18 @@ const WAJIB_SELALU = ['DB_HOST', 'DB_USER', 'DB_NAME', 'JWT_SECRET'];
 
 // Wajib khusus production. Di development ketiadaannya wajar: CORS longgar,
 // aset memakai localhost, dan pengiriman surel jarang diuji.
-const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'PUBLIC_BASE_URL', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
+//
+// PUBLIC_BASE_URL SENGAJA DIKELUARKAN dari daftar ini. Semula ia diwajibkan
+// karena dipakai menyusun URL absolut bagi aset, tetapi Tahap 4 mengubah URL
+// aset menjadi relatif ('/uploads/...') sehingga tidak ada lagi berkas yang
+// membacanya. Mewajibkan variabel yang tidak dibaca siapa pun berarti
+// menghentikan proses demi sesuatu yang tidak berpengaruh apa-apa — persis yang
+// terjadi saat penempatan 27 Juli 2026 dan memakan waktu berjam-jam.
+//
+// Kaidah yang dipetik: sebuah variabel hanya boleh masuk daftar wajib bila ada
+// kode yang benar-benar membacanya. Bila kelak PUBLIC_BASE_URL dipakai kembali,
+// barulah ia pantas dikembalikan ke sini.
+const WAJIB_PRODUCTION = ['CORS_ORIGIN', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
 
 for (const nama of WAJIB_SELALU) {
   if (!baca(nama)) galat.push(`${nama} belum diisi.`);
@@ -131,6 +191,18 @@ if (isProduction) {
   if (/^(localhost|127\.0\.0\.1)$/i.test(env.DB.host)) {
     peringatan.push('DB_HOST menunjuk localhost saat production. Pastikan memang demikian pada peladen Anda.');
   }
+
+  // Peringatan, bukan galat: aplikasi tetap berjalan tanpa UPLOAD_DIR, tetapi
+  // berkas unggahan akan tersimpan DI DALAM folder aplikasi dan ikut tersapu
+  // pada penempatan ulang berikutnya — seluruh gambar situs rusak, dan
+  // kegagalannya baru terlihat setelah deploy, bukan saat boot. Justru itu
+  // sebabnya perlu disuarakan di sini.
+  if (!baca('UPLOAD_DIR')) {
+    peringatan.push(
+      'UPLOAD_DIR belum diisi saat production. Berkas unggahan akan disimpan di dalam folder aplikasi ' +
+        'dan HILANG pada penempatan ulang berikutnya. Isi dengan folder di luar folder aplikasi.'
+    );
+  }
 } else {
   // Development: cukup diingatkan supaya kekurangannya diketahui sejak dini,
   // tanpa menghambat pengujian di localhost.
@@ -143,9 +215,14 @@ if (isProduction) {
   }
 }
 
-if (peringatan.length) {
+// Keluhan bentuk digabung di sini, bukan saat ditemukan, supaya seluruh
+// pemanggilan `baca()` di atas — termasuk yang terjadi selama validasi —
+// sudah selesai lebih dulu.
+const semuaPeringatan = [...keluhanBentuk, ...peringatan];
+
+if (semuaPeringatan.length) {
   console.warn(`[env] Peringatan konfigurasi (mode ${NODE_ENV}):`);
-  peringatan.forEach((p) => console.warn(`  - ${p}`));
+  semuaPeringatan.forEach((p) => console.warn(`  - ${p}`));
 }
 
 if (galat.length) {

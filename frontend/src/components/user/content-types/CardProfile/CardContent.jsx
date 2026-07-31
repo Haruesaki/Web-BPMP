@@ -1,11 +1,11 @@
 import "./CardContent.css";
-import WOWOK from "../../../../assets/source/FotoFormal.jpg";
+import MediaKosong from "../../../common/MediaKosong";
 
 const CardContent = ({
   name = "Arif Ahmad Muzakky",
   role = "UI/UX Desain",
   quote = "“Programmer Full Stuck bukan Full Stack”",
-  imageSrc = WOWOK,
+  imageSrc = null,
 }) => {
   return (
     <div className="card-profile">
@@ -13,7 +13,11 @@ const CardContent = ({
       <div className="card-light-sweep"></div>
 
       <div className="profile-frame">
-        <img src={imageSrc} alt={`Profil ${name}`} />
+        {imageSrc ? (
+          <img src={imageSrc} alt={`Profil ${name}`} loading="lazy" decoding="async" />
+        ) : (
+          <MediaKosong fill label={`Foto profil ${name} belum tersedia`} />
+        )}
       </div>
 
       <div className="card-text">

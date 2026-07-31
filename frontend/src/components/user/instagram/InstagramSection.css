@@ -21,8 +21,8 @@
     width: 100%;
     height: 180px;
     background-color: #ffffff;
-    border-top: 10px solid #050814;
-    border-bottom: 10px solid #050814;
+    border-top: 10px solid var(--theme-bg-darker, #050814);
+    border-bottom: 10px solid var(--theme-bg-darker, #050814);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -58,7 +58,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 18px 8%;
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     color: #ffffff;
     overflow: hidden;
     border-bottom: 2px solid rgba(255, 255, 255, 0.05);
@@ -120,7 +120,7 @@
 }
 
 .ig-follow-btn {
-    background: linear-gradient(135deg, #1A3C87 0%, #080D21 100%);
+    background: linear-gradient(135deg, var(--theme-accent, #1A3C87) 0%, rgb(var(--theme-highlight-deep-rgb, 8, 13, 33)) 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 10px 24px;
@@ -139,7 +139,7 @@
 
 .ig-follow-btn:hover {
     /* Transform dihapus agar tidak konflik dengan animasi float dan scroll */
-    background: linear-gradient(135deg, #2a52c7 0%, #0e1533 100%);
+    background: linear-gradient(135deg, rgba(var(--theme-highlight-rgb, 42, 82, 199), 1) 0%, rgb(var(--theme-highlight-deep-rgb, 14, 21, 51)) 100%);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.4);
 }
@@ -164,7 +164,7 @@
 }
 
 .ig-post-card {
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     padding: 18px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);

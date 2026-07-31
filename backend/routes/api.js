@@ -13,13 +13,20 @@ const ProfilPegawaiController = require('../controllers/profilPegawaiController'
 const BeritaController = require('../controllers/beritaController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
+const BerandaTemaController = require('../controllers/berandaTemaController');
 const BerandaBeritaController = require('../controllers/berandaBeritaController');
 const BerandaPengunjungController = require('../controllers/berandaPengunjungController');
 const LogoMitraController = require('../controllers/logoMitraController');
 const InfoKontakController = require('../controllers/infoKontakController');
 const TautanFooterController = require('../controllers/tautanFooterController');
 const TautanMediaSosialController = require('../controllers/tautanMediaSosialController');
-const UrutanSectionBerandaController = require('../controllers/urutanSectionBerandaController');
+// Huruf besar 'U' di sini WAJIB sama dengan nama berkasnya,
+// controllers/UrutanSectionBerandaController.js. Windows tidak membedakan
+// besar-kecil huruf nama berkas sehingga ejaan yang salah tetap berjalan di
+// lokal, tetapi Linux membedakannya dan proses mati saat boot dengan pesan
+// "Cannot find module". Jangan diseragamkan menjadi huruf kecil mengikuti
+// controller lain tanpa sekaligus mengubah nama berkasnya.
+const UrutanSectionBerandaController = require('../controllers/UrutanSectionBerandaController');
 const SearchController = require('../controllers/searchController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
@@ -65,6 +72,8 @@ router.post('/auth/reset-password', batasVerifikasiOtp, AuthController.resetPass
 // ================= BERANDA CMS ROUTES =================
 router.get('/beranda/header', BerandaHeaderController.getHeader);
 router.put('/beranda/header', authMiddleware, BerandaHeaderController.updateHeader);
+router.get('/beranda/tema', BerandaTemaController.getTema);
+router.put('/beranda/tema', authMiddleware, BerandaTemaController.updateTema);
 router.get('/beranda/hero', BerandaHeroController.getHero);
 router.put('/beranda/hero', authMiddleware, BerandaHeroController.updateHero);
 router.get('/beranda/berita', BerandaBeritaController.getBeritaBeranda);

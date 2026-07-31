@@ -14,7 +14,7 @@
 .news-section {
   width: 100%;
   height: auto;
-  background-color: #0b132b;
+  background-color: var(--theme-surface, #0b132b);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
   border-radius: clamp(12px, 2vw, 20px);
   overflow: hidden;
@@ -22,7 +22,7 @@
 }
 
 .news-header-bar {
-  background-color: #1a3c87;
+  background-color: var(--theme-accent, #1a3c87);
   padding: clamp(15px, 3vw, 20px) clamp(20px, 6vw, 60px);
   width: 100%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -103,7 +103,7 @@
   border-radius: clamp(12px, 2vw, 20px);
   border: 2px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  background-color: #1a3c87;
+  background-color: var(--theme-accent, #1a3c87);
 }
 
 .featured-img {
@@ -121,9 +121,19 @@
   position: absolute;
   /* Selalu menempel di dasar bingkai preview. */
   bottom: 0;
-  /* KUNCI: regangkan ke DUA tepi, bukan width:100%. Proyek ini tidak punya
-     reset box-sizing global, sehingga "width:100% + padding" membuat overlay
-     ±40-50px LEBIH LEBAR dari .featured-card lalu terpotong overflow:hidden. */
+  /* KUNCI: regangkan ke DUA tepi, bukan width:100%. Dengan "width:100% +
+     padding" overlay menjadi ±40-50px LEBIH LEBAR dari .featured-card lalu
+     terpotong overflow:hidden — kecuali box-sizing-nya border-box.
+
+     KOREKSI (31 Juli 2026): komentar di sini dahulu menyatakan "proyek ini
+     tidak punya reset box-sizing global". Pernyataan itu TIDAK BENAR dan
+     sempat membelokkan penelusuran bug tata letak tabel admin. Kenyataannya
+     `Beranda.css` memasang `*,::before,::after { box-sizing: border-box }`
+     yang ikut masuk ke CSS entry, sehingga berlaku di SELURUH halaman.
+
+     Meski begitu cara di bawah tetap dipertahankan, dan justru itu intinya:
+     merentang ke dua tepi benar tanpa bergantung pada reset mana pun, sehingga
+     tidak ikut rusak bila reset itu kelak dipindah atau dihapus. */
   left: 0;
   right: 0;
   box-sizing: border-box; /* pengaman ganda: padding memakan ke dalam */
@@ -174,7 +184,7 @@
   aspect-ratio: 16 / 10;
   border-radius: clamp(8px, 1.2vw, 12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  background-color: #1a3c87;
+  background-color: var(--theme-accent, #1a3c87);
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s ease, transform 0.2s ease;
@@ -246,7 +256,7 @@
 }
 
 .page-num.active {
-  background-color: #1a3c87;
+  background: linear-gradient(135deg, var(--theme-accent, #1a3c87) 0%, var(--theme-secondary, #10255A) 100%);
   color: #ffffff;
   border: 1px solid #ffffff;
 }
@@ -268,7 +278,7 @@
 
 .page-arrow:hover:not(:disabled) {
   background-color: #ffffff;
-  color: #0b132b;
+  color: var(--theme-surface, #0b132b);
 }
 
 .page-arrow:disabled {

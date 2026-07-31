@@ -20,7 +20,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 25px 8%;
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     color: #ffffff;
     overflow: hidden;
 }
@@ -112,7 +112,7 @@
         rgba(255, 255, 255, 0.15) 60%,
         rgba(255, 255, 255, 0) 100%
     );
-    transform: skewX(-25deg);
+    transform: translateX(0) skewX(-25deg);
     animation: youtube-buttonLightSweep 6s infinite linear; /* Animasi kilau */
     animation-delay: 2s; /* Jeda sebelum animasi kilau dimulai lagi */
 }
@@ -130,7 +130,7 @@
 }
 
 .yt-unified-card {
-    background-color: #0B132B;
+    background-color: var(--theme-surface, #0B132B);
     border-radius: 12px;
     padding: 35px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
@@ -196,6 +196,55 @@
 .main-wrapper {
     aspect-ratio: 16 / 9;
 
+}
+
+/* --- Facade YouTube: thumbnail + tombol play (mengganti iframe berat sampai diklik) --- */
+/* Mengisi wrapper persis seperti iframe (absolute, 100%), sehingga ukuran & tata
+   letak tidak berubah sama sekali. */
+.yt-facade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    background-color: #000;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+/* Tombol play meniru gaya YouTube: persegi membulat gelap, merah saat hover,
+   segitiga putih di tengah. */
+.yt-facade-play {
+    width: 68px;
+    height: 48px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 14%;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.yt-facade:hover .yt-facade-play,
+.yt-facade:focus-visible .yt-facade-play {
+    background-color: #f00;
+}
+
+.yt-facade-play::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-style: solid;
+    border-width: 11px 0 11px 19px;
+    border-color: transparent transparent transparent #fff;
 }
 
 /* Susunan Video Kanan (Bagi 2 secara vertikal) */
@@ -364,12 +413,15 @@
     }
 }
 
+/* Semula menganimasikan `left` (-150%→150%, rentang 300% lebar kontainer).
+   Lebar element = 70% kontainer → 300%/70% ≈ 429% lebar element. Gerakan sama,
+   tapi via transform (GPU) sehingga tidak memicu layout shift/CLS. */
 @keyframes youtube-buttonLightSweep {
     0% {
-        left: -150%;
+        transform: translateX(0) skewX(-25deg);
     }
     100% {
-        left: 150%;
+        transform: translateX(429%) skewX(-25deg);
     }
 }
 /* --- Responsive YouTube --- */

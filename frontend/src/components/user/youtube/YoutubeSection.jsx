@@ -1,22 +1,50 @@
 import React, { useEffect, useRef } from 'react';
 import './YoutubeSection.css';
 
-import Youtube from "../../../assets/source/youtube.png";
+import MediaKosong from "../../common/MediaKosong";
 
-// Komponen Iframe Player
-const IframePlayer = ({ videoId, isMain }) => (
-    <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`}>
-        <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-        ></iframe>
-    </div>
-);
+// Komponen Iframe Player dengan pola "facade":
+// Awalnya HANYA menampilkan thumbnail + tombol play (ringan). Iframe YouTube
+// yang berat (menyeret analitik YouTube + iklan DoubleClick, ~1 MB/video) baru
+// dimuat SAAT DIKLIK. Ini menghapus rantai jaringan kritis ~7 detik di mobile
+// tanpa mengubah tampilan: sebelum diklik pun iframe YouTube hanya menampilkan
+// thumbnail + tombol play yang serupa.
+const IframePlayer = ({ videoId, isMain }) => {
+    const [aktif, setAktif] = React.useState(false);
+
+    return (
+        <div className={`yt-video-wrapper ${isMain ? 'main-wrapper' : 'side-wrapper'}`}>
+            {aktif ? (
+                // `referrerPolicy` di bawah adalah LAPIS KEDUA atas Error 153.
+                // Perbaikan pokoknya ada di backend (helmet `referrerPolicy` pada
+                // index.js), tetapi atribut elemen MENANG atas kebijakan dokumen —
+                // sehingga sematan ini tetap hidup seandainya kelak ada yang
+                // mengetatkan header itu kembali. YouTube menolak memutar bila tidak
+                // tahu domain penyematnya, dan gejalanya hanya muncul di production.
+                <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                    title="YouTube video player"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                ></iframe>
+            ) : (
+                <button
+                    type="button"
+                    className="yt-facade"
+                    onClick={() => setAktif(true)}
+                    aria-label="Putar video YouTube"
+                    style={{ backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }}
+                >
+                    <span className="yt-facade-play" aria-hidden="true"></span>
+                </button>
+            )}
+        </div>
+    );
+};
 
 // Komponen Placeholder untuk saat tidak ada video
 const VideoPlaceholder = () => (
@@ -92,7 +120,11 @@ const YoutubeSection = ({ ytVideos, ytChannel, loading, error }) => {
         <section className="youtube-section">
             <div className="yt-header-bar">
                 <div className="yt-profile-left">
-                    <img src={ytChannel?.thumbnails?.default?.url || Youtube} alt="YouTube Icon" className="yt-icon" style={ytChannel?.thumbnails ? { borderRadius: '50%' } : {}} />
+                    {ytChannel?.thumbnails?.default?.url ? (
+                        <img src={ytChannel.thumbnails.default.url} alt="YouTube Icon" className="yt-icon" style={{ borderRadius: '50%' }} loading="lazy" decoding="async" />
+                    ) : (
+                        <MediaKosong className="yt-icon" label="Ikon kanal YouTube belum tersedia" />
+                    )}
                     <span className="yt-channel-name">
                         {ytChannel?.title || "Memuat..."}
                     </span>

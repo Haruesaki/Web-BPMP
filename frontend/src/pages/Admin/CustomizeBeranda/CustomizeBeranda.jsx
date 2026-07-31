@@ -16,18 +16,15 @@ import SectionOrderSetting from '../../../components/admin/CustomizeBeranda/Sect
 import FooterSetting from '../../../components/admin/CustomizeBeranda/FooterSetting';
 import ThemeAlert from '../../../components/admin/ThemeAlert';
 import axiosInstance from '../../../api/axiosInstance';
+// Definisi tema dipusatkan di satu modul agar admin (pilih & simpan) dan
+// halaman pengunjung (terapkan warna) tak pernah berbeda.
+import { THEMES, THEME_FONT, themeIdFromColors } from '../../../utils/berandaThemes';
 
 // =========================================================================
 //  DATA AWAL
 //  -----------------------------------------------------------------------
 //  Nanti tinggal diganti fetch ke backend (GET /api/beranda-settings).
 // =========================================================================
-const THEMES = [
-  { id: 'dark-navy', label: 'Dark Navy', hex: '#0B132B' },
-  { id: 'saffron-gold', label: 'Saffron Gold', hex: '#FAB12F' },
-  { id: 'forest-green', label: 'Forest Green', hex: '#2B5748' },
-];
-
 // Opsi menu untuk dropdown "Menu" pada Sections Halaman Beranda.
 const MENU_OPTIONS = [
   'Kosong',
@@ -71,6 +68,7 @@ const CustomizeBeranda = () => {
   const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isSavingSocials, setIsSavingSocials] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [isSavingTheme, setIsSavingTheme] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false });
 
@@ -86,6 +84,8 @@ const CustomizeBeranda = () => {
 
   // ---------- TEMA ----------
   const [selectedTheme, setSelectedTheme] = useState('dark-navy');
+  // Baseline preset terakhir-tersimpan (untuk deteksi perubahan tombol Simpan).
+  const [baseTheme, setBaseTheme] = useState('dark-navy');
 
   // ---------- HEADER (Logo Utama Website) ----------
   const [headerLogoPreview, setHeaderLogoPreview] = useState(null);
@@ -157,7 +157,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
 
     const loadBerandaSettings = async () => {
       try {
-        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse, medsosResponse, sectionResponse] = await Promise.all([
+        const [headerResponse, heroResponse, mitraResponse, footerResponse, tautanResponse, medsosResponse, sectionResponse, temaResponse] = await Promise.all([
           axiosInstance.get('/api/beranda/header'),
           axiosInstance.get('/api/beranda/hero'),
           axiosInstance.get('/api/beranda/mitra'),
@@ -165,6 +165,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
           axiosInstance.get('/api/beranda/tautan-footer'),
           axiosInstance.get('/api/beranda/media-sosial'),
           axiosInstance.get('/api/beranda/urutan-section'),
+          axiosInstance.get('/api/beranda/tema'),
         ]);
         const header = headerResponse.data?.data;
         const hero = heroResponse.data?.data;
@@ -175,6 +176,12 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         const sectionData = sectionResponse?.data?.data || [];
 
         if (!hero || !isMounted) return;
+
+        // ---------- TEMA ----------
+        const temaData = temaResponse?.data?.data;
+        const loadedThemeId = themeIdFromColors(temaData);
+        setSelectedTheme(loadedThemeId);
+        setBaseTheme(loadedThemeId);
 
         const loadedHeaderForm = {
           logoUrl: header?.url_logo_header || null,
@@ -465,6 +472,40 @@ const [tautan, setTautan] = useState(makeInitialTautan);
     }
   };
 
+  const handleSaveTema = async () => {
+    if (isSavingTheme) return;
+    const preset = THEMES.find((t) => t.id === selectedTheme);
+    if (!preset) return;
+
+    setIsSavingTheme(true);
+    try {
+      const res = await axiosInstance.put('/api/beranda/tema', {
+        warna_latar: preset.warna_latar,
+        warna_utama: preset.warna_utama,
+        warna_sekunder: preset.warna_sekunder,
+        warna_teks: preset.warna_teks,
+        font_pilihan: THEME_FONT,
+      });
+      if (res.data?.success) {
+        setBaseTheme(selectedTheme);
+        // Segarkan cache tema browser ini agar pratinjau halaman pengunjung
+        // langsung memakai warna baru tanpa flash (kunci dibagi dengan useTema
+        // & skrip inline index.html).
+        try {
+          localStorage.setItem('beranda-theme-vars', JSON.stringify(preset.vars));
+        } catch (e) {
+          /* localStorage diblokir — abaikan, tema tetap tersimpan di server */
+        }
+        showAlert('success', 'Tema halaman beranda telah diperbarui.', 'Berhasil');
+      }
+    } catch (error) {
+      console.error('Gagal menyimpan tema beranda:', error);
+      showAlert('error', error.response?.data?.pesan || 'Gagal menyimpan pengaturan tema.', 'Simpan Gagal');
+    } finally {
+      setIsSavingTheme(false);
+    }
+  };
+
   const handleSaveHero = async () => {
     if (isSavingHero) return;
 
@@ -575,6 +616,7 @@ const [tautan, setTautan] = useState(makeInitialTautan);
   // Membandingkan nilai berjalan dengan baseline terakhir-tersimpan. Untuk
   // gambar, dianggap berubah bila ada file baru dipilih ATAU URL tersimpan
   // berbeda dari baseline (mencakup kasus dihapus).
+  const themeDirty = useMemo(() => selectedTheme !== baseTheme, [selectedTheme, baseTheme]);
   const headerDirty = useMemo(
     () => headerLogoFile !== null || savedHeaderLogoUrl !== baseHeaderLogoUrl,
     [headerLogoFile, savedHeaderLogoUrl, baseHeaderLogoUrl]
@@ -619,6 +661,9 @@ const [tautan, setTautan] = useState(makeInitialTautan);
         selectedTheme={selectedTheme}
         setSelectedTheme={setSelectedTheme}
         themes={THEMES}
+        onSave={handleSaveTema}
+        isSaving={isSavingTheme}
+        isDirty={themeDirty}
       />
 
               <HeaderLogoSetting

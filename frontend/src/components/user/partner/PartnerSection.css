@@ -9,7 +9,7 @@
 
     position: relative;
     width: 100%;
-    background-image: linear-gradient(to right, #79cbf8 0%, #aeceff 50%, #79cbf8 100%);
+    background-image: linear-gradient(to right, var(--theme-band-a, #79cbf8) 0%, var(--theme-band-b, #aeceff) 50%, var(--theme-band-a, #79cbf8) 100%);
     padding: var(--partner-section-padding-y) 0;
     margin-top: 50px;
     margin-bottom: 50px;

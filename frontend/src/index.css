@@ -6,6 +6,25 @@ body {
 }
 
 /* =========================================
+   FALLBACK FONT BER-METRIK (anti-CLS)
+   -----------------------------------------
+   Saat Poppins (dari Google Fonts) belum termuat, browser memakai font
+   cadangan. Bila metriknya beda dari Poppins, teks "melompat" begitu Poppins
+   masuk (FOUT) — penyumbang CLS di mobile. Font-face ini memakai Arial lokal
+   yang DISESUAIKAN (size-adjust/override) agar menempati ruang yang sama
+   dengan Poppins, sehingga peralihan tidak menggeser tata letak.
+   Font akhir tetap Poppins — tidak ada perubahan tampilan permanen.
+========================================= */
+@font-face {
+    font-family: 'Poppins-fallback';
+    src: local('Arial');
+    ascent-override: 92.6%;
+    descent-override: 30.9%;
+    line-gap-override: 8.8%;
+    size-adjust: 112.4%;
+}
+
+/* =========================================
    LENIS SMOOTH SCROLL
 ========================================= */
 html.lenis, html.lenis body {

@@ -65,6 +65,24 @@ app.use(
         // di sini terlalu ketat dan akan memutus embed.
         crossOriginEmbedderPolicy: false,
         crossOriginResourcePolicy: { policy: 'cross-origin' },
+        // WAJIB DISEBUT EKSPLISIT — jangan dihapus dengan anggapan ini bawaan.
+        //
+        // Bawaan helmet adalah `Referrer-Policy: no-referrer`, yang membuat peramban
+        // TIDAK mengirim header Referer sama sekali. YouTube memvalidasi domain
+        // penyemat dari header itu, sehingga tanpa referrer pemutarnya berhenti
+        // dengan "Error 153 — Terjadi error pada konfigurasi pemutar video".
+        // Sematan lain yang memvalidasi hal serupa (Instagram, iframe Google Maps)
+        // menanggung risiko yang sama.
+        //
+        // Kegagalan ini MUSTAHIL tampak di localhost: di sana halaman disajikan Vite,
+        // sedangkan helmet hanya menyentuh balasan Express. Barulah di production,
+        // ketika Express menyajikan frontend/dist, headernya ikut terkirim. Jadi
+        // "aman di lokal" sama sekali bukan bukti aman di peladen untuk header ini.
+        //
+        // `strict-origin-when-cross-origin` adalah bawaan peramban modern: lintas asal
+        // hanya ASAL yang dikirim (https://bpmplampung.com/), tanpa path maupun query,
+        // dan tidak dikirim sama sekali bila turun dari HTTPS ke HTTP.
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     })
 );
 
@@ -123,7 +141,7 @@ app.use(express.urlencoded({ extended: true, limit: BATAS_UMUM }));
 // byte acak, sehingga tidak pernah dipakai ulang untuk isi yang berbeda.
 app.use(
     '/uploads',
-    express.static(path.join(__dirname, 'uploads'), {
+    express.static(env.UPLOAD_DIR, {
         maxAge: env.isProduction ? '30d' : 0,
     })
 );
@@ -134,11 +152,38 @@ app.use('/api', apiRoutes);
 // --- KONFIGURASI PRODUCTION UNTUK FRONTEND ---
 // Di production (Hostinger), Express akan menyajikan file build React secara statis
 if (env.isProduction) {
-    // Penataan baku mengandaikan `backend/` dan `frontend/` bersebelahan.
-    // FRONTEND_DIST_PATH menjadi jalan keluar bila peladen memaksa bentuk lain.
-    const dirDist = env.FRONTEND_DIST_PATH
-        ? path.resolve(env.FRONTEND_DIST_PATH)
-        : path.join(__dirname, '../frontend/dist');
+    // Letak hasil build dicari pada beberapa kandidat, bukan satu jalur tunggal.
+    //
+    // Alasannya berasal dari kejadian nyata: penataan folder di peladen tidak
+    // selalu dapat ditentukan sendiri. Pada Hostinger, isi folder backend
+    // ditempatkan LANGSUNG di akar aplikasi, sehingga `../frontend/dist` menunjuk
+    // ke luar akar aplikasi — jalur yang benar di lokal justru salah di peladen.
+    // Menyandarkan diri pada satu jalur berarti setiap perbedaan penataan menjadi
+    // kegagalan penempatan, padahal cukup diselesaikan dengan mencoba dua bentuk
+    // yang memang mungkin.
+    //
+    // Urutannya bermakna: yang paling eksplisit menang.
+    const fs = require('fs');
+    const kandidatDist = [
+        // 1. Ditetapkan langsung oleh pengelola — selalu diutamakan.
+        env.FRONTEND_DIST_PATH && path.resolve(env.FRONTEND_DIST_PATH),
+        // 2. Di dalam akar aplikasi. Bentuk ini dipakai di Hostinger.
+        path.join(__dirname, 'frontend/dist'),
+        // 3. Bersebelahan dengan folder backend. Bentuk ini dipakai di lokal.
+        path.join(__dirname, '../frontend/dist'),
+    ].filter(Boolean);
+
+    const punyaIndex = (dir) => {
+        try {
+            return fs.existsSync(path.join(dir, 'index.html'));
+        } catch (e) {
+            return false;
+        }
+    };
+
+    // Bila tidak satu pun kandidat berisi index.html, kandidat pertama tetap
+    // dipakai supaya pesan galat di bawah menyebut jalur yang paling relevan.
+    const dirDist = kandidatDist.find(punyaIndex) || kandidatDist[0];
 
     // Diperiksa saat boot, bukan dibiarkan sampai ada permintaan masuk.
     // Tanpa pemeriksaan ini, folder build yang salah letak hanya tampak sebagai
@@ -146,13 +191,28 @@ if (env.isProduction) {
     // menyesatkan dan memakan waktu untuk dilacak. Prosesnya sengaja TIDAK
     // dihentikan: API masih berfungsi penuh, dan menghentikan proses akan
     // menjatuhkan seluruh layanan hanya karena satu folder belum terunggah.
-    if (!require('fs').existsSync(path.join(dirDist, 'index.html'))) {
-        console.error('[frontend] index.html tidak ditemukan pada:', dirDist);
+    if (punyaIndex(dirDist)) {
+        console.log('[frontend] Hasil build ditemukan pada:', dirDist);
+    } else {
+        console.error('[frontend] index.html tidak ditemukan. Jalur yang dicoba:');
+        kandidatDist.forEach((d) => console.error(`  - ${d}`));
         console.error('[frontend] Seluruh halaman akan gagal tampil, meskipun /api tetap berfungsi.');
-        console.error('[frontend] Periksa penataan folder, atau tetapkan FRONTEND_DIST_PATH ke letak folder dist yang sebenarnya.');
+        console.error('[frontend] Tempatkan folder dist pada salah satu jalur di atas, atau tetapkan FRONTEND_DIST_PATH.');
     }
 
-    app.use(express.static(dirDist));
+    // Aset ber-hash Vite (index-AbC123.js, dst) tidak pernah berubah isi untuk
+    // nama yang sama, sehingga aman di-cache setahun penuh (immutable). Namun
+    // index.html WAJIB no-cache: ia merujuk nama aset ber-hash terbaru, jadi bila
+    // ikut ter-cache lama, pengunjung tetap memuat versi lama setelah deploy baru.
+    app.use(express.static(dirDist, {
+        maxAge: env.isProduction ? '1y' : 0,
+        immutable: env.isProduction,
+        setHeaders: (res, filePath) => {
+            if (filePath.endsWith('index.html')) {
+                res.setHeader('Cache-Control', 'no-cache');
+            }
+        },
+    }));
 
     // Tangkap semua route yang tidak ada di /api dan serahkan ke React Router.
     //
@@ -185,7 +245,17 @@ if (env.isProduction) {
             return res.status(404).json({ pesan: 'Halaman tidak ditemukan' });
         }
 
-        return res.sendFile(path.join(dirDist, 'index.html'), (err) => {
+        // index.html tidak boleh ter-cache lama (lihat alasan di express.static di atas).
+        res.setHeader('Cache-Control', 'no-cache');
+        // `root` + nama file relatif — BUKAN jalur absolut. Sebabnya: di Hostinger
+        // aplikasi berjalan dari dalam `.builds/versions/<id>/nodejs/...`, dan
+        // segmen `.builds` diawali titik. Bila jalur absolut dikirim, pustaka
+        // `send` (default `dotfiles: 'ignore'`) menganggapnya "dotfile" dan
+        // membalas 404 walau index.html jelas ada — sehingga SEMUA deep-link
+        // (/admin, /berita/..) gagal. Dengan `root`, cek dotfile hanya berlaku
+        // pada bagian relatif ('index.html', bersih); `.builds` di atas root
+        // diabaikan — persis cara express.static bekerja.
+        return res.sendFile('index.html', { root: dirDist }, (err) => {
             if (err) next(err);
         });
     });
