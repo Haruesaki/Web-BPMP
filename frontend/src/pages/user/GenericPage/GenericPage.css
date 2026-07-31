@@ -12,6 +12,9 @@
 
 @media (max-width: 768px) {
     .generic-page-container {
-        padding: 20px 35px; /* Mengurangi padding untuk layar kecil */
+        /* Padding samping dikecilkan (dari 35px) agar tidak menumpuk dengan
+           padding .default-layout-wrapper di dalamnya — sebelumnya kolom konten
+           menyusut jadi ~256px pada layar 390px. */
+        padding: 20px 12px;
     }
 }

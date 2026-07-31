@@ -67,16 +67,15 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
   const isVertical = viewLayout === 'Vertikal';
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexWrap: isVertical ? 'nowrap' : 'wrap', 
+    <div className="news-card-list" style={{
+      display: 'flex',
+      flexWrap: isVertical ? 'nowrap' : 'wrap',
       flexDirection: isVertical ? 'column' : 'row',
       alignItems: isVertical ? 'center' : 'stretch',
-      gap: '30px', 
-      padding: '40px', 
-      justifyContent: 'center', 
-      minHeight: '80vh', 
-      alignContent: 'flex-start' 
+      gap: '30px',
+      justifyContent: 'center',
+      minHeight: '80vh',
+      alignContent: 'flex-start'
     }}>
       {berita.map(b => {
         // `waktu_tayang` baru terisi ketika berita diaktifkan tayang di Beranda,

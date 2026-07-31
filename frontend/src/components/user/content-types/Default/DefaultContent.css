@@ -9,6 +9,10 @@
     background-color: #232F72;
     border-radius: 20px;
     max-width: 1300px;
+    /* min-width dipindah dari inline style JSX ke sini (menjaga tampilan
+       desktop: kartu tidak menyempit berlebihan saat row-wrap). Di mobile
+       nilai ini di-nol-kan agar kartu tidak dipaksa melebihi lebar layar. */
+    min-width: 300px;
 }
 
 /* --- Default Content Styling --- */
@@ -133,10 +137,49 @@
 @media (max-width: 768px) {
     .content-type-section {
         padding: 20px 10px;
+        /* Lepaskan min-width 300px di mobile: pada layar sempit ia memaksa
+           kartu lebih lebar dari wadahnya sehingga meluber & tidak center. */
+        min-width: 0;
     }
 
     .default-banner-title {
         font-size: 1.5em;
+    }
+
+    /* Kurangi padding wrapper yang menumpuk dengan padding .generic-page-container
+       (jika ada) agar kolom konten tidak menyusut jadi terlalu sempit. */
+    .default-layout-wrapper {
+        padding: 1.5rem 0.5rem;
+    }
+
+    .page-content-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+
+    /* Padding banner & isi dikecilkan agar area baca lebih lega di HP. */
+    .default-banner-wrapper {
+        padding: 18px 20px;
+    }
+
+    .default-description-container {
+        padding: 24px 18px;
+    }
+
+    /* justify sering menyisakan spasi "belang" di kolom sempit → rata kiri. */
+    .default-description-container p {
+        font-size: 1em;
+        text-align: left;
+    }
+
+    /* Tabel dari CKEditor sering lebih lebar dari layar. Di dalam wadah
+       ber-overflow:hidden, kolom yang meluber jadi terpotong & tak terjangkau.
+       Buat tabel bisa digulir horizontal sendiri di mobile. */
+    .default-description-container table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 

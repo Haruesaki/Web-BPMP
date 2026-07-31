@@ -1,4 +1,13 @@
 /* ========================================= */
+/* DAFTAR KARTU (WRAPPER FLEX)               */
+/* Padding dipindah dari inline style JSX ke sini agar bisa dioverride di    */
+/* media query mobile (inline style tak bisa di-media-query).                */
+/* ========================================= */
+.news-card-list {
+  padding: 40px; /* nilai desktop, sama seperti sebelumnya */
+}
+
+/* ========================================= */
 /* KONTAINER UTAMA KARTU BERITA              */
 /* ========================================= */
 .news-card {
@@ -230,4 +239,27 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 @keyframes lightSweepCard {
   from { left: -150%; }
   to { left: 150%; }
+}
+
+/* ========================================= */
+/* RESPONSIF MOBILE                          */
+/* Kartu lebar keras 400px terpotong di layar HP. Di ≤768px kartu dibuat     */
+/* mengisi lebar tersedia (maks 360px) dengan menjaga rasio 400/430, dan     */
+/* padding daftar dikecilkan agar tidak ada lagi bagian yang terpangkas.     */
+/* ========================================= */
+@media (max-width: 768px) {
+  .news-card-list {
+    padding: 24px 12px;
+    gap: 20px;
+  }
+
+  /* Seluruh anak .news-card ber-position:absolute sehingga kartu tidak punya
+     lebar intrinsik. Karena itu lebar HARUS berupa nilai pasti (bukan 100%,
+     yang akan mengecil jadi 0). Pakai lebar berbasis viewport, tinggi mengikuti
+     rasio desain asli 400/430. */
+  .news-card {
+    width: min(360px, calc(100vw - 56px));
+    height: auto;
+    aspect-ratio: 400 / 430;
+  }
 }
