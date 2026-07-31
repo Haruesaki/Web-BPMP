@@ -1,5 +1,9 @@
 const db = require('../config/database');
 const { logActivityInternal } = require('./aktivitasAdminController');
+// Menormalkan waktu dari badan permintaan. Lihat penjelasan lengkap di sana:
+// untai ISO-8601 yang dikirim frontend ditolak MySQL, dan memformatnya sendiri
+// berisiko menyimpan jam UTC alih-alih jam WIB.
+const { keWaktuDb } = require('../utils/waktu');
 
 class BeritaController {
   static async getBeritaByMenu(req, res) {
@@ -37,6 +41,9 @@ class BeritaController {
 
       const status = statusTayang ? 'terbit' : 'draf';
 
+      const waktu = keWaktuDb(waktuTayang);
+      if (!waktu.sah) return res.status(400).json({ pesan: 'Format waktu tayang tidak dikenali' });
+
       // MySQL tidak mendukung RETURNING, jadi baris baru dibaca ulang lewat insertId.
       const [insertId] = await db('berita').insert({
         menu_id,
@@ -45,7 +52,7 @@ class BeritaController {
         deskripsi_kaya: deskripsi_kaya || '',
         url_foto: coverUrl || null,
         status,
-        waktu_tayang: waktuTayang || null
+        waktu_tayang: waktu.nilai
       });
       const inserted = await db('berita').where({ id: insertId }).first();
 
@@ -69,7 +76,11 @@ class BeritaController {
       if (judul !== undefined) updateData.judul = judul;
       if (deskripsi_kaya !== undefined) updateData.deskripsi_kaya = deskripsi_kaya;
       if (statusTayang !== undefined) updateData.status = statusTayang ? 'terbit' : 'draf';
-      if (waktuTayang !== undefined) updateData.waktu_tayang = waktuTayang;
+      if (waktuTayang !== undefined) {
+        const waktu = keWaktuDb(waktuTayang);
+        if (!waktu.sah) return res.status(400).json({ pesan: 'Format waktu tayang tidak dikenali' });
+        updateData.waktu_tayang = waktu.nilai;
+      }
       if (coverUrl !== undefined) updateData.url_foto = coverUrl;
 
       // Pastikan beritanya ada sebelum diperbarui, karena MySQL tidak bisa
