@@ -121,9 +121,19 @@
   position: absolute;
   /* Selalu menempel di dasar bingkai preview. */
   bottom: 0;
-  /* KUNCI: regangkan ke DUA tepi, bukan width:100%. Proyek ini tidak punya
-     reset box-sizing global, sehingga "width:100% + padding" membuat overlay
-     ±40-50px LEBIH LEBAR dari .featured-card lalu terpotong overflow:hidden. */
+  /* KUNCI: regangkan ke DUA tepi, bukan width:100%. Dengan "width:100% +
+     padding" overlay menjadi ±40-50px LEBIH LEBAR dari .featured-card lalu
+     terpotong overflow:hidden — kecuali box-sizing-nya border-box.
+
+     KOREKSI (31 Juli 2026): komentar di sini dahulu menyatakan "proyek ini
+     tidak punya reset box-sizing global". Pernyataan itu TIDAK BENAR dan
+     sempat membelokkan penelusuran bug tata letak tabel admin. Kenyataannya
+     `Beranda.css` memasang `*,::before,::after { box-sizing: border-box }`
+     yang ikut masuk ke CSS entry, sehingga berlaku di SELURUH halaman.
+
+     Meski begitu cara di bawah tetap dipertahankan, dan justru itu intinya:
+     merentang ke dua tepi benar tanpa bergantung pada reset mana pun, sehingga
+     tidak ikut rusak bila reset itu kelak dipindah atau dihapus. */
   left: 0;
   right: 0;
   box-sizing: border-box; /* pengaman ganda: padding memakan ke dalam */

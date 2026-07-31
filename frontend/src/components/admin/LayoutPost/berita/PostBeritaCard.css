@@ -98,16 +98,35 @@
 .postdefault .bc-table {
     width: 100%;
     border-collapse: collapse;
-    /* Cukup lebar untuk semua kolom + header; bila viewport lebih sempit,
+    /* Sama persis dengan jumlah lebar seluruh kolom di bagian KOLOM di bawah
+       (48+78+240+250+128+158+108+94). Bila viewport lebih sempit,
        .bc-table-scroll memberi scroll horizontal (bukan teks tumpang tindih). */
-    min-width: 1100px;
+    min-width: 1104px;
     /* Lebar kolom jadi batas keras → tabel tidak ikut membengkak saat judul/
        deskripsi panjang diinput (mencegah scroll horizontal dari konten). */
     table-layout: fixed;
 }
 
+/* PENTING — JANGAN DIHAPUS DENGAN ANGGAPAN "SUDAH ADA RESETNYA".
+   Proyek ini memuat reset universal `*,::before,::after{box-sizing:border-box}`
+   lewat Beranda.css, yang ikut masuk ke CSS entry sehingga berlaku di SELURUH
+   halaman termasuk panel admin. Akibatnya lebar kolom di bawah dihitung
+   TERMASUK padding. Disebut eksplisit di sini supaya perhitungan lebar kolom
+   tidak diam-diam berubah arti bila reset itu kelak dipindah atau dihapus —
+   perlu dicatat bahwa ada komentar di NewsSection.css yang justru menyatakan
+   proyek ini TIDAK punya reset global, dan pernyataan itu sudah tidak benar. */
+.postdefault .bc-table th,
+.postdefault .bc-table td {
+    box-sizing: border-box;
+}
+
 .postdefault .bc-table thead th {
-    padding: 14px 18px;
+    /* Padding mendatar 12px (bukan 18px). Dengan box-sizing: border-box, setiap
+       12px yang ditambahkan di sini LANGSUNG memakan ruang isi kolom di kedua
+       sisi. Pada 18px, kolom Aksi hanya menyisakan 54px untuk dua tombol 32px
+       beserta jarak 6px (butuh 70px), dan kolom Thumbnail menyisakan 48px untuk
+       gambar 54px — itulah sebab kolomnya tampak berantakan. */
+    padding: 14px 12px;
     text-align: left;
     font-size: 11.5px;
     font-weight: 600;
@@ -123,7 +142,9 @@
 }
 
 .postdefault .bc-table tbody td {
-    padding: 14px 18px;
+    /* Wajib sama dengan padding thead di atas, kalau tidak kolom badan dan
+       kepalanya tidak akan sejajar. */
+    padding: 14px 12px;
     font-size: 13px;
     color: var(--text-main);
     border-bottom: 1px solid var(--border-soft);
@@ -138,43 +159,55 @@
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* ---------- KOLOM ---------- */
+/* ---------- KOLOM ----------
+   Lebar di bawah sudah TERMASUK padding mendatar 12px di kedua sisi (24px),
+   sebab box-sizing: border-box berlaku. Angka dalam kurung adalah ruang yang
+   benar-benar tersisa untuk isinya — itulah angka yang harus dibandingkan
+   dengan lebar elemen di dalamnya, bukan lebar kolomnya. Jumlah seluruhnya
+   1104px, dan harus tetap sama dengan min-width pada .bc-table. */
+
 .postdefault .bc-col-no {
-    width: 48px;
+    width: 48px;   /* isi 24px — cukup untuk "No." dan nomor 3 digit */
     color: var(--text-sub);
     text-align: center;
 }
 
 .postdefault .bc-col-foto {
-    width: 84px;
+    width: 78px;   /* isi 54px — persis selebar .bc-thumb */
 }
 
 .postdefault .bc-col-judul {
-    width: 240px;
+    width: 240px;  /* isi 216px */
 }
 
 .postdefault .bc-col-desk {
-    width: 260px;
-    max-width: 260px;
+    width: 250px;  /* isi 226px */
+    max-width: 250px;
 }
 
 .postdefault .bc-col-pembuat {
-    width: 110px;
+    width: 128px;  /* isi 104px */
     white-space: nowrap;
+    /* Nama yang lebih panjang dipotong "…" alih-alih meluber ke kolom
+       sebelahnya. Tanpa ini `nowrap` membuat teks menembus batas sel. */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .postdefault .bc-col-waktu {
-    width: 140px;
+    width: 158px;  /* isi 134px — "2026-07-31 09:03:47" muat tanpa terpotong */
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .postdefault .bc-col-status {
-    width: 130px;
+    width: 108px;  /* isi 84px — saklar 42px, header boleh 2 baris */
     text-align: center;
 }
 
 .postdefault .bc-col-aksi {
-    width: 90px;
+    width: 94px;   /* isi 70px — dua tombol 32px + jarak 6px, pas */
     text-align: center;
 }
 
@@ -225,6 +258,9 @@
 /* ---------- THUMBNAIL FOTO ---------- */
 .postdefault .bc-thumb {
     width: 54px;
+    /* Jaring pengaman: bila kelak lebar kolom Thumbnail dipersempit, gambarnya
+       ikut menyusut alih-alih menembus batas sel. */
+    max-width: 100%;
     height: 40px;
     border-radius: 7px;
     overflow: hidden;
@@ -258,6 +294,42 @@
     font-size: 7.5px;
     letter-spacing: 0.3px;
     text-transform: uppercase;
+}
+
+/* ---------- PESAN GALAT ----------
+   Kegagalan menyimpan dahulu hanya dicatat ke konsol peramban, sehingga saklar
+   "Tampilkan di Beranda" tampak tidak berfungsi tanpa sebab yang terlihat. */
+.postdefault .bc-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    color: #fca5a5;
+    font-size: 12.5px;
+    line-height: 1.4;
+}
+
+.postdefault .bc-error-banner span {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.postdefault .bc-error-banner button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+}
+
+.postdefault .bc-error-banner button:hover {
+    opacity: 1;
 }
 
 /* ---------- SWITCH STATUS TAYANG ---------- */

@@ -38,6 +38,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [highlightedRow, setHighlightedRow] = useState(null);
+  const [pesanGalat, setPesanGalat] = useState('');
 
   const highlightId = location.state?.highlightId;
   const highlightSumber = location.state?.highlightSumber;
@@ -107,11 +108,28 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
     if (!b) return;
     const nyala = !b.statusTayang;
     const newWaktu = nyala ? (b.waktuTayang || new Date().toISOString()) : b.waktuTayang;
-    
+
+    // Diperbarui lebih dulu supaya saklarnya bergerak seketika, lalu DIKEMBALIKAN
+    // bila peladen menolak. Sebelumnya state hanya diubah sesudah permintaan
+    // berhasil, sehingga ketika permintaannya gagal saklar sama sekali tidak
+    // bergerak — dan karena galatnya cuma dicatat ke konsol, saklarnya tampak
+    // "tidak bisa diklik" tanpa penjelasan apa pun.
+    setBeritaList((prev) => prev.map(x => x.id === id ? { ...x, statusTayang: nyala, waktuTayang: newWaktu } : x));
+    setPesanGalat('');
+
     try {
       await axiosInstance.put(`/api/berita/${id}`, { statusTayang: nyala, waktuTayang: newWaktu });
-      setBeritaList((prev) => prev.map(x => x.id === id ? { ...x, statusTayang: nyala, waktuTayang: newWaktu } : x));
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      // Kembalikan ke keadaan semula supaya tampilan tidak berbohong tentang
+      // apa yang benar-benar tersimpan di basis data.
+      setBeritaList((prev) => prev.map(x => x.id === id ? { ...x, statusTayang: b.statusTayang, waktuTayang: b.waktuTayang } : x));
+      // Badan balasan belum tentu JSON — galat dari lapisan infrastruktur
+      // (CDN/WAF/proxy) mengirim HTML, dan membacanya sebagai JSON akan
+      // menyembunyikan sebab sesungguhnya di balik pesan generik axios.
+      const pesanPeladen = typeof err?.response?.data === 'object' ? err.response.data?.pesan : null;
+      setPesanGalat(pesanPeladen || `Gagal mengubah status "${b.judul}". ${err?.message || 'Coba lagi.'}`);
+    }
   };
 
   const handleTambah = () => {
@@ -194,6 +212,16 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
           <h1>{menuName ? `Kelola Berita — ${menuName}` : 'Kelola Berita'}</h1>
           <p>Kelola daftar berita yang tampil di halaman user.</p>
         </div>
+
+        {pesanGalat && (
+          <div className="bc-error-banner" role="alert">
+            <i className="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span>{pesanGalat}</span>
+            <button type="button" onClick={() => setPesanGalat('')} aria-label="Tutup pesan galat">
+              <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        )}
 
         <div className="bc-toolbar">
           <div className="bc-search">
