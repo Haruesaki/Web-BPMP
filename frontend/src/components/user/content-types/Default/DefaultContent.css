@@ -138,6 +138,16 @@
     .default-banner-title {
         font-size: 1.5em;
     }
+
+    /* Padding dinamis untuk default-banner-wrapper */
+    .default-banner-wrapper {
+        padding: 20px 20px; /* Padding atas-bawah 20px, kiri-kanan 20px */
+    }
+
+    /* Padding dinamis untuk default-description-container */
+    .default-description-container {
+        padding: 30px 20px; /* Padding atas-bawah 30px, kiri-kanan 20px */
+    }
 }
 
 /* ---- WADAH GAMBAR ADAPTIF (kelas rasio dipilih via JS di DefaultContent.jsx) ----
@@ -513,7 +523,7 @@
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
-  padding: 4rem 2rem;
+  /* padding: 4rem 2rem; */
 }
 
 /* Styling for the page title header, consistent with ProfileLayout */
