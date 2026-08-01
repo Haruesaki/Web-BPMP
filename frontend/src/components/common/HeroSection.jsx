@@ -25,7 +25,15 @@ const pseudoRandom = (seed) => {
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
-    const [isMobileView, setIsMobileView] = useState(false);
+    // Ditentukan SINKRON saat mount (bukan default `false`) agar di HP branch
+    // desktop tidak sempat berjalan lebih dulu dan meninggalkan blur "nyangkut"
+    // sebelum efek resize mengoreksi state.
+    const [isMobileView, setIsMobileView] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const isPotentiallyMobile = window.innerWidth <= 1040;
+        const isVeryShortDesktop = window.innerHeight < 400;
+        return isPotentiallyMobile && !isVeryShortDesktop;
+    });
     const [showSubtitle, setShowSubtitle] = useState(false);
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
     const landingWrapperRef = useRef(null); // Ref untuk wrapper utama
@@ -208,23 +216,33 @@ const HeroSection = () => {
                     const rightOpacity = Math.max(1 - scrollY * 0.0025, 1); // Kecepatan menghilang
                     rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
                     rightContainer.style.opacity = rightOpacity;
+                    // WAJIB: bersihkan blur di mode mobile. Jika sebelumnya branch
+                    // desktop sempat menetapkan blur, tanpa reset ini nilainya
+                    // "nyangkut" karena branch mobile tak pernah menyentuh filter.
+                    rightContainer.style.filter = 'none';
                 }
             } else {
                 // --- Animasi Parallax untuk Desktop ---
                 const scaleDown = Math.max(1 - scrollY * 0.0001, 0.6);
                 const blurValue = Math.min(scrollY * 0.007, 10);
+                // Saat mendekati puncak (scroll ke atas), pakai `none` — BUKAN
+                // `blur(0px)`. `blur(0px)` tetap membuat konteks filter yang
+                // berinteraksi dengan `backdrop-filter` pada frame di dalamnya,
+                // membuat gambar terlihat tetap blur ("nyangkut") walau sudah di
+                // atas. `none` menghapus konteks itu sepenuhnya.
+                const blurCss = blurValue > 0.15 ? `blur(${blurValue}px)` : 'none';
                 if (rightContainer && rightImage) {
                     const rightTranslateY = Math.min(scrollY * 1, 2000);
                     const brightness = Math.max(1 - scrollY * 0.00045, 0.58);
                     rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
-                    rightContainer.style.filter = `blur(${blurValue}px)`;
+                    rightContainer.style.filter = blurCss;
                     rightImage.style.transform = `scale(1)`;
                     rightImage.style.filter = `brightness(${brightness})`;
                 }
                 leftContent.style.opacity = '1';
                 const leftTranslateY = Math.min(scrollY * 1, 2000);
                 leftContent.style.transform = `translateY(${leftTranslateY}px) scale(${scaleDown})`;
-                leftContent.style.filter = `blur(${blurValue}px)`;
+                leftContent.style.filter = blurCss;
             }
 
             animationFrame = requestAnimationFrame(animateHero);

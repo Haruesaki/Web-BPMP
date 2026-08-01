@@ -29,7 +29,14 @@ const LenisProvider = ({ children }) => {
       duration: 1.8,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
-      smoothTouch: true,
+      // Lenis 1.3 mengganti opsi lama `smoothTouch` menjadi `syncTouch`. Nama
+      // lama diabaikan diam-diam sehingga smooth scroll TIDAK aktif di perangkat
+      // sentuh (mobile/tablet). `syncTouch` mengaktifkan smoothing untuk touch.
+      // `syncTouchLerp` sengaja lebih tinggi dari lerp wheel agar terasa responsif
+      // (dekat gerakan jari) dan tidak "melayang" — mengurangi risiko scroll
+      // terasa aneh/terkunci di HP.
+      syncTouch: true,
+      syncTouchLerp: 0.1,
       touchMultiplier: 1.5,
       wheelMultiplier: 1,
       lerp: 0.06,
