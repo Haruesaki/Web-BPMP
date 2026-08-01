@@ -181,6 +181,22 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
+
+    /* Di HP, SEMUA gambar konten mengisi lebar penuh seperti cover berita (SS1),
+       melepas batas max-width/aspect-ratio varian square/portrait yang di layar
+       sempit membuat gambar tampak kecil & terpusat dengan ruang kosong.
+       Hanya berlaku di mobile — tampilan desktop tidak berubah. */
+    .default-description-container .image-frame,
+    .default-description-container .image-frame--square,
+    .default-description-container .image-frame--portrait {
+        max-width: 100%;
+        aspect-ratio: auto;
+    }
+    .default-description-container .image-frame--square img,
+    .default-description-container .image-frame--portrait img {
+        height: auto;
+        max-height: 70vh;
+    }
 }
 
 /* ---- WADAH GAMBAR ADAPTIF (kelas rasio dipilih via JS di DefaultContent.jsx) ----
