@@ -276,4 +276,13 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
     height: auto;
     aspect-ratio: 400 / 430;
   }
+
+  /* Orb "liquid" (250px) terlalu besar untuk kartu mobile yang lebih pendek:
+     saat beranimasi naik, puncaknya menyembul di atas panel blur teks dan
+     tampak sebagai lingkaran tajam. Dikecilkan agar tetap berada di dalam area
+     blur. HANYA ukuran yang diubah — posisi, warna, dan animasi tetap. */
+  .liquid {
+    height: 150px;
+    width: 150px;
+  }
 }
