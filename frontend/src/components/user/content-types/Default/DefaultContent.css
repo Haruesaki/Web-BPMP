@@ -620,3 +620,19 @@
     object-fit: cover;
     border-radius: 8px;
 }
+
+/* ---------------------------------------------------------------------------
+   PERBAIKAN LEBAR KARTU KONTEN DI MOBILE — disamakan dengan halaman BeritaDetail.
+   Kartu DefaultContent tampak lebih sempit karena .default-layout-wrapper masih
+   memakai padding samping desktop (2rem) di HP: override mobile di blok @media
+   atas (≈ baris 152) TERKLOBER oleh deklarasi DASAR .default-layout-wrapper yang
+   berada SETELAHNYA (spesifisitas sama → urutan sumber menang). Rule ini sengaja
+   diletakkan PALING AKHIR agar menang, menghapus padding samping wrapper di HP
+   sehingga lebar kartu hanya dibatasi .generic-page-container — persis seperti
+   BeritaDetail yang tidak memakai wrapper ini.
+--------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .default-layout-wrapper {
+        padding: 1.5rem 0;
+    }
+}

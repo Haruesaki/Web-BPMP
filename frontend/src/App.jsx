@@ -5,6 +5,16 @@ import AppRoutes from './routes/AppRoutes';
 
 const LENIS_CLASSES = ['lenis', 'lenis-smooth', 'lenis-stopped', 'lenis-scrolling'];
 
+// Matikan restorasi scroll otomatis peramban (default 'auto'). Tanpa ini, saat
+// REFRESH peramban mengembalikan posisi scroll terakhir sebelum refresh — dan
+// karena konten dimuat asinkron serta scroll dikelola Lenis, posisinya sering
+// meleset "agak ke bawah". Dengan 'manual', refresh selalu mulai dari atas dan
+// posisi diatur sepenuhnya oleh aplikasi. Dijalankan di ruang modul agar aktif
+// sedini mungkin, sebelum React sempat merender.
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
 const LenisProvider = ({ children }) => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -56,9 +66,23 @@ const LenisProvider = ({ children }) => {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      lenisRef.current = null;
       cleanupLenis();
     };
   }, [isAdmin, location.pathname]);
+
+  // Selalu mulai dari paling atas setiap kali pindah halaman (dan saat pertama
+  // dimuat). Tanpa ini, SPA mempertahankan posisi scroll halaman sebelumnya.
+  // Rute dengan hash (#section) sengaja dilewati agar lompatan ke anchor tetap
+  // berfungsi. Efek ini diletakkan SETELAH efek Lenis agar `lenisRef.current`
+  // sudah menunjuk instance Lenis yang baru saat dipanggil.
+  useEffect(() => {
+    if (location.hash) return;
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
+    window.scrollTo(0, 0);
+  }, [location.pathname, location.hash]);
 
   // Kita berikan lenisRef sebagai cloneElement prop jika dibutuhkan oleh children
   // (misalnya untuk Navbar), atau karena AppRoutes menerima lenisRef

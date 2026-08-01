@@ -198,4 +198,8 @@ router.post(
 // Publik (konten tampil di halaman pengunjung).
 router.get('/berkas/:base', UploadController.serveInline);
 
+// Proksi PRATINJAU dokumen dari URL eksternal (server sumber tak ber-CORS).
+// Publik — hanya menyajikan byte berkas dengan penjaga anti-SSRF di controller.
+router.get('/proksi-berkas', UploadController.serveProxyFile);
+
 module.exports = router;

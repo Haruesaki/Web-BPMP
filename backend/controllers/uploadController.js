@@ -3,8 +3,20 @@ const fs = require('fs/promises');
 const fsSync = require('fs');
 const crypto = require('crypto');
 const sharp = require('sharp');
+const axios = require('axios');
+const https = require('https');
 const MediaModel = require('../models/mediaModel');
 const env = require('../config/env');
+
+// Agent HTTPS yang TIDAK menolak sertifikat tak-terverifikasi — DIPAKAI KHUSUS
+// oleh proksi dokumen (serveProxyFile), BUKAN global. Alasannya: banyak server
+// pemerintah (mis. *.kemendikdasmen.go.id) mengirim rantai sertifikat TAK
+// LENGKAP (tanpa sertifikat perantara). Peramban menambalnya sendiri (AIA
+// fetching), tetapi Node menolaknya dengan "unable to verify the first
+// certificate" sehingga proksi gagal (502). Karena endpoint ini hanya MENGAMBIL
+// berkas publik dan TIDAK mengirim kredensial apa pun, melonggarkan verifikasi
+// di sini berisiko sangat kecil dan sengaja dibatasi pada agen ini saja.
+const agenProksiLonggar = new https.Agent({ rejectUnauthorized: false });
 
 // =========================================================================
 //  UPLOAD CONTROLLER — menerima gambar dari CKEditor (SimpleUploadAdapter).
@@ -153,6 +165,66 @@ class UploadController {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'no-store');
     fsSync.createReadStream(path.join(UPLOAD_DIR, found)).pipe(res);
+  }
+
+  // Proksi PRATINJAU dokumen dari server LUAR. Peramban memblokir `fetch`
+  // lintas-origin bila server sumber tak mengirim header CORS (mis. PDF di
+  // spab.kemendikdasmen.go.id), sehingga pratinjau gagal dengan "Failed to
+  // fetch". Server mengambil berkas sisi-ke-sisi (tanpa batasan CORS) lalu
+  // meneruskannya dengan header CORS milik kita.
+  static async serveProxyFile(req, res) {
+    const { url } = req.query;
+
+    let target;
+    try {
+      target = new URL(url);
+    } catch (_) {
+      return res.status(400).json({ error: { message: 'URL tidak valid.' } });
+    }
+
+    // Hanya http/https.
+    if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+      return res.status(400).json({ error: { message: 'Protokol tidak diizinkan.' } });
+    }
+
+    // Penjaga SSRF: tolak host lokal/jaringan privat agar endpoint ini tidak bisa
+    // dipakai menjangkau layanan internal peladen.
+    const host = target.hostname.toLowerCase();
+    const hostPrivat =
+      host === 'localhost' ||
+      host === '0.0.0.0' ||
+      host === '::1' ||
+      /^127\./.test(host) ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^169\.254\./.test(host) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+    if (hostPrivat) {
+      return res.status(400).json({ error: { message: 'Host tidak diizinkan.' } });
+    }
+
+    try {
+      const upstream = await axios.get(target.href, {
+        responseType: 'stream',
+        timeout: 20000,
+        maxContentLength: 60 * 1024 * 1024,
+        maxRedirects: 3,
+        // Sebagian server menolak permintaan tanpa User-Agent peramban.
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        // Toleran terhadap rantai sertifikat tak lengkap milik server sumber
+        // (lihat penjelasan pada `agenProksiLonggar` di atas). Hanya untuk fetch ini.
+        httpsAgent: agenProksiLonggar,
+      });
+      res.setHeader('Content-Type', upstream.headers['content-type'] || 'application/octet-stream');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'no-store');
+      upstream.data.pipe(res);
+    } catch (err) {
+      console.error('Gagal proksi berkas eksternal:', err.message);
+      if (!res.headersSent) {
+        res.status(502).json({ error: { message: 'Gagal mengambil berkas eksternal.' } });
+      }
+    }
   }
 }
 
