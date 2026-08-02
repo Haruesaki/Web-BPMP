@@ -249,34 +249,64 @@
     transform: translateX(0);
   }
 }
-@keyframes shimmer {
-  0% { background-position: -468px 0; }
-  100% { background-position: 468px 0; }
+/* =========================================
+   Skeleton Loading State
+   ========================================= */
+.search-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
+
 .search-suggestion-item.skeleton {
   pointer-events: none;
-  animation: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  animation: skeletonFadeIn 0.3s ease forwards;
 }
-.search-suggestion-item.skeleton .skeleton-title,
-.search-suggestion-item.skeleton .skeleton-meta {
-  background-color: rgba(255, 255, 255, 0.08);
-  background-image: linear-gradient(to right,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0.08) 40%,
-    rgba(255, 255, 255, 0.08) 100%);
-  background-repeat: no-repeat;
-  background-size: 800px 104px;
-  animation: shimmer 1.5s linear infinite;
+
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.4s infinite linear;
+  border-radius: 6px;
+  will-change: background-position;
+}
+
+.skeleton-line.title {
+  width: 75%;
+  height: 14px;
+}
+
+.skeleton-line.meta {
+  width: 45%;
+  height: 10px;
   border-radius: 4px;
 }
-.search-suggestion-item.skeleton .skeleton-title {
-  width: 80%;
-  height: 1.2em;
+
+@keyframes shimmerSweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
-.search-suggestion-item.skeleton .skeleton-meta {
-  width: 40%;
-  height: 0.9em;
+
+@keyframes skeletonFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 /* =========================================
    Breakpoint: <= 888px
@@ -341,6 +371,12 @@
   .search-suggestion-meta {
     margin: 0px;
     font-size: clamp(0.2rem, 2.2vw, 0.5rem);
+  }
+
+  .search-suggestions-dropdown {
+    background: rgb(var(--theme-panel-rgb, 15, 25, 55));
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .search-suggestion-item.empty {

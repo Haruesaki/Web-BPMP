@@ -136,14 +136,18 @@ const ButtonSearch = () => {
           {searchError ? (
             <div className="search-suggestion-item empty" style={{ color: 'red' }}>Error: {searchError}</div>
           ) : isSearching ? (
-            <>
+            <div className="search-skeleton-group">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="search-suggestion-item skeleton">
-                  <div className="skeleton-title"></div>
-                  <div className="skeleton-meta"></div>
+                <div 
+                  key={i} 
+                  className="search-suggestion-item skeleton"
+                  style={{ '--skeleton-delay': `${i * 0.15}s` }}
+                >
+                  <div className="skeleton-line title"></div>
+                  <div className="skeleton-line meta"></div>
                 </div>
               ))}
-            </>
+            </div>
           ) : searchResults.length > 0 ? (
             searchResults.map((result, idx) => (
               <Link 
