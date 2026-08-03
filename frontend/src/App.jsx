@@ -36,18 +36,16 @@ const LenisProvider = ({ children }) => {
     }
 
     const rootEl = document.getElementById('root');
-    const isMobile = window.innerWidth <= 1024;
 
     const lenis = new Lenis({
-      ...(isMobile && rootEl ? { wrapper: rootEl, content: rootEl.firstElementChild || rootEl } : {}),
       duration: 2.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
       syncTouch: true,
       syncTouchLerp: 0.042,
       touchInertiaExponent: 1.35,
-      touchMultiplier: 0.65,
-      wheelMultiplier: 1,
+      touchMultiplier: 0.45, /* Sedikit diturunkan dari 0.65 agar usapan terasa lebih berbobot & smooth */
+      wheelMultiplier: 0.75, /* Sedikit diturunkan dari 1 agar scroll mouse tidak terlalu cepat */
       lerp: 0.045,
       infinite: false,
       autoResize: true,
