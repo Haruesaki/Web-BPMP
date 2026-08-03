@@ -135,6 +135,21 @@
 
 /* Responsiveness for smaller screens */
 @media (max-width: 768px) {
+    /* Paksa layout Horizontal (row-wrap, kartu flex-basis 45%) menjadi SATU
+       kolom di mobile. Tanpa ini jumlah kartu per baris tidak konsisten (1↔2)
+       tergantung kebetulan min-width vs lebar wadah saat layar mengecil.
+       flex-direction wrapper diset via var(--flex-direction) di stylesheet (bukan
+       inline), jadi bisa ditimpa di sini tanpa !important. Kartu lalu tampil
+       satu per baris (penuh lebar), sisanya digulir ke bawah. Layout Vertikal
+       sudah column, jadi tidak terpengaruh.
+       Selektor sengaja 2-level (.default-layout-wrapper .default-content-wrapper)
+       agar spesifisitasnya melebihi aturan dasar .default-content-wrapper yang
+       berada di bawah file — tanpa ini urutan sumber membuat aturan dasar menang. */
+    .default-layout-wrapper .default-content-wrapper {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+
     .content-type-section {
         padding: 20px 10px;
         /* Lepaskan min-width 300px di mobile: pada layar sempit ia memaksa
