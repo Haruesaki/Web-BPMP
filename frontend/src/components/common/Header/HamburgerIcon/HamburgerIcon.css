@@ -1,0 +1,29 @@
+.hamburger-icon {
+  display: none; /* Sembunyikan secara default */
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: clamp(22px, 5vw, 28px);
+  cursor: pointer;
+  padding: 5px;
+  z-index: 101; /* Pastikan di atas elemen lain */
+  transition: color 0.3s ease;
+}
+
+.hamburger-icon:hover {
+    color: var(--theme-link-hover, #a4dcfa);
+}
+
+/* Tampilkan pada layar tablet dan mobile */
+@media (max-width: 1290px) {
+  .hamburger-icon {
+    display: block;
+    font-size: clamp(12px, 3.5vw, 25px);
+  }
+}
+
+@media (max-height: 888px) {
+    .hamburger-icon {
+        font-size: clamp(12px, 4.5vw, 22px);
+    }
+}

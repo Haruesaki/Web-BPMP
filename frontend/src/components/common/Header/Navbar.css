@@ -1,0 +1,553 @@
+/* =========================================
+   Global & Root Styles
+   ========================================= */
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+:root {
+  --bg-subPanel : rgba(6, 23, 79, 0.289);
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+html.no-scroll,
+body.no-scroll,
+body.body-no-scroll {
+  overflow: hidden;
+}
+
+/* =========================================
+   Main Header Layout
+   ========================================= */
+.unified-header {
+  margin: 0px;
+  position: sticky;
+  top: 0;
+  gap: 0px;
+  z-index: 9999;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 4vw 15px 4vw;
+    background: rgb(var(--theme-surface-rgb, 11, 19, 43));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 100;
+}
+.header-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+/* =========================================
+   Navigation Links
+   ========================================= */
+.nav-link {
+  position: relative;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: clamp(12px, 1vw, 14.5px);
+  text-shadow: 0px 0px 20px rgb(27, 27, 27);
+  font-weight: 500;
+  font-family: "Poppins", "Poppins-fallback", Arial, Helvetica, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 20px;
+  border-radius: 30px;
+  transition: color 0.3s ease;
+  transition: text-shadow 0.5s ease;
+  white-space: nowrap;
+  z-index: 2;
+}
+.nav-link:hover {
+  color: var(--theme-link-hover, #a4dcfa);
+  text-shadow: 0px 0px 10px rgba(var(--theme-highlight-rgb, 133, 175, 255), 0.766);
+}
+.nav-link.active {
+  font-weight: 500;
+  color: #ffffff;
+}
+.nav-item {
+  position: relative;
+}
+
+.dropdown-menu a {
+  color: #ffffff;
+  text-decoration: none;
+  padding: 15px 5px;
+  display: block; /* Pastikan link mengisi ruang */
+  position: relative; /* Agar z-index bekerja */
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Poppins", "Poppins-fallback", Arial, Helvetica, sans-serif;
+  opacity: 0;
+  transform: translateX(-30px);
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+/* =========================================
+   Search Bar
+   ========================================= */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 45px;
+  height: 45px;
+  background: rgba(var(--theme-input-rgb, 30, 45, 85), 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50px;
+  transition:
+    width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+    background 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.search-wrapper:hover,
+.search-wrapper.active {
+  background: rgba(var(--theme-input-hover-rgb, 42, 60, 105), 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.search-wrapper.active {
+  width: 280px;
+}
+.search-input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
+  font-size: clamp(12px, 1.2vw, 14px);
+  padding-left: 25px;
+  padding-right: 65px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.search-wrapper.active .search-input {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.15s;
+}
+.navbar-actions .search-trigger,
+.header-actions .search-trigger {
+  position: absolute;
+  right:0px;
+  top: 0px;
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  overflow: hidden; /* Diperlukan untuk efek kilau */
+  transition: all 0.3s ease;
+
+  /* --- Menerapkan "Formula Gaya" --- */
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946),
+              -2px -2px 10px 0px rgba(21, 21, 21, 0.365),
+              -2.7px -2.5px 8px -2px rgba(255, 255, 255, 0.547)
+  ;
+  background: linear-gradient(
+    155deg,
+    rgba(var(--theme-highlight-rgb, 105, 130, 255), 0.651) 0%,
+    rgba(var(--theme-highlight-deep-rgb, 6, 22, 80), 0.604) 80%
+  );
+}
+.navbar-actions .search-trigger::before,
+.header-actions .search-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-100%) skewX(-30deg);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.navbar-actions .search-trigger:hover,
+.header-actions .search-trigger:hover {
+  transform: scale(1);
+  background: linear-gradient( 155deg, rgba(var(--theme-highlight-rgb, 24, 63, 255), 0.751) 0%, rgba(var(--theme-highlight-deep-rgb, 12, 47, 174), 0.823) 80% );
+}
+.navbar-actions .search-trigger:hover::before,
+.header-actions .search-trigger:hover::before {
+  transform: translateX(200%) skewX(-30deg);
+}
+/* =========================================
+   Search Suggestions Dropdown
+   ========================================= */
+.search-suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 10px;
+  background: rgba(var(--theme-panel-rgb, 15, 25, 55), 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(248, 248, 248, 0.425) rgba(1, 2, 34, 0.342);
+}
+.search-suggestions-dropdown::-webkit-scrollbar {
+  width: 2px !important;
+}
+.search-suggestions-dropdown::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+.search-suggestions-dropdown::-webkit-scrollbar-thumb {
+  background-color: rgba(5, 11, 192, 0.486);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.search-suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 5, 156, 0.9);
+}
+.search-suggestion-item {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-family: 'Poppins', 'Poppins-fallback', sans-serif;
+  opacity: 0;
+  animation: slideInFromLeft 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: var(--animation-delay, 0s);
+}
+.search-suggestion-item.empty {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  pointer-events: none;
+  padding: 20px;
+}
+.search-suggestion-item:last-child {
+  border-bottom: none;
+}
+.search-suggestion-item:hover {
+  background: rgba(var(--theme-highlight-rgb, 91, 95, 232), 0.12);
+}
+.search-suggestion-title {
+  font-size: clamp(0.75rem, 0.3rem + 0.75vw, 0.85rem);
+  font-weight: 600;
+  color: #ffffff;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+}
+.search-suggestion-title .highlighted-text {
+  color: #61e5ff;
+  text-shadow: 0px 0px 5px rgba(2, 28, 75, 0.766);
+  background-color: transparent;
+  font-weight: 800;
+}
+.search-suggestion-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: clamp(0.6rem, 0.3rem + 0.42vw, 0.7rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 6px;
+}
+.location-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.location-label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+.location-value {
+  font-weight: 400;
+  color: #dbe1ff;
+  background-color: rgba(var(--theme-highlight-rgb, 91, 95, 232), 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.location-value.submenu {
+  background-color: rgba(61, 229, 255, 0.15);
+  color: #e0f8ff;
+}
+.search-suggestion-item:hover .location-value {
+  background-color: rgba(var(--theme-highlight-rgb, 91, 95, 232), 0.25);
+  color: #fff;
+}
+.search-suggestion-item:hover .location-value.submenu {
+  background-color: rgba(61, 229, 255, 0.25);
+  color: #fff;
+}
+.search-suggestion-item.empty {
+  text-align: center;
+  color: var(--text-muted, #fcfafa);
+  font-style: italic;
+  font-size: 0.8rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+.search-suggestion-item.skeleton {
+  pointer-events: none;
+}
+.search-suggestion-item.skeleton .skeleton-title,
+.search-suggestion-item.skeleton .skeleton-meta {
+  background-color: rgba(255, 255, 255, 0.08);
+  background-image: linear-gradient(to right,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.08) 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 104px;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: 4px;
+}
+.search-suggestion-item.skeleton .skeleton-title {
+  width: 80%;
+  height: 1.2em;
+}
+.search-suggestion-item.skeleton .skeleton-meta {
+  width: 40%;
+  height: 0.9em;
+}
+@media (max-height: 700px) {
+  /* --- Header Atas --- */
+  .header-top {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* --- Tombol Aksi di Header (Search & TTS) --- */
+  .header-actions {
+    gap: 15px;
+  }
+
+  /* --- Wrapper & Tombol Pencarian --- */
+  .search-wrapper,
+  .header-actions .search-trigger {
+    height: 30px;
+    width: 30px;
+  }
+
+  .header-actions .search-trigger i {
+    font-size: 12px;
+  }
+
+  .search-wrapper.active {
+    width: 200px;
+  }
+  .search-input {
+    font-size: clamp(10px, 1.2vw, 10px);
+    padding-left: 22px;
+    padding-right: 58px;
+  }
+
+  /* --- Item & Link Menu Navigasi --- */
+  .nav-link {
+    padding: 7px 18px;
+    font-size: clamp(8px, 0.9vw, 11px);
+  }
+
+  /* --- Indikator Menu Aktif --- */
+  .nav-selector::before {
+    border-radius: 18px;
+  }
+
+  /* --- Dropdown Desktop --- */
+  .dropdown-menu {
+    margin-top: 8px;
+    width: 230px;
+    border-radius: 10px;
+  }
+
+  .dropdown-scroll-container {
+    max-height: max(135px, calc(85vh - 170px));
+    padding: 6px 9px;
+  }
+
+  .dropdown-menu a {
+    padding: 13px 5px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .dropdown-menu a:hover {
+    padding-left: 10px;
+    border-radius: 9px;
+  }
+
+  .search-suggestions-dropdown {
+    margin-top: 8px;
+    max-height: 300px;
+    border-radius: 10px;
+  }
+
+  .search-suggestion-item {
+    padding: 10px 14px;
+  }
+
+  .search-suggestion-item.empty {
+    padding: 18px;
+    font-size: 0.75rem;
+  }
+
+  .search-suggestion-title {
+    font-size: clamp(0.50rem,1.6vw, 0.65rem);
+  }
+
+  .search-suggestion-meta {
+    font-size: clamp(0.35rem,1.5vw, 0.5rem);
+  }
+
+  /* --- Penyesuaian Tampilan Mobile (Header Terpisah) di Layar Pendek --- */
+  @media (max-width: 888px) {
+    .header-actions .search-wrapper {
+      height: clamp(26px, 7vw, 32px);
+      max-width: clamp(26px, 7vw, 32px);
+    }
+    .header-actions .search-wrapper.active {
+      max-width: 250px;
+    }
+    .header-actions .search-trigger {
+      width: clamp(30px, 8vw, 36px);
+      height: clamp(29px, 9vw, 36px);
+      top: -2px;
+      right: -2px;
+    }
+    .header-actions .search-trigger i {
+      font-size: clamp(10px, 3vw, 13px);
+    }
+  } 
+}
+
+/* =========================================
+   Responsive Header Layout Breakpoint (<= 888px)
+   ========================================= */
+@media (max-width: 888px) {
+  .header-top {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    padding: 12px 4vw;
+  }
+
+  .header-menu {
+    display: contents;
+  }
+
+  /* Baris 1: Logo Header di Sebelah Kiri Atas dengan Pembatas Garis */
+  .header-menu > :nth-child(2) {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    justify-self: start;
+    width: 100%;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Baris 2: Hamburger Icon di Kiri Sejajar dengan Actions */
+  .hamburger-icon,
+  .header-menu > :nth-child(1) {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
+    align-self: center;
+  }
+
+  /* Baris 2: Actions (Search & TTS) di Kanan Sejajar dengan Hamburger Icon */
+  .header-actions {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: end;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: clamp(5px, 2vw, 10px);
+    width: auto;
+  }
+}
+
+/* =========================================
+   Overflowed Desktop Menu (Force Mobile Mode on 1 Single Row)
+   ========================================= */
+.unified-header.menu-overflowed .hamburger-icon {
+  display: block !important;
+}
+
+.unified-header.menu-overflowed .desktop-main-navbar {
+  display: none !important;
+}

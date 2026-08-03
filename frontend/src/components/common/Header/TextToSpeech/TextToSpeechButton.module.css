@@ -1,0 +1,149 @@
+.btnVoice {
+  /* Base styles from .header-actions button */
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
+  background: linear-gradient(
+    155deg,
+    rgba(105, 130, 255, 0.651) 0%,
+    rgba(6, 22, 80, 0.604) 80%
+  );
+  border-radius: 20px;
+
+  /* Specific styles from .btn-voice */
+  padding-left: 17px;
+  padding-right: 0px;
+  border: none;
+  gap: 15px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  /* Combined transition */
+  transition:
+    background 5.4s ease,
+    width 2.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.btnVoice::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-100%) skewX(-30deg);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.btnVoice:hover::before {
+  transform: translateX(200%) skewX(-30deg);
+}
+
+/* Specific hover for non-active state */
+.btnVoice:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+              inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
+  background: linear-gradient(
+    135deg,
+    rgba(42, 60, 105, 0.9) 0%,
+    rgba(30, 45, 85, 0.8) 100%
+  );
+}
+
+.active {
+  background: linear-gradient(
+    120deg,
+    rgba(2, 192, 52, 0.858) 0%,
+    rgba(5, 74, 22, 0.857) 70%
+  );
+}
+
+/* Specific hover for active state */
+.active:hover {
+  background: linear-gradient(
+    135deg,
+    rgb(23, 82, 40) 0%,
+    rgba(1, 31, 9, 0.748) 100%
+  );
+}
+
+.voiceText {
+  font-family: "Poppins", "Poppins-fallback", sans-serif;
+  font-size: clamp(10px, 1.2vw, 12px);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.voiceIcon {
+  height: auto;
+  width: 40px;
+}
+
+@media (max-width: 888px) {
+  .btnVoice {
+    overflow: hidden;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    gap: clamp(3px, 2vw, 12px);
+    padding-left: clamp(10px, 2vw, 15px);
+  }
+
+  .btnVoice::before,
+  .btnVoice:hover::before {
+    display: none !important;
+  }
+
+  .btnVoice:hover {
+    transform: none;
+  }
+
+  .voiceText {
+    padding-top: 1px;
+    font-size: clamp(5px, 2vw, 9px);
+  }
+
+  .voiceIcon {
+    width: clamp(17px, 7.4vw, 30px);
+  }
+}
+
+
+
+/* Responsive Styles */
+@media (max-height: 700px) {
+  .btnVoice {
+    gap: 12px;
+    padding-left: 20px;
+  }
+  .voiceIcon {
+    width: 28px;
+  }
+  .voiceText {
+    font-size: 9px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 888px) {
+  .voiceText {
+    font-size: clamp(6px, 3vw, 9px);
+  }
+  .voiceIcon {
+    width: clamp(15px, 8vw, 32px);
+  }
+    .btnVoice {
+    gap: clamp(5px, 2vw, 12px);
+    padding-left: clamp(10px, 4vw, 20px);
+  }
+}
