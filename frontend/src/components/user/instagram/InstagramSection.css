@@ -6,7 +6,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 100px 0px;
+    padding: 50px 0px;
 }
 
 .instagram-section {
@@ -170,6 +170,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease;
     cursor: pointer;
+    overflow: visible; /* Pastikan konten embed tidak terpotong */
 }
 
 .ig-post-card:hover {
@@ -205,6 +206,8 @@
 
 /* --- Responsive Instagram --- */
 @media (max-width: 960px) {
+    /* Tinggi untuk layout 2-kolom sudah di-handle
+       di blok .ig-embed-wrapper di bawah (min-height: 820px) */
     .ig-profile-header {
         flex-direction: column;
         gap: 30px;
@@ -256,25 +259,43 @@
     }
 }
 
-/* --- Instagram Embed Styling --- */
+/* --- Instagram Embed Styling (Wadah Pengunci Layout Statis) --- */
 .ig-embed-wrapper {
     padding: 0 !important;
     display: block !important;
     border-radius: 10px;
     background-color: transparent !important;
     box-shadow: none !important;
+    min-height: clamp(500px, 40vw, 720px);
+    height: auto;           /* Biarkan tinggi menyesuaikan konten iframe */
+    position: relative;
+    width: 100%;
+    overflow: visible;      /* Jangan potong konten iframe yang meluap */
 }
 .ig-embed-wrapper:hover {
-    transform: translateY(-10px) scale(1.02);
+    transform: translateY(-6px);
+    transition: transform 0.3s ease;
 }
 /* Placeholder saat embed Instagram belum dimuat (lazy load) */
 .ig-embed-skeleton {
-    min-height: 500px;
+    min-height: 620px;
     border-radius: 10px;
     background: linear-gradient(100deg, #ececec 30%, #f6f6f6 50%, #ececec 70%);
     background-size: 200% 100%;
     animation: ig-skeletonShimmer 1.4s ease-in-out infinite;
     cursor: default;
+}
+
+.ig-skeleton-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
 }
 
 .ig-embed-skeleton:hover {
@@ -292,4 +313,45 @@
     min-width: 100% !important;
     width: 100% !important;
     display: block;
+    /* Tinggi iframe desktop: card 4-kolom (sempit), cukup ~620px */
+    min-height: clamp(500px, 40vw, 720px) !important;
+    height: auto !important;
+    overflow: visible;
+}
+
+/* ============================================================
+   Responsif: 960px – layout 2 kolom (card lebih lebar)
+   Card yang lebih lebar → foto lebih besar → butuh tinggi lebih
+   ============================================================ */
+@media (max-width: 960px) {
+    .ig-embed-wrapper {
+        min-height: clamp(500px, 85vw, 720px);  /* Cukup untuk foto + aksi + caption di kartu 2-kolom */
+        overflow: visible;
+    }
+
+    .ig-embed-skeleton {
+        min-height: 720px;
+    }
+
+    .ig-embed-wrapper iframe {
+        min-height: clamp(500px, 85vw, 720px) !important;
+        height: auto !important;
+    }
+}
+
+
+@media (max-width: 500px) {
+    .ig-embed-wrapper {
+        min-height: clamp(500px, 185vw, 750px);  /* Cukup untuk foto + aksi + caption di kartu 1-kolom */
+        overflow: visible;
+    }
+
+    /* .ig-embed-skeleton {
+        min-height: 800px;
+    } */
+
+    .ig-embed-wrapper iframe {
+        min-height: clamp(500px, 185vw, 750px) !important;
+        height: auto !important;
+    }
 }

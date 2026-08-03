@@ -11,99 +11,68 @@ const getFullUrl = (url) => {
   return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-// Script embed Instagram hanya dimuat sekali dan dipakai bersama oleh semua kartu
-let instagramScriptPromise = null;
-const loadInstagramScript = () => {
-    if (instagramScriptPromise) return instagramScriptPromise;
 
-    instagramScriptPromise = new Promise((resolve) => {
-        if (window.instgrm) return resolve();
 
-        const existing = document.getElementById('instagram-embed-script');
-        if (existing) {
-            existing.addEventListener('load', resolve);
-            existing.addEventListener('error', resolve);
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.id = 'instagram-embed-script';
-        script.src = 'https://www.instagram.com/embed.js';
-        script.async = true;
-        script.onload = resolve;
-        script.onerror = resolve; // tetap lanjut walau gagal agar tidak menggantung
-        document.body.appendChild(script);
-    });
-
-    return instagramScriptPromise;
-};
-
-// Gabungkan (coalesce) pemrosesan embed: bila beberapa kartu aktif hampir
-// bersamaan, cukup SATU kali window.instgrm.Embeds.process() per frame — bukan
-// N pemindaian global. process() menghidrasi semua <blockquote> yang belum
-// diproses, dan hanya kartu yang terlihat yang merender blockquote.
-let processScheduled = false;
-const scheduleProcess = () => {
-    if (processScheduled) return;
-    processScheduled = true;
-    requestAnimationFrame(() => {
-        processScheduled = false;
-        if (window.instgrm) window.instgrm.Embeds.process();
-    });
-};
-
-const InstagramEmbedCard = React.memo(({ postId, forceActive }) => {
+const InstagramEmbedCard = React.memo(({ postId, forceActive, staggerIndex = 0 }) => {
     const wrapperRef = useRef(null);
-    // Lazy per-kartu: embed baru dimuat saat KARTU INI mendekati viewport
-    // (bukan saat seluruh grid mendekat). forceActive = mode preview admin.
     const [visible, setVisible] = useState(forceActive);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-    // Observer per-kartu.
     useEffect(() => {
         if (visible) return;
         const el = wrapperRef.current;
         if (!el || typeof IntersectionObserver === 'undefined') {
-            setVisible(true);
-            return;
+            // Stagger load secara berurutan agar tidak semua request bersamaan
+            const timer = setTimeout(() => setVisible(true), staggerIndex * 400);
+            return () => clearTimeout(timer);
         }
         const observer = new IntersectionObserver((entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
-                setVisible(true);
-                observer.disconnect();
+                // Tunda sedikit berdasarkan urutan card agar request tidak bertabrakan
+                setTimeout(() => {
+                    setVisible(true);
+                    observer.disconnect();
+                }, staggerIndex * 400);
             }
-        }, { rootMargin: '300px 0px' }); // mulai memuat sedikit sebelum terlihat
+        }, { rootMargin: '50px 0px' }); // Dikurangi dari 300px agar tidak semua iframe load bersamaan
         observer.observe(el);
         return () => observer.disconnect();
     }, [visible]);
 
-    // Proses embed hanya setelah kartu terlihat.
-    useEffect(() => {
-        if (!visible) return;
-        let cancelled = false;
-        loadInstagramScript().then(() => {
-            if (!cancelled) scheduleProcess();
-        });
-        return () => { cancelled = true; };
-    }, [postId, visible]);
-
-    // Placeholder ringan selama embed belum dimuat, agar tidak ada lompatan layout.
-    // wrapperRef dipasang di kedua cabang agar observer punya elemen untuk diamati.
-    if (!visible) {
-        return <div ref={wrapperRef} className="ig-post-card ig-embed-wrapper ig-embed-skeleton" aria-hidden="true" />;
-    }
+    const cleanPostId = postId?.replace(/\/$/, '') || '';
 
     return (
         <div ref={wrapperRef} className="ig-post-card ig-embed-wrapper">
-            <blockquote
-                className="instagram-media"
-                data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
-                data-instgrm-version="14"
-                style={{ background: '#FFF', border: 0, borderRadius: '3px', boxShadow: '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', margin: '1px', maxWidth: '540px', minWidth: '326px', padding: 0, width: 'calc(100% - 2px)' }}
-            >
-            </blockquote>
+            {!isLoaded && (
+                <div className="ig-embed-skeleton ig-skeleton-overlay" aria-hidden="true" />
+            )}
+
+            {visible && cleanPostId && (
+                <iframe
+                    src={`https://www.instagram.com/p/${cleanPostId}/embed`}
+                    title={`Instagram Post ${cleanPostId}`}
+                    className="ig-embed-iframe"
+                    onLoad={() => {
+                        setIsLoaded(true);
+                        setTimeout(() => {
+                            window.dispatchEvent(new Event('resize'));
+                        }, 200);
+                    }}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        border: '0',
+                        borderRadius: '10px',
+                        opacity: isLoaded ? 1 : 0,
+                        transition: 'opacity 0.4s ease'
+                    }}
+                    scrolling="no"
+                    allowTransparency="true"
+                />
+            )}
         </div>
     );
-}, (prevProps, nextProps) => prevProps.postId === nextProps.postId && prevProps.forceActive === nextProps.forceActive);
+}, (prevProps, nextProps) => prevProps.postId === nextProps.postId && prevProps.forceActive === nextProps.forceActive && prevProps.staggerIndex === nextProps.staggerIndex);
 
 
 const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
@@ -228,14 +197,14 @@ const InstagramSection = ({ igProfile, loading, isPreviewMode = false }) => {
                     {/* Dynamic Instagram Embed Component */}
                     {igProfile && igProfile.embed_links && igProfile.embed_links.length > 0 ? (
                         igProfile.embed_links.map((linkId, index) => (
-                            linkId ? <InstagramEmbedCard key={index} postId={linkId} forceActive={isPreviewMode} /> : null
+                            linkId ? <InstagramEmbedCard key={index} postId={linkId} forceActive={isPreviewMode} staggerIndex={index} /> : null
                         ))
                     ) : (
                         <>
-                            <InstagramEmbedCard postId="DaMGvRKAb7z" forceActive={isPreviewMode} />
-                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" forceActive={isPreviewMode} />
-                            <InstagramEmbedCard postId="DaNwf5vyIYn" forceActive={isPreviewMode} />
-                            <InstagramEmbedCard postId="DaKohaEPomy" forceActive={isPreviewMode} />
+                            <InstagramEmbedCard postId="DaMGvRKAb7z" forceActive={isPreviewMode} staggerIndex={0} />
+                            <InstagramEmbedCard postId="DZR9Hdfh9Zs" forceActive={isPreviewMode} staggerIndex={1} />
+                            <InstagramEmbedCard postId="DaNwf5vyIYn" forceActive={isPreviewMode} staggerIndex={2} />
+                            <InstagramEmbedCard postId="DaKohaEPomy" forceActive={isPreviewMode} staggerIndex={3} />
                         </>
                     )}
                 </div>

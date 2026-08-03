@@ -9,7 +9,7 @@
        ========================================================================== */
 
     /* --- Pengaturan Posisi & Jarak Sisi Wadah Utama --- */
-    --fsb-right: 0.7vw;                     /* Jarak dari tepi kanan layar */
+    --fsb-right: 0vw;                     /* Jarak dari tepi kanan layar */
     --fsb-padding-y: 25px;                  /* Jarak atas-bawah di dalam wadah */
     --fsb-padding-x: 12px;                  /* Jarak kiri-kanan di dalam wadah */
     --fsb-gap: 15px;                        /* Jarak sela antar-ikon sosial media */
@@ -21,7 +21,7 @@
     --fsb-blur-radius: 12px;                /* Intensitas efek blur keburaman hiasan warna */
     
     /* --- Ukuran Ikon Sosial Media --- */
-    --fsb-icon-size: clamp(35px, 1.2vw, 50px); /* Dimensi tinggi & lebar ikon bulat */
+    --fsb-icon-size: clamp(40px, 1.2vw, 50px); /* Dimensi tinggi & lebar ikon bulat */
     
     /* --- Tooltip Teks (Label Informasi Saat Di-hover) --- */
     --fsb-text-right: calc(100% + 15px);     /* Jarak geser tooltip dari sebelah kiri wadah */
@@ -33,8 +33,8 @@
 
     /* LAYOUT UTAMA */
     position: fixed;
-    right: 0px;
-    top: 50%;
+    right: var(--fsb-right);
+    top: 50dvh; /* Menggunakan Dynamic Viewport Height agar selalu presisi di tengah walau ada URL bar di HP */
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -163,49 +163,62 @@
            Semua selektor elemen anak akan secara otomatis mewarisi & menyesuaikan ukurannya.
         */
         --fsb-right: clamp(0px, 0vw, 10px);                     /* Menyempitkan letak melayang di tepi kanan */
-        --fsb-padding-y: clamp(15px, 3.5vw, 25px);              /* Mengurangi tinggi padding wadah secara dinamis */
-        --fsb-padding-x: clamp(8px, 1.5vw, 12px);               /* Mengurangi lebar padding wadah secara dinamis */
-        --fsb-gap: clamp(10px, 2vw, 15px);                      /* Memperpendek jarak antar-ikon agar pas */
+        --fsb-padding-y: clamp(13px, 3.1vw, 22px);              /* Mengurangi tinggi padding wadah secara dinamis */
+        --fsb-padding-x: clamp(7px, 1.3vw, 11px);               /* Mengurangi lebar padding wadah secara dinamis */
+        --fsb-gap: clamp(9px, 1.8vw, 13px);                     /* Memperpendek jarak antar-ikon agar pas */
         
-        --fsb-blur-width: clamp(30px, 7vw, 60px);               /* Memperkecil hiasan bulatan blur */
-        --fsb-blur-height: clamp(40px, 9vw, 80px);              /* Memperkecil hiasan bulatan blur */
-        --fsb-blur-radius: clamp(6px, 1.5vw, 12px);             /* Meminimalkan radius keburaman hiasan */
-        --fsb-border-radius: clamp(15px, 3.5vw, 30px); 
-        --fsb-icon-size: clamp(30px, 4vw, 33px);              /* Mengecilkan ukuran tombol ikon */
+        --fsb-blur-width: clamp(26px, 6.2vw, 53px);             /* Memperkecil hiasan bulatan blur */
+        --fsb-blur-height: clamp(35px, 7.9vw, 70px);            /* Memperkecil hiasan bulatan blur */
+        --fsb-blur-radius: clamp(6px, 1.3vw, 11px);             /* Meminimalkan radius keburaman hiasan */
+        --fsb-border-radius: clamp(13px, 3.1vw, 26px); 
+        --fsb-icon-size: clamp(25px, 3.5vw, 29px);              /* Mengecilkan ukuran tombol ikon */
         
-        --fsb-text-right: calc(100% + clamp(8px, 1.5vw, 15px));  /* Menyesuaikan kerapatan jarak tooltip */
-        --fsb-text-padding-y: clamp(5px, 1vw, 8px);             /* Merapatkan padding vertikal tooltip */
-        --fsb-text-padding-x: clamp(10px, 2vw, 16px);           /* Merapatkan padding horizontal tooltip */
-        --fsb-text-border-radius: clamp(12px, 2.5vw, 20px);      /* Mengurangi sudut rounded tooltip */
-        --fsb-text-font-size: clamp(11px, 1.8vw, 14px);         /* Memperkecil ukuran teks agar tidak meluap */
-        --fsb-text-translate-x: clamp(20px, 4vw, 50px);         /* Mempersingkat jarak geser animasi masuk */
+        --fsb-text-right: calc(100% + clamp(7px, 1.3vw, 13px));  /* Menyesuaikan kerapatan jarak tooltip */
+        --fsb-text-padding-y: clamp(3px, 0.7vw, 6px);             /* Merapatkan padding vertikal tooltip */
+        --fsb-text-padding-x: clamp(7px, 1.3vw, 11px);           /* Merapatkan padding horizontal tooltip */
+        --fsb-text-border-radius: clamp(8px, 1.7vw, 13px);      /* Mengurangi sudut rounded tooltip */
+        --fsb-text-font-size: clamp(7.4px, 1.2vw, 10px);         /* Memperkecil ukuran teks agar tidak meluap */
+        --fsb-text-translate-x: clamp(18px, 3.5vw, 44px);         /* Mempersingkat jarak geser animasi masuk */
     }
     
 }
 
 @media (max-height:  800px){
     .floating-social-bar {
-    --fsb-icon-size: clamp(17px, 4vw, 33px);
+    --fsb-icon-size: clamp(19px, 4.4vw, 27px);
 
-        --fsb-text-right: calc(100% + clamp(8px, 1.5vw, 15px));  /* Menyesuaikan kerapatan jarak tooltip */
-        --fsb-text-padding-y: clamp(5px, 1vw, 8px);             /* Merapatkan padding vertikal tooltip */
-        --fsb-text-padding-x: clamp(10px, 2vw, 16px);           /* Merapatkan padding horizontal tooltip */
-        --fsb-text-border-radius: clamp(12px, 2.5vw, 20px);      /* Mengurangi sudut rounded tooltip */
-        --fsb-text-font-size: clamp(6px, 1.8vw, 14px);         /* Memperkecil ukuran teks agar tidak meluap */
-        --fsb-text-translate-x: clamp(20px, 4vw, 50px);         /* Mempersingkat jarak geser animasi masuk */
+        --fsb-text-right: calc(100% + clamp(9px, 1.7vw, 17px));  /* Menyesuaikan kerapatan jarak tooltip */
+        --fsb-text-padding-y: clamp(6px, 1.1vw, 7px);             /* Merapatkan padding vertikal tooltip */
+        --fsb-text-padding-x: clamp(11px, 2.2vw, 10px);           /* Merapatkan padding horizontal tooltip */
+        --fsb-text-border-radius: clamp(13px, 2.8vw, 22px);      /* Mengurangi sudut rounded tooltip */
+        --fsb-text-font-size: clamp(7.8px, 2.1vw, 10.8px);         /* Memperkecil ukuran teks agar tidak meluap */
+        --fsb-text-translate-x: clamp(22px, 4.4vw, 55px);         /* Mempersingkat jarak geser animasi masuk */
 }
 }
 
 
 @media (min-height:  801px){
     .floating-social-bar {
-    --fsb-icon-size: clamp(17px, 4vw, 33px);
+    --fsb-icon-size: clamp(27px, 3.6vw, 30px);
 
-        --fsb-text-right: calc(100% + clamp(8px, 1.5vw, 15px));  /* Menyesuaikan kerapatan jarak tooltip */
-        --fsb-text-padding-y: clamp(5px, 1vw, 8px);             /* Merapatkan padding vertikal tooltip */
-        --fsb-text-padding-x: clamp(10px, 2vw, 16px);           /* Merapatkan padding horizontal tooltip */
-        --fsb-text-border-radius: clamp(12px, 2.5vw, 20px);      /* Mengurangi sudut rounded tooltip */
-        --fsb-text-font-size: clamp(6px, 1.8vw, 14px);         /* Memperkecil ukuran teks agar tidak meluap */
-        --fsb-text-translate-x: clamp(20px, 4vw, 50px);         /* Mempersingkat jarak geser animasi masuk */
+        --fsb-text-right: calc(100% + clamp(7px, 1.4vw, 14px));
+        --fsb-text-padding-y: clamp(5px, 0.9vw, 7px);
+        --fsb-text-padding-x: clamp(9px, 1.8vw, 14px);
+        --fsb-text-border-radius: clamp(11px, 2.3vw, 18px);
+        --fsb-text-font-size: clamp(5.6px, 1.7vw, 13.7px);
+        --fsb-text-translate-x: clamp(18px, 3.6vw, 45px);
+}
+}
+
+@media screen and (max-width: 800px) and (min-height:  801px){
+    .floating-social-bar {
+    --fsb-icon-size: clamp(27px, 3.6vw, 30px);
+
+        --fsb-text-right: calc(100% + clamp(7px, 1.4vw, 14px));  /* Menyesuaikan kerapatan jarak tooltip */
+        --fsb-text-padding-y: clamp(5px, 0.9vw, 7px);             /* Merapatkan padding vertikal tooltip */
+        --fsb-text-padding-x: clamp(9px, 1.8vw, 14px);           /* Merapatkan padding horizontal tooltip */
+        --fsb-text-border-radius: clamp(11px, 2.3vw, 18px);      /* Mengurangi sudut rounded tooltip */
+        --fsb-text-font-size: clamp(6.2px, 1.9vw, 15.1px);         /* Memperkecil ukuran teks agar tidak meluap */
+        --fsb-text-translate-x: clamp(18px, 3.6vw, 45px);         /* Mempersingkat jarak geser animasi masuk */
 }
 }
