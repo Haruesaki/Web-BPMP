@@ -1,6 +1,14 @@
 /* =========================================
    GLOBAL RESET
 ========================================= */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
 body {
     margin: 0;
 }
@@ -29,7 +37,16 @@ body {
 ========================================= */
 html.lenis, html.lenis body {
     height: auto;
+    /* Mencegah header/searchbar bawaan browser mobile auto-hide saat di-scroll */
+    overscroll-behavior-y: none;
 }
+
+@media (max-width: 1280px) {
+    html.lenis {
+        touch-action: pan-y;
+    }
+}
+
 
 .lenis.lenis-smooth {
     scroll-behavior: auto !important;
