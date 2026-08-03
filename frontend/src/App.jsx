@@ -35,16 +35,20 @@ const LenisProvider = ({ children }) => {
       return;
     }
 
+    const rootEl = document.getElementById('root');
+    const isMobile = window.innerWidth <= 1024;
+
     const lenis = new Lenis({
-      duration: 1.8,
+      ...(isMobile && rootEl ? { wrapper: rootEl, content: rootEl.firstElementChild || rootEl } : {}),
+      duration: 2.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
       syncTouch: true,
-      syncTouchLerp: 0.075,
-      touchInertiaExponent: 1.6,
-      touchMultiplier: 1.5,
+      syncTouchLerp: 0.042,
+      touchInertiaExponent: 1.35,
+      touchMultiplier: 0.65,
       wheelMultiplier: 1,
-      lerp: 0.06,
+      lerp: 0.045,
       infinite: false,
       autoResize: true,
       prevent: (node) => node.hasAttribute('data-lenis-prevent'),

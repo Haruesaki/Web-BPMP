@@ -31,6 +31,9 @@ body.body-no-scroll {
   width: 100%;
   display: flex;
   flex-direction: column;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 .header-top {
     display: flex;
