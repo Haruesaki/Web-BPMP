@@ -26,10 +26,8 @@ const LenisProvider = ({ children }) => {
     }
 
     const rootEl = document.getElementById('root');
-    const isMobile = window.innerWidth <= 1024;
 
     const lenis = new Lenis({
-      ...(isMobile && rootEl ? { wrapper: rootEl, content: rootEl.firstElementChild || rootEl } : {}),
       duration: 2.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
