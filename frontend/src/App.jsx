@@ -29,12 +29,15 @@ const LenisProvider = ({ children }) => {
       duration: 1.8,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
-      smoothTouch: true,
+      syncTouch: true,
+      syncTouchLerp: 0.075,
+      touchInertiaExponent: 1.6,
       touchMultiplier: 1.5,
       wheelMultiplier: 1,
       lerp: 0.06,
       infinite: false,
       autoResize: true,
+      prevent: (node) => node.hasAttribute('data-lenis-prevent'),
     });
 
     lenisRef.current = lenis;
