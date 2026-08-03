@@ -32,9 +32,9 @@ const LenisProvider = ({ children }) => {
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
       syncTouch: true,
-      syncTouchLerp: 0.042,
+      syncTouchLerp: 0.028, /* Diturunkan dari 0.042 agar luncuran lebih panjang/lama setelah jari dilepas */
       touchInertiaExponent: 1.35,
-      touchMultiplier: 0.45, /* Sedikit diturunkan dari 0.65 agar usapan terasa lebih berbobot & smooth */
+      touchMultiplier: 1.5, /* Diturunkan sedikit dari standar (2) agar ada kesan 'smooth berat', usapan tetap meluncur setelah jari diangkat */
       wheelMultiplier: 0.75, /* Sedikit diturunkan dari 1 agar scroll mouse tidak terlalu cepat */
       lerp: 0.045,
       infinite: false,
