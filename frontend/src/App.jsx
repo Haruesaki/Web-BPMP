@@ -34,8 +34,8 @@ const LenisProvider = ({ children }) => {
       syncTouch: true,
       syncTouchLerp: 0.042,
       touchInertiaExponent: 1.35,
-      touchMultiplier: 0.65,
-      wheelMultiplier: 1,
+      touchMultiplier: 0.45, /* Sedikit diturunkan dari 0.65 agar usapan terasa lebih berbobot & smooth */
+      wheelMultiplier: 0.75, /* Sedikit diturunkan dari 1 agar scroll mouse tidak terlalu cepat */
       lerp: 0.045,
       infinite: false,
       autoResize: true,
