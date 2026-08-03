@@ -5,6 +5,7 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-scrolling iframe { pointer-events: none; }
 
+
 /* Site Shell - base layout container */
 .site-shell {
   --nav-text: rgba(255, 255, 255, 0.88);
