@@ -283,7 +283,6 @@ const HeroSection = () => {
 
     return (
         <div className="landing-wrapper" ref={landingWrapperRef}>
-            <div className="background-glow-container"></div>
             <div className="particle-container">{particles}</div>
             <section className="hero-section">
                 <div className="hero-flex-container">
