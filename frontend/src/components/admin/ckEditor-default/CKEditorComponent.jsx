@@ -70,6 +70,10 @@ import {
 import 'ckeditor5/ckeditor5.css';
 import { CustomUploadAdapterPlugin } from '../../../utils/CustomUploadAdapter';
 import { InsertDocumentPlugin } from '../../../utils/InsertDocumentPlugin';
+// Membuang format visual bawaan sumber saat menempel (warna, latar, font,
+// kelas), tetapi mempertahankan perataan beserta struktur. Lihat sebab
+// lengkapnya di utils/tempelBersih.js.
+import { TempelBersih } from '../../../utils/TempelBersihPlugin';
 import axiosInstance from '../../../api/axiosInstance';
 import './CKEditorComponent.css';
 
@@ -175,6 +179,7 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
       extraPlugins: [
         CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg),
         InsertDocumentPlugin('/api/upload/dokumen'),
+        TempelBersih,
       ]
     }),
     []
