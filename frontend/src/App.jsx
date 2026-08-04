@@ -35,23 +35,28 @@ const LenisProvider = ({ children }) => {
       return;
     }
 
+    const rootEl = document.getElementById('root');
+
     const lenis = new Lenis({
-      duration: 1.8,
+      duration: 2.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
       // Lenis 1.3 mengganti opsi lama `smoothTouch` menjadi `syncTouch`. Nama
-      // lama diabaikan diam-diam sehingga smooth scroll TIDAK aktif di perangkat
-      // sentuh (mobile/tablet). `syncTouch` mengaktifkan smoothing untuk touch.
-      // `syncTouchLerp` sengaja lebih tinggi dari lerp wheel agar terasa responsif
-      // (dekat gerakan jari) dan tidak "melayang" — mengurangi risiko scroll
-      // terasa aneh/terkunci di HP.
+      // lama diabaikan DIAM-DIAM sehingga smooth scroll tidak aktif sama sekali
+      // di perangkat sentuh tanpa satu pun peringatan — jangan dikembalikan.
+      //
+      // Nilai penyetelan di bawah berasal dari cabang `arif` ("Lenis Ringan")
+      // dan sengaja dipakai menggantikan angka lama, sebab justru penyetelan
+      // itulah maksud pekerjaan tersebut.
       syncTouch: true,
-      syncTouchLerp: 0.1,
-      touchMultiplier: 1.5,
-      wheelMultiplier: 1,
-      lerp: 0.06,
+      syncTouchLerp: 0.028, /* Diturunkan dari 0.042 agar luncuran lebih panjang/lama setelah jari dilepas */
+      touchInertiaExponent: 1.35,
+      touchMultiplier: 1.5, /* Diturunkan sedikit dari standar (2) agar ada kesan 'smooth berat', usapan tetap meluncur setelah jari diangkat */
+      wheelMultiplier: 0.75, /* Sedikit diturunkan dari 1 agar scroll mouse tidak terlalu cepat */
+      lerp: 0.045,
       infinite: false,
       autoResize: true,
+      prevent: (node) => node.hasAttribute('data-lenis-prevent'),
     });
 
     lenisRef.current = lenis;

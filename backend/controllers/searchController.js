@@ -85,6 +85,7 @@ class SearchController {
         results.push({
           title: m.nama_menu,
           type: 'Menu',
+          induk_id: m.induk_id || null,
           path: getMenuPath(m, menuMap),
           ...location,
         });

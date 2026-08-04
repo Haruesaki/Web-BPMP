@@ -25,15 +25,21 @@ const pseudoRandom = (seed) => {
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
-    // Ditentukan SINKRON saat mount (bukan default `false`) agar di HP branch
+    // Ditentukan SINKRON saat mount (bukan default `false`) agar di HP cabang
     // desktop tidak sempat berjalan lebih dulu dan meninggalkan blur "nyangkut"
-    // sebelum efek resize mengoreksi state.
+    // sebelum efek resize mengoreksi state. Jangan dikembalikan ke `false`.
     const [isMobileView, setIsMobileView] = useState(() => {
         if (typeof window === 'undefined') return false;
         const isPotentiallyMobile = window.innerWidth <= 1040;
         const isVeryShortDesktop = window.innerHeight < 400;
         return isPotentiallyMobile && !isVeryShortDesktop;
     });
+    // Dari cabang `arif`: ambang terpisah untuk layar sempit, dipakai bagian lain
+    // pada komponen ini. Penjagaan `typeof window` disamakan dengan di atas supaya
+    // keduanya aman bila kelak dirender di sisi peladen.
+    const [isNarrowScreen, setIsNarrowScreen] = useState(
+        () => typeof window !== 'undefined' && window.innerWidth <= 888
+    );
     const [showSubtitle, setShowSubtitle] = useState(false);
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
     const landingWrapperRef = useRef(null); // Ref untuk wrapper utama
@@ -79,10 +85,14 @@ const HeroSection = () => {
     }, []);
 
     // EFEK PARTIKEL
+    // Desktop (>888px): 50 partikel — efek penuh.
+    // Narrow/Low-end (≤888px): 12 partikel — seminimal mungkin, efek tetap ada.
     const particles = useMemo(() => {
-        const particleCount = 50;
+        const particleCount = isNarrowScreen ? 12 : 50;
         return Array.from({ length: particleCount }).map((_, i) => {
-            const size = pseudoRandom(i + 1) * 1 + 3; // Ukuran antara 1px dan 4px
+            const size = isNarrowScreen
+                ? pseudoRandom(i + 1) * 0.9 + 1.5  // Narrow ≤888px: 1.5–2.3px (lebih kecil)
+                : pseudoRandom(i + 1) * 1 + 3;      // Desktop >888px: 3–4px (normal)
             const duration = pseudoRandom(i + 101) * 10 + 3; // Durasi antara 10s dan 20s
             const delay = pseudoRandom(i + 201) * 3; // Delay hingga 20s
             const left = pseudoRandom(i + 301) * 150; // Posisi horizontal acak
@@ -101,7 +111,7 @@ const HeroSection = () => {
                 />
             );
         });
-    }, []);
+    }, [isNarrowScreen]);
 
     // EFEK TYPEWRITER
     useEffect(() => {
@@ -135,9 +145,13 @@ const HeroSection = () => {
             const isPotentiallyMobile = window.innerWidth <= 1040;
             const isVeryShortDesktop = window.innerHeight < 400; // Kondisi untuk "desktop mini"
 
-            // 1. Tentukan apakah ini tampilan mobile (bukan "desktop mini")
+            // Tentukan apakah ini tampilan mobile (bukan "desktop mini")
             const isMobile = isPotentiallyMobile && !isVeryShortDesktop;
             setIsMobileView(isMobile);
+
+            // Breakpoint khusus partikel: ≤888px = layar sempit/low-end
+            // → jumlah partikel dikurangi drastis untuk meringankan beban GPU
+            setIsNarrowScreen(window.innerWidth <= 888);
         };
 
         handleResize(); // Panggil sekali saat mount untuk set state awal yang benar
@@ -190,21 +204,25 @@ const HeroSection = () => {
     }, []); // Dependensi kosong agar hanya berjalan sekali saat komponen dimuat
 
     // EFEK HERO PARALLAX
+    // Pendekatan: RAF hanya aktif saat ada scroll, berhenti saat idle.
+    // Menghemat ~60 komputasi/detik ketika user tidak men-scroll hero.
     useEffect(() => {
-        let animationFrame;
+        let rafId = null;
+        let stopTimer = null;
 
         const rightContainer = heroRightCmsRef.current;
         const rightImage = heroImageRef.current;
         const leftContent = heroLeftContentRef.current;
 
-        const animateHero = () => {
-            if (!leftContent) return;
+        if (!leftContent) return;
 
+        // Fungsi murni: terapkan transform parallax berdasarkan posisi scroll saat ini.
+        // Dipisah dari loop agar bisa dipanggil sekali (mount/resize) tanpa RAF.
+        const applyParallax = () => {
             const scrollY = window.scrollY;
 
             if (isMobileView) {
                 // --- Animasi Scroll untuk Mobile ---
-                // Konten Teks (kiri) tetap bergerak ke samping
                 const leftOpacity = Math.max(1 - scrollY * 0.002, 0);
                 leftContent.style.opacity = leftOpacity;
                 const leftTranslateY = scrollY * 0.5;
@@ -212,14 +230,24 @@ const HeroSection = () => {
                 leftContent.style.filter = 'none';
                 // Konten Gambar (kanan) diubah menjadi animasi tenggelam
                 if (rightContainer) {
-                    const rightTranslateY = scrollY * 0.6; // Kecepatan tenggelam
-                    const rightOpacity = Math.max(1 - scrollY * 0.0025, 1); // Kecepatan menghilang
+                    const rightTranslateY = scrollY * 0.6;
+                    const rightOpacity = Math.max(1 - scrollY * 0.0025, 1);
                     rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
                     rightContainer.style.opacity = rightOpacity;
-                    // WAJIB: bersihkan blur di mode mobile. Jika sebelumnya branch
-                    // desktop sempat menetapkan blur, tanpa reset ini nilainya
-                    // "nyangkut" karena branch mobile tak pernah menyentuh filter.
-                    rightContainer.style.filter = 'none';
+                    // WAJIB: bersihkan sisa gaya yang ditinggalkan mode desktop.
+                    // Cabang desktop di bawah menyetel TIGA properti sekaligus —
+                    // filter pada container, serta filter dan transform pada
+                    // gambarnya. Bila mode mobile tidak meresetnya, nilai itu
+                    // "nyangkut" saat layar berpindah ke mobile, sebab cabang
+                    // mobile tidak pernah menyentuhnya lagi.
+                    //
+                    // Dipakai untai kosong, bukan 'none': ia MENGHAPUS gaya inline
+                    // sepenuhnya sehingga tidak ada konteks filter yang tersisa.
+                    rightContainer.style.filter = '';   // reset blur yang ditinggal mode desktop
+                }
+                if (rightImage) {
+                    rightImage.style.filter = '';       // reset brightness yang ditinggal mode desktop
+                    rightImage.style.transform = '';    // reset scale yang ditinggal mode desktop
                 }
             } else {
                 // --- Animasi Parallax untuk Desktop ---
@@ -244,11 +272,41 @@ const HeroSection = () => {
                 leftContent.style.transform = `translateY(${leftTranslateY}px) scale(${scaleDown})`;
                 leftContent.style.filter = blurCss;
             }
-
-            animationFrame = requestAnimationFrame(animateHero);
         };
-        animationFrame = requestAnimationFrame(animateHero);
-        return () => cancelAnimationFrame(animationFrame);
+
+        // Loop RAF — hanya dijalankan selama scroll aktif
+        const rafLoop = () => {
+            applyParallax();
+            rafId = requestAnimationFrame(rafLoop);
+        };
+
+        // Terapkan posisi awal SATU KALI saat mount.
+        // Menangani kasus refresh halaman saat sudah di posisi scroll tengah —
+        // tanpa ini, elemen akan di posisi "scrollY=0" sampai scroll pertama terjadi.
+        applyParallax();
+
+        const handleScroll = () => {
+            // Mulai RAF jika belum berjalan
+            if (!rafId) {
+                rafId = requestAnimationFrame(rafLoop);
+            }
+            // Reset timer penghenti setiap ada event scroll baru.
+            // RAF dihentikan 100ms setelah scroll terakhir — cukup lama untuk
+            // menangkap inersia (iOS/trackpad) namun cukup cepat untuk hemat CPU.
+            clearTimeout(stopTimer);
+            stopTimer = setTimeout(() => {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }, 100);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            cancelAnimationFrame(rafId);
+            clearTimeout(stopTimer);
+        };
     }, [isMobileView, heroImage]);
 
     return (
