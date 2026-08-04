@@ -14,3 +14,7 @@
 # langsung di frontend/.gitignore.
 .claude/
 /.deploy_plan
+
+# Catatan lokal pengembang — tidak di-push ke remote
+/catatan/
+/GEMINI.md
