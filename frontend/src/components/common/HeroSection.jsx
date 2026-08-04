@@ -231,17 +231,11 @@ const HeroSection = () => {
                 // --- Animasi Parallax untuk Desktop ---
                 const scaleDown = Math.max(1 - scrollY * 0.0001, 0.6);
                 const blurValue = Math.min(scrollY * 0.007, 10);
-                // Saat mendekati puncak (scroll ke atas), pakai `none` — BUKAN
-                // `blur(0px)`. `blur(0px)` tetap membuat konteks filter yang
-                // berinteraksi dengan `backdrop-filter` pada frame di dalamnya,
-                // membuat gambar terlihat tetap blur ("nyangkut") walau sudah di
-                // atas. `none` menghapus konteks itu sepenuhnya.
-                const blurCss = blurValue > 0.15 ? `blur(${blurValue}px)` : 'none';
                 if (rightContainer && rightImage) {
                     const rightTranslateY = Math.min(scrollY * 1, 2000);
                     const brightness = Math.max(1 - scrollY * 0.00045, 0.58);
                     rightContainer.style.transform = `translateY(${rightTranslateY}px) scale(${scaleDown})`;
-                    rightContainer.style.filter = blurCss;
+                    rightContainer.style.filter = `blur(${blurValue}px)`;
                     rightImage.style.transform = `scale(1)`;
                     rightImage.style.filter = `brightness(${brightness})`;
                 }
