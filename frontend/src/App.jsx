@@ -41,6 +41,13 @@ const LenisProvider = ({ children }) => {
       duration: 2.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
       smoothWheel: true,
+      // Lenis 1.3 mengganti opsi lama `smoothTouch` menjadi `syncTouch`. Nama
+      // lama diabaikan DIAM-DIAM sehingga smooth scroll tidak aktif sama sekali
+      // di perangkat sentuh tanpa satu pun peringatan — jangan dikembalikan.
+      //
+      // Nilai penyetelan di bawah berasal dari cabang `arif` ("Lenis Ringan")
+      // dan sengaja dipakai menggantikan angka lama, sebab justru penyetelan
+      // itulah maksud pekerjaan tersebut.
       syncTouch: true,
       syncTouchLerp: 0.028, /* Diturunkan dari 0.042 agar luncuran lebih panjang/lama setelah jari dilepas */
       touchInertiaExponent: 1.35,
