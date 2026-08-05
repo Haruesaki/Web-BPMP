@@ -73,12 +73,12 @@ const HeroSection = () => {
 
     // EFEK PARTIKEL
     // Desktop (>888px): 50 partikel — efek penuh.
-    // Narrow/Low-end (≤888px): 12 partikel — seminimal mungkin, efek tetap ada.
+    // Narrow/Low-end (≤888px): 20 partikel — sedikit lebih ramai dari sebelumnya (12), tetap performan.
     const particles = useMemo(() => {
-        const particleCount = isNarrowScreen ? 12 : 50;
+        const particleCount = isNarrowScreen ? 20 : 50;
         return Array.from({ length: particleCount }).map((_, i) => {
             const size = isNarrowScreen
-                ? pseudoRandom(i + 1) * 0.9 + 1.5  // Narrow ≤888px: 1.5–2.3px (lebih kecil)
+                ? pseudoRandom(i + 1) * 1.1 + 1.7  // Narrow ≤888px: 1.5–2.3px (lebih kecil)
                 : pseudoRandom(i + 1) * 1 + 3;      // Desktop >888px: 3–4px (normal)
             const duration = pseudoRandom(i + 101) * 10 + 3; // Durasi antara 10s dan 20s
             const delay = pseudoRandom(i + 201) * 3; // Delay hingga 20s
