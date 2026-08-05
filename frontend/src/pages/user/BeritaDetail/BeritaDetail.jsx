@@ -279,7 +279,14 @@ const BeritaDetail = ({ lenisRef }) => {
     },
   });
 
-  const formattedDate = new Date(newsDetail.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // Format tanggal DISAMAKAN dengan DefaultContent (post-date): "Hari, DD Bulan YYYY | HH.MM WIB".
+  const formattedDate = (() => {
+    const d = new Date(newsDetail.tanggal);
+    const hari = new Intl.DateTimeFormat('id-ID', { weekday: 'long', timeZone: 'Asia/Jakarta' }).format(d);
+    const tgl = new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' }).format(d);
+    const pukul = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).format(d);
+    return `${hari}, ${tgl} | ${pukul} WIB`;
+  })();
 
   return (
     <div className="berita-detail-page generic-page-container">
@@ -287,10 +294,10 @@ const BeritaDetail = ({ lenisRef }) => {
 
         <div className="default-banner-wrapper">
           <h1 className="default-banner-title">{newsDetail.judul}</h1>
-          <div className="berita-detail-meta">
-            <span className="berita-meta-item"><i className="fa-solid fa-calendar-day"></i> {formattedDate}</span>
-            <span className="berita-meta-item"><i className="fa-solid fa-folder"></i> {newsDetail.kategori}</span>
-          </div>
+          <p className="post-date">
+            <i className="fa-solid fa-calendar-days" style={{ marginRight: '8px' }}></i>
+            {formattedDate}
+          </p>
         </div>
         
         <div className="default-description-container">

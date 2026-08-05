@@ -25,7 +25,15 @@ const pseudoRandom = (seed) => {
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
-    const [isMobileView, setIsMobileView] = useState(false);
+    // Ditentukan SINKRON saat mount (bukan default `false`) agar di HP branch
+    // desktop tidak sempat berjalan lebih dulu dan meninggalkan blur "nyangkut"
+    // sebelum efek resize mengoreksi state.
+    const [isMobileView, setIsMobileView] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const isPotentiallyMobile = window.innerWidth <= 1040;
+        const isVeryShortDesktop = window.innerHeight < 400;
+        return isPotentiallyMobile && !isVeryShortDesktop;
+    });
     const [isNarrowScreen, setIsNarrowScreen] = useState(window.innerWidth <= 888);
     const [showSubtitle, setShowSubtitle] = useState(false);
     const heroImageRef = useRef(null); // Ref untuk gambar di dalam bingkai
@@ -221,7 +229,10 @@ const HeroSection = () => {
                     const rightOpacity = Math.max(1 - scrollY * 0.0025, 1);
                     rightContainer.style.transform = `translateY(${rightTranslateY}px)`;
                     rightContainer.style.opacity = rightOpacity;
-                    rightContainer.style.filter = '';   // reset blur yang ditinggal mode desktop
+                    // WAJIB: bersihkan blur di mode mobile. Jika sebelumnya branch
+                    // desktop sempat menetapkan blur, tanpa reset ini nilainya
+                    // "nyangkut" karena branch mobile tak pernah menyentuh filter.
+                    rightContainer.style.filter = 'none';
                 }
                 if (rightImage) {
                     rightImage.style.filter = '';       // reset brightness yang ditinggal mode desktop

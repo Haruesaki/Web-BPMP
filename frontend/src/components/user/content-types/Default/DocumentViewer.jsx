@@ -28,9 +28,18 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 const toInlineUrl = (fileUrl) => {
   try {
     const u = new URL(fileUrl, window.location.origin);
-    if (!u.pathname.includes('/uploads/')) return fileUrl;
-    const base = u.pathname.split('/').pop().replace(/\.[^.]+$/, '');
-    return `${u.origin}/api/berkas/${base}`;
+    // Berkas milik sendiri di /uploads/ → sajikan via /api/berkas (tanpa ekstensi).
+    if (u.pathname.includes('/uploads/')) {
+      const base = u.pathname.split('/').pop().replace(/\.[^.]+$/, '');
+      return `${u.origin}/api/berkas/${base}`;
+    }
+    // URL eksternal (beda origin) → lewat proksi backend agar lolos CORS server
+    // sumber. Tanpa ini, fetch lintas-origin ke server yang tak ber-CORS gagal
+    // dengan "Failed to fetch" dan pratinjau tidak muncul.
+    if (u.origin !== window.location.origin) {
+      return `${window.location.origin}/api/proksi-berkas?url=${encodeURIComponent(u.href)}`;
+    }
+    return fileUrl;
   } catch (_) {
     return fileUrl;
   }
