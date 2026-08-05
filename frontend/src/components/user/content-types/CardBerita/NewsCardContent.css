@@ -285,4 +285,19 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
     height: 150px;
     width: 150px;
   }
+
+  /* Ukuran font dikecilkan khusus mobile agar proporsional di kartu ±334px.
+     Patokan tipografi mobile: judul kartu ~17px, meta/tanggal ~11.5px,
+     ringkasan ~12px (min. nyaman-baca ±12px). */
+  .CardNewstitle {
+    font-size: 1.05rem; /* 20.8px → ~16.8px */
+  }
+
+  .CardNewsdate {
+    font-size: 0.72rem; /* 12.8px → ~11.5px */
+  }
+
+  .CardNewsexcerpt {
+    font-size: 0.75rem; /* 12.8px → ~12px */
+  }
 }

@@ -532,3 +532,9 @@
         justify-content: center;
     }
 }
+
+@media (max-width: 500px) {
+    .container-youtube-section {
+        padding: 20px 0px;
+    }
+}

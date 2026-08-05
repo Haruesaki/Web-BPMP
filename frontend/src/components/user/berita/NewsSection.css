@@ -348,3 +348,16 @@
      Grid dengan 3 slot ber-batas tetap sudah responsif dengan sendirinya —
      slot menyusut proporsional di layar sempit tanpa mengubah rasionya. */
 }
+
+/* Ponsel (≤768px): kecilkan judul seksi & sub-judul agar proporsional di HP.
+   Ditempatkan setelah blok ≤1020 agar menang untuk HP; tablet tak berubah.
+   (Judul kartu list & tanggal di NewsCard.css sudah kecil, dibiarkan.) */
+@media (max-width: 768px) {
+  .news-header-bar h2 {
+    font-size: clamp(15px, 4.2vw, 18px); /* ~19.5px → ~16.4px */
+  }
+
+  .right-title {
+    font-size: clamp(13px, 3.7vw, 16px); /* ~17px → ~14.4px */
+  }
+}

@@ -342,16 +342,23 @@
 
 @media (max-width: 500px) {
     .ig-embed-wrapper {
-        min-height: clamp(500px, 185vw, 750px);  /* Cukup untuk foto + aksi + caption di kartu 1-kolom */
+        max-width: 340px; /* Membatasi lebar agar tidak melebar penuh */
+        margin: 0 auto;    /* Memusatkan card di tengah layar */
+        min-height: clamp(520px, 170vw, 650px); /* Mengatur tinggi agar pas dengan tombol aksi di bawah foto */
+        height: clamp(520px, 170vw, 650px);
         overflow: visible;
     }
 
-    /* .ig-embed-skeleton {
-        min-height: 800px;
-    } */
+    .ig-embed-skeleton {
+        min-height: clamp(520px, 170vw, 650px); /* Menyamakan tinggi skeleton loader */
+    }
 
     .ig-embed-wrapper iframe {
-        min-height: clamp(500px, 185vw, 750px) !important;
-        height: auto !important;
+        min-height: clamp(520px, 170vw, 650px) !important;
+        height: clamp(520px, 170vw, 650px) !important;
+    }
+
+    .container-instagram-section{
+        padding: 20px 0px;
     }
 }

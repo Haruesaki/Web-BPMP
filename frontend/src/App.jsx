@@ -15,7 +15,7 @@ if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
   window.history.scrollRestoration = 'manual';
 }
 
-const LenisProvider = ({ children }) => {
+const LenisProvider = () => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
   const lenisRef = useRef(null);
@@ -30,30 +30,24 @@ const LenisProvider = ({ children }) => {
       document.body.style.overflow = '';
     };
 
-    if (isAdmin) {
+    // Deteksi Layar Sentuh secara universal
+    const isTouchDevice = 
+      'ontouchstart' in window || 
+      navigator.maxTouchPoints > 0 || 
+      window.matchMedia('(pointer: coarse)').matches;
+
+    // Jika admin atau perangkat layar sentuh, matikan Lenis
+    if (isAdmin || isTouchDevice) {
       cleanupLenis();
       return;
     }
 
-    const rootEl = document.getElementById('root');
-
     const lenis = new Lenis({
-      duration: 2.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
+      duration: 1.2, // Default industri
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Default industri
       smoothWheel: true,
-      // Lenis 1.3 mengganti opsi lama `smoothTouch` menjadi `syncTouch`. Nama
-      // lama diabaikan DIAM-DIAM sehingga smooth scroll tidak aktif sama sekali
-      // di perangkat sentuh tanpa satu pun peringatan — jangan dikembalikan.
-      //
-      // Nilai penyetelan di bawah berasal dari cabang `arif` ("Lenis Ringan")
-      // dan sengaja dipakai menggantikan angka lama, sebab justru penyetelan
-      // itulah maksud pekerjaan tersebut.
-      syncTouch: true,
-      syncTouchLerp: 0.028, /* Diturunkan dari 0.042 agar luncuran lebih panjang/lama setelah jari dilepas */
-      touchInertiaExponent: 1.35,
-      touchMultiplier: 1.5, /* Diturunkan sedikit dari standar (2) agar ada kesan 'smooth berat', usapan tetap meluncur setelah jari diangkat */
-      wheelMultiplier: 0.75, /* Sedikit diturunkan dari 1 agar scroll mouse tidak terlalu cepat */
-      lerp: 0.045,
+      syncTouch: false, // Layar sentuh menggunakan native scroll
+      lerp: 0.1, // Default industri
       infinite: false,
       autoResize: true,
       prevent: (node) => node.hasAttribute('data-lenis-prevent'),

@@ -91,15 +91,15 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
         const getAnimationSettings = () => {
             const screenWidth = isPreviewMode ? (partnersSectionRef.current?.clientWidth || window.innerWidth) : window.innerWidth;
 
-            if (screenWidth <= 370) {
+            if (screenWidth <= 470) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 40,
-                    scrollSensitivityPerSecond: 10,
-                    maxRotation: 28, // Rotasi logo di tepi layar
-                    minScale: 0.86,  // Ukuran logo di titik tengah
-                    maxScale: 1.05,  // Ukuran logo di sisi kanan/kiri
-                    maxDepth: 260,   // Jarak kedalaman 3D
+                    baseSpeedPerSecond: 47,
+                    scrollSensitivityPerSecond: 35 ,
+                    maxRotation: 108, // Rotasi logo di tepi layar
+                    minScale: 1.4,  // Ukuran logo di titik tengah
+                    maxScale: 4,  // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 1060,   // Jarak kedalaman 3D
                     perspective: 620,// Kekuatan efek perspektif
                 };
             }
@@ -107,24 +107,24 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             if (screenWidth <= 953) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 50,
-                    scrollSensitivityPerSecond: 16,
-                    maxRotation: 38, // Rotasi logo di tepi layar
-                    minScale: 0.9,   // Ukuran logo di titik tengah
-                    maxScale: 1.2,   // Ukuran logo di sisi kanan/kiri
-                    maxDepth: 380,   // Jarak kedalaman 3D
-                    perspective: 700,// Kekuatan efek perspektif
+                    baseSpeedPerSecond: 90,
+                    scrollSensitivityPerSecond: 36,
+                    maxRotation: 108, // Rotasi logo di tepi layar
+                    minScale: 1.2,   // Ukuran logo di titik tengah
+                    maxScale: 3.4,   // Ukuran logo di sisi kanan/kiri
+                    maxDepth: 880,   // Jarak kedalaman 3D
+                    perspective: 800,// Kekuatan efek perspektif
                 };
             }
 
             if (screenWidth <= 1280) {
                 return {
                     screenWidth,
-                    baseSpeedPerSecond: 70,
-                    scrollSensitivityPerSecond: 24,
-                    maxRotation: 55, // Rotasi logo di tepi layar
+                    baseSpeedPerSecond: 120,
+                    scrollSensitivityPerSecond: 34,
+                    maxRotation: 60, // Rotasi logo di tepi layar
                     minScale: 1.1,   // Ukuran logo di titik tengah
-                    maxScale: 1.4,   // Ukuran logo di sisi kanan/kiri
+                    maxScale: 2.4,   // Ukuran logo di sisi kanan/kiri
                     maxDepth: 540,   // Jarak kedalaman 3D
                     perspective: 660,// Kekuatan efek perspektif
                 };
@@ -132,13 +132,13 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
 
             return {
                 screenWidth,
-                baseSpeedPerSecond: 120,
-                scrollSensitivityPerSecond: 38,
-                maxRotation: 30, // Rotasi logo di tepi layar
-                minScale: 2.4,   // Ukuran logo di titik tengah
-                maxScale: 4,   // Ukuran logo di sisi kanan/kiri
-                maxDepth: 800,   // Jarak kedalaman 3D
-                perspective: 200,// Kekuatan efek perspektif
+                baseSpeedPerSecond: 150,
+                scrollSensitivityPerSecond: 48,
+                maxRotation: 48, // Rotasi logo di tepi layar
+                minScale: 3.3,   // Ukuran logo di titik tengah
+                maxScale: 6.8,   // Ukuran logo di sisi kanan/kiri
+                maxDepth: 2200,   // Jarak kedalaman 3D
+                perspective: 400,// Kekuatan efek perspektif
             };
         };
 
@@ -183,7 +183,8 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             }
             const animationSettings = getAnimationSettings();
 
-            const currentScrollY = window.scrollY;
+            const scrollContainer = document.getElementById('root');
+            const currentScrollY = (scrollContainer && scrollContainer.scrollTop > 0) ? scrollContainer.scrollTop : window.scrollY;
             const scrollDelta = currentScrollY - lastScrollY;
             lastScrollY = currentScrollY;
             currentVelocity += (scrollDelta - currentVelocity) * 0.06;
@@ -208,21 +209,11 @@ const PartnerSection = ({ customMitraList, isPreviewMode = false }) => {
             const { screenWidth, maxRotation, minScale, maxScale, maxDepth, perspective } = animationSettings;
             const screenCenter = screenWidth / 2;
             const maxDistance = screenWidth;
-
-            /*
-            =========================================
-              KONFIGURASI ANIMASI 3D LOGO
-            =========================================
-            - perspective: Mengatur kekuatan efek 3D. Nilai lebih kecil = lebih dramatis.
-            - maxScale:    Ukuran logo saat berada di sisi kanan/kiri (paling dekat).
-            - minScale:    Ukuran logo saat berada di titik tengah (paling jauh).
-            - maxDepth:    Jarak kedalaman (mundur) logo saat di tengah.
-            - maxRotation: Kemiringan maksimal logo saat berada di sisi layar.
-            */
             for (let i = 0; i < logoFrames.length; i++) {
                 const frame = logoFrames[i];
                 const logo = frame.querySelector('.partner-logo');
                 if (!logo) continue;
+                
                 const frameRect = frame.getBoundingClientRect();
                 const logoCenter = frameRect.left + frameRect.width / 2;
 

@@ -9,54 +9,6 @@
   position: relative;
 }
 
-.background-glow-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.background-glow-container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  /* Posisi awal DITETAPKAN di sini; gerakannya lewat transform, bukan `left`.
-     Menganimasikan `left` memaksa layout tiap frame → dihitung sebagai layout
-     shift terus-menerus (CLS). `transform` diproses GPU dan tidak menggeser tata
-     letak. Gerakan visual tetap identik. */
-  left: -70%;
-  width: 30%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0.04) 75%,
-    transparent 100%
-  );
-  filter: blur(40px);
-  transform: translateX(0) skewX(35deg);
-  animation: lightSweep 11s infinite;
-}
-
-/* Semula menganimasikan `left` dari -70% ke 150% (rentang 220% lebar kontainer).
-   Lebar element = 30% kontainer, sehingga 220% kontainer = ~733% lebar element.
-   Jarak & waktu sama → sapuan cahaya terlihat persis sama, tanpa memicu CLS. */
-@keyframes lightSweep {
-  0% {
-    transform: translateX(0) skewX(35deg);
-  }
-
-  100% {
-    transform: translateX(733%) skewX(35deg);
-  }
-}
-
 .particle-container {
   position: absolute;
   top: 0;
@@ -530,6 +482,24 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
 }
 
 /*
+ * KONDISI: Ponsel (portrait) — TARGET ≤768px.
+ * FUNGSI: Mengecilkan font hero khusus HP agar proporsional saat dibaca di layar
+ * kecil (patokan: judul ~21px, eyebrow ~13px, subjudul ~12px). Diletakkan SETELAH
+ * blok ≤1040px agar menang untuk HP; tablet (769–1040px) tetap memakai nilai lama.
+*/
+@media (max-width: 768px) {
+  .welcome-text {
+    font-size: clamp(0.78rem, 3.4vw, 0.95rem); /* ~14.6px → ~13px */
+  }
+  .main-title {
+    font-size: clamp(1.3rem, 5.6vw, 1.6rem); /* ~25.6px → ~21px */
+  }
+  .sub-title {
+    font-size: clamp(0.72rem, 3.1vw, 0.85rem); /* ~13.3px → ~12px */
+  }
+}
+
+/*
  * KONDISI: Layar Desktop/Laptop yang Pendek
  * TARGET: Layar dengan lebar > 1040px tapi tinggi <= 800px.
  * FUNGSI: Mengecilkan elemen vertikal agar tidak sesak.
@@ -613,7 +583,6 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
   /* Matikan semua animasi yang bersifat dekoratif */
   .particle,
   .hero-right-cms,
-  .background-glow-container::before,
   .typing-cursor {
     animation: none !important;
     transition: none !important;
