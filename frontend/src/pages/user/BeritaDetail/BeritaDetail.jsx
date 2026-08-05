@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "../../../components/user/content-types/Default/DocumentViewer";
+import { kelompokkanGambarBerurutan } from "../../../utils/kelompokGambar";
 import "../../../components/user/content-types/Default/DefaultContent.css"; 
 import "./BeritaDetail.css";
 
@@ -226,53 +227,12 @@ const BeritaDetail = ({ lenisRef }) => {
   const wrappedHtml = `<div class="ck-content-root">${newsDetail.konten || ''}</div>`;
   const parsedContent = parse(wrappedHtml, {
     replace: (node) => {
+      // Gambar yang bersebelahan tanpa teks di antaranya dijajarkan mendatar,
+      // paling banyak tiga per baris. Aturan lengkapnya di utils/kelompokGambar.js
+      // — berbagi logika dengan DefaultContent supaya keduanya tidak menyimpang.
       if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
-        const newChildren = [];
-        let currentGroup = [];
-
-        const flushGroup = () => {
-          if (currentGroup.length > 1) {
-            for (let i = 0; i < currentGroup.length; i += 3) {
-              const chunk = currentGroup.slice(i, i + 3);
-              if (chunk.length > 1) {
-                newChildren.push({
-                  type: 'tag',
-                  name: 'div',
-                  attribs: { class: `image-gallery-grid cols-${chunk.length}` },
-                  children: chunk
-                });
-              } else {
-                newChildren.push(chunk[0]);
-              }
-            }
-          } else if (currentGroup.length === 1) {
-            newChildren.push(currentGroup[0]);
-          }
-          currentGroup = [];
-        };
-
-        node.children.forEach(child => {
-          if (child.type === 'text' && !child.data.trim()) {
-            if (currentGroup.length > 0) return;
-            newChildren.push(child);
-            return;
-          }
-
-          const isImage = child.type === 'tag' && (
-            (child.name === 'figure' && child.attribs?.class?.includes('image')) ||
-            child.name === 'img'
-          );
-
-          if (isImage) {
-            currentGroup.push(child);
-          } else {
-            if (currentGroup.length > 0) flushGroup();
-            newChildren.push(child);
-          }
-        });
-        if (currentGroup.length > 0) flushGroup();
-        node.children = newChildren;
-        return; 
+        node.children = kelompokkanGambarBerurutan(node.children);
+        return; // biarkan parser melanjutkan dengan anak yang baru
       }
       
       return transformNode(node);
