@@ -6,11 +6,9 @@ import parse from "html-react-parser";
 import DocumentViewer from "./DocumentViewer";
 import { kelompokkanGambarBerurutan } from "../../../../utils/kelompokGambar";
 
-// Klasifikasi rasio gambar → kelas wadah adaptif (CSS tidak bisa mendeteksi
-// rasio konten gambar, jadi diukur via naturalWidth/naturalHeight):
-//   landscape → penuh lebar konten induk (tinggi maks 500px, crop bila lewat)
-//   square (kotak) → 500×500
-//   portrait → box portrait (tinggi maks 500px, kelebihan di-crop)
+// ==========================================
+// IMAGE RATIO & FRAME HELPERS
+// ==========================================
 const classifyRatio = (w, h) => {
   if (!w || !h) return "image-frame--landscape";
   const r = w / h;
@@ -19,8 +17,6 @@ const classifyRatio = (w, h) => {
   return "image-frame--square";
 };
 
-// Wadah gambar adaptif: memilih kelas sesuai rasio gambar saat dimuat.
-// Ref callback menangani gambar dari cache (sudah `complete` saat mount).
 const ContentImage = ({ imgProps }) => {
   const [variant, setVariant] = useState("image-frame--landscape");
   const apply = (img) => {
@@ -41,6 +37,9 @@ const ContentImage = ({ imgProps }) => {
   );
 };
 
+// ==========================================
+// MAIN COMPONENT: DEFAULT CONTENT RENDERER
+// ==========================================
 const DefaultContent = ({ menuId, viewLayout, menuName }) => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,20 +73,32 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
     fetchContent();
   }, [menuId]);
 
-  // Ekstensi berkas yang dianggap "dokumen" (disisipkan lewat tombol
-  // "Sisipkan Dokumen" di editor). Tautan seperti ini kita ubah jadi preview.
   const DOC_EXT = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|rtf|txt|csv)(\?.*)?$/i;
 
-  // Membungkus <img>, dan mengubah tautan-dokumen menjadi preview/kartu unduh.
+  // ==========================================
+  // NODE TRANSFORMER (HTML PARSER & COMPONENT INJECTION)
+  // ==========================================
   const transformNode = (node) => {
+    if (node.type === "tag" && node.attribs?.style) {
+      const originalStyle = node.attribs.style;
+      const fontSizeRegex = /font-size\s*:\s*([^;]+)/i;
+      const match = originalStyle.match(fontSizeRegex);
+      if (match) {
+        const fontSizeVal = match[1].trim();
+        let newStyle = originalStyle.replace(/font-size\s*:\s*[^;]+;?/gi, "").trim();
+        newStyle = newStyle.replace(/;+/g, ";").replace(/^;|;$/g, "");
+        const numericVal = parseFloat(fontSizeVal);
+        const fsValDecl = isNaN(numericVal) ? "" : `; --fs-val: ${numericVal}`;
+        node.attribs.style = `${newStyle}${newStyle ? "; " : ""}--fs: ${fontSizeVal}${fsValDecl};`;
+      }
+    }
+
     if (node.type === "tag" && node.name === "img") {
       const imgSrc = node.attribs.src;
-
       const cleanedAttribs = { ...node.attribs };
       delete cleanedAttribs.width;
       delete cleanedAttribs.height;
       delete cleanedAttribs.style;
-
       return (
         <ContentImage
           imgProps={{ ...cleanedAttribs, src: imgSrc, alt: node.attribs.alt || "" }}
@@ -104,22 +115,15 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
 
     const renderDoc = (anchor) => {
       const href = anchor.attribs.href;
-      // Teks tautan = nama file (dari editor); fallback ke bagian akhir URL.
       const label =
         (anchor.children && anchor.children[0] && anchor.children[0].data) ||
         decodeURIComponent(href.split("/").pop());
-
       const match = href.match(DOC_EXT);
       const ext = match && match[1] ? match[1].toLowerCase() : "";
-
-      // Format modern dirender sebagai pratinjau yang bisa discroll & dibaca:
-      // PDF, DOCX, XLSX/XLS, PPTX. (.doc & .ppt biner lama → kartu unduh.)
       const PREVIEWABLE = ["pdf", "doc", "docx", "xls", "xlsx", "pptx"];
       if (PREVIEWABLE.includes(ext)) {
         return <DocumentViewer href={href} label={label} ext={ext} />;
       }
-
-      // Format lain (.ppt lama/dll) belum bisa dirender langsung → kartu unduh.
       return (
         <div className="doc-embed doc-embed-card">
           <i className="fa-solid fa-file-lines doc-embed-icon" />
@@ -138,11 +142,6 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
       );
     };
 
-    // --- MEDIA EMBED (Instagram/YouTube/Vimeo) ---
-    // CKEditor menyimpan hasil "Media Embed" sebagai elemen SEMANTIK
-    // <figure class="media"><oembed url="..."></oembed></figure> (bukan iframe
-    // jadi). <oembed> bukan elemen HTML nyata → tak tampil di browser. Di sini
-    // kita ambil url-nya lalu render embed asli.
     const getEmbedUrl = (n) => {
       if (!n || n.type !== "tag") return "";
       if (n.attribs?.["data-oembed-url"]) return n.attribs["data-oembed-url"];
@@ -157,13 +156,9 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
     };
 
     const renderMediaEmbed = (url) => {
-      // Instagram (post/reel/tv) → iframe endpoint /embed (dirancang untuk disematkan).
       const ig = url.match(/instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_-]+)/i);
       if (ig) {
         return (
-          // data-lenis-prevent: lepaskan pembajakan roda mouse oleh Lenis saat
-          // kursor di atas embed, agar konten IG (yang punya scroll internal)
-          // bisa digulir — sama seperti wadah pratinjau dokumen.
           <div className="media-embed media-embed-ig" data-lenis-prevent>
             <iframe
               src={`https://www.instagram.com/${ig[1]}/${ig[2]}/embed`}
@@ -174,7 +169,6 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           </div>
         );
       }
-      // YouTube (watch/youtu.be/embed/shorts)
       const yt = url.match(
         /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i
       );
@@ -192,7 +186,6 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           </div>
         );
       }
-      // Vimeo
       const vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
       if (vm) {
         return (
@@ -208,7 +201,6 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           </div>
         );
       }
-      // Provider lain yang tak dikenali → tetap tampil sebagai tautan (bukan hilang).
       return (
         <div className="media-embed media-embed-fallback">
           <a href={url} target="_blank" rel="noopener noreferrer">
@@ -223,9 +215,6 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
       return renderMediaEmbed(embedUrl);
     }
 
-    // CKEditor membungkus tautan dalam <p>. Karena viewer memakai <div> (blok),
-    // menaruhnya di dalam <p> melanggar HTML & memicu error hydration. Maka bila
-    // sebuah <p> HANYA berisi satu tautan dokumen, kita ganti seluruh <p>-nya.
     if (node.type === "tag" && node.name === "p") {
       const kids = (node.children || []).filter(
         (c) => !(c.type === "text" && !(c.data || "").trim())
@@ -235,13 +224,13 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
       }
     }
 
-    // Tautan dokumen yang berdiri sendiri (tidak dalam <p>).
     if (isDocAnchor(node)) {
       return renderDoc(node);
     }
 
     return node;
   };
+
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat konten...</div>;
   }
@@ -259,33 +248,21 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           <h1>{menuName}</h1>
         </div>
       )}
-      <div
-        className="default-content-wrapper"
-        style={{
-          '--flex-direction': isVertical ? 'column' : 'row',
-          '--flex-wrap': isVertical ? 'nowrap' : 'wrap',
-        }}
-      >
+      <div className={`default-content-wrapper ${isVertical ? 'layout-vertical' : 'layout-horizontal'}`}>
         {content.map(c => {
           const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
           const parsedContent = parse(wrappedHtml, {
             replace: (node) => {
-              // Gambar yang bersebelahan tanpa teks di antaranya dijajarkan
-              // mendatar, paling banyak tiga per baris. Aturan lengkap beserta
-              // bentuk-bentuk gambar yang dikenali ada di utils/kelompokGambar.js
-              // — logikanya dipakai bersama halaman berita, dan disatukan di sana
-              // supaya tidak lagi menyimpang antar-salinan.
               if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
                 node.children = kelompokkanGambarBerurutan(node.children);
-                return; // biarkan parser melanjutkan dengan anak yang baru
+                return;
               }
-
               return transformNode(node);
             },
           });
 
           return (
-            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content" style={{ flex: isVertical ? 'none' : '1 1 45%' }}>
+            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content">
               <div className="default-banner-wrapper">
                 <h1 className="default-banner-title">{c.judul}</h1>
                 <p className="post-date">
@@ -304,19 +281,18 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
   );
 };
 
+// ==========================================
+// DATE FORMATTER UTILS
+// ==========================================
 const formatTanggal = (tanggalISO) => {
   if (!tanggalISO) return null;
-
   const date = new Date(tanggalISO);
-  
   const optionsHari = { weekday: 'long', timeZone: 'Asia/Jakarta' };
   const optionsTanggalBulanTahun = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' };
   const optionsPukul = { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' };
-
   const hari = new Intl.DateTimeFormat('id-ID', optionsHari).format(date);
   const tanggalBulanTahun = new Intl.DateTimeFormat('id-ID', optionsTanggalBulanTahun).format(date);
   const pukul = new Intl.DateTimeFormat('id-ID', optionsPukul).format(date);
-
   return `${hari}, ${tanggalBulanTahun} | ${pukul} WIB`;
 };
 

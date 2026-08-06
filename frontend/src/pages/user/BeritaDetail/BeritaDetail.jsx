@@ -70,6 +70,25 @@ const BeritaDetail = ({ lenisRef }) => {
   const DOC_EXT = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|rtf|txt|csv)(\?.*)?$/i;
 
   const transformNode = (node) => {
+    // Tangani konversi font-size inline style menjadi CSS Variable untuk responsivitas font
+    if (node.type === "tag" && node.attribs?.style) {
+      const originalStyle = node.attribs.style;
+      const fontSizeRegex = /font-size\s*:\s*([^;]+)/i;
+      const match = originalStyle.match(fontSizeRegex);
+      if (match) {
+        const fontSizeVal = match[1].trim();
+        let newStyle = originalStyle.replace(/font-size\s*:\s*[^;]+;?/gi, "").trim();
+        newStyle = newStyle.replace(/;+/g, ";").replace(/^;|;$/g, "");
+        // --fs        : nilai asli berunit (misal: 20px) — dipakai untuk tampilan standar
+        // --fs-val    : nilai numerik murni tanpa satuan (misal: 20) — dipakai
+        //               untuk perkalian dengan <length> di CSS calc() pada
+        //               formula fluid scaling horizontal layout (1290px breakpoint)
+        const numericVal = parseFloat(fontSizeVal);
+        const fsValDecl = isNaN(numericVal) ? "" : `; --fs-val: ${numericVal}`;
+        node.attribs.style = `${newStyle}${newStyle ? "; " : ""}--fs: ${fontSizeVal}${fsValDecl};`;
+      }
+    }
+
     if (node.type === "tag" && node.name === "img") {
       const imgSrc = node.attribs.src;
       const cleanedAttribs = { ...node.attribs };
