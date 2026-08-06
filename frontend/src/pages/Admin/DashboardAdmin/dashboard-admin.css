@@ -689,21 +689,28 @@
 
 
 @media (max-width: 768px) {
-    /* ---- SHELL: dari 2 kolom (sidebar | konten) menjadi bertumpuk ----
-       Di HP, meletakkan sidebar & konten berdampingan membuat keduanya sangat
-       sempit (±168px & ±222px) sehingga sesak. Diubah menjadi kolom: sidebar
-       tampil sebagai panel atas (lihat AdminSidebar.css), konten mengisi lebar
-       penuh di bawahnya. zoom:0.7 dipertahankan agar kepadatan teks konsisten
-       dengan tampilan desktop admin. */
-    .admin-layout {
-        flex-direction: column;
-    }
+    /* ---- SHELL DI HP ----
+       Sidebar menjadi DRAWER (position: fixed, off-canvas) yang dibuka lewat
+       hamburger di header — lihat AdminSidebar.css & AdminHeader.css. Karena
+       sidebar keluar dari alur, .admin-main otomatis memakai lebar penuh; tak
+       perlu mengubah arah flex di sini. zoom:0.7 dipertahankan agar kepadatan
+       teks konsisten dengan tampilan desktop admin. */
 
     /* Jaring pengaman: cegah SELURUH area konten melebar akibat elemen lebar
        (mis. marquee logo mitra pada pratinjau beranda). Wadah scroll internal
        (tabel dengan overflow-x:auto) tetap bisa digulir sendiri. */
     .admin-layout .admin-main {
         overflow-x: hidden;
+    }
+
+    /* Saat drawer terbuka, matikan interaksi ke KONTEN di belakangnya. Ini
+       mencegah: (1) tombol konten tak sengaja ter-tap lewat area gelap, dan
+       (2) karena `zoom:0.7` membuat elemen `position:fixed` di-hit-test di
+       BELAKANG konten ter-zoom, mematikan pointer-events konten membuat tap di
+       area gelap "tembus" ke backdrop → drawer bisa ditutup dengan menyentuh
+       area gelap. Menutup tetap bisa lewat tombol X & memilih menu. */
+    .admin-layout.admin-sidebar-is-open .admin-main {
+        pointer-events: none;
     }
 
     /* .admin-sidebar & .admin-topbar: aturan responsif ada di file masing-masing. */

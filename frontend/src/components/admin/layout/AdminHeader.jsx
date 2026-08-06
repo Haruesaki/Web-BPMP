@@ -45,6 +45,9 @@ const AdminHeader = ({
   // nama, email, & role diambil dari sessionStorage (data user yang login,
   // bersumber dari backend/DB). Bukan lagi prop hardcoded.
   onLogout,
+  // Toggle drawer sidebar (dipakai tombol hamburger di HP). Di desktop tombol
+  // hamburger disembunyikan lewat CSS sehingga prop ini tak terpakai.
+  onToggleSidebar,
 }) => {
   const navigate = useNavigate();
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -171,6 +174,17 @@ const AdminHeader = ({
 
   return (
     <header className="admin-topbar">
+      {/* Tombol hamburger — hanya tampil di HP (CSS). Membuka/menutup drawer
+          sidebar. */}
+      <button
+        type="button"
+        className="admin-hamburger"
+        onClick={onToggleSidebar}
+        aria-label="Buka menu navigasi"
+      >
+        <i className="fa-solid fa-bars"></i>
+      </button>
+
       <div className="search-wrapper" ref={searchWrapperRef}>
         <div
           className={`search-box ${isSearchActive ? 'active' : ''}`}

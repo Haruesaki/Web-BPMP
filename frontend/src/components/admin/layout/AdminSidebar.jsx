@@ -16,7 +16,7 @@ const adminMenuItems2 = [
   { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: '/admin/setting' },
 ];
 
-const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
+const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dynamicMenus, setDynamicMenus] = useState([]);
@@ -229,6 +229,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
           // Klik item statis akan menyimpan ID aktif untuk dipakai lagi saat refresh.
           persistSelectedId(item.id);
           if (item.path) navigate(item.path);
+          onClose?.(); // tutup drawer (mobile) setelah memilih menu
         }}
         style={{ opacity: accessible ? 1 : 0.6, cursor: accessible ? 'pointer' : 'not-allowed' }}
         title={!accessible ? "Anda tidak memiliki hak akses" : ""}
@@ -264,6 +265,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
               isPostTanpaSubmenu: menu.jenis === 'post'
             }
           });
+          onClose?.(); // tutup drawer (mobile) setelah navigasi
         }
       }
     };
@@ -308,6 +310,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
                     persistSelectedId(sub.id);
                     if (sub.path) {
                       navigate(sub.path, { state: { menuName: sub.label, menuId: sub.id, isPostTanpaSubmenu: false } });
+                      onClose?.(); // tutup drawer (mobile) setelah navigasi
                     }
                   }}
                   title={!subAccessible ? "Anda tidak memiliki hak akses" : ""}
@@ -325,9 +328,22 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
   };
 
   return (
-    <aside className="admin-sidebar">
+    <>
+      {/* Latar gelap di belakang drawer (hanya tampil saat terbuka di HP).
+          Klik untuk menutup. Di desktop disembunyikan via CSS. */}
+      <div
+        className={`sidebar-backdrop ${isOpen ? 'is-open' : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <aside className={`admin-sidebar ${isOpen ? 'admin-sidebar--open' : ''}`}>
       <div className="sidebar-brand">
         <h1>Content Management<br />System Website BPMP</h1>
+        {/* Tombol tutup drawer — hanya tampil di HP (CSS). */}
+        <button className="sidebar-close" onClick={onClose} aria-label="Tutup menu">
+          <i className="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <nav className="sidebar-nav" data-lenis-prevent="true">
@@ -401,7 +417,8 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger }) => {
           </div>
         </div>
       )}
-    </aside>
+      </aside>
+    </>
   );
 };
 

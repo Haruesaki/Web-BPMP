@@ -27,6 +27,18 @@ const AdminLayout = () => {
   const [refreshSidebarTrigger, setRefreshSidebarTrigger] = useState(0); // trigger untuk refresh sidebar
   const [formError, setFormError] = useState(''); // state untuk error message di form
 
+  // --- STATE: DRAWER SIDEBAR (mobile) ---
+  // Di HP sidebar bukan lagi panel yang mendorong konten, melainkan drawer yang
+  // muncul saat tombol hamburger di header ditekan. Di desktop tidak dipakai
+  // (sidebar selalu tampil; CSS mengabaikan class ini di >768px).
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Tutup drawer otomatis setiap ganti halaman agar tidak "menyangkut" terbuka
+  // setelah pengguna memilih menu.
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
   // --- 3. STATE: FORM TAMBAH MENU ---
   const [menuName, setMenuName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
@@ -138,15 +150,31 @@ const AdminLayout = () => {
   const selectedIconLabel = iconOptions.find((o) => o.value === selectedIcon)?.label;
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar onTambahMenu={() => setIsMenuModalOpen(true)} refreshTrigger={refreshSidebarTrigger} />
+    <div
+      className={`admin-layout ${isSidebarOpen ? 'admin-sidebar-is-open' : ''}`}
+      onClick={(e) => {
+        // Tutup drawer saat menyentuh area gelap di luar drawer. Karena `zoom:0.7`
+        // membuat backdrop `position:fixed` di-hit-test di belakang konten, tap di
+        // area itu "jatuh" ke elemen root ini. e.target === e.currentTarget
+        // memastikan hanya tap di area kosong (bukan drawer/konten) yang menutup.
+        if (isSidebarOpen && e.target === e.currentTarget) setIsSidebarOpen(false);
+      }}
+    >
+      <AdminSidebar
+        onTambahMenu={() => setIsMenuModalOpen(true)}
+        refreshTrigger={refreshSidebarTrigger}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
       {/* ================= MAIN AREA ================= */}
       <div className="admin-main">
-        <AdminHeader onLogout={() => {
-          logout();
-          navigate('/admin/login');
-        }} />
+        <AdminHeader
+          onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
+          onLogout={() => {
+            logout();
+            navigate('/admin/login');
+          }} />
         <div key={location.pathname}>
           <Outlet />
         </div>

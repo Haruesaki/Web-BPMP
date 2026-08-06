@@ -19,6 +19,11 @@
     background: var(--bg-app);
 }
 
+/* Tombol hamburger: hanya tampil di HP (lihat media query di bawah). */
+.admin-layout .admin-hamburger {
+    display: none;
+}
+
 .admin-layout .search-wrapper {
     position: relative;
     flex: 1;
@@ -292,6 +297,26 @@
     .admin-layout .admin-topbar {
         padding: 12px 16px;
         gap: 12px;
+    }
+    /* Tampilkan hamburger di HP untuk membuka drawer sidebar. */
+    .admin-layout .admin-hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--border-soft);
+        border-radius: 10px;
+        background: var(--bg-card-soft);
+        color: var(--text-main);
+        font-size: 18px;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .admin-layout .admin-hamburger:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--border-mid);
     }
     /* Pintasan keyboard (Ctrl K) tak relevan di HP → sembunyikan agar kotak
        cari punya lebih banyak ruang. */
