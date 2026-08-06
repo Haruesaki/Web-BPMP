@@ -1,0 +1,181 @@
+/* =========================================================================
+   OVERLAY KEMAJUAN UNGGAHAN
+   -----------------------------------------------------------------------
+   Warnanya mengikuti tema admin yang sudah ada — ungu --purple sebagai aksen,
+   --bg-elevated sebagai latar kartu — sehingga tidak tampak seperti tempelan
+   dari luar. Nilai cadangan disertakan pada setiap var() karena berkas ini
+   dapat termuat di layar yang belum menetapkan variabel temanya.
+   ========================================================================= */
+
+.ou-tumpukan {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 12000; /* di atas dialog CKEditor (ck-body-wrapper ~ 10000) */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; /* kartu tidak menghalangi klik ke belakangnya */
+    max-width: min(360px, calc(100vw - 48px));
+}
+
+.ou-kartu {
+    pointer-events: auto; /* kecuali kartunya sendiri — tombol tutup perlu diklik */
+    background: var(--bg-elevated, #1a2238);
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+    border-left: 3px solid var(--purple, #5b5fe8);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: ou-masuk 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ou-kartu--gagal {
+    border-left-color: #ff6b6b;
+}
+
+@keyframes ou-masuk {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+}
+
+.ou-baris-atas {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ou-ikon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(91, 95, 232, 0.16);
+    color: var(--purple, #5b5fe8);
+    font-size: 13px;
+}
+
+.ou-kartu--gagal .ou-ikon {
+    background: rgba(255, 107, 107, 0.16);
+    color: #ff6b6b;
+}
+
+.ou-teks {
+    flex: 1;
+    min-width: 0; /* wajib, agar anak ber-ellipsis boleh menyusut di flexbox */
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ou-judul {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main, #f3f5fb);
+    line-height: 1.3;
+}
+
+.ou-berkas {
+    font-size: 11.5px;
+    color: var(--text-sub, #c7c4d8);
+    /* Nama berkas unggahan panjang-panjang; dipotong agar kartu tidak melar. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ou-persen {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple, #5b5fe8);
+    /* Lebar dipatok supaya angka yang berubah (9% → 78%) tidak menggeser tata
+       letak di sebelahnya pada setiap pembaruan. */
+    min-width: 34px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.ou-tutup {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-sub, #c7c4d8);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    line-height: 1;
+}
+
+.ou-tutup:hover {
+    color: var(--text-main, #f3f5fb);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ------------------------------------------------------------ bilah kemajuan */
+.ou-rel {
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.ou-isi {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--purple, #5b5fe8), var(--purple-hover, #6d71f0));
+    /* Perpindahan lebarnya dihaluskan supaya lonjakan angka dari peristiwa
+       progres tidak terlihat patah-patah. */
+    transition: width 200ms ease-out;
+}
+
+/* Tahap yang lamanya TIDAK dapat diukur — bita sudah terkirim seluruhnya dan
+   peladen sedang memproses. Garis bergerak menyatakan "sedang dikerjakan" tanpa
+   berbohong soal kemajuan. */
+.ou-isi--takterukur {
+    width: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--purple, #5b5fe8) 0 10px,
+        var(--purple-hover, #6d71f0) 10px 20px
+    );
+    background-size: 200% 100%;
+    animation: ou-bergerak 900ms linear infinite;
+}
+
+@keyframes ou-bergerak {
+    from { background-position: 0 0; }
+    to   { background-position: 40px 0; }
+}
+
+.ou-tahap {
+    font-size: 11.5px;
+    color: var(--text-sub, #c7c4d8);
+    line-height: 1.35;
+}
+
+.ou-tahap--gagal {
+    color: #ff9d9d;
+}
+
+/* Menghormati pengguna yang mematikan animasi di setelan sistemnya. Bilahnya
+   tetap ada dan tetap memberi tahu, hanya tidak bergerak. */
+@media (prefers-reduced-motion: reduce) {
+    .ou-kartu { animation: none; }
+    .ou-isi { transition: none; }
+    .ou-isi--takterukur { animation: none; }
+}
+
+@media (max-width: 600px) {
+    .ou-tumpukan {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        max-width: none;
+    }
+}

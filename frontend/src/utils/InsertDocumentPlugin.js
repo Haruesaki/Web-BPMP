@@ -1,5 +1,6 @@
 import { ButtonView } from 'ckeditor5';
 import axiosInstance from '../api/axiosInstance';
+import { mulaiUnggah, majukanUnggah, sudahiUnggah, gagalkanUnggah } from './statusUnggah';
 
 // Ikon dokumen sederhana (SVG inline) untuk tombol toolbar.
 const DOC_ICON =
@@ -12,6 +13,20 @@ const ACCEPT =
 // membuka pemilih berkas, mengunggah ke `endpoint`, lalu menyisipkan TAUTAN
 // (teks = nama file, href = URL) ke posisi kursor. Sisi pengunjung yang
 // mengubah tautan berekstensi dokumen menjadi preview.
+//
+// KEMAJUAN UNGGAHAN
+// -----------------
+// Dokumen lazimnya jauh lebih besar daripada gambar — berkas PDF puluhan
+// megabita bukan hal aneh. Sebelumnya penyisipan ini berjalan tanpa isyarat apa
+// pun: tombol diklik, lalu tidak terjadi apa-apa sampai tautannya tiba-tiba
+// muncul. Pada berkas besar jeda itu terasa seperti tombol yang tidak berfungsi,
+// dan pengguna cenderung mengkliknya berulang kali sehingga berkas yang sama
+// terunggah beberapa kali.
+//
+// Kemajuannya kini dilaporkan ke `utils/statusUnggah`, yang ditampilkan
+// `OverlayUnggah`. Pemberitahuan galat juga dipindahkan ke sana — `window.alert`
+// menghentikan seluruh halaman dan memaksa pengguna menekan OK sebelum dapat
+// berbuat apa pun.
 export function InsertDocumentPlugin(endpoint = '/api/upload/dokumen') {
   return function (editor) {
     editor.ui.componentFactory.add('insertDocument', (locale) => {
@@ -31,26 +46,53 @@ export function InsertDocumentPlugin(endpoint = '/api/upload/dokumen') {
           const file = input.files && input.files[0];
           if (!file) return;
 
+          const id = mulaiUnggah({
+            judul: 'Mengunggah dokumen',
+            berkas: file.name,
+            tahap: 'Menyiapkan berkas…',
+          });
+
           try {
             const formData = new FormData();
             formData.append('upload', file);
 
             const res = await axiosInstance.post(endpoint, formData, {
               headers: { 'Content-Type': 'multipart/form-data' },
+              onUploadProgress: (evt) => {
+                // `evt.total` bisa tidak terisi bila peramban tidak mengetahui
+                // panjang muatan. Dalam keadaan itu persentase tidak dapat
+                // dihitung, dan bilahnya dibiarkan pada mode tak terukur.
+                if (!evt.total) {
+                  majukanUnggah(id, 100, 'Mengunggah…');
+                  return;
+                }
+                const bagian = evt.loaded / evt.total;
+                majukanUnggah(
+                  id,
+                  bagian * 100,
+                  bagian >= 1 ? 'Diproses peladen…' : 'Mengunggah ke peladen…'
+                );
+              },
             });
 
             const url = res.data?.url;
             const name = res.data?.name || file.name;
 
-            if (url) {
-              editor.model.change((writer) => {
-                const linkText = writer.createText(name, { linkHref: url });
-                editor.model.insertContent(linkText, editor.model.document.selection);
-              });
+            if (!url) {
+              gagalkanUnggah(id, 'Peladen tidak mengembalikan URL dokumen.');
+              return;
             }
+
+            editor.model.change((writer) => {
+              const linkText = writer.createText(name, { linkHref: url });
+              editor.model.insertContent(linkText, editor.model.document.selection);
+            });
+
+            sudahiUnggah(id);
           } catch (err) {
             console.error('Gagal mengunggah dokumen:', err);
-            window.alert(
+            gagalkanUnggah(
+              id,
               err?.response?.data?.error?.message || 'Gagal mengunggah dokumen.'
             );
           }

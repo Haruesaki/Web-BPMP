@@ -338,3 +338,79 @@
     margin-left: auto !important;
     margin-right: auto !important;
 }
+/* =========================================================================
+   KEMAJUAN UNGGAHAN THUMBNAIL
+   -----------------------------------------------------------------------
+   Ditampilkan DI TEMPAT, tepat di bawah kotak unggah, bukan lewat overlay di
+   sudut layar. Alasannya sederhana: kotak itulah yang baru saja diklik
+   pengguna, sehingga isyarat di situ paling mudah dihubungkan dengan
+   tindakannya sendiri. Overlay sudut disediakan bagi unggahan yang dipicu dari
+   DALAM editor, tempat kotak semacam ini tidak ada.
+   ========================================================================= */
+
+.pd-thumb-progres {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pd-thumb-progres-baris {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pd-thumb-progres-tahap {
+    font-size: 12px;
+    color: var(--text-sub, #c7c4d8);
+}
+
+.pd-thumb-progres-persen {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple, #5b5fe8);
+    /* Angka bertabular agar lebarnya tetap saat berubah 9% -> 78%, sehingga
+       teks tahap di sebelahnya tidak bergeser-geser. */
+    font-variant-numeric: tabular-nums;
+}
+
+.pd-thumb-progres-rel {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.pd-thumb-progres-isi {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--purple, #5b5fe8), var(--purple-hover, #6d71f0));
+    transition: width 200ms ease-out;
+}
+
+/* Bita sudah terkirim seluruhnya, peladen masih memampatkan gambar dengan
+   `sharp`. Lamanya tidak dapat diukur dari peramban, jadi bilahnya bergaris
+   bergerak alih-alih memacetkan angka di 100% — yang justru tampak seperti
+   aplikasi menggantung. */
+.pd-thumb-progres-isi--takterukur {
+    width: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--purple, #5b5fe8) 0 10px,
+        var(--purple-hover, #6d71f0) 10px 20px
+    );
+    background-size: 200% 100%;
+    animation: pd-thumb-bergerak 900ms linear infinite;
+}
+
+@keyframes pd-thumb-bergerak {
+    from { background-position: 0 0; }
+    to   { background-position: 40px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pd-thumb-progres-isi { transition: none; }
+    .pd-thumb-progres-isi--takterukur { animation: none; }
+}
