@@ -20,6 +20,24 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 //  Catatan: .doc & .ppt (biner Office lama) TIDAK didukung parser ini —
 //  hanya format modern (docx/xlsx/pptx). Format lama ditangani sebagai
 //  kartu unduh di DefaultContent.
+//
+//  BINGKAI BERASIO 9:16
+//  --------------------
+//  Wadahnya dipatok tegak 9:16, bukan sekadar dibatasi tinggi maksimum.
+//  Sebelumnya tingginya mengikuti isi sampai batas 720px, sehingga dokumen
+//  satu halaman dan dokumen empat puluh halaman menghasilkan kotak yang
+//  tingginya berbeda-beda — halaman jadi tampak acak, dan tidak ada isyarat
+//  bahwa kotak itu sesuatu yang dapat digulir. Rasio tetap memberi bentuk yang
+//  dikenali sebagai "dokumen" sekaligus membuat seluruh pratinjau seragam.
+//
+//  KURUNGAN GULIRAN
+//  ----------------
+//  Saat kursor berada DI DALAM bingkai, roda mouse menggulir dokumennya dan
+//  TIDAK merembet ke halaman — dijaga `overscroll-behavior: contain` beserta
+//  `data-lenis-prevent` (situs ini memakai Lenis, yang kalau tidak dicegah akan
+//  menelan peristiwa wheel dan justru menggerakkan seluruh halaman). Saat
+//  kursor di luar bingkai, dokumennya tidak ikut bergerak sama sekali — itu
+//  perilaku bawaan, dan sengaja tidak diakali dengan pendengar global.
 // =========================================================================
 
 // Ubah URL berkas /uploads/<base>.<ext> menjadi /api/berkas/<base> (tanpa
@@ -45,9 +63,64 @@ const toInlineUrl = (fileUrl) => {
   }
 };
 
+const LABEL_JENIS = {
+  pdf: 'PDF', doc: 'Word', docx: 'Word',
+  xls: 'Excel', xlsx: 'Excel', pptx: 'PowerPoint',
+};
+
+const IKON_JENIS = {
+  pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word',
+  xls: 'fa-file-excel', xlsx: 'fa-file-excel', pptx: 'fa-file-powerpoint',
+};
+
+/**
+ * Mengambil berkas sambil melaporkan kemajuannya.
+ *
+ * `fetch` biasa tidak memberi kabar apa pun sampai seluruh bita tiba, dan pada
+ * PDF puluhan megabita itu berarti layar diam berdetik-detik tanpa penjelasan.
+ * Di sini badan balasannya dibaca sebagai stream sehingga jumlah bita yang sudah
+ * masuk dapat dilaporkan. Bila peladen tidak menyertakan `Content-Length` —
+ * lazim terjadi pada balasan terkompresi — persentase memang tidak dapat
+ * dihitung, dan pemanggilnya menerima null agar menampilkan bilah tak terukur.
+ */
+const ambilDenganProgres = async (url, laporkan) => {
+  const resp = await fetch(url, { mode: 'cors', cache: 'no-store' });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+  const total = Number(resp.headers.get('Content-Length')) || 0;
+
+  if (!resp.body || !total) {
+    laporkan(null);
+    return resp.arrayBuffer();
+  }
+
+  const pembaca = resp.body.getReader();
+  const potongan = [];
+  let masuk = 0;
+
+  for (;;) {
+    const { done, value } = await pembaca.read();
+    if (done) break;
+    potongan.push(value);
+    masuk += value.length;
+    laporkan(Math.min(99, Math.round((masuk / total) * 100)));
+  }
+
+  const gabung = new Uint8Array(masuk);
+  let geser = 0;
+  for (const p of potongan) {
+    gabung.set(p, geser);
+    geser += p.length;
+  }
+  return gabung.buffer;
+};
+
 const DocumentViewer = ({ href, label, ext }) => {
   const containerRef = useRef(null);
   const [status, setStatus] = useState('loading'); // loading | ready | error
+  const [persen, setPersen] = useState(null); // null = tak terukur
+  const [tahap, setTahap] = useState('Menyiapkan…');
+  const [jumlahHalaman, setJumlahHalaman] = useState(0);
 
   const isPdf = ext === 'pdf';
   const isDocx = ext === 'doc' || ext === 'docx';
@@ -59,20 +132,30 @@ const DocumentViewer = ({ href, label, ext }) => {
     let pdfDoc = null;
     let observer = null;
 
+    const ambil = (pesan) => {
+      setTahap(pesan);
+      return ambilDenganProgres(toInlineUrl(href), (p) => {
+        if (!cancelled) setPersen(p);
+      });
+    };
+
     const renderPdf = async () => {
       const pdfjsLib = await import('pdfjs-dist');
       pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-      // Ambil byte sendiri (GET biasa, aman lintas-origin dgn CORS `*`; hindari
-      // Range request internal PDF.js). no-store agar tak memakai cache non-CORS.
-      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.arrayBuffer();
+      // Byte diambil sendiri (GET biasa, aman lintas-origin dgn CORS `*`; hindari
+      // Range request internal PDF.js).
+      const data = await ambil('Mengunduh dokumen…');
+      if (cancelled) return;
+
+      setTahap('Menyiapkan halaman…');
+      setPersen(null);
 
       pdfDoc = await pdfjsLib.getDocument({ data }).promise;
       const container = containerRef.current;
       if (cancelled || !container) return;
       container.innerHTML = '';
+      setJumlahHalaman(pdfDoc.numPages);
 
       // Skala mengikuti lebar wadah supaya canvas tidak lebih besar dari perlu.
       const baseWidth = container.clientWidth || 700;
@@ -123,13 +206,15 @@ const DocumentViewer = ({ href, label, ext }) => {
 
     const renderDocx = async () => {
       const { renderAsync } = await import('docx-preview');
-      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const blob = await resp.blob();
+      const data = await ambil('Mengunduh dokumen…');
+      if (cancelled) return;
+      setTahap('Menyusun tampilan…');
+      setPersen(null);
+
       const container = containerRef.current;
-      if (cancelled || !container) return;
+      if (!container) return;
       container.innerHTML = '';
-      await renderAsync(blob, container, undefined, {
+      await renderAsync(new Blob([data]), container, undefined, {
         className: 'docv-docx',
         inWrapper: true,
       });
@@ -139,13 +224,16 @@ const DocumentViewer = ({ href, label, ext }) => {
     const renderXlsx = async () => {
       const mod = await import('xlsx');
       const XLSX = mod.read ? mod : mod.default; // aman utk interop CJS/ESM
-      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.arrayBuffer();
+      const data = await ambil('Mengunduh berkas…');
+      if (cancelled) return;
+      setTahap('Membaca lembar kerja…');
+      setPersen(null);
+
       const wb = XLSX.read(data, { type: 'array' });
       const container = containerRef.current;
-      if (cancelled || !container) return;
+      if (!container) return;
       container.innerHTML = '';
+      setJumlahHalaman(wb.SheetNames.length);
 
       wb.SheetNames.forEach((name) => {
         const sheet = wb.Sheets[name];
@@ -169,11 +257,13 @@ const DocumentViewer = ({ href, label, ext }) => {
     // PPTX → pptx-preview. init(container, {width,height}) lalu preview(buffer).
     const renderPptx = async () => {
       const { init } = await import('pptx-preview');
-      const resp = await fetch(toInlineUrl(href), { mode: 'cors', cache: 'no-store' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.arrayBuffer();
+      const data = await ambil('Mengunduh presentasi…');
+      if (cancelled) return;
+      setTahap('Menyusun slide…');
+      setPersen(null);
+
       const container = containerRef.current;
-      if (cancelled || !container) return;
+      if (!container) return;
       container.innerHTML = '';
 
       // Skala slide 16:9 mengikuti lebar wadah (maks 960px seperti default lib).
@@ -186,6 +276,8 @@ const DocumentViewer = ({ href, label, ext }) => {
     const run = async () => {
       try {
         setStatus('loading');
+        setPersen(null);
+        setTahap('Menyiapkan…');
         if (isPdf) await renderPdf();
         else if (isDocx) await renderDocx();
         else if (isXls) await renderXlsx();
@@ -211,23 +303,86 @@ const DocumentViewer = ({ href, label, ext }) => {
     };
   }, [href, isPdf, isDocx, isXls, isPptx]);
 
+  const jenis = LABEL_JENIS[ext] || (ext || '').toUpperCase();
+  const ikon = IKON_JENIS[ext] || 'fa-file-lines';
+  const satuanHalaman = isXls ? 'lembar' : isPptx ? 'slide' : 'halaman';
+
   return (
-    <div className="doc-embed">
-      {status === 'loading' && (
-        <div className="docv-status">
-          <i className="fa-solid fa-spinner fa-spin" /> Memuat pratinjau {label}…
+    <div className="docv">
+      {/* ------------------------------------------------------ kepala */}
+      <div className="docv-kepala">
+        <span className={`docv-ikon docv-ikon--${ext}`} aria-hidden="true">
+          <i className={`fa-solid ${ikon}`} />
+        </span>
+
+        <div className="docv-judul-blok">
+          <span className="docv-judul" title={label}>{label}</span>
+          <span className="docv-meta">
+            {jenis}
+            {status === 'ready' && jumlahHalaman > 0 && ` · ${jumlahHalaman} ${satuanHalaman}`}
+          </span>
+        </div>
+
+        <a
+          className="docv-unduh"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          title="Unduh dokumen"
+        >
+          <i className="fa-solid fa-download" />
+          <span className="docv-unduh-teks">Unduh</span>
+        </a>
+      </div>
+
+      {/* ------------------------------------------------------ bingkai */}
+      <div className="docv-bingkai">
+        {status === 'loading' && (
+          <div className="docv-muat">
+            <div className="docv-muat-ikon" aria-hidden="true">
+              <i className={`fa-solid ${ikon}`} />
+            </div>
+            <span className="docv-muat-tahap">{tahap}</span>
+            <div className="docv-rel" role="progressbar" aria-valuenow={persen ?? undefined}>
+              <div
+                className={`docv-isi${persen === null ? ' docv-isi--takterukur' : ''}`}
+                style={persen === null ? undefined : { width: `${persen}%` }}
+              />
+            </div>
+            {persen !== null && <span className="docv-muat-persen">{persen}%</span>}
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="docv-muat docv-muat--galat">
+            <div className="docv-muat-ikon" aria-hidden="true">
+              <i className="fa-solid fa-triangle-exclamation" />
+            </div>
+            <span className="docv-muat-tahap">Pratinjau tidak dapat ditampilkan.</span>
+            <a className="docv-unduh docv-unduh--galat" href={href} target="_blank" rel="noopener noreferrer">
+              <i className="fa-solid fa-download" /> Unduh berkasnya
+            </a>
+          </div>
+        )}
+
+        {/* data-lenis-prevent: melepaskan pembajakan roda mouse oleh Lenis saat
+            kursor berada di atas wadah ini. Tanpa itu Lenis menelan peristiwa
+            wheel dan yang bergerak justru seluruh halaman. */}
+        <div
+          ref={containerRef}
+          className={`docv-isi-dokumen${status === 'ready' ? '' : ' docv-isi-dokumen--sembunyi'}`}
+          data-lenis-prevent
+        />
+      </div>
+
+      {/* ------------------------------------------------------ kaki */}
+      {status === 'ready' && (
+        <div className="docv-kaki">
+          <i className="fa-solid fa-arrows-up-down" aria-hidden="true" />
+          Gulir di dalam bingkai untuk membaca dokumen
         </div>
       )}
-      {status === 'error' && (
-        <div className="docv-status docv-error">
-          Pratinjau dokumen tidak dapat ditampilkan.
-        </div>
-      )}
-      {/* data-lenis-prevent: matikan pembajakan roda mouse oleh Lenis (smooth
-          scroll global) saat kursor di atas wadah ini, agar dokumen bisa
-          digulir native dengan mouse. Tanpa ini, Lenis menelan event wheel
-          dan yang bergerak malah seluruh halaman. */}
-      <div ref={containerRef} className="docv-canvas-wrap" data-lenis-prevent />
     </div>
   );
 };
