@@ -631,3 +631,33 @@
         padding: 14px 16px;
     }
 }
+
+/* ---- MOBILE (≤768px) ---- */
+@media (max-width: 768px) {
+    /* Toolbar (cari + tombol tambah) ditumpuk agar tidak berdesakan. */
+    .admin-layout .mu-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-layout .mu-search {
+        max-width: none;
+    }
+    /* Tabel user diberi lebar minimum lalu digulir horizontal (kartu tabel jadi
+       area scroll) supaya kolom tidak gepeng & tak terpotong. */
+    .admin-layout .mu-table-card {
+        overflow-x: auto;
+    }
+    .admin-layout .mu-table {
+        min-width: 600px;
+    }
+    /* Detail user & hero angka: kecilkan yang berlebihan untuk layar sempit. */
+    .admin-layout .mu-detail-grid {
+        grid-template-columns: 1fr;
+    }
+    .admin-layout .mu-hero-text h2 {
+        font-size: 22px;
+    }
+    .admin-layout .mu-hero-stat-number {
+        font-size: 30px;
+    }
+}

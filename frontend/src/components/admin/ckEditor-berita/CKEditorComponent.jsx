@@ -75,6 +75,7 @@ import { InsertDocumentPlugin } from '../../../utils/InsertDocumentPlugin';
 // lengkapnya di utils/tempelBersih.js.
 import { TempelBersih } from '../../../utils/TempelBersihPlugin';
 import axiosInstance from '../../../api/axiosInstance';
+import OverlayUnggah from '../common/OverlayUnggah';
 import './CKEditorComponent.css';
 
 const editorConfig = {
@@ -171,9 +172,14 @@ const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/a
 
 const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) => {
   const editorRef = useRef(null);
-  const [compressMsg, setCompressMsg] = useState('');
   const [thumbUploading, setThumbUploading] = useState(false);
   const [thumbError, setThumbError] = useState('');
+  // Kemajuan unggahan thumbnail ditampilkan DI TEMPAT, bukan lewat overlay
+  // sudut layar. Kotaknya tepat berada di depan mata saat pengguna memilih
+  // berkas, sehingga isyarat di situ jauh lebih mudah dihubungkan dengan
+  // tindakannya sendiri.
+  const [thumbPersen, setThumbPersen] = useState(0);
+  const [thumbTahap, setThumbTahap] = useState('');
   const thumbInputRef = useRef(null);
 
   const handleThumbnailPick = () => {
@@ -192,6 +198,8 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
 
     setThumbError('');
     setThumbUploading(true);
+    setThumbPersen(0);
+    setThumbTahap('Menyiapkan berkas…');
 
     try {
       const formData = new FormData();
@@ -199,13 +207,28 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
 
       const res = await axiosInstance.post('/api/upload/gambar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (evt) => {
+          // `evt.total` dapat kosong bila peramban tidak mengetahui panjang
+          // muatan; persentase tidak dapat dihitung, jadi bilahnya dibiarkan
+          // pada mode tak terukur alih-alih menampilkan angka karangan.
+          if (!evt.total) {
+            setThumbPersen(100);
+            setThumbTahap('Mengunggah…');
+            return;
+          }
+          const bagian = evt.loaded / evt.total;
+          setThumbPersen(Math.round(bagian * 100));
+          // Bita terakhir terkirim bukan berarti selesai — peladen masih
+          // mengubah ukuran gambar dengan `sharp`.
+          setThumbTahap(bagian >= 1 ? 'Diproses peladen…' : 'Mengunggah ke peladen…');
+        },
       });
 
       const url = res?.data?.url;
       if (url && onThumbnailChange) {
         onThumbnailChange(url);
       } else {
-        setThumbError('Server tidak mengembalikan URL gambar.');
+        setThumbError('Peladen tidak mengembalikan URL gambar.');
       }
     } catch (err) {
       console.error('Gagal upload thumbnail:', err);
@@ -213,6 +236,8 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
       setThumbError(message);
     } finally {
       setThumbUploading(false);
+      setThumbPersen(0);
+      setThumbTahap('');
     }
   };
 
@@ -225,7 +250,7 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
     () => ({
       ...editorConfig,
       extraPlugins: [
-        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`, setCompressMsg),
+        CustomUploadAdapterPlugin(UPLOAD_URL, `Bearer ${getAuthToken()}`),
         InsertDocumentPlugin('/api/upload/dokumen'),
         TempelBersih,
       ]
@@ -333,15 +358,12 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
 
   return (
     <div className="ckeditor-container" style={{ position: 'relative' }}>
-      {compressMsg && (
-        <div style={{ position: 'absolute', top: '30px', right: '15px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 14px', borderRadius: '6px', fontSize: '13px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 2s linear infinite' }}>
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-          </svg>
-          {compressMsg}
-          <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-        </div>
-      )}
+      {/* Kemajuan unggahan dari dalam editor — gambar sisipan dan dokumen —
+          ditampilkan di sini. Keduanya dipicu dari luar pohon React (adapter
+          CKEditor dan plugin toolbar), sehingga menempuh penyimpan bersama
+          `utils/statusUnggah`. */}
+      <OverlayUnggah />
+
       <div className="pd-thumbnail-uploader">
         <label className="pd-thumbnail-label">Thumbnail Berita</label>
         <input
@@ -354,10 +376,10 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
 
         {thumbnailUrl ? (
           <div className="pd-thumbnail-preview">
-            <img src={thumbnailUrl} alt="Preview thumbnail berita" />
+            <img src={thumbnailUrl} alt="Pratinjau thumbnail berita" />
             <div className="pd-thumbnail-preview-actions">
               <button type="button" className="pd-thumbnail-btn" onClick={handleThumbnailPick} disabled={thumbUploading}>
-                {thumbUploading ? 'Mengunggah...' : 'Ganti Gambar'}
+                {thumbUploading ? 'Mengunggah…' : 'Ganti Gambar'}
               </button>
               <button type="button" className="pd-thumbnail-btn pd-thumbnail-btn-danger" onClick={handleThumbnailRemove} disabled={thumbUploading}>
                 Hapus
@@ -367,8 +389,25 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
         ) : (
           <button type="button" className="pd-thumbnail-dropzone" onClick={handleThumbnailPick} disabled={thumbUploading}>
             <i className="fa-regular fa-image" style={{ fontSize: 22 }}></i>
-            <span>{thumbUploading ? 'Mengunggah gambar...' : 'Klik untuk unggah gambar thumbnail'}</span>
+            <span>{thumbUploading ? 'Mengunggah gambar…' : 'Klik untuk unggah gambar thumbnail'}</span>
           </button>
+        )}
+
+        {thumbUploading && (
+          <div className="pd-thumb-progres" role="status" aria-live="polite">
+            <div className="pd-thumb-progres-baris">
+              <span className="pd-thumb-progres-tahap">{thumbTahap}</span>
+              {/* Angka disembunyikan saat tahap tak terukur; menampilkan 100%
+                  sementara peladen masih bekerja justru menyesatkan. */}
+              {thumbPersen < 100 && <span className="pd-thumb-progres-persen">{thumbPersen}%</span>}
+            </div>
+            <div className="pd-thumb-progres-rel">
+              <div
+                className={`pd-thumb-progres-isi${thumbPersen >= 100 ? ' pd-thumb-progres-isi--takterukur' : ''}`}
+                style={thumbPersen >= 100 ? undefined : { width: `${thumbPersen}%` }}
+              />
+            </div>
+          </div>
         )}
 
         {thumbError && <p className="pd-thumbnail-error">{thumbError}</p>}

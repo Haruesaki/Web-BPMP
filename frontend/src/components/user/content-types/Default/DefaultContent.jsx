@@ -4,6 +4,7 @@ import "./DefaultContent.css";
 import axiosInstance from "../../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "./DocumentViewer";
+import { kelompokkanGambarBerurutan } from "../../../../utils/kelompokGambar";
 
 // Klasifikasi rasio gambar → kelas wadah adaptif (CSS tidak bisa mendeteksi
 // rasio konten gambar, jadi diukur via naturalWidth/naturalHeight):
@@ -269,57 +270,16 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
           const parsedContent = parse(wrappedHtml, {
             replace: (node) => {
+              // Gambar yang bersebelahan tanpa teks di antaranya dijajarkan
+              // mendatar, paling banyak tiga per baris. Aturan lengkap beserta
+              // bentuk-bentuk gambar yang dikenali ada di utils/kelompokGambar.js
+              // — logikanya dipakai bersama halaman berita, dan disatukan di sana
+              // supaya tidak lagi menyimpang antar-salinan.
               if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
-                const newChildren = [];
-                let currentGroup = [];
-
-                const flushGroup = () => {
-                  if (currentGroup.length > 1) {
-                    // Chunk into groups of up to 3
-                    for (let i = 0; i < currentGroup.length; i += 3) {
-                      const chunk = currentGroup.slice(i, i + 3);
-                      if (chunk.length > 1) {
-                        newChildren.push({
-                          type: 'tag',
-                          name: 'div',
-                          attribs: { class: `image-gallery-grid cols-${chunk.length}` },
-                          children: chunk
-                        });
-                      } else {
-                        newChildren.push(chunk[0]);
-                      }
-                    }
-                  } else if (currentGroup.length === 1) {
-                    newChildren.push(currentGroup[0]);
-                  }
-                  currentGroup = [];
-                };
-
-                node.children.forEach(child => {
-                  // Ignore empty text nodes between images
-                  if (child.type === 'text' && !child.data.trim()) {
-                    if (currentGroup.length > 0) return;
-                    newChildren.push(child);
-                    return;
-                  }
-
-                  const isImage = child.type === 'tag' && (
-                    (child.name === 'figure' && child.attribs?.class?.includes('image')) ||
-                    child.name === 'img'
-                  );
-
-                  if (isImage) {
-                    currentGroup.push(child);
-                  } else {
-                    if (currentGroup.length > 0) flushGroup();
-                    newChildren.push(child);
-                  }
-                });
-                if (currentGroup.length > 0) flushGroup();
-                node.children = newChildren;
-                return; // Let html-react-parser continue with new children
+                node.children = kelompokkanGambarBerurutan(node.children);
+                return; // biarkan parser melanjutkan dengan anak yang baru
               }
-              
+
               return transformNode(node);
             },
           });
