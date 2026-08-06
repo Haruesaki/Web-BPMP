@@ -19,7 +19,7 @@
     line-height: 1.6;
     background-color: #232F72;
     border-radius: 20px;
-    max-width: 1300px;
+    /* max-width: 1300px; */
     min-width: 300px;
 }
 
@@ -146,7 +146,7 @@
 
 
     .default-layout-wrapper {
-        padding: 1.5rem 0;
+        padding: 5px 0px !important;
     }
 
     .page-content-header {
@@ -155,12 +155,12 @@
     }
 
     .default-layout-wrapper .page-content-header h1 {
-        font-size: 1.375rem;
-        margin-left: 2rem;
+        font-size: clamp(1.1rem, 3.7vw, 2.5rem) !important;
+        margin-left: 0.5rem;
     }
 
     .default-banner-wrapper {
-        padding: 18px 20px;
+        padding: 18px 10px;
     }
 
     .default-description-container {
@@ -716,7 +716,8 @@
 }
 
 .default-layout-wrapper {
-  max-width: 1600px;
+  max-width: 1500px;
+  padding: 3rem 0;
   margin: 0 auto;
   width: 100%;
 }
