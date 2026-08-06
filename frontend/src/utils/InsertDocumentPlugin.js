@@ -1,6 +1,7 @@
 import { ButtonView } from 'ckeditor5';
 import axiosInstance from '../api/axiosInstance';
 import { mulaiUnggah, majukanUnggah, sudahiUnggah, gagalkanUnggah } from './statusUnggah';
+import { bukaPratinjau } from './pratinjauDokumen';
 
 // Ikon dokumen sederhana (SVG inline) untuk tombol toolbar.
 const DOC_ICON =
@@ -89,6 +90,13 @@ export function InsertDocumentPlugin(endpoint = '/api/upload/dokumen') {
             });
 
             sudahiUnggah(id);
+
+            // Apa yang tersisip ke naskah hanyalah tautan bertuliskan nama
+            // berkas — tidak ada cara memastikan isinya benar tanpa menyimpan
+            // tulisan lalu membuka halaman pengunjung. Panel pratinjau
+            // menampilkan dokumen yang BARU SAJA tersimpan di peladen, jadi
+            // sekaligus membuktikan unggahannya utuh, bukan sekadar terkirim.
+            bukaPratinjau({ url, nama: name });
           } catch (err) {
             console.error('Gagal mengunggah dokumen:', err);
             gagalkanUnggah(

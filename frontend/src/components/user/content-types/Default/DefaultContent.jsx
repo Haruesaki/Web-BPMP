@@ -114,7 +114,12 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
 
       // Format modern dirender sebagai pratinjau yang bisa discroll & dibaca:
       // PDF, DOCX, XLSX/XLS, PPTX. (.doc & .ppt biner lama → kartu unduh.)
-      const PREVIEWABLE = ["pdf", "doc", "docx", "xls", "xlsx", "pptx"];
+      //
+      // ".doc" sempat ikut terdaftar di sini, bertentangan dengan keterangan di
+      // atasnya: viewer-nya terbuka lalu gagal karena docx-preview hanya
+      // memahami OOXML, sehingga pembaca melihat pesan galat padahal berkasnya
+      // baik-baik saja.
+      const PREVIEWABLE = ["pdf", "docx", "xls", "xlsx", "pptx"];
       if (PREVIEWABLE.includes(ext)) {
         return <DocumentViewer href={href} label={label} ext={ext} />;
       }

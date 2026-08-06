@@ -23,6 +23,21 @@ export default defineConfig(({ mode }) => {
           target: targetBackend,
           changeOrigin: true,
         },
+        // Pratinjau dokumen mengambil berkasnya lewat path RELATIF
+        // ('/api/berkas/<nama>' dan '/api/proksi-berkas'), bukan lewat
+        // axiosInstance yang memakai URL absolut. Alasannya sama seperti
+        // '/uploads' di atas: di production keduanya satu asal sehingga path
+        // relatif terselesaikan sendiri. Tanpa proxy ini, saat development
+        // permintaannya jatuh ke dev server Vite dan dibalas index.html —
+        // pratinjaunya gagal dengan galat penguraian yang menyesatkan,
+        // sementara di production justru berjalan normal.
+        //
+        // Tidak mengganggu pemanggilan API lain: seluruhnya melewati
+        // axiosInstance yang alamatnya sudah absolut ke VITE_API_URL.
+        '/api': {
+          target: targetBackend,
+          changeOrigin: true,
+        },
       },
     },
   }

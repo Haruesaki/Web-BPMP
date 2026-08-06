@@ -1,0 +1,201 @@
+/* =========================================================================
+   PANEL PRATINJAU DOKUMEN DI DALAM EDITOR
+   -----------------------------------------------------------------------
+   Warnanya mengikuti tema admin yang sudah ada — ungu --purple sebagai aksen,
+   --bg-elevated sebagai latar panel — sehingga tidak tampak seperti tempelan
+   dari luar. Nilai cadangan disertakan pada setiap var() karena berkas ini
+   dapat termuat di layar yang belum menetapkan variabel temanya.
+   ========================================================================= */
+
+.pde-latar {
+    position: fixed;
+    inset: 0;
+    /* Di atas dialog CKEditor (ck-body-wrapper ~ 10000), tetapi DI BAWAH kartu
+       kemajuan unggahan (12000): bila unggahan lain berjalan selagi panel
+       terbuka, kabarnya harus tetap terlihat. */
+    z-index: 11500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(4, 7, 20, 0.68);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    animation: pde-pudar 160ms ease-out;
+}
+
+.pde-panel {
+    width: min(1000px, 94vw);
+    max-height: min(92vh, 980px);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elevated, #1a2238);
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    animation: pde-masuk 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------------ kepala */
+.pde-kepala {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+}
+
+.pde-lencana {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-size: 15px;
+    background: rgba(63, 200, 137, 0.16);
+    color: #55d79c;
+}
+
+.pde-teks {
+    flex: 1;
+    min-width: 0; /* wajib agar anak ber-ellipsis boleh menyusut di flexbox */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pde-judul {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main, #f3f5fb);
+    line-height: 1.3;
+}
+
+.pde-berkas {
+    font-size: 12px;
+    color: var(--text-sub, #c7c4d8);
+    /* Nama berkas unggahan panjang-panjang; dipotong agar kepala tidak melar. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pde-tutup {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-sub, #c7c4d8);
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.pde-tutup:hover {
+    color: var(--text-main, #f3f5fb);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* -------------------------------------------------------------------- isi */
+.pde-isi {
+    flex: 1;
+    /* Tanpa ini, anak yang tinggi menolak menyusut dan panel meluber melewati
+       batas tingginya — perilaku bawaan flexbox. */
+    min-height: 0;
+    padding: 14px 16px;
+    overflow: hidden;
+}
+
+/* Viewer dibiarkan mengisi penuh ruang yang tersisa. Di halaman pengunjung
+   tinggi bingkainya dibatasi terhadap layar; di dalam panel, panelnya yang
+   sudah dibatasi, jadi pembatas kedua hanya akan menyisakan ruang kosong. */
+.pde-isi .docv {
+    margin: 0;
+    height: 100%;
+}
+
+.pde-isi .docv-bingkai {
+    height: 100%;
+}
+
+/* Format yang belum dapat dirender — bukan kegagalan, hanya keterbatasan. */
+.pde-tanpa-pratinjau {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 24px;
+    text-align: center;
+    border: 1px dashed var(--border-soft, rgba(255, 255, 255, 0.14));
+    border-radius: 12px;
+    color: var(--text-sub, #c7c4d8);
+}
+
+.pde-tanpa-pratinjau i {
+    font-size: 30px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.pde-tanpa-pratinjau p {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.pde-tanpa-pratinjau strong {
+    color: var(--text-main, #f3f5fb);
+}
+
+.pde-tanpa-pratinjau a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple, #5b5fe8);
+}
+
+/* -------------------------------------------------------------------- kaki */
+.pde-kaki {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-sub, #c7c4d8);
+    border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+}
+
+.pde-kaki i {
+    flex-shrink: 0;
+    color: var(--purple, #5b5fe8);
+}
+
+@keyframes pde-pudar {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes pde-masuk {
+    from { opacity: 0; transform: translateY(12px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Menghormati pengguna yang mematikan animasi di setelan sistemnya. Panelnya
+   tetap muncul, hanya tidak bergerak. */
+@media (prefers-reduced-motion: reduce) {
+    .pde-latar,
+    .pde-panel { animation: none; }
+}
+
+@media (max-width: 600px) {
+    .pde-latar { padding: 10px; }
+    .pde-panel { max-height: 94vh; }
+    .pde-isi { padding: 10px; }
+}

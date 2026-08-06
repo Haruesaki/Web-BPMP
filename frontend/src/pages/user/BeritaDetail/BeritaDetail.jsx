@@ -99,7 +99,11 @@ const BeritaDetail = ({ lenisRef }) => {
 
       const match = href.match(DOC_EXT);
       const ext = match && match[1] ? match[1].toLowerCase() : "";
-      const PREVIEWABLE = ["pdf", "doc", "docx", "xls", "xlsx", "pptx"];
+      // ".doc" TIDAK termasuk: itu format biner Office lama, dan docx-preview
+      // hanya memahami OOXML. Memasukkannya membuat viewer terbuka lalu gagal —
+      // pembaca melihat pesan galat padahal berkasnya baik-baik saja. Format
+      // lama diarahkan ke kartu unduh di bawah.
+      const PREVIEWABLE = ["pdf", "docx", "xls", "xlsx", "pptx"];
       if (PREVIEWABLE.includes(ext)) {
         return <DocumentViewer href={href} label={label} ext={ext} />;
       }

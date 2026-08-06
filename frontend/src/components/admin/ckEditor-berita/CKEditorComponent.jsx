@@ -76,6 +76,7 @@ import { InsertDocumentPlugin } from '../../../utils/InsertDocumentPlugin';
 import { TempelBersih } from '../../../utils/TempelBersihPlugin';
 import axiosInstance from '../../../api/axiosInstance';
 import OverlayUnggah from '../common/OverlayUnggah';
+import PratinjauDokumenEditor from '../common/PratinjauDokumenEditor';
 import './CKEditorComponent.css';
 
 const editorConfig = {
@@ -363,6 +364,11 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
           CKEditor dan plugin toolbar), sehingga menempuh penyimpan bersama
           `utils/statusUnggah`. */}
       <OverlayUnggah />
+
+      {/* Pratinjau dokumen yang baru selesai diunggah. Sama seperti overlay di
+          atas, pemicunya berada di luar pohon React (plugin toolbar), sehingga
+          menempuh penyimpan bersama `utils/pratinjauDokumen`. */}
+      <PratinjauDokumenEditor />
 
       <div className="pd-thumbnail-uploader">
         <label className="pd-thumbnail-label">Thumbnail Berita</label>

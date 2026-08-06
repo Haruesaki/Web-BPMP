@@ -1,0 +1,481 @@
+/* =========================================================================
+   PRATINJAU DOKUMEN — gaya milik komponen DocumentViewer.
+   -------------------------------------------------------------------------
+   Berkas ini sebelumnya menumpang di DefaultContent.css. Dipisahkan karena
+   viewer-nya kini juga dipakai DI DALAM editor admin (panel pratinjau setelah
+   dokumen selesai diunggah), dan halaman admin tidak pernah memuat
+   DefaultContent.css. Dengan berkas sendiri yang diimpor komponennya, gayanya
+   ikut ke mana pun komponennya dipakai.
+
+   TANPA KEPALA
+   ------------
+   Viewer ini tidak punya baris judul, nama berkas, maupun tombol unduh. Di
+   halaman pengunjung, dokumen adalah bagian dari isi tulisan — bukan lampiran
+   yang perlu diperkenalkan. Kepala yang memuat nama berkas justru mengulang apa
+   yang sudah tertulis di sekitarnya dan memakan tinggi yang seharusnya menjadi
+   milik dokumennya.
+
+   Perabot yang ada hanya BILAH KENDALI MENGAMBANG di dasar bingkai, dan ia
+   melayang di atas dokumen sehingga tidak memakan tinggi sama sekali.
+   ========================================================================= */
+
+.docv {
+    margin: 24px 0;
+
+    /* Tinggi ruang yang disediakan bagi bilah alat di dasar panggung, supaya
+       akhir halaman terakhir tetap dapat digulir sampai terlihat penuh dan
+       tidak tertutup bilahnya. */
+    --docv-ruang-alat: 62px;
+}
+
+/* -------------------------------------------------------------------------
+   BINGKAI
+   Lebarnya mengikuti pembungkusnya secara penuh — dokumen tidak dikurung kotak
+   tegak sempit yang menyisakan lajur kosong di kiri-kanan. Tingginya yang
+   dibatasi, bukan lebarnya: `clamp` menjaga bingkai tetap terbaca di layar
+   pendek sekaligus tidak menelan seluruh layar panjang.
+   ------------------------------------------------------------------------- */
+.docv-bingkai {
+    position: relative;
+    width: 100%;
+    height: clamp(320px, 80vh, 860px);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
+    background: #525659; /* abu gelap khas latar viewer PDF */
+}
+
+/* Di layar penuh, pembungkusnya adalah layar itu sendiri. Batas tinggi dan
+   sudut membulat justru menyisakan pinggiran hitam yang tidak ada gunanya. */
+.docv-bingkai:fullscreen {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+}
+
+/* Wadah gulir. Mengisi penuh bingkai lewat posisi mutlak, supaya tinggi
+   bingkai ditentukan bingkainya sendiri — bukan oleh isi. */
+.docv-isi-dokumen {
+    position: absolute;
+    inset: 0;
+    /* Kedua sumbu: saat dokumen diperbesar melewati lebar bingkai, ia harus
+       dapat digeser ke samping, bukan terpotong. */
+    overflow: auto;
+
+    /* Ruang batang gulir dipesan sejak awal. Lebar halaman dihitung dari
+       `clientWidth` saat wadah masih kosong; tanpa pemesanan ini, batang gulir
+       yang muncul belakangan menyempitkan wadah sesudah ukuran terlanjur
+       dihitung, dan halaman menjadi meluber ke samping. */
+    scrollbar-gutter: stable;
+
+    /* Gulir roda mouse TERKURUNG di dalam bingkai saat kursor berada di
+       atasnya: sesampainya di ujung atas atau bawah, halaman di belakangnya
+       tidak ikut bergerak. Saat kursor di luar bingkai, dokumen tidak bergerak
+       sama sekali — itu perilaku bawaan, tidak perlu diakali. */
+    overscroll-behavior: contain;
+    touch-action: pan-x pan-y;
+}
+
+/* Wadahnya dapat difokuskan (tabIndex) supaya tombol panah & Page Up/Down
+   menggulir dokumennya. Cincin fokus hanya ditampilkan pada fokus papan tik —
+   bukan saat diklik — sehingga tidak mengganggu pengguna tetikus. */
+.docv-isi-dokumen:focus { outline: none; }
+.docv-isi-dokumen:focus-visible {
+    outline: 2px solid var(--purple, #5b5fe8);
+    outline-offset: -2px;
+}
+
+.docv-isi-dokumen--sembunyi {
+    /* Disembunyikan, bukan dilepas dari DOM: `panggungRef` harus tetap ada
+       supaya proses render dapat menulis ke dalamnya sebelum status berubah
+       menjadi siap. */
+    visibility: hidden;
+}
+
+/* -------------------------------------------------------------------------
+   PANGGUNG — lapisan tempat isi dokumen sesungguhnya diletakkan.
+   Dipisahkan dari wadah gulir karena keduanya punya tugas yang bentrok: wadah
+   gulir harus tetap seukuran bingkai, sementara panggung harus boleh melebar
+   melewatinya saat dokumen diperbesar.
+   ------------------------------------------------------------------------- */
+.docv-panggung {
+    /* Ditulis tegas, tidak bersandar pada reset universal: reset itu berada di
+       Beranda.css dan hanya ikut termuat pada rute yang memakainya — sedangkan
+       viewer ini juga hidup di halaman admin. Tanpa ini, sela tepi ditambahkan
+       DI LUAR lebar 100% dan panggungnya meluber 24px ke samping. */
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px var(--docv-ruang-alat);
+}
+
+/* PDF: tanpa sela tepi supaya halaman benar-benar pas selebar bingkai.
+
+   `max-content` + `min-width: 100%` adalah kuncinya saat diperbesar. Memusatkan
+   isi dengan `align-items: center` saja menyembunyikan tepi KIRI begitu isinya
+   lebih lebar daripada wadah — bagian yang melimpah ke arah awal tidak dapat
+   digulir dan menjadi tidak terjangkau selamanya. Dengan panggung yang ikut
+   melebar, yang meluber adalah panggungnya, dan seluruh tepinya tetap dapat
+   dicapai. */
+.docv-panggung--bebas {
+    width: max-content;
+    min-width: 100%;
+    gap: 8px;
+    padding: 0 0 var(--docv-ruang-alat);
+}
+
+/* Batang gulir dibuat serasi dengan latar viewer, bukan abu-abu bawaan sistem
+   yang menonjol di atas latar gelap. */
+.docv-isi-dokumen::-webkit-scrollbar { width: 10px; height: 10px; }
+.docv-isi-dokumen::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.22); }
+.docv-isi-dokumen::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+.docv-isi-dokumen::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+    background-clip: content-box;
+}
+
+/* =========================================================================
+   BILAH KENDALI MENGAMBANG
+   -------------------------------------------------------------------------
+   Menempel pada BINGKAI, bukan pada wadah gulir — sehingga tetap di tempatnya
+   selagi dokumennya bergerak. Isinya sengaja terbatas pada hal yang tidak dapat
+   dikerjakan gulir biasa: mengetahui sedang di halaman berapa, melompat ke
+   halaman tertentu, mengatur perbesaran, dan membuka layar penuh.
+   ========================================================================= */
+.docv-alat,
+.docv-alat * {
+    /* Alasannya sama seperti pada .docv-panggung: reset universal proyek ini
+       tidak dijamin termuat di setiap rute yang memakai viewer. */
+    box-sizing: border-box;
+}
+
+.docv-alat {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    z-index: 3;
+
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    max-width: calc(100% - 20px);
+    padding: 5px;
+    border-radius: 12px;
+
+    background: rgba(16, 20, 38, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    color: #eef1fa;
+    font-size: 12.5px;
+    line-height: 1;
+    /* Menyeret di atas bilah tidak boleh menyorot teksnya seperti dokumen. */
+    user-select: none;
+    animation: docv-alat-masuk 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes docv-alat-masuk {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.docv-alat-grup {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.docv-alat-tombol {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: #eef1fa;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 140ms ease;
+}
+
+.docv-alat-tombol:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.13);
+}
+
+.docv-alat-tombol:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* Tombol persentase: lebarnya dipatok supaya bilah tidak bergoyang setiap kali
+   angkanya berganti dari 75% ke 100% ke 125%. */
+.docv-alat-tombol--lebar {
+    min-width: 52px;
+    font-variant-numeric: tabular-nums;
+}
+
+.docv-pisah {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.docv-alat-halaman {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 2px;
+    white-space: nowrap;
+}
+
+.docv-alat-label,
+.docv-alat-total {
+    color: rgba(238, 241, 250, 0.72);
+}
+
+.docv-alat-input {
+    width: 38px;
+    height: 26px;
+    padding: 0 4px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+}
+
+.docv-alat-input:focus {
+    outline: none;
+    border-color: var(--purple, #5b5fe8);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+/* Layar sempit: kata "Halaman" dibuang lebih dulu. Angkanya yang penting, dan
+   konteksnya sudah jelas dari kotak beserta pembagi "/ 5" di sebelahnya. */
+@media (max-width: 560px) {
+    .docv-alat-label { display: none; }
+    .docv-alat { gap: 0; padding: 4px; }
+    .docv-pisah { margin: 0 2px; }
+}
+
+/* ------------------------------------------------------ keadaan memuat */
+.docv-muat {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    text-align: center;
+    background: rgba(10, 14, 34, 0.72);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    color: var(--text-main, #f3f5fb);
+}
+
+.docv-muat-ikon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    font-size: 24px;
+    background: rgba(91, 95, 232, 0.18);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.docv-muat--galat .docv-muat-ikon {
+    background: rgba(255, 107, 107, 0.16);
+    color: #ff8f8f;
+}
+
+.docv-muat-tahap {
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.docv-muat-persen {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    font-variant-numeric: tabular-nums;
+}
+
+.docv-rel {
+    width: min(240px, 70%);
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+}
+
+.docv-isi {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--purple, #5b5fe8), var(--purple-hover, #6d71f0));
+    transition: width 180ms ease;
+}
+
+/* Tahap yang lamanya tidak dapat diukur — mis. peladen tidak menyertakan
+   Content-Length, atau berkas sedang diurai menjadi halaman. Garis bergerak
+   menyatakan "sedang dikerjakan" tanpa mengarang persentase. */
+.docv-isi--takterukur {
+    width: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--purple, #5b5fe8) 0 10px,
+        var(--purple-hover, #6d71f0) 10px 20px
+    );
+    animation: docv-bergerak 900ms linear infinite;
+}
+
+@keyframes docv-bergerak {
+    from { background-position: 0 0; }
+    to   { background-position: 40px 0; }
+}
+
+/* Satu-satunya tautan unduh yang tersisa: jalan keluar saat pratinjau gagal. */
+.docv-unduh-galat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background 160ms ease;
+}
+
+.docv-unduh-galat:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .docv-isi { transition: none; }
+    .docv-isi--takterukur { animation: none; }
+    .docv-alat { animation: none; }
+}
+
+/* -------------------------------------------------------------------------
+   ISI DOKUMEN PER FORMAT
+   ------------------------------------------------------------------------- */
+
+/* Slot per halaman PDF. Lebarnya ditulis JS (lebar bingkai dikali perbesaran)
+   dan tingginya diturunkan dari `aspect-ratio` halaman aslinya — bukan dari
+   tinggi piksel yang tetap. Dengan begitu setiap perubahan lebar, apa pun
+   sebabnya, tidak pernah membuat halaman menjadi gepeng.
+
+   Sengaja TIDAK ada `max-width`: pembatas seperti itu akan membatalkan
+   perbesaran melewati 100%. Yang menampung kelebihannya adalah panggung. */
+.docv-isi-dokumen .docv-page-slot {
+    flex-shrink: 0;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Canvas halaman mengisi penuh slot-nya. Ukuran piksel canvas ditentukan
+   kerapatan render di JS; di sini hanya ukuran tampilnya. */
+.docv-isi-dokumen .docv-page {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Kanvas & konten di dalam viewer tidak boleh "menelan" event roda mouse,
+   supaya scroll selalu diteruskan ke .docv-isi-dokumen. */
+.docv-isi-dokumen .docv-page-slot,
+.docv-isi-dokumen .docv-page {
+    touch-action: pan-x pan-y;
+}
+
+/* Hasil render DOCX diberi latar putih seperti kertas. */
+.docv-isi-dokumen .docx-wrapper,
+.docv-isi-dokumen .docv-docx {
+    background: transparent;
+    width: 100%;
+    /* Biarkan wadah luar (.docv-isi-dokumen) yang jadi satu-satunya area scroll.
+       Tanpa ini, docx-preview membuat konteks overflow sendiri sehingga roda
+       mouse "tertangkap" di wrapper dan dokumen terasa tak bisa discroll. */
+    overflow: visible;
+    max-height: none;
+    height: auto;
+    /* Roda mouse yang jatuh di atas konten docx diteruskan ke wadah scroll. */
+    pointer-events: auto;
+}
+
+/* --- XLSX/XLS: tiap sheet jadi kartu putih berisi tabel --- */
+.docv-isi-dokumen .docv-sheet {
+    width: 100%;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+}
+
+.docv-isi-dokumen .docv-sheet-title {
+    font-weight: 700;
+    padding: 8px 12px;
+    background: #f1f3f5;
+    color: #2a2f3a;
+    border-bottom: 1px solid #d3d9e3;
+}
+
+/* Tabel bisa digulir horizontal bila kolomnya banyak. */
+.docv-isi-dokumen .docv-sheet-table {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.docv-isi-dokumen .docv-sheet-table table {
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #222;
+    width: max-content;
+}
+
+.docv-isi-dokumen .docv-sheet-table td,
+.docv-isi-dokumen .docv-sheet-table th {
+    border: 1px solid #d0d5dd;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+/* --- PPTX: slide dari pptx-preview, diberi jarak & bayangan --- */
+.docv-isi-dokumen .pptx-preview-wrapper {
+    background: transparent;
+    max-width: 100%;
+}
+
+.docv-isi-dokumen .pptx-preview-slide-wrapper {
+    margin: 0 auto 14px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    max-width: 100%;
+}
