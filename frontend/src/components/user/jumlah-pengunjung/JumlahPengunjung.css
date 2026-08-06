@@ -90,3 +90,31 @@
     font-size: clamp(16px, 1.5vw, 18px);
     font-weight: 600;
 }
+
+/* =========================================
+   Responsif Breakpoint 960px
+   ========================================= */
+@media (max-width: 960px) {
+    .visitor-counter-wrapper {
+        padding: clamp(30px, 8vw, 50px) 15px;
+    }
+
+    .visitor-text-header {
+        /* Font menyusut hingga 14px pada layar sangat kecil */
+        font-size: clamp(14px, 2.5vw, 20px);
+    }
+
+    .visitor-icon {
+        font-size: clamp(14px, 3vw, 26px);
+    }
+
+    .visitor-text {
+        /* Label dan nilai menyusut hingga 13px */
+        font-size: clamp(13px, 2vw, 16px);
+    }
+
+    .visitor-content {
+        /* Merapatkan jarak antar kolom di mobile */
+        gap: clamp(10px, 0vw, 20px);
+    }
+}

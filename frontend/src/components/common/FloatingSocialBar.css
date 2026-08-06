@@ -34,7 +34,29 @@
     /* LAYOUT UTAMA */
     position: fixed;
     right: var(--fsb-right);
-    top: 50dvh; /* Menggunakan Dynamic Viewport Height agar selalu presisi di tengah walau ada URL bar di HP */
+
+    /*
+     * FIX STABILITAS POSISI MOBILE/TABLET
+     * ─────────────────────────────────────────────────────────────
+     * MASALAH: `top: 50dvh` + `translateY(-50%)`
+     *   dvh (Dynamic Viewport Height) berubah nilainya setiap kali
+     *   address bar browser auto-hide/show, sehingga komponen
+     *   melompat-lompat saat user scroll di perangkat sentuh.
+     *
+     * SOLUSI:
+     *   Ukuran container dibiarkan AUTO (mengikuti jumlah ikon).
+     *   Hanya titik posisinya yang dihitung ulang secara statis:
+     *
+     *   Titik tengah area di bawah header:
+     *   = header_height + (100svh - header_height) / 2
+     *   = calc(50svh + var(--header-height) / 2)
+     *
+     *   svh (Small Viewport Height) = ukuran viewport PALING KECIL
+     *   (kondisi saat address bar terlihat). Nilai ini TIDAK pernah
+     *   berubah ketika address bar hide/show → posisi jadi statis.
+     * ─────────────────────────────────────────────────────────────
+     */
+    top: calc(50svh + var(--header-height, 80px) / 2);
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -191,7 +213,7 @@
         --fsb-text-padding-y: clamp(6px, 1.1vw, 7px);             /* Merapatkan padding vertikal tooltip */
         --fsb-text-padding-x: clamp(11px, 2.2vw, 10px);           /* Merapatkan padding horizontal tooltip */
         --fsb-text-border-radius: clamp(13px, 2.8vw, 22px);      /* Mengurangi sudut rounded tooltip */
-        --fsb-text-font-size: clamp(7.8px, 2.1vw, 10.8px);         /* Memperkecil ukuran teks agar tidak meluap */
+        --fsb-text-font-size: clamp(7.8px, 2.1vw, 11.8px);         /* Memperkecil ukuran teks agar tidak meluap */
         --fsb-text-translate-x: clamp(22px, 4.4vw, 55px);         /* Mempersingkat jarak geser animasi masuk */
 }
 }
@@ -199,7 +221,7 @@
 
 @media (min-height:  801px){
     .floating-social-bar {
-    --fsb-icon-size: clamp(27px, 3.6vw, 30px);
+    --fsb-icon-size: clamp(27px, 3.6vw, 35px);
 
         --fsb-text-right: calc(100% + clamp(7px, 1.4vw, 14px));
         --fsb-text-padding-y: clamp(5px, 0.9vw, 7px);
@@ -212,13 +234,13 @@
 
 @media screen and (max-width: 800px) and (min-height:  801px){
     .floating-social-bar {
-    --fsb-icon-size: clamp(27px, 3.6vw, 30px);
+    --fsb-icon-size: clamp(20px, 5.6vw, 30px);
 
         --fsb-text-right: calc(100% + clamp(7px, 1.4vw, 14px));  /* Menyesuaikan kerapatan jarak tooltip */
         --fsb-text-padding-y: clamp(5px, 0.9vw, 7px);             /* Merapatkan padding vertikal tooltip */
         --fsb-text-padding-x: clamp(9px, 1.8vw, 14px);           /* Merapatkan padding horizontal tooltip */
         --fsb-text-border-radius: clamp(11px, 2.3vw, 18px);      /* Mengurangi sudut rounded tooltip */
-        --fsb-text-font-size: clamp(6.2px, 1.9vw, 15.1px);         /* Memperkecil ukuran teks agar tidak meluap */
+        --fsb-text-font-size: clamp(9.2px, 1.9vw, 15.1px);         /* Memperkecil ukuran teks agar tidak meluap */
         --fsb-text-translate-x: clamp(18px, 3.6vw, 45px);         /* Mempersingkat jarak geser animasi masuk */
 }
 }

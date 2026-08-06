@@ -90,15 +90,23 @@
     font-weight: 400;
     color: #ffffff;
     margin: 0;
+
     letter-spacing: 0.5px;
 }
 
 /* --- Responsive Table & Mobile --- */
 @media (max-width: 960px) {
+    .main-footer {
+        /* Menggunakan clamp untuk membuat ukuran font dasar dinamis (Fluid Typography).
+           Seluruh elemen di dalamnya yang menggunakan 'em' akan ikut menyesuaikan secara proporsional.
+           Range: 13px pada layar terkecil hingga 16px pada breakpoint 960px. */
+        font-size: clamp(13px, 1.2vw + 8px, 16px);
+    }
+
     .footer-grid {
         grid-template-columns: 1fr;
-        /* Berubah menjadi 1 kolom (atas-bawah) */
-        gap: 3.125em;
+        /* Layout menjadi vertikal (satu kolom) */
+        gap: 3.5em;
     }
 
     .footer-col {
@@ -107,7 +115,19 @@
     }
 
     .footer-link {
-        align-items: center;
+        width: auto;
+        display: inline-block;
+    }
+
+    .footer-link:hover {
+        transform: scale(1.05); /* Efek hover lebih halus untuk mobile/tablet */
+    }
+
+    .footer-map-wrapper iframe {
+        border-radius: 15px; /* Mengambil alih styling dari inline style sebelumnya */
+        border: none;
+        width: 100%;
+        max-width: 500px; /* Batasi lebar peta di mobile agar tidak terlalu lebar */
     }
 }
 

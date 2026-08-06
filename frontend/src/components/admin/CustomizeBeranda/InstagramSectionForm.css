@@ -128,3 +128,10 @@
     font-weight: 600;
     color: var(--text-main);
 }
+
+/* Mobile: input tautan embed ditumpuk 1 kolom agar tidak sempit di HP. */
+@media (max-width: 768px) {
+    .cb-ig-embed-grid {
+        grid-template-columns: 1fr;
+    }
+}
