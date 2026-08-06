@@ -638,12 +638,31 @@
     height: 100%;
 }
 
+/* Bentuk sel DIPATOK, tidak mengikuti rasio gambar aslinya.
+ *
+ * Sebabnya: satu baris grid dapat memuat gambar lanskap dan potret sekaligus.
+ * Bila tiap sel mengikuti rasio isinya, tinggi barisnya ditentukan gambar yang
+ * paling jangkung — dan gambar potret sangat jangkung. Dua gambar 577x1280
+ * bersanding pada lebar konten 800px akan menghasilkan baris setinggi hampir
+ * 900 piksel, yang justru mengalahkan tujuan menjajarkannya.
+ *
+ * Rasio 4/3 dipilih sebagai jalan tengah: gambar lanskap (lazimnya 3/2) hanya
+ * terpotong tipis, sementara gambar potret dipotong tegas menjadi seragam.
+ * Pemotongan dikerjakan `object-fit: cover` di bawah, yang memangkas dari kedua
+ * sisi sehingga bagian tengah gambar — tempat pokoknya lazim berada — tetap
+ * terlihat. Ganti ke 1/1 bila galeri berbentuk kotak lebih disukai, atau 3/2
+ * bila pemotongan gambar potret terasa terlalu banyak.
+ *
+ * `max-height` sengaja dinolkan: varian --portrait memasang batas 500px yang,
+ * bila dibiarkan, akan memangkas tinggi sel dan merusak keseragaman baris.
+ */
 .image-gallery-grid .image-frame {
     margin: 0;
     width: 100%;
-    height: 100%;
     max-width: 100%;
-    aspect-ratio: auto;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-height: none;
 }
 
 .image-gallery-grid .image-frame img {
