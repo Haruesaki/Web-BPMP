@@ -498,4 +498,27 @@
     .admin-layout .pm-heading h1 {
         font-size: 34px;
     }
+    /* Header kartu (judul + hint + legenda) ditumpuk agar tidak berdesakan. */
+    .admin-layout .pm-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .admin-layout .pm-card-header-right {
+        align-items: flex-start;
+    }
+    /* Kurangi padding baris agar konten lebih lega di layar sempit. */
+    .admin-layout .pm-row {
+        padding: 16px;
+    }
+    .admin-layout .pm-subrow {
+        padding-left: 28px;
+    }
+    /* Tombol Aktif/Nonaktif tak lagi dipatok 128px keras di HP: boleh tumbuh
+       mengisi baris saat aksi membungkus, mencegah luber di layar sempit. */
+    .admin-layout .pm-btn-nonaktif,
+    .admin-layout .pm-btn-aktif {
+        width: auto;
+        flex: 1 1 auto;
+    }
 }

@@ -196,7 +196,32 @@
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
+    /* Di HP sidebar tidak lagi di samping (terlalu sempit), melainkan menjadi
+       PANEL ATAS selebar layar. Tinggi mengikuti isi (bukan setinggi layar),
+       dengan daftar menu dibatasi tinggi & bisa digulir sendiri agar tidak
+       mendorong konten terlalu jauh ke bawah. */
     .admin-layout .admin-sidebar {
-        width: 240px;
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border-soft);
+        padding: 14px 16px;
+    }
+
+    .admin-layout .sidebar-brand h1 {
+        font-size: 15px;
+        margin: 0 0 12px 4px;
+    }
+
+    /* Daftar menu dibatasi ±46% tinggi layar lalu digulir di dalamnya sendiri.
+       (calc dibagi 0.7 mengompensasi zoom:0.7 pada .admin-layout, sama seperti
+       pola tinggi lain di admin.) */
+    .admin-layout .sidebar-nav {
+        max-height: calc(46vh / 0.7);
+    }
+
+    .admin-layout .btn-tambah-menu {
+        margin-top: 12px;
     }
 }

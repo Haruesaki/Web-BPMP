@@ -290,6 +290,20 @@
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
     .admin-layout .admin-topbar {
-        padding: 20px;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    /* Pintasan keyboard (Ctrl K) tak relevan di HP → sembunyikan agar kotak
+       cari punya lebih banyak ruang. */
+    .admin-layout .search-shortcut {
+        display: none;
+    }
+    /* Nama & peran profil dibatasi agar tidak mendorong avatar keluar layar. */
+    .admin-layout .profile-name,
+    .admin-layout .profile-role {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
