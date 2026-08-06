@@ -5,8 +5,10 @@ const crypto = require('crypto');
 const sharp = require('sharp');
 const axios = require('axios');
 const https = require('https');
+const http = require('http');
 const MediaModel = require('../models/mediaModel');
 const env = require('../config/env');
+const penjagaSsrf = require('../utils/penjagaSsrf');
 
 // Agent HTTPS yang TIDAK menolak sertifikat tak-terverifikasi — DIPAKAI KHUSUS
 // oleh proksi dokumen (serveProxyFile), BUKAN global. Alasannya: banyak server
@@ -16,7 +18,19 @@ const env = require('../config/env');
 // certificate" sehingga proksi gagal (502). Karena endpoint ini hanya MENGAMBIL
 // berkas publik dan TIDAK mengirim kredensial apa pun, melonggarkan verifikasi
 // di sini berisiko sangat kecil dan sengaja dibatasi pada agen ini saja.
-const agenProksiLonggar = new https.Agent({ rejectUnauthorized: false });
+//
+// `lookup` DIGANTI penjaga SSRF — jangan dihapus. Di sinilah penyaringan
+// alamat benar-benar ditegakkan: setiap soket yang hendak dibuka, pada
+// permintaan pertama maupun pada setiap pengalihan, harus melewatinya lebih
+// dulu. Penjelasan lengkapnya di utils/penjagaSsrf.js.
+const agenProksiLonggar = new https.Agent({
+  rejectUnauthorized: false,
+  lookup: penjagaSsrf.lookupAman,
+});
+
+// Padanannya untuk sumber yang masih memakai http polos. Tanpa ini, target
+// http:// akan memakai agen bawaan Node yang tidak mengenal penjaga sama sekali.
+const agenProksiHttp = new http.Agent({ lookup: penjagaSsrf.lookupAman });
 
 // =========================================================================
 //  UPLOAD CONTROLLER — menerima gambar dari CKEditor (SimpleUploadAdapter).
@@ -36,6 +50,11 @@ const agenProksiLonggar = new https.Agent({ rejectUnauthorized: false });
 const UPLOAD_DIR = env.UPLOAD_DIR;
 const MAX_WIDTH = 1600; // px — gambar lebih lebar dari ini diperkecil
 const WEBP_QUALITY = 80; // 0-100, kompromi kualitas vs ukuran
+
+// Batas bagi proksi dokumen eksternal. Angkanya dipertahankan seperti semula
+// agar berkas yang selama ini dapat dipratinjau tidak tiba-tiba ditolak.
+const BATAS_UKURAN_PROKSI = 60 * 1024 * 1024;
+const MAKS_PENGALIHAN_PROKSI = 3;
 
 class UploadController {
   static async uploadImage(req, res) {
@@ -182,47 +201,96 @@ class UploadController {
       return res.status(400).json({ error: { message: 'URL tidak valid.' } });
     }
 
-    // Hanya http/https.
-    if (target.protocol !== 'http:' && target.protocol !== 'https:') {
-      return res.status(400).json({ error: { message: 'Protokol tidak diizinkan.' } });
-    }
-
-    // Penjaga SSRF: tolak host lokal/jaringan privat agar endpoint ini tidak bisa
-    // dipakai menjangkau layanan internal peladen.
-    const host = target.hostname.toLowerCase();
-    const hostPrivat =
-      host === 'localhost' ||
-      host === '0.0.0.0' ||
-      host === '::1' ||
-      /^127\./.test(host) ||
-      /^10\./.test(host) ||
-      /^192\.168\./.test(host) ||
-      /^169\.254\./.test(host) ||
-      /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-    if (hostPrivat) {
+    // Penjaga SSRF lapis pertama: protokol dan kredensial tersemat, ditambah
+    // penilaian alamat bila hostnya memang sudah berupa IP. Yang berupa nama
+    // domain BELUM dinilai di sini — penilaiannya terjadi saat penyambungan,
+    // lewat `lookup` pada agen. Lihat utils/penjagaSsrf.js untuk sebabnya.
+    const alasanAwal = penjagaSsrf.alasanUrlTerlarang(target);
+    if (alasanAwal) {
       return res.status(400).json({ error: { message: 'Host tidak diizinkan.' } });
     }
 
     try {
-      const upstream = await axios.get(target.href, {
-        responseType: 'stream',
-        timeout: 20000,
-        maxContentLength: 60 * 1024 * 1024,
-        maxRedirects: 3,
-        // Sebagian server menolak permintaan tanpa User-Agent peramban.
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        // Toleran terhadap rantai sertifikat tak lengkap milik server sumber
-        // (lihat penjelasan pada `agenProksiLonggar` di atas). Hanya untuk fetch ini.
-        httpsAgent: agenProksiLonggar,
-      });
+      // PENGALIHAN DIIKUTI SENDIRI, bukan diserahkan kepada axios.
+      //
+      // Sebelumnya `maxRedirects: 3` membuat axios (lewat follow-redirects)
+      // mengikuti pengalihan tanpa sepengetahuan kita. Penjaga alamat pada agen
+      // memang tetap ikut berlaku di sana, tetapi PROTOKOL tidak: pengalihan
+      // dari https ke http polos akan diikuti diam-diam. Dengan mengikutinya
+      // sendiri, setiap lompatan melewati pemeriksaan yang sama persis dengan
+      // permintaan pertama, dan alasan penolakannya dapat dicatat apa adanya.
+      let sekarang = target;
+      let upstream = null;
+
+      for (let lompatan = 0; upstream === null; lompatan += 1) {
+        const balasan = await axios.get(sekarang.href, {
+          responseType: 'stream',
+          timeout: 20000,
+          maxContentLength: BATAS_UKURAN_PROKSI,
+          // 0 = jangan diikuti; axios memakai http/https bawaan Node secara
+          // langsung, sehingga agen di bawah benar-benar terpakai.
+          maxRedirects: 0,
+          // 3xx bukan kegagalan di sini — ia justru yang hendak ditangani.
+          validateStatus: (s) => s >= 200 && s < 400,
+          // Sebagian server menolak permintaan tanpa User-Agent peramban.
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          // Toleran terhadap rantai sertifikat tak lengkap milik server sumber
+          // (lihat penjelasan pada `agenProksiLonggar` di atas). Hanya untuk fetch ini.
+          httpsAgent: agenProksiLonggar,
+          httpAgent: agenProksiHttp,
+        });
+
+        const dialihkan = balasan.status >= 300 && balasan.status < 400 && balasan.headers.location;
+        if (!dialihkan) {
+          upstream = balasan;
+          break;
+        }
+
+        // Badan balasan pengalihan tidak pernah dipakai. Tanpa dibuang, soketnya
+        // tertahan sampai waktu habis karena tidak ada yang membacanya.
+        balasan.data.destroy();
+
+        if (lompatan >= MAKS_PENGALIHAN_PROKSI) {
+          console.error('Proksi berkas: pengalihan melebihi batas dari', sekarang.href);
+          return res.status(502).json({ error: { message: 'Gagal mengambil berkas eksternal.' } });
+        }
+
+        let berikutnya;
+        try {
+          // Header Location boleh berupa jalur relatif, jadi diselesaikan
+          // terhadap alamat lompatan saat ini — bukan terhadap URL awal.
+          berikutnya = new URL(balasan.headers.location, sekarang);
+        } catch (_) {
+          return res.status(502).json({ error: { message: 'Gagal mengambil berkas eksternal.' } });
+        }
+
+        const alasan = penjagaSsrf.alasanUrlTerlarang(berikutnya);
+        if (alasan) {
+          console.error(`Proksi berkas: pengalihan ditolak (${alasan}) dari ${sekarang.host}`);
+          return res.status(400).json({ error: { message: 'Host tidak diizinkan.' } });
+        }
+        sekarang = berikutnya;
+      }
+
       res.setHeader('Content-Type', upstream.headers['content-type'] || 'application/octet-stream');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Cache-Control', 'no-store');
       upstream.data.pipe(res);
     } catch (err) {
+      // Galat ber-kode ESSRF datang dari penjaga alamat, bukan dari jaringan —
+      // dibedakan supaya log menyebutkan sebab yang sebenarnya, dan supaya
+      // pemanggilnya menerima 400 (permintaannya yang keliru) alih-alih 502
+      // (peladen sumber yang bermasalah).
+      const diblokir = err.code === 'ESSRF' || /ESSRF/.test(err.message || '');
       console.error('Gagal proksi berkas eksternal:', err.message);
       if (!res.headersSent) {
-        res.status(502).json({ error: { message: 'Gagal mengambil berkas eksternal.' } });
+        res.status(diblokir ? 400 : 502).json({
+          error: { message: diblokir ? 'Host tidak diizinkan.' : 'Gagal mengambil berkas eksternal.' },
+        });
+      } else {
+        // Aliran sudah telanjur mengalir ke klien; tidak ada status yang dapat
+        // diubah lagi, jadi yang tersisa hanya menutupnya agar tidak menggantung.
+        res.destroy();
       }
     }
   }

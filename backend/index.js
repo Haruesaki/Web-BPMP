@@ -27,25 +27,51 @@ if (env.isProduction) {
 // (misal peta atau pemutar video lain), daftarkan di sini juga.
 const SUMBER_SKRIP = ["'self'", "'unsafe-inline'", 'https://kit.fontawesome.com', 'https://*.fontawesome.com', 'https://www.instagram.com'];
 const SUMBER_GAYA = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://*.fontawesome.com'];
-const SUMBER_FONT = ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://*.fontawesome.com'];
-const SUMBER_BINGKAI = ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://www.instagram.com', 'https://www.google.com', 'https://player.vimeo.com'];
+// `blob:` diperlukan docx-preview: font yang tertanam di dalam berkas .docx
+// diekstrak ke Blob lalu didaftarkan sebagai @font-face.
+const SUMBER_FONT = ["'self'", 'data:', 'blob:', 'https://fonts.gstatic.com', 'https://*.fontawesome.com'];
+// `https://*.google.com` menggantikan `https://www.google.com` DENGAN SENGAJA:
+// alamat peta pada footer datang dari basis data (`info_kontak.url_google_map`,
+// dapat disunting admin), sehingga host persisnya tidak dapat dipastikan dari
+// kode — `maps.google.com` sama sahnya dengan `www.google.com`. Pelebaran ini
+// tetap terbatas pada satu pemilik domain, bukan pada `https:` seluruhnya.
+const SUMBER_BINGKAI = ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://www.instagram.com', 'https://*.google.com', 'https://player.vimeo.com'];
+// Pekerja web. `blob:` BUKAN kelengkapan yang boleh dilewatkan: pustaka
+// `browser-image-compression` — yang dipakai setiap kali admin menyisipkan
+// gambar lewat CKEditor — membuat pekerjanya dari Blob. Tanpa ini, kompresi
+// gambar di panel admin mati begitu CSP ditegakkan, dan hanya di production.
+const SUMBER_PEKERJA = ["'self'", 'blob:'];
+// Setara dengan imgSrc, dan karena alasan yang sama: konten dapat memuat video
+// atau audio yang ditumpangkan dari luar. Tanpa direktif ini, media jatuh ke
+// `defaultSrc 'self'` dan seluruh sematan luar terblokir.
+const SUMBER_MEDIA = ["'self'", 'data:', 'blob:', 'https:'];
+// `blob:` diperlukan pemuat dokumen: pdf.js dan pptx-preview membaca berkas
+// yang sudah diambil lewat URL objek.
+const SUMBER_SAMBUNGAN = ["'self'", 'https:', 'blob:', 'data:'];
 
 app.use(
     helmet({
-        // CSP sengaja dipasang sebagai LAPORAN SAJA (report-only), belum menegakkan.
+        // CSP DITEGAKKAN sejak 7 Agustus 2026 (sebelumnya report-only).
         //
-        // Alasannya: kebijakan yang terlalu ketat akan mematikan sematan Instagram,
-        // YouTube, dan iframe Google Maps tanpa galat di sisi peladen — gejalanya
-        // hanya tampak di konsol peramban, sehingga mudah lolos dari pengujian dan
-        // baru ketahuan setelah pengunjung mengeluh. Dengan report-only, seluruh
-        // pelanggaran tercatat di konsol peramban tanpa memblokir apa pun.
+        // RIWAYATNYA, supaya tidak dikembalikan tanpa sebab: kebijakan ini
+        // sengaja dipasang sebagai laporan saja lebih dulu, sebab kebijakan yang
+        // terlalu ketat mematikan sematan Instagram, YouTube, dan iframe Google
+        // Maps TANPA galat apa pun di sisi peladen — gejalanya hanya muncul di
+        // konsol peramban pengunjung. Penegakannya baru dilakukan setelah
+        // seluruh halaman dijalankan sungguhan dalam mode production di lokal
+        // dan dipotret dengan peramban tanpa kepala; pelanggaran yang ditemukan
+        // di sana justru tiga yang mustahil ditebak dari membaca kode:
+        // pekerja Blob milik `browser-image-compression`, font Blob milik
+        // docx-preview, dan alamat peta footer yang datang dari basis data.
         //
-        // CARA MENEGAKKAN setelah diperiksa di peramban: ganti
-        // `reportOnly: true` menjadi `false`. Periksa lebih dulu halaman Beranda
-        // (sematan Instagram & YouTube), footer (iframe Google Maps), halaman
-        // konten bergambar, serta pratinjau dokumen.
+        // YANG PERLU DIKETAHUI BILA KELAK ADA SEMATAN BARU: penambahan sumber
+        // pihak ketiga (peta lain, pemutar video lain, pustaka dari CDN) kini
+        // TIDAK cukup ditulis di komponennya saja — ia harus didaftarkan pada
+        // tetapan SUMBER_* di atas, atau peramban akan memblokirnya diam-diam.
+        // Bukti pertamanya ada di Log Runtime peladen: setiap pelanggaran
+        // dilaporkan ke /api/laporan-csp dan dicetak di sana.
         contentSecurityPolicy: {
-            reportOnly: true,
+            reportOnly: false,
             directives: {
                 defaultSrc: ["'self'"],
                 scriptSrc: SUMBER_SKRIP,
@@ -55,10 +81,19 @@ app.use(
                 // ketiga yang namanya berubah-ubah (Instagram, thumbnail YouTube),
                 // sehingga mustahil didaftarkan satu per satu.
                 imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+                mediaSrc: SUMBER_MEDIA,
                 frameSrc: SUMBER_BINGKAI,
-                connectSrc: ["'self'", 'https:'],
+                workerSrc: SUMBER_PEKERJA,
+                connectSrc: SUMBER_SAMBUNGAN,
                 objectSrc: ["'none'"],
                 upgradeInsecureRequests: env.isProduction ? [] : null,
+                // Titik pelaporan. `report-uri` memang berstatus usang di
+                // spesifikasi, tetapi ia yang didukung SELURUH peramban yang
+                // dipakai pengunjung; penggantinya (`report-to`) menuntut header
+                // tambahan dan belum merata. Tanpa ini, penegakan CSP menjadi
+                // buta: yang terblokir hanya terlihat oleh pengunjung yang
+                // kebetulan membuka konsol peramban.
+                reportUri: ['/api/laporan-csp'],
             },
         },
         // Sematan pihak ketiga memuat sumber lintas asal; kebijakan bawaan helmet

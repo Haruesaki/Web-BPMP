@@ -81,10 +81,27 @@ const batasCron = buat({
   pesan: 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
 });
 
+// Proksi berkas eksternal. Titik ini PUBLIK tanpa token dan menyuruh peladen
+// mengunduh berkas sampai 60 MB atas perintah siapa pun — tanpa pembatas, ia
+// dapat dipakai sebagai proksi terbuka: pihak lain memakai pita dan alamat IP
+// peladen kita untuk mengambil berkas besar berulang kali, dan pada shared
+// hosting itu cukup untuk menghabiskan kuota.
+//
+// Angkanya dihitung dari pemakaian yang sah: satu permintaan untuk satu
+// dokumen yang dipratinjau. Empat puluh dokumen eksternal dalam seperempat jam
+// jauh melampaui yang mungkin dibaca seorang pengunjung, sekaligus menutup
+// pengambilan beruntun.
+const batasProksiBerkas = buat({
+  jendela: 15 * MENIT,
+  maksimum: 40,
+  pesan: 'Terlalu banyak permintaan pratinjau berkas. Silakan coba lagi nanti.',
+});
+
 module.exports = {
   batasLogin,
   batasOtp,
   batasVerifikasiOtp,
   batasPengunjung,
   batasCron,
+  batasProksiBerkas,
 };

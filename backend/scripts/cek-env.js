@@ -75,6 +75,13 @@ console.log('='.repeat(66));
 console.log(`  PEMERIKSAAN ENVIRONMENT — mode terbaca: ${NODE_ENV}`);
 console.log('='.repeat(66));
 
+// Versi pemuat dicetak paling awal supaya pertanyaan "paket di peladen ini
+// versi mana" terjawab sebelum apa pun dibaca. Baris ini baru ada sejak
+// 7 Agustus 2026; ketiadaannya pada keluaran di peladen berarti paket di sana
+// LEBIH LAMA daripada tanggal itu — jawaban yang pasti, bukan terkaan.
+console.log(`\n  Pemuat environment  : muatEnv versi ${muatEnv.versiPemuat}`);
+console.log(`  Urutan kemenangan   : ${muatEnv.urutanBerlaku}`);
+
 if (!isProduction) {
   console.log('\n  PERHATIAN: mode terbaca BUKAN production.');
   console.log('  Di peladen, ini berarti NODE_ENV belum dipasang dengan benar —');

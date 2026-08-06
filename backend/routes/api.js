@@ -28,16 +28,31 @@ const TautanMediaSosialController = require('../controllers/tautanMediaSosialCon
 // controller lain tanpa sekaligus mengubah nama berkasnya.
 const UrutanSectionBerandaController = require('../controllers/UrutanSectionBerandaController');
 const SearchController = require('../controllers/searchController');
+const LaporanCspController = require('../controllers/laporanCspController');
 const { getLinkPreview } = require('../controllers/previewController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 const CronController = require('../controllers/cronController');
 const penjagaCron = require('../middlewares/penjagaCron');
-const { batasLogin, batasOtp, batasVerifikasiOtp, batasPengunjung, batasCron } = require('../middlewares/pembatasLaju');
+const { batasLogin, batasOtp, batasVerifikasiOtp, batasPengunjung, batasCron, batasProksiBerkas } = require('../middlewares/pembatasLaju');
 
 router.get('/salam', (req, res) => {
     res.json({ pesan: "Halo dari Node.js Backend!" });
 });
+
+// ================= LAPORAN PELANGGARAN CSP =================
+// Parser tersendiri, BUKAN express.json bawaan aplikasi: peramban mengirim
+// laporan dengan Content-Type `application/csp-report` (atau
+// `application/reports+json`), dan parser umum di index.js hanya mengenali
+// `application/json` sehingga badannya tidak akan pernah terbaca.
+//
+// Batasnya sengaja kecil. Titik ini terbuka tanpa token karena pengirimnya
+// peramban pengunjung anonim — lihat alasannya di controllers/laporanCspController.js.
+const parserLaporanCsp = express.json({
+    type: ['application/csp-report', 'application/reports+json', 'application/json'],
+    limit: '20kb',
+});
+router.post('/laporan-csp', parserLaporanCsp, LaporanCspController.terima);
 
 // ================= GLOBAL SEARCH =================
 router.get('/search', SearchController.globalSearch);
@@ -199,7 +214,11 @@ router.post(
 router.get('/berkas/:base', UploadController.serveInline);
 
 // Proksi PRATINJAU dokumen dari URL eksternal (server sumber tak ber-CORS).
-// Publik — hanya menyajikan byte berkas dengan penjaga anti-SSRF di controller.
-router.get('/proksi-berkas', UploadController.serveProxyFile);
+// Publik — konten yang memakainya tampil di halaman pengunjung, sehingga
+// menuntut token akan mematikan pratinjau bagi pembaca biasa. Karena publik,
+// dua penjaga dipasang: penyaring alamat anti-SSRF di controller
+// (utils/penjagaSsrf.js) dan pembatas laju di sini, supaya titik ini tidak
+// dapat dipakai sebagai proksi terbuka.
+router.get('/proksi-berkas', batasProksiBerkas, UploadController.serveProxyFile);
 
 module.exports = router;

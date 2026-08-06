@@ -111,6 +111,61 @@ const namaDariBerkas = hasil.parsed ? Object.keys(hasil.parsed) : [];
 // tetap jujur saat jalan keluar darurat sedang dipakai.
 const ditimpaOlehBerkas = new Set();
 
+// ------------------------------------------------- jalan keluar darurat
+// Bendera boleh datang dari platform ATAU dari dalam berkas .env. Yang kedua
+// penting: keadaan yang melahirkan fitur ini justru panel yang tidak dapat
+// menyimpan perubahan, sehingga bendera mustahil dipasang dari sana.
+const bendera = String(
+  process.env.ENV_FILE_OVERRIDE ?? hasil.parsed?.ENV_FILE_OVERRIDE ?? ''
+)
+  .trim()
+  .toLowerCase();
+
+const penimpaanAktif = bendera === 'true' && Boolean(hasil.parsed);
+const ditolakMilikPlatform = [];
+
+// PENIMPAAN DIKERJAKAN LEBIH DULU, PELAPORANNYA MENYUSUL — dan urutan itu
+// disengaja. Sebelumnya keduanya terbalik, sehingga saat jalan keluar darurat
+// menyala log memuat dua baris yang tampak bertentangan: "Diabaikan karena
+// platform sudah menetapkannya (panel menang)" disusul "Variabel yang ditimpa"
+// yang menyebut variabel yang sama. Keduanya benar menurut urutan
+// pelaksanaannya, tetapi siapa pun yang membacanya saat mendiagnosis justru
+// disesatkan. Dengan menghitung hasil akhirnya lebih dulu, yang dicetak adalah
+// keadaan yang SUDAH selesai, bukan keadaan setengah jalan.
+if (penimpaanAktif) {
+  for (const [nama, nilai] of Object.entries(hasil.parsed)) {
+    if (MILIK_PLATFORM.includes(nama)) {
+      if (adaSebelumnya.has(nama)) ditolakMilikPlatform.push(nama);
+      continue;
+    }
+    if (adaSebelumnya.has(nama) && process.env[nama] !== nilai) {
+      process.env[nama] = nilai;
+      ditimpaOlehBerkas.add(nama);
+    }
+  }
+}
+
+// ------------------------------------------------- penanda versi pemuat
+//
+// SEBAB ADANYA BARIS INI. Pada 5 Agustus 2026 salinan kerja sudah memakai
+// `override: false` (panel menang), sementara peladen masih menjalankan paket
+// lama yang memakai `override: true`. Perbedaan itu HANYA dapat diduga dari
+// kata "MENIMPA" yang kebetulan muncul di Log Runtime — bukti yang rapuh,
+// sebab kata itu ikut hilang begitu keadaan berubah, dan diamnya log tidak
+// membedakan "versi baru" dari "versi lama yang kebetulan tidak menimpa".
+//
+// Penanda ini menukar dugaan dengan pernyataan: satu baris yang selalu ada,
+// menyebut versi pemuat beserta urutan kemenangan yang sedang berlaku. Bila
+// Log Runtime peladen tidak memuatnya sama sekali, paket di sana pasti lebih
+// lama daripada 7 Agustus 2026 — dan itu jawaban yang pasti, bukan terkaan.
+//
+// NAIKKAN ANGKANYA setiap kali aturan kemenangan nilai berubah.
+const VERSI_PEMUAT = 3;
+const URUTAN_BERLAKU = penimpaanAktif
+  ? 'BERKAS .env menimpa panel (ENV_FILE_OVERRIDE aktif — darurat)'
+  : 'PANEL menang atas berkas .env (override:false — bawaan)';
+console.log(`[env] muatEnv versi ${VERSI_PEMUAT} — urutan kemenangan: ${URUTAN_BERLAKU}.`);
+
 // ------------------------------------------------- keberadaan berkas .env
 // Keberadaan berkasnya dilaporkan tegas. Tanpa ini, ".env tidak terbaca" dan
 // ".env terbaca tetapi kosong" tampak sama persis dari luar.
@@ -118,7 +173,10 @@ if (!adaBerkasEnv) {
   console.log(`[env] Tidak ada berkas .env pada ${JALUR_ENV}. Seluruh nilai berasal dari pengelola environment.`);
 } else {
   const diisi = namaDariBerkas.filter((n) => !adaSebelumnya.has(n));
-  const dikalahkan = namaDariBerkas.filter((n) => adaSebelumnya.has(n));
+  // Yang benar-benar kalah adalah yang ditetapkan platform DAN tidak jadi
+  // ditimpa berkas. Tanpa pengurangan ini, daftarnya berdusta saat jalan
+  // keluar darurat menyala.
+  const dikalahkan = namaDariBerkas.filter((n) => adaSebelumnya.has(n) && !ditimpaOlehBerkas.has(n));
 
   console.log(`[env] Berkas .env ditemukan pada ${JALUR_ENV} (${namaDariBerkas.length} variabel).`);
   if (diisi.length) {
@@ -134,30 +192,9 @@ if (!adaBerkasEnv) {
   }
 }
 
-// ------------------------------------------------- jalan keluar darurat
-// Bendera boleh datang dari platform ATAU dari dalam berkas .env. Yang kedua
-// penting: keadaan yang melahirkan fitur ini justru panel yang tidak dapat
-// menyimpan perubahan, sehingga bendera mustahil dipasang dari sana.
-const bendera = String(
-  process.env.ENV_FILE_OVERRIDE ?? hasil.parsed?.ENV_FILE_OVERRIDE ?? ''
-)
-  .trim()
-  .toLowerCase();
-
-if (bendera === 'true' && hasil.parsed) {
-  for (const [nama, nilai] of Object.entries(hasil.parsed)) {
-    if (MILIK_PLATFORM.includes(nama)) {
-      if (adaSebelumnya.has(nama)) {
-        console.warn(
-          `[env] Berkas .env mencoba mengubah ${nama}, tetapi variabel itu milik platform. Diabaikan.`
-        );
-      }
-      continue;
-    }
-    if (adaSebelumnya.has(nama) && process.env[nama] !== nilai) {
-      process.env[nama] = nilai;
-      ditimpaOlehBerkas.add(nama);
-    }
+if (penimpaanAktif) {
+  for (const nama of ditolakMilikPlatform) {
+    console.warn(`[env] Berkas .env mencoba mengubah ${nama}, tetapi variabel itu milik platform. Diabaikan.`);
   }
 
   console.warn('[env] PERHATIAN: ENV_FILE_OVERRIDE aktif — berkas .env MENIMPA pengelola environment.');
@@ -337,6 +374,11 @@ if (adaBerkasEnv && String(process.env.NODE_ENV ?? '').trim().toLowerCase() === 
 module.exports = {
   // Hasil mentah dotenv, dipertahankan bila kelak ada yang memerlukannya.
   hasil,
+  // Dibaca scripts/cek-env.js supaya jawaban "versi mana yang berjalan di
+  // peladen" tersedia pula lewat perintah, bukan hanya lewat log boot.
+  versiPemuat: VERSI_PEMUAT,
+  urutanBerlaku: URUTAN_BERLAKU,
+  penimpaanAktif,
   jalurEnv: JALUR_ENV,
   adaBerkasEnv,
   namaDariBerkas,
