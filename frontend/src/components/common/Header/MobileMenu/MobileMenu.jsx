@@ -20,7 +20,13 @@ const MobileMenuItem = ({ item, onItemClick, isOpen, onToggleSubmenu }) => {
         </a>
         <div className="mobile-submenu">
           {item.submenu.map((subItem, index) => (
-            <Link key={index} to={subItem.path} className="mobile-submenu-link" onClick={onItemClick}>
+            <Link 
+              key={index} 
+              to={subItem.path} 
+              className="mobile-submenu-link" 
+              onClick={onItemClick}
+              style={{ '--i': index }}
+            >
               <i className="fa-solid fa-circle fa-2xs"></i> {subItem.title}
             </Link>
           ))}

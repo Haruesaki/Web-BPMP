@@ -21,6 +21,8 @@
     border-radius: 20px;
     /* max-width: 1300px; */
     min-width: 300px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
 }
 
 .default-content {
@@ -62,7 +64,7 @@
 }
 
 .default-banner-title {
-    font-size: clamp(0.5rem, 1vw + 0.9rem, 1.9rem);
+    font-size: clamp(0.3rem, 0.8vw + 0.9rem, 1.9rem);
     font-weight: 700;
     line-height: 1.25;
     margin: 0;
@@ -71,7 +73,7 @@
 }
 
 .post-date {
-    font-size: clamp(0.68rem, 1.2vw, 1rem);
+    font-size: clamp(0.55rem, 2.2vw, 1rem);
     font-weight: 400;
     color: #d1d5db;
     margin: 8px 0 0 0;
@@ -101,6 +103,8 @@
     overflow-wrap: anywhere;
     word-break: break-word;
     overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .default-description-container p {
@@ -140,7 +144,7 @@
     }
 
     .content-type-section {
-        padding: 20px 10px;
+        padding: 6px 5px;
         min-width: 0;
     }
 
@@ -160,12 +164,17 @@
     }
 
     .default-banner-wrapper {
-        padding: 18px 10px;
+        padding: 15px 18px;
+    }
+
+    .default-banner-wrapper::before {
+        width: clamp(250px, 300%, 1500px);
+        filter: blur(50px);
+        animation: lightswap 10s infinite linear;
     }
 
     .default-description-container {
         padding: 5px 8px;
-        font-size: 0.9375rem;
     }
 
     .default-description-container p {
@@ -785,12 +794,12 @@
     /* 9.1. PENSKALAAN DINAMIS UNTUK TEKS DEFAULT (PARAGRAF BIASA) */
     /* Aturan default mobile (untuk layout vertikal murni & detail berita) */
     .default-description-container {
-        font-size: clamp(0.55rem, 2.5vw, 1rem) !important;
+        font-size: clamp(0.55rem, 0.8vw + 0.5rem, 1rem) !important;
     }
 
     /* Aturan khusus mobile jika asalnya adalah layout horizontal yang di-warp */
     .default-content-wrapper.layout-horizontal .default-description-container {
-        font-size: clamp(0.55rem, 2.5vw, 0.95rem) !important;
+        font-size: clamp(0.55rem, 0.8vw + 0.5rem, 0.95rem) !important;
     }
 
     /* 9.2. PENSKALAAN DINAMIS UNTUK TEKS KUSTOM DENGAN UKURAN DARI EDITOR (--fs-val) */

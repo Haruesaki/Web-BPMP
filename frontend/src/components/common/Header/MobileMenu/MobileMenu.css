@@ -139,7 +139,20 @@
   text-decoration: none;
   font-size: clamp(0.4rem, 2vw, 0.75rem); /* Responsive font size */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.2s ease;
+  opacity: 0;
+  transform: translateX(-20px);
+  /* Transisi keluar ketika menu ditutup (slide ke kiri secara berurutan) */
+  transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
+              transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
+              background-color 0.2s ease;
+  transition-delay: calc(var(--i) * 0.02s);
+  will-change: transform, opacity;
+}
+
+.submenu-open .mobile-submenu-link {
+  animation: slideInSubmenuItem 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: calc(var(--i) * 0.05s);
+  transition-delay: 0s; /* Hilangkan transition-delay saat sedang terbuka */
 }
 
 .mobile-submenu-link i {
@@ -150,6 +163,17 @@
 
 .mobile-submenu-link:hover {
   background-color: rgba(var(--theme-highlight-rgb, 91, 95, 232), 0.2);
+}
+
+@keyframes slideInSubmenuItem {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 
