@@ -414,3 +414,22 @@
     .pd-thumb-progres-isi { transition: none; }
     .pd-thumb-progres-isi--takterukur { animation: none; }
 }
+
+/* =========================================================================
+   RESPONSIVITAS UKURAN FONT DINAMIS (DARI EDITOR)
+   ========================================================================= */
+/* Default: Jika ada custom variable --fs, gunakan di dalam editor */
+.ckeditor-container .ck-content [style*="--fs"] {
+    font-size: var(--fs) !important;
+}
+
+@media (max-width: 768px) {
+    /* Pada layar kecil, buat font editor ber-variabel --fs menyusut secara fluid menggunakan clamp() antara 80% hingga 100% */
+    .ckeditor-container .ck-content [style*="--fs"] {
+        font-size: clamp(calc(var(--fs) * 0.8), calc(var(--fs) * 0.8 + 0.8vw), var(--fs)) !important;
+    }
+    /* Kecilkan juga basis font default editor agar responsif */
+    .ckeditor-container .pd-editor .ck-content {
+        font-size: 14px;
+    }
+}

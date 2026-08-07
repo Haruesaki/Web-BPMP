@@ -1,110 +1,103 @@
-/* Base styling for all content type sections */
+/* =========================================================================
+   1. ROOT VARIABLES
+   ========================================================================= */
+:root {
+    --font-scale-horizontal: clamp(0.6px, 0.0775vw, 1px);
+    --font-scale-mobile-warped: clamp(0.04rem, 0.13vw, 0.065rem);
+    --font-scale-mobile-vertical: clamp(0.1rem, 100vw, 2rem);
+}
+
+/* =========================================================================
+   2. CONTENT SECTION BASE STYLING
+   ========================================================================= */
 .content-type-section {
     position: relative;
     margin: 0 auto;
-    width: 100%;; /* Batasi lebar agar tidak terlalu lebar di layar besar */
+    width: 100%;
     color: #333;
-    font-family: 'Roboto', sans-serif; /* Contoh font */
+    font-family: 'Roboto', sans-serif;
     line-height: 1.6;
     background-color: #232F72;
     border-radius: 20px;
-    max-width: 1300px;
-    /* min-width dipindah dari inline style JSX ke sini (menjaga tampilan
-       desktop: kartu tidak menyempit berlebihan saat row-wrap). Di mobile
-       nilai ini di-nol-kan agar kartu tidak dipaksa melebihi lebar layar. */
+    /* max-width: 1300px; */
     min-width: 300px;
 }
 
-/* --- Default Content Styling --- */
 .default-content {
     text-align: left;
-    /* Ruang atas sudah diberi .generic-page-container (padding-top 100px) +
-       wrapper flex (padding 40px), jadi margin-top di sini tidak perlu lagi
-       agar jarak ke navbar normal (tidak dobel). */
     margin-top: 0;
 }
 
 @keyframes lightswap {
-    0% {
-        transform: translateX(-100%) rotate(45deg);
-    }
-    100% {
-        transform: translateX(100%) rotate(45deg);
-    }
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
 }
 
 .default-banner-wrapper {
     position: relative;
-    background-color: rgba(6, 21, 60, 0.5); /* Warna biru contoh dengan transparansi */
+    background-color: rgba(6, 21, 60, 0.5);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 22px 50px; /* padding atas-bawah dikecilkan agar pas dengan judul */
-    /* Hanya sudut atas yang membulat; sudut bawah rata agar menyatu dengan
-       kontainer konten di bawahnya (tanpa kesan kartu terpisah/berlipat). */
+    padding: 20px 30px;
     border-radius: 15px 15px 0 0;
     z-index: 2;
     overflow: hidden;
-
 }
 
 .default-banner-wrapper::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 75%; /* Adjust to start off-screen to the right when translateX(100%) is applied */
-    width: 200%; /* Make it wider to cover the entire swipe area */
+    left: 75%;
+    width: 200%;
     height: 100%;
-    background: linear-gradient(to right, 
-    transparent, 
-    rgba(255, 255, 255, 0.589) 50%, transparent); /* Light stripe */
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.589) 50%, transparent);
     opacity: 0.8;
-    z-index: 3; /* Ensure it's above the banner content */
+    z-index: 3;
     pointer-events: none;
     filter: blur(90px);
     animation: lightswap 10s infinite linear;
 }
 
 .default-banner-title {
-    font-size: 1.9rem;
+    font-size: clamp(0.5rem, 1vw + 0.9rem, 1.9rem);
     font-weight: 700;
-    line-height: 1.25; /* judul multi-baris tidak terlalu renggang */
+    line-height: 1.25;
     margin: 0;
-    /* Pecah kata super panjang tanpa spasi agar judul tidak meluber. */
     overflow-wrap: anywhere;
     word-break: break-word;
 }
 
 .post-date {
-    font-size: 0.9rem;
+    font-size: clamp(0.68rem, 1.2vw, 1rem);
     font-weight: 400;
-    color: #d1d5db; /* Warna abu-abu terang agar kontras dengan latar belakang */
-    margin: 8px 0 0 0; /* Jarak atas dari judul, tanpa margin bawah */
+    color: #d1d5db;
+    margin: 8px 0 0 0;
     line-height: 1.4;
     display: flex;
     align-items: center;
 }
 
+.post-date i {
+    font-size: inherit !important;
+}
+
 .default-description-container {
     position: relative;
     z-index: 1;
-    /* top:-15px sebelumnya menarik kontainer ke atas → menyisakan "lip" 15px di
-       bagian bawah kartu (efek berlipat). Dibuat 0 agar konten menempel rata di
-       bawah banner sekaligus mengisi penuh sampai dasar kartu. */
     top: 0;
     color: white;
-    background-color: rgba(35, 47, 114, 0.7); /* Warna biru dengan transparansi */
+    background-color: rgba(35, 47, 114, 0.7);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    border: 3px solid rgba(255, 255, 255, 0.188);
-    border-top: none; /* menyatu dengan banner di atasnya */
-    padding: 50px 35px;
+    border: 1px solid rgba(255, 255, 255, 0.188);
+    border-top: none;
+    padding: 5px 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
-    /* Pecah kata/URL super panjang tanpa spasi agar teks tidak meluber keluar
-       wadah, dan sembunyikan sisa luapan sebagai pengaman. */
     overflow-wrap: anywhere;
     word-break: break-word;
     overflow: hidden;
@@ -133,80 +126,53 @@
     margin-bottom: 0.5em;
 }
 
-/* Responsiveness for smaller screens */
+/* =========================================================================
+   3. MOBILE LAYOUT RESPONSIVENESS (<= 768px)
+   ========================================================================= */
 @media (max-width: 768px) {
-    /* Paksa layout Horizontal (row-wrap, kartu flex-basis 45%) menjadi SATU
-       kolom di mobile. Tanpa ini jumlah kartu per baris tidak konsisten (1↔2)
-       tergantung kebetulan min-width vs lebar wadah saat layar mengecil.
-       flex-direction wrapper diset via var(--flex-direction) di stylesheet (bukan
-       inline), jadi bisa ditimpa di sini tanpa !important. Kartu lalu tampil
-       satu per baris (penuh lebar), sisanya digulir ke bawah. Layout Vertikal
-       sudah column, jadi tidak terpengaruh.
-       Selektor sengaja 2-level (.default-layout-wrapper .default-content-wrapper)
-       agar spesifisitasnya melebihi aturan dasar .default-content-wrapper yang
-       berada di bawah file — tanpa ini urutan sumber membuat aturan dasar menang. */
-    .default-layout-wrapper .default-content-wrapper {
+    .default-layout-wrapper .default-content-wrapper.layout-vertical {
         flex-direction: column;
         flex-wrap: nowrap;
     }
 
+    .default-layout-wrapper .default-content-wrapper.layout-horizontal {
+        grid-template-columns: 1fr;
+    }
+
     .content-type-section {
         padding: 20px 10px;
-        /* Lepaskan min-width 300px di mobile: pada layar sempit ia memaksa
-           kartu lebih lebar dari wadahnya sehingga meluber & tidak center. */
         min-width: 0;
     }
 
-    /* Ukuran font dikecilkan khusus mobile (patokan: judul post ~19px, judul
-       halaman ~22px, tanggal ~13px, isi/body ~15px — masih nyaman dibaca). */
-    .default-banner-title {
-        font-size: 1.2rem; /* ~24px → ~19px */
-    }
 
-    .post-date {
-        font-size: 0.8rem; /* ~14.4px → ~12.8px */
-    }
-
-    /* Kurangi padding wrapper yang menumpuk dengan padding .generic-page-container
-       (jika ada) agar kolom konten tidak menyusut jadi terlalu sempit. */
     .default-layout-wrapper {
-        padding: 1.5rem 0.5rem;
+        padding: 5px 0px !important;
     }
 
     .page-content-header {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
+        margin-bottom: 25px !important;
+        padding-bottom: 5px !important;
     }
 
-    /* Selektor 2-level agar menang atas aturan dasar .page-content-header h1
-       (clamp 28–38px) yang berada di bawah file — spesifisitas, bukan urutan. */
     .default-layout-wrapper .page-content-header h1 {
-        font-size: 1.375rem; /* ~28px → ~22px */
+        font-size: clamp(1.1rem, 3.7vw, 2.5rem) !important;
+        margin-left: 0.5rem;
     }
 
-    /* Padding banner & isi dikecilkan agar area baca lebih lega di HP. */
     .default-banner-wrapper {
-        padding: 18px 20px;
+        padding: 18px 10px;
     }
 
     .default-description-container {
-        padding: 24px 18px;
-        /* Kecilkan basis font isi konten di mobile → 15px. Karena banyak elemen
-           di dalamnya (p, li, article-*) memakai satuan em, mengubah basis di
-           sini otomatis menskala seluruh isi secara proporsional. */
-        font-size: 0.9375rem; /* 15px */
+        padding: 5px 8px;
+        font-size: 0.9375rem;
     }
 
-    /* justify sering menyisakan spasi "belang" di kolom sempit → rata kiri.
-       font-size 1em = mengikuti basis container (15px) di atas. */
     .default-description-container p {
         font-size: 1em;
         text-align: left;
     }
 
-    /* Tabel dari CKEditor sering lebih lebar dari layar. Di dalam wadah
-       ber-overflow:hidden, kolom yang meluber jadi terpotong & tak terjangkau.
-       Buat tabel bisa digulir horizontal sendiri di mobile. */
     .default-description-container table {
         display: block;
         max-width: 100%;
@@ -214,10 +180,6 @@
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Di HP, SEMUA gambar konten mengisi lebar penuh seperti cover berita (SS1),
-       melepas batas max-width/aspect-ratio varian square/portrait yang di layar
-       sempit membuat gambar tampak kecil & terpusat dengan ruang kosong.
-       Hanya berlaku di mobile — tampilan desktop tidak berubah. */
     .default-description-container .image-frame,
     .default-description-container .image-frame--square,
     .default-description-container .image-frame--portrait {
@@ -231,16 +193,16 @@
     }
 }
 
-/* ---- WADAH GAMBAR ADAPTIF (kelas rasio dipilih via JS di DefaultContent.jsx) ----
-   Base: gaya bersama. Ukuran/rasio spesifik ada di varian --landscape/--square/
-   --portrait. Gambar kecil sengaja DIPAKSA memenuhi wadah (boleh ter-upscale). */
+/* =========================================================================
+   4. ADAPTIVE CONTENT IMAGE FRAMES
+   ========================================================================= */
 .default-description-container .image-frame {
     width: 100%;
-    overflow: hidden; /* memotong kelebihan object-fit: cover */
+    overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     display: block;
-    margin-left: auto;   /* pusatkan bila lebih sempit dari max-width */
+    margin-left: auto;
     margin-right: auto;
     position: relative;
 }
@@ -252,8 +214,6 @@
     object-fit: cover;
 }
 
-/* Landscape → penuh lebar konten induk; tinggi mengikuti rasio tapi dibatasi
-   500px (kelebihan di-crop lewat object-fit: cover). */
 .default-description-container .image-frame--landscape {
     max-width: none;
 }
@@ -262,13 +222,11 @@
     max-height: 500px;
 }
 
-/* Kotak → 500×500 (menyusut proporsional di layar sempit). */
 .default-description-container .image-frame--square {
     max-width: 500px;
     aspect-ratio: 1 / 1;
 }
 
-/* Portrait → box portrait, tinggi maks 500px; kelebihan di-crop (cover). */
 .default-description-container .image-frame--portrait {
     max-width: 400px;
     aspect-ratio: 4 / 5;
@@ -276,10 +234,7 @@
 }
 
 /* =========================================================================
-   GAYA STYLE KONTEN (dari dropdown "Styles" editor admin)
-   Setara dengan definisi di PostDefault.css agar konten yang diberi style di
-   editor tampil sama di halaman user. Warna solid supaya terbaca di atas
-   latar gelap kontainer ini.
+   5. EDITOR STYLES PARITY (CKEDITOR DROPDOWN)
    ========================================================================= */
 .default-description-container .article-italic-title {
     font-size: 1.7em;
@@ -357,7 +312,7 @@
 }
 
 /* =========================================================================
-   MEDIA EMBED (hasil tombol "Media Embed" di editor: Instagram/YouTube/Vimeo)
+   6. MEDIA EMBED STYLING
    ========================================================================= */
 .media-embed {
     margin: 24px 0;
@@ -366,7 +321,6 @@
     width: 100%;
 }
 
-/* Instagram: lebar kartu khas IG, tinggi tetap agar tidak terlalu panjang. */
 .media-embed-ig iframe {
     width: 100%;
     max-width: 540px;
@@ -376,7 +330,6 @@
     border-radius: 10px;
 }
 
-/* Video (YouTube/Vimeo): responsif 16:9. */
 .media-embed-video {
     max-width: 720px;
 }
@@ -389,7 +342,6 @@
     display: block;
 }
 
-/* Provider tak dikenali → tautan biasa (tetap terbaca di latar gelap). */
 .media-embed-fallback a {
     color: #9db2ff;
     font-weight: 600;
@@ -397,7 +349,7 @@
 }
 
 /* =========================================================================
-   PREVIEW DOKUMEN (hasil tombol "Sisipkan Dokumen" di editor)
+   7. DOCUMENT VIEWER STYLING
    ========================================================================= */
 .doc-embed {
     margin: 24px 0;
@@ -406,7 +358,6 @@
 /* Gaya pratinjau dokumen (.docv*) TIDAK lagi di sini — pindah ke
    DocumentViewer.css yang diimpor komponennya sendiri, sebab viewer itu kini
    juga dipakai di dalam editor admin yang tidak memuat berkas ini. */
-
 
 .doc-embed-open {
     display: inline-flex;
@@ -422,7 +373,6 @@
     text-decoration: underline;
 }
 
-/* Non-PDF: kartu unduh */
 .doc-embed-card {
     display: flex;
     align-items: center;
@@ -456,7 +406,7 @@
 }
 
 /* =========================================================================
-   IMAGE GALLERY GRID (For consecutive images)
+   8. IMAGE GALLERY GRID STYLE
    ========================================================================= */
 .image-gallery-grid {
     display: grid;
@@ -476,19 +426,17 @@
 @media (max-width: 768px) {
     .image-gallery-grid.cols-2,
     .image-gallery-grid.cols-3 {
-        grid-template-columns: 1fr; /* Stack vertically on mobile */
+        grid-template-columns: 1fr;
     }
 }
 
-/* Wrapper for the entire default content page layout */
 .default-layout-wrapper {
-  max-width: 1600px;
+  max-width: 1500px;
+  padding: 3rem 0;
   margin: 0 auto;
   width: 100%;
-  /* padding: 4rem 2rem; */
 }
 
-/* Styling for the page title header, consistent with ProfileLayout */
 .page-content-header {
   margin-bottom: 3rem;
   padding-bottom: 1.5rem;
@@ -503,40 +451,28 @@
   letter-spacing: 0.5px;
 }
 
-/* Wrapper for the flexbox content */
 .default-content-wrapper {
-  display: flex;
-  flex-direction: var(--flex-direction, column);
-  flex-wrap: var(--flex-wrap, nowrap);
-  gap: 40px;
   width: 100%;
-  justify-content: center;
+}
+
+.default-content-wrapper.layout-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.default-content-wrapper.layout-horizontal {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
 }
 
 .image-gallery-grid figure.image {
-    margin: 0; /* Override default figure margin */
+    margin: 0;
     width: 100%;
     height: 100%;
 }
 
-/* Bentuk sel DIPATOK, tidak mengikuti rasio gambar aslinya.
- *
- * Sebabnya: satu baris grid dapat memuat gambar lanskap dan potret sekaligus.
- * Bila tiap sel mengikuti rasio isinya, tinggi barisnya ditentukan gambar yang
- * paling jangkung — dan gambar potret sangat jangkung. Dua gambar 577x1280
- * bersanding pada lebar konten 800px akan menghasilkan baris setinggi hampir
- * 900 piksel, yang justru mengalahkan tujuan menjajarkannya.
- *
- * Rasio 4/3 dipilih sebagai jalan tengah: gambar lanskap (lazimnya 3/2) hanya
- * terpotong tipis, sementara gambar potret dipotong tegas menjadi seragam.
- * Pemotongan dikerjakan `object-fit: cover` di bawah, yang memangkas dari kedua
- * sisi sehingga bagian tengah gambar — tempat pokoknya lazim berada — tetap
- * terlihat. Ganti ke 1/1 bila galeri berbentuk kotak lebih disukai, atau 3/2
- * bila pemotongan gambar potret terasa terlalu banyak.
- *
- * `max-height` sengaja dinolkan: varian --portrait memasang batas 500px yang,
- * bila dibiarkan, akan memangkas tinggi sel dan merusak keseragaman baris.
- */
 .image-gallery-grid .image-frame {
     margin: 0;
     width: 100%;
@@ -553,18 +489,43 @@
     border-radius: 8px;
 }
 
-/* ---------------------------------------------------------------------------
-   PERBAIKAN LEBAR KARTU KONTEN DI MOBILE — disamakan dengan halaman BeritaDetail.
-   Kartu DefaultContent tampak lebih sempit karena .default-layout-wrapper masih
-   memakai padding samping desktop (2rem) di HP: override mobile di blok @media
-   atas (≈ baris 152) TERKLOBER oleh deklarasi DASAR .default-layout-wrapper yang
-   berada SETELAHNYA (spesifisitas sama → urutan sumber menang). Rule ini sengaja
-   diletakkan PALING AKHIR agar menang, menghapus padding samping wrapper di HP
-   sehingga lebar kartu hanya dibatasi .generic-page-container — persis seperti
-   BeritaDetail yang tidak memakai wrapper ini.
---------------------------------------------------------------------------- */
+/* =========================================================================
+   9. FLUID FONT SCALING RESPONSIVENESS
+   ========================================================================= */
+.ck-content-root [style*="--fs"] {
+    font-size: var(--fs) !important;
+}
+
 @media (max-width: 768px) {
-    .default-layout-wrapper {
-        padding: 1.5rem 0;
+    /* 9.1. PENSKALAAN DINAMIS UNTUK TEKS DEFAULT (PARAGRAF BIASA) */
+    /* Aturan default mobile (untuk layout vertikal murni & detail berita) */
+    .default-description-container {
+        font-size: clamp(0.7rem, 0.8vw + 0.5rem, 1rem) !important;
+    }
+
+    /* Aturan khusus mobile jika asalnya adalah layout horizontal yang di-warp */
+    .default-content-wrapper.layout-horizontal .default-description-container {
+        font-size: clamp(0.7rem, 0.8vw + 0.5rem, 0.95rem) !important;
+    }
+
+    /* 9.2. PENSKALAAN DINAMIS UNTUK TEKS KUSTOM DENGAN UKURAN DARI EDITOR (--fs-val) */
+    /* Layout default mobile fallback (vertikal murni & detail berita) */
+    .default-description-container .ck-content-root [style*="--fs-val"] {
+        font-size: calc(var(--fs-val) * var(--font-scale-mobile-vertical)) !important;
+    }
+
+    /* Layout khusus mobile override (asal layout horizontal yang di-warp) */
+    .default-content-wrapper.layout-horizontal .default-description-container .ck-content-root [style*="--fs-val"] {
+        font-size: calc(var(--fs-val) * var(--font-scale-mobile-warped)) !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1290px) {
+    .default-content-wrapper.layout-horizontal .default-description-container {
+        font-size: clamp(0.8rem, 0.5vw + 0.5rem, 1.1rem) !important;
+    }
+
+    .layout-horizontal .ck-content-root [style*="--fs-val"] {
+        font-size: calc(var(--fs-val) * var(--font-scale-horizontal)) !important;
     }
 }
