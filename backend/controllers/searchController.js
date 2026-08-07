@@ -57,12 +57,17 @@ const getMenuPath = (menu, menuMap) => {
 class SearchController {
   static async globalSearch(req, res) {
     try {
-      const { q } = req.query;
+      let { q } = req.query;
       if (!q || q.trim().length === 0) {
         return res.json({ success: true, data: [] });
       }
 
-      const keyword = `%${q.trim().toLowerCase()}%`;
+      // Pertahanan Layer 1: Batasi panjang input maksimal 100 karakter untuk mencegah serangan DoS kueri panjang
+      const queryCleaned = q.trim().slice(0, 100);
+
+      // Pertahanan Layer 2: Loloskan karakter khusus SQL LIKE (%, _, \) untuk mencegah eksploitasi wildcard
+      const sanitizedQ = queryCleaned.replace(/[%_\\]/g, '\\$&');
+      const keyword = `%${sanitizedQ.toLowerCase()}%`;
       const results = [];
 
       // OPTIMASI: Ambil semua menu sekali saja, hindari N+1 query
@@ -93,7 +98,12 @@ class SearchController {
 
       // 2. Cari di halaman_konten
       const halamanKonten = await db('halaman_konten')
-        .whereRaw('LOWER(halaman_konten.judul) LIKE ? OR LOWER(halaman_konten.deskripsi_kaya) LIKE ?', [keyword, keyword])
+        .where(function() {
+          this.whereRaw('LOWER(halaman_konten.judul) LIKE ?', [keyword])
+              .orWhereRaw('LOWER(halaman_konten.deskripsi_kaya) LIKE ?', [keyword]);
+        })
+        // Catatan: Tidak memfilter status 'terbit' pada halaman_konten karena API publik /api/halaman-konten
+        // juga menyajikan semua halaman di bawah menu aktif tanpa memandang statusnya di database.
         .select('judul', 'menu_id');
 
       for (let hk of halamanKonten) {
@@ -109,8 +119,12 @@ class SearchController {
 
       // 3. Cari di berita
       const beritaList = await db('berita')
-        .whereRaw('LOWER(berita.judul) LIKE ? OR LOWER(berita.deskripsi_kaya) LIKE ?', [keyword, keyword])
-        .select('judul', 'menu_id');
+        .where(function() {
+          this.whereRaw('LOWER(berita.judul) LIKE ?', [keyword])
+              .orWhereRaw('LOWER(berita.deskripsi_kaya) LIKE ?', [keyword]);
+        })
+        .andWhere('berita.status', 'terbit') // Berita memiliki filter status rilis aktif di CMS
+        .select('id', 'judul', 'menu_id'); // Menyeleksi kolom 'id' berita untuk merakit URL detail yang sah
 
       for (let b of beritaList) {
         if (!menuDapatDijangkau(b.menu_id, menuMap)) continue;
@@ -118,7 +132,7 @@ class SearchController {
         results.push({
           title: b.judul,
           type: 'Berita',
-          path: `/halaman/${b.menu_id}`,
+          path: `/berita/berita-${b.id}`, // Mengarahkan ke rute artikel detail berita yang benar
           ...location,
         });
       }
@@ -143,9 +157,8 @@ class SearchController {
       const uniqueResults = [];
       const seen = new Set();
       for (const res of results) {
-        // Jika path adalah '#' (Dropdown Menu), bedakan berdasarkan judulnya.
-        // Jika path adalah URL spesifik (misal /halaman/5), jadikan path tersebut sebagai kunci tunggal.
-        const key = res.path === '#' ? `#-${res.title}` : res.path;
+        // Gabungkan path, title, dan type sebagai kunci unik agar Menu, Halaman Konten, dan Pegawai yang memiliki rute sama tidak saling bertabrakan
+        const key = res.path === '#' ? `#-${res.title}` : `${res.path}-${res.title}-${res.type}`;
         
         if (!seen.has(key)) {
           seen.add(key);

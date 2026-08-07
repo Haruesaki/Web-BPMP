@@ -86,10 +86,9 @@ const NewsCardContent = ({ menuId, viewLayout }) => {
           ? new Date(sumberTanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
           : '';
         
-        // Ekstrak text polos dari HTML untuk excerpt
-        const tmp = document.createElement('div');
-        tmp.innerHTML = b.deskripsi_kaya || '';
-        let excerpt = tmp.textContent || tmp.innerText || '';
+        // Ekstrak text polos dari HTML untuk excerpt secara aman tanpa memicu rendering DOM memori
+        const plainText = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
+        let excerpt = plainText;
         if (excerpt.length > 100) excerpt = excerpt.substring(0, 100) + '...';
 
         return (

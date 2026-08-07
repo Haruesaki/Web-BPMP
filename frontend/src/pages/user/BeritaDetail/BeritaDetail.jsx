@@ -4,6 +4,7 @@ import axiosInstance from "../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "../../../components/user/content-types/Default/DocumentViewer";
 import { kelompokkanGambarBerurutan } from "../../../utils/kelompokGambar";
+import { sanitizeHTML } from "../../../utils/sanitizeHtml";
 import "../../../components/user/content-types/Default/DefaultContent.css"; 
 import "./BeritaDetail.css";
 
@@ -247,7 +248,8 @@ const BeritaDetail = ({ lenisRef }) => {
   }
 
   // Lakukan parsing dan integrasi logika grouping gambar seperti di DefaultContent
-  const wrappedHtml = `<div class="ck-content-root">${newsDetail.konten || ''}</div>`;
+  const sanitized = sanitizeHTML(newsDetail.konten || '');
+  const wrappedHtml = `<div class="ck-content-root">${sanitized}</div>`;
   const parsedContent = parse(wrappedHtml, {
     replace: (node) => {
       // Gambar yang bersebelahan tanpa teks di antaranya dijajarkan mendatar,

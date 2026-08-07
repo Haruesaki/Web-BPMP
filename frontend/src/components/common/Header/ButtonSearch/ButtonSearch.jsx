@@ -67,10 +67,11 @@ const ButtonSearch = () => {
         const filteredResults = backendResults.filter(result => {
           // Abaikan HANYA jika item tersebut adalah Menu Induk Utama (induk_id null/falsy)
           const isMainMenu = result.type === 'Menu' && !result.induk_id;
+          if (isMainMenu) return false;
           
-          return !isMainMenu &&
-            result.title &&
-            result.title.toLowerCase().includes(searchQuery.toLowerCase());
+          // Memastikan pencarian berdasarkan judul aman dari nilai NULL di database
+          const titleSafe = result.title || '';
+          return titleSafe.toLowerCase().includes(searchQuery.toLowerCase());
         });
         
         setSearchResults(filteredResults);
@@ -111,7 +112,7 @@ const ButtonSearch = () => {
     if (!highlight.trim() || !text) {
       return text || '';
     }
-    const escapedHighlight = highlight.replace(/[-\/\^$*+?.()|[\]{}]/g, '\$&');
+    const escapedHighlight = highlight.replace(/[-\/\^$*+?.()|[\]{}]/g, '\\$&');
     const parts = text.split(new RegExp(`(${escapedHighlight})`, 'gi'));
     return (
       <>
@@ -135,6 +136,11 @@ const ButtonSearch = () => {
           type="text"
           className="search-input"
           placeholder="Cari informasi..."
+          maxLength={100} // Pengaman UI: Batasi panjang kueri untuk mencegah browser hang/lagging
+          autoComplete="off" // Pengaman Privasi: Mencegah kebocoran riwayat pencarian di komputer publik
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
           ref={searchInputRef}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

@@ -5,6 +5,7 @@ import axiosInstance from "../../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "./DocumentViewer";
 import { kelompokkanGambarBerurutan } from "../../../../utils/kelompokGambar";
+import { sanitizeHTML } from "../../../../utils/sanitizeHtml";
 
 // ==========================================
 // IMAGE RATIO & FRAME HELPERS
@@ -258,7 +259,8 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
       )}
       <div className={`default-content-wrapper ${isVertical ? 'layout-vertical' : 'layout-horizontal'}`}>
         {content.map(c => {
-          const wrappedHtml = `<div class="ck-content-root">${c.deskripsi_kaya || ''}</div>`;
+          const sanitized = sanitizeHTML(c.deskripsi_kaya || '');
+          const wrappedHtml = `<div class="ck-content-root">${sanitized}</div>`;
           const parsedContent = parse(wrappedHtml, {
             replace: (node) => {
               if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
