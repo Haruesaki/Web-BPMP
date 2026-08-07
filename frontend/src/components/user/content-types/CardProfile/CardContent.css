@@ -3,7 +3,7 @@
   font-size: 9.5px;
   width: 34em;
   height: 43em;
-  background: rgb(6, 2, 63) ;
+  background: var(--theme-bg-deep, #06023f) ;
   border-radius: 3.4em;
   position: relative;
   overflow: hidden;
@@ -44,7 +44,7 @@
   height: 100%;
   
   /* Gradien linier vertikal (bawah gelap ke atas sedikit terang) */
-  background: linear-gradient(to top, #06023f 60%, #0d0761 100%); 
+  background: linear-gradient(to top, var(--theme-bg-deep, #06023f) 60%, var(--theme-secondary, #0d0761) 100%);
   
   z-index: 1;
   display: flex;

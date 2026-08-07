@@ -17,7 +17,7 @@
     color: #333;
     font-family: 'Roboto', sans-serif;
     line-height: 1.6;
-    background-color: #232F72;
+    background-color: var(--theme-accent, #232F72);
     border-radius: 20px;
     /* max-width: 1300px; */
     min-width: 300px;
@@ -37,7 +37,7 @@
 
 .default-banner-wrapper {
     position: relative;
-    background-color: rgba(6, 21, 60, 0.5);
+    background-color: rgba(var(--theme-highlight-deep-rgb, 6, 21, 60), 0.5);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -91,7 +91,7 @@
     z-index: 1;
     top: 0;
     color: white;
-    background-color: rgba(35, 47, 114, 0.7);
+    background-color: rgba(var(--theme-accent-rgb, 35, 47, 114), 0.7);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.188);
