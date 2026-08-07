@@ -3,37 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 import parse from "html-react-parser";
 import DocumentViewer from "../../../components/user/content-types/Default/DocumentViewer";
+import GambarKonten from "../../../components/user/content-types/Default/GambarKonten";
 import { kelompokkanGambarBerurutan } from "../../../utils/kelompokGambar";
-import "../../../components/user/content-types/Default/DefaultContent.css"; 
+import { autoPotongDinyalakan } from "../../../utils/rasioGambar";
+import { siapkanTabelKonten } from "../../../utils/tabelKonten";
+import "../../../components/user/content-types/Default/DefaultContent.css";
 import "./BeritaDetail.css";
-
-const classifyRatio = (w, h) => {
-  if (!w || !h) return "image-frame--landscape";
-  const r = w / h;
-  if (r > 1.15) return "image-frame--landscape";
-  if (r < 0.85) return "image-frame--portrait";
-  return "image-frame--square";
-};
-
-const ContentImage = ({ imgProps }) => {
-  const [variant, setVariant] = useState("image-frame--landscape");
-  const apply = (img) => {
-    if (img && img.naturalWidth) {
-      setVariant(classifyRatio(img.naturalWidth, img.naturalHeight));
-    }
-  };
-  return (
-    <div className={`image-frame ${variant}`}>
-      <img
-        {...imgProps}
-        onLoad={(e) => apply(e.currentTarget)}
-        ref={(el) => {
-          if (el && el.complete) apply(el);
-        }}
-      />
-    </div>
-  );
-};
 
 const BeritaDetail = ({ lenisRef }) => {
   const { id } = useParams();
@@ -76,13 +51,24 @@ const BeritaDetail = ({ lenisRef }) => {
       delete cleanedAttribs.width;
       delete cleanedAttribs.height;
       delete cleanedAttribs.style;
+      // `class` diteruskan lewat prop `className`; React tidak mengenal `class`.
+      delete cleanedAttribs.class;
 
       return (
-        <ContentImage
+        <GambarKonten
           imgProps={{ ...cleanedAttribs, src: imgSrc, alt: node.attribs.alt || "" }}
+          className={node.attribs.class}
+          autoPotong={autoPotongDinyalakan(node)}
         />
       );
     }
+
+    // Tabel: bentuk & gulir mendatarnya diurus CSS (DefaultContent.css, yang
+    // juga diimpor halaman ini). Yang tersisa di sini hanya membuang perataan
+    // kanan-kiri yang tertulis sebaris pada tabel berkolom banyak. Lihat
+    // utils/tabelKonten.js, termasuk catatan mengapa `data-lenis-prevent`
+    // TIDAK boleh dipasang di sini.
+    if (siapkanTabelKonten(node)) return node;
 
     const isDocAnchor = (n) =>
       n &&

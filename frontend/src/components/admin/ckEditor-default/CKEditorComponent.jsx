@@ -74,9 +74,12 @@ import { InsertDocumentPlugin } from '../../../utils/InsertDocumentPlugin';
 // kelas), tetapi mempertahankan perataan beserta struktur. Lihat sebab
 // lengkapnya di utils/tempelBersih.js.
 import { TempelBersih } from '../../../utils/TempelBersihPlugin';
+// Saklar "Potong otomatis" pada bilah alat gambar. Sisi pengunjung kini tidak
+// pernah memotong gambar; plugin ini yang memberi penyunting jalan keluar untuk
+// gambar potret yang terlalu menjulang. Lihat utils/AutoPotongGambarPlugin.js.
+import { AutoPotongGambarPlugin } from '../../../utils/AutoPotongGambarPlugin';
 import axiosInstance from '../../../api/axiosInstance';
 import OverlayUnggah from '../common/OverlayUnggah';
-import PratinjauDokumenEditor from '../common/PratinjauDokumenEditor';
 import './CKEditorComponent.css';
 
 const editorConfig = {
@@ -91,6 +94,7 @@ const editorConfig = {
     BlockQuote, CodeBlock, HorizontalLine, PageBreak, SpecialCharacters, SpecialCharactersEssentials,
     Link, AutoLink, LinkImage,
     Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageInsert, AutoImage, ImageUpload,
+    AutoPotongGambarPlugin,
     MediaEmbed,
     Table, TableToolbar, TableProperties, TableCellProperties, TableColumnResize, TableCaption,
   ],
@@ -138,10 +142,31 @@ const editorConfig = {
     ],
   },
   image: {
+    // `insertImage` sengaja diletakkan PALING DEPAN. Pada bilah alat gambar,
+    // tombol ini berganti sendiri menjadi "Ganti gambar" begitu ada gambar
+    // terpilih — CKEditor menandainya lewat `isImageSelected` pada
+    // ImageInsertUI. Sebelumnya bilah alat ini hanya memuat teks alternatif,
+    // keterangan, gaya, dan ukuran, sehingga gambar yang berkasnya rusak atau
+    // hilang tidak dapat ditukar sama sekali: satu-satunya jalan adalah
+    // menghapusnya lalu menyisipkan ulang, dan bersamanya hilang pula
+    // keterangan, perataan, serta ukuran yang sudah disetel.
+    //
+    // Menggantinya mempertahankan seluruh atribut itu — yang berubah hanya
+    // sumber gambarnya. Unggahannya menempuh CustomUploadAdapter yang sama
+    // dengan penyisipan biasa, jadi kompresi, konversi WebP, dan bilah
+    // kemajuannya ikut berlaku tanpa penyesuaian apa pun.
+    //
+    // `autoPotongGambar` diletakkan PALING BELAKANG dan dipisahkan garis. Ia
+    // satu-satunya butir bertuliskan teks di antara deretan ikon, jadi menaruhnya
+    // di ujung menjaga barisan ikon tetap rapat. Saklarnya hanya menyala untuk
+    // gambar berasio potret — pada gambar lain ia tampil redup beserta
+    // keterangan sebabnya.
     toolbar: [
-      'imageTextAlternative', 'toggleImageCaption',
+      'insertImage',
+      '|', 'imageTextAlternative', 'toggleImageCaption',
       '|', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side',
       '|', 'resizeImage',
+      '|', 'autoPotongGambar',
     ],
   },
   table: {
@@ -291,11 +316,6 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
           CKEditor dan plugin toolbar), sehingga menempuh penyimpan bersama
           `utils/statusUnggah`. */}
       <OverlayUnggah />
-
-      {/* Pratinjau dokumen yang baru selesai diunggah. Sama seperti overlay di
-          atas, pemicunya berada di luar pohon React (plugin toolbar), sehingga
-          menempuh penyimpan bersama `utils/pratinjauDokumen`. */}
-      <PratinjauDokumenEditor />
 
       <div className="pd-editor">
         <CKEditor

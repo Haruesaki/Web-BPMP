@@ -83,3 +83,77 @@
     max-width: 400px;
     line-height: 1.6;
 }
+/* =========================================================================
+   KLIK vs TAHAN — pengurutan kartu profil
+   -------------------------------------------------------------------------
+   Kartu di halaman ini mengemban dua perintah pada gerakan yang awalnya sama:
+   klik singkat membuka editor, tahan lalu geser memindahkannya. Gaya di bawah
+   yang membuat perbedaan itu terlihat, sebab tanpa isyarat apa pun pengguna
+   tidak punya cara mengetahui bahwa kartunya sedang terangkat.
+
+   Efek `transform: scale` pada tetikus-lewat dipindahkan dari gaya sebaris di
+   JSX ke sini, supaya ia bisa DIMATIKAN selama penyusunan berlangsung — kartu
+   yang membesar sendiri saat dilewati seretan membuat sasaran jatuhnya
+   bergoyang.
+   ========================================================================= */
+.ppc-preview-card-wrapper {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    /* Gerakan menahan di layar sentuh tidak boleh langsung ditafsirkan sebagai
+       gulir; hook yang memutuskan setelah tenggang tahannya lewat. */
+    touch-action: manipulation;
+    /* Menahan lama di iOS memunculkan panel bagikan/salin gambar yang
+       memotong seretan tepat saat ia dimulai. */
+    -webkit-touch-callout: none;
+}
+
+.ppc-preview-card-wrapper:hover {
+    transform: scale(1.02);
+}
+
+/* Selama ada kartu yang sedang diangkat, seluruh kartu berhenti membesar. */
+.ppc-preview-card-wrapper.ppc-sedang-menyusun:hover {
+    transform: none;
+}
+
+/* Kartu yang sedang diangkat. */
+.ppc-preview-card-wrapper.ppc-kartu-diseret {
+    opacity: 0.55;
+    transform: scale(1.04);
+    cursor: grabbing;
+    z-index: 5;
+}
+
+.ppc-preview-card-wrapper.ppc-kartu-diseret::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 2px dashed rgba(91, 95, 232, 0.9);
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+.ppc-seret-catatan {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-sub, #8892a6);
+}
+
+.ppc-seret-catatan i {
+    color: var(--purple, #5b5fe8);
+    flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ppc-preview-card-wrapper,
+    .ppc-preview-card-wrapper:hover,
+    .ppc-preview-card-wrapper.ppc-kartu-diseret {
+        transition: none;
+        transform: none;
+    }
+}

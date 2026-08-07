@@ -330,9 +330,14 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
   return (
     <>
       {/* Latar gelap di belakang drawer (hanya tampil saat terbuka di HP).
-          Klik untuk menutup. Di desktop disembunyikan via CSS. */}
+          Klik untuk menutup. Di desktop disembunyikan via CSS.
+
+          Kelasnya berawalan `admin-` dengan sengaja: nama polos
+          `sidebar-backdrop` dipakai juga oleh menu mobile sisi pengunjung, dan
+          keduanya sempat saling merusak. Penjelasan lengkapnya di
+          AdminSidebar.css. */}
       <div
-        className={`sidebar-backdrop ${isOpen ? 'is-open' : ''}`}
+        className={`admin-sidebar-backdrop ${isOpen ? 'is-open' : ''}`}
         onClick={onClose}
         aria-hidden="true"
       />

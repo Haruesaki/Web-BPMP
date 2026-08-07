@@ -1,6 +1,9 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../default/PostDefault.css'; 
+import axiosInstance from '../../../../api/axiosInstance';
+import useSeretUrutan from '../../../../hooks/useSeretUrutan';
+import PeganganSeretBaris from '../PeganganSeretBaris';
+import '../default/PostDefault.css';
 import '../berita/PostBeritaCard.css';
 import PostDefault from '../default/PostDefault';
 
@@ -25,10 +28,12 @@ const htmlToText = (html) => {
 
 const EMPTY_ARRAY = [];
 
-const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRAY, onSave, onCancel, saveStatus, setSaveStatus }) => {
+const Default = ({ menuId, menuName = '', routeAction = '', initialContents = EMPTY_ARRAY, onSave, onCancel, saveStatus, setSaveStatus }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [kontenList, setKontenList] = useState(initialContents || []);
+  const [pesanUrutan, setPesanUrutan] = useState('');
+  const bungkusRef = useRef(null);
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,16 +54,55 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
     setKontenList(initialContents || []);
   }, [initialContents]);
 
+  // --- PENGURUTAN LEWAT SERET ---
+  // Dimatikan selama ada kata kunci pencarian. Sebabnya bukan teknis melainkan
+  // kejujuran tampilan: saat sebagian baris disembunyikan penyaring, menjatuhkan
+  // sebuah baris "tepat di bawah" baris lain tidak berarti apa-apa — di antara
+  // keduanya bisa saja ada baris tersembunyi. Pengurutan yang tersimpan akan
+  // berbeda dari yang tampak dilakukan.
+  const bolehDiurutkan = !search.trim();
+
+  const simpanUrutan = async (daftarBaru) => {
+    const sebelumnya = kontenList;
+    setPesanUrutan('');
+    setKontenList(daftarBaru); // tampilkan lebih dulu supaya terasa seketika
+
+    if (!menuId) return;
+    try {
+      await axiosInstance.put(`/api/halaman-konten/urutan/${menuId}`, {
+        urutan: daftarBaru.map((k) => k.id),
+      });
+    } catch (err) {
+      // DIKEMBALIKAN bila peladen menolak. Tanpa ini tampilan akan menunjukkan
+      // urutan yang sebenarnya tidak pernah tersimpan, dan admin baru
+      // mengetahuinya setelah memuat ulang halaman.
+      setKontenList(sebelumnya);
+      const pesanPeladen = typeof err?.response?.data === 'object' ? err.response.data?.pesan : null;
+      setPesanUrutan(pesanPeladen || 'Gagal menyimpan urutan. Coba lagi.');
+      console.error('Gagal menyimpan urutan konten:', err);
+    }
+  };
+
+  const seret = useSeretUrutan({
+    daftar: kontenList,
+    onUrutBaru: simpanUrutan,
+    tahanMs: 0, // pegangan titik-enam → langsung menyeret, tanpa perlu ditahan
+    aktif: bolehDiurutkan,
+  });
+
   // --- Filter + pagination ---
+  // Sumbernya `seret.daftarTampil`, BUKAN `kontenList`: selama seretan
+  // berlangsung hook memegang susunan sementara, dan dari situlah tabel harus
+  // digambar supaya barisnya bergeser mengikuti kursor.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return kontenList;
-    return kontenList.filter(
+    if (!q) return seret.daftarTampil;
+    return seret.daftarTampil.filter(
       (b) =>
         b.judul.toLowerCase().includes(q) ||
         htmlToText(b.konten).toLowerCase().includes(q)
     );
-  }, [kontenList, search]);
+  }, [seret.daftarTampil, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const page = Math.min(currentPage, totalPages);
@@ -213,6 +257,35 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
           </button>
         </div>
 
+        {pesanUrutan && (
+          <div className="bc-error-banner" role="alert">
+            <i className="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span>{pesanUrutan}</span>
+            <button type="button" onClick={() => setPesanUrutan('')} aria-label="Tutup pesan galat">
+              <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        )}
+
+        <p className="bc-seret-catatan">
+          <i className={`fa-solid ${bolehDiurutkan ? 'fa-grip-vertical' : 'fa-circle-info'}`} aria-hidden="true"></i>
+          {bolehDiurutkan
+            ? 'Seret pegangan di kiri nomor untuk mengubah urutan tampil di halaman pengunjung.'
+            : 'Pengurutan dinonaktifkan selama pencarian aktif — kosongkan kata kunci untuk menyusun ulang.'}
+        </p>
+
+        {/* Pembungkus ini SEMATA jangkar bagi lajur pegangan di sebelah kiri.
+            Ia tidak memasang overflow apa pun, sehingga lajurnya tidak
+            terpotong — berbeda dengan kartu dan wadah gulir di dalamnya. */}
+        <div className="bc-tabel-bungkus" ref={bungkusRef}>
+        <PeganganSeretBaris
+          bungkusRef={bungkusRef}
+          kunciUkur={`${page}-${pageSize}-${visible.map((b) => b.id).join(',')}`}
+          aktif={bolehDiurutkan}
+          idDiseret={seret.idDiseret}
+          padaTekan={seret.padaTekan}
+          judulPer={Object.fromEntries(visible.map((b) => [String(b.id), b.judul]))}
+        />
         <section className="bc-table-card">
           <div className="bc-table-scroll">
             <table className="bc-table">
@@ -235,10 +308,14 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
                   </tr>
                 ) : (
                   visible.map((b, i) => (
-                    <tr 
-                      key={b.id} 
-                      id={`row-${b.id}`} 
-                      className={highlightedRow === String(b.id) ? 'row-blink' : ''}
+                    <tr
+                      key={b.id}
+                      id={`row-${b.id}`}
+                      {...seret.propsWadah(b.id)}
+                      className={[
+                        highlightedRow === String(b.id) ? 'row-blink' : '',
+                        seret.idDiseret === String(b.id) ? 'bc-baris-diseret' : '',
+                      ].filter(Boolean).join(' ')}
                     >
                       <td className="bc-col-no">{startIdx + i + 1}</td>
                       <td className="bc-col-judul">
@@ -339,6 +416,7 @@ const Default = ({ menuName = '', routeAction = '', initialContents = EMPTY_ARRA
             </div>
           </div>
         </section>
+        </div>
       </main>
 
       {deleteTarget && (

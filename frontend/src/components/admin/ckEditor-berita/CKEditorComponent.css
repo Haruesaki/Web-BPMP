@@ -414,3 +414,49 @@
     .pd-thumb-progres-isi { transition: none; }
     .pd-thumb-progres-isi--takterukur { animation: none; }
 }
+
+
+/* =========================================================================
+   SAKLAR "POTONG OTOMATIS" & PENANDANYA DI DALAM EDITOR
+   -------------------------------------------------------------------------
+   Saklar ini satu-satunya butir bertuliskan teks pada bilah alat gambar yang
+   selebihnya berisi ikon, jadi tingginya disamakan agar barisnya tidak
+   bergelombang.
+   ========================================================================= */
+.ck.ck-toolbar .ck-button.bpmp-saklar-potong {
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+
+/* Gambar yang ditandai diberi bingkai putus-putus beserta labelnya.
+   Tanpa ini penyunting menyalakan saklar lalu tidak melihat apa-apa berubah —
+   sebab hasil pemotongannya baru tampak di halaman pengunjung, bukan di editor.
+   Bingkai ini bukan simulasi potongannya, melainkan sekadar pengingat bahwa
+   penandanya menempel di gambar tersebut. */
+.ck-content figure.image.gambar-auto-potong,
+.ck-content img.gambar-auto-potong {
+    outline: 2px dashed rgba(91, 95, 232, 0.85);
+    outline-offset: 3px;
+}
+
+.ck-content figure.image.gambar-auto-potong {
+    position: relative;
+}
+
+.ck-content figure.image.gambar-auto-potong::after {
+    content: 'Potong otomatis';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 1;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(91, 95, 232, 0.92);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    /* Label hanyalah keterangan; klik harus tetap sampai ke gambarnya supaya
+       widget tetap dapat dipilih di bagian ini. */
+    pointer-events: none;
+}
