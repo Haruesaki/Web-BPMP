@@ -785,12 +785,12 @@
     /* 9.1. PENSKALAAN DINAMIS UNTUK TEKS DEFAULT (PARAGRAF BIASA) */
     /* Aturan default mobile (untuk layout vertikal murni & detail berita) */
     .default-description-container {
-        font-size: clamp(0.7rem, 0.8vw + 0.5rem, 1rem) !important;
+        font-size: clamp(0.55rem, 2.5vw, 1rem) !important;
     }
 
     /* Aturan khusus mobile jika asalnya adalah layout horizontal yang di-warp */
     .default-content-wrapper.layout-horizontal .default-description-container {
-        font-size: clamp(0.7rem, 0.8vw + 0.5rem, 0.95rem) !important;
+        font-size: clamp(0.55rem, 2.5vw, 0.95rem) !important;
     }
 
     /* 9.2. PENSKALAAN DINAMIS UNTUK TEKS KUSTOM DENGAN UKURAN DARI EDITOR (--fs-val) */
