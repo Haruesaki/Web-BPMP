@@ -37,9 +37,27 @@
     border-left-color: #ff6b6b;
 }
 
+.ou-kartu--selesai {
+    border-left-color: #3ec98a;
+}
+
 @keyframes ou-masuk {
     from { opacity: 0; transform: translateY(10px) scale(0.98); }
     to   { opacity: 1; transform: none; }
+}
+
+/* Kartu yang tenggangnya habis. Ditulis SESUDAH `.ou-kartu` supaya animasi
+   masuknya tergantikan — keduanya berkekhususan sama, jadi yang belakangan
+   menang. `forwards` menahan keadaan akhir agar kartunya tidak berkedip kembali
+   muncul pada satu bingkai sebelum benar-benar dibuang dari daftar. */
+.ou-kartu--memudar {
+    animation: ou-pudar 450ms ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes ou-pudar {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: translateY(8px) scale(0.98); }
 }
 
 .ou-baris-atas {
@@ -63,6 +81,11 @@
 .ou-kartu--gagal .ou-ikon {
     background: rgba(255, 107, 107, 0.16);
     color: #ff6b6b;
+}
+
+.ou-kartu--selesai .ou-ikon {
+    background: rgba(62, 201, 138, 0.16);
+    color: #3ec98a;
 }
 
 .ou-teks {
@@ -153,6 +176,14 @@
     to   { background-position: 40px 0; }
 }
 
+/* Keadaan selesai. Warnanya berganti dari ungu ke hijau sementara lebarnya
+   sudah penuh, sehingga peralihannya terbaca sebagai kelanjutan bilah yang
+   sama — bukan sebagai bilah baru. */
+.ou-isi--selesai {
+    background: linear-gradient(90deg, #3ec98a, #57e0a1);
+    animation: none;
+}
+
 .ou-tahap {
     font-size: 11.5px;
     color: var(--text-sub, #c7c4d8);
@@ -169,6 +200,10 @@
     .ou-kartu { animation: none; }
     .ou-isi { transition: none; }
     .ou-isi--takterukur { animation: none; }
+    /* Tanpa animasi pudar kartunya tetap hilang pada detik yang sama, hanya
+       seketika. Tenggangnya diatur penjadwal di `utils/statusUnggah`, bukan
+       oleh CSS, sehingga mematikan animasi tidak membuat kartu tertinggal. */
+    .ou-kartu--memudar { animation: none; opacity: 0; }
 }
 
 @media (max-width: 600px) {

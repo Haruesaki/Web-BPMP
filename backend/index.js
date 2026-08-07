@@ -237,14 +237,48 @@ if (env.isProduction) {
 
     // Aset ber-hash Vite (index-AbC123.js, dst) tidak pernah berubah isi untuk
     // nama yang sama, sehingga aman di-cache setahun penuh (immutable). Namun
-    // index.html WAJIB no-cache: ia merujuk nama aset ber-hash terbaru, jadi bila
-    // ikut ter-cache lama, pengunjung tetap memuat versi lama setelah deploy baru.
+    // index.html WAJIB tidak disimpan: ia merujuk nama aset ber-hash terbaru,
+    // jadi bila ikut ter-cache lama, pengunjung tetap memuat versi lama setelah
+    // deploy baru.
+    //
+    // `etag` dan `lastModified` DIMATIKAN — jangan dihidupkan kembali tanpa
+    // membaca sebabnya. Ini setengah dari perbaikan bug 7 Agustus 2026:
+    //
+    //   Gejalanya, pengunjung membuka halaman berdokumen dan mendapat tampilan
+    //   LAMA; sesudah refresh barulah tampilan baru. Sebabnya bukan pada kode
+    //   tampilan sama sekali, melainkan pada VALIDATOR tembolok. Express
+    //   menyusun ETag lemah dari ukuran + mtime berkas. Paket penempatan dahulu
+    //   menulis stempel waktu nol ke dalam ZIP, sehingga setiap berkas hasil
+    //   ekstraksi bertanggal 1980 — sama pada setiap penempatan. Maka ETag
+    //   menjadi fungsi UKURAN semata, dan ukuran `index.html` praktis tak
+    //   pernah berubah antar-build (yang berganti hanya sidik nama aset, yang
+    //   panjangnya selalu sama). Peramban memvalidasi ulang, ETag-nya kebetulan
+    //   cocok, peladen menjawab 304, dan pengunjung terus memakai index.html
+    //   lama yang menunjuk bundel lama — bundel yang masih tergeletak di
+    //   peladen karena ekstraksi ZIP tidak pernah menghapus berkas.
+    //
+    // Pembangun paket kini menulis stempel waktu yang sebenarnya, sehingga
+    // sebab pokoknya sudah hilang. Tetapi bersandar pada itu saja berarti
+    // menaruh keselamatan situs pada satu baris di skrip yang DIABAIKAN GIT dan
+    // tidak pernah sampai ke rekan tim. Mematikan validator di sini membuat
+    // 304 palsu mustahil terjadi, apa pun stempel waktu berkasnya.
+    //
+    // Aman bagi aset: namanya sudah memuat sidik isi, jadi tidak pernah perlu
+    // divalidasi ulang — `immutable` sudah menjamin itu. Yang hilang hanya
+    // penghematan pada berkas yang namanya sama tetapi isinya berubah, dan
+    // berkas semacam itu memang tidak ada di sini.
     app.use(express.static(dirDist, {
         maxAge: env.isProduction ? '1y' : 0,
         immutable: env.isProduction,
+        etag: false,
+        lastModified: false,
         setHeaders: (res, filePath) => {
             if (filePath.endsWith('index.html')) {
-                res.setHeader('Cache-Control', 'no-cache');
+                // `no-store`, bukan `no-cache`: yang kedua masih membolehkan
+                // peramban menyimpan salinan lalu memvalidasinya. Selama salinan
+                // itu ada, ia dapat dipakai kembali begitu validasinya berkata
+                // "belum berubah" — dan justru di situlah bugnya bersarang.
+                res.setHeader('Cache-Control', 'no-store, must-revalidate');
             }
         },
     }));
@@ -280,8 +314,13 @@ if (env.isProduction) {
             return res.status(404).json({ pesan: 'Halaman tidak ditemukan' });
         }
 
-        // index.html tidak boleh ter-cache lama (lihat alasan di express.static di atas).
-        res.setHeader('Cache-Control', 'no-cache');
+        // index.html tidak boleh disimpan sama sekali (lihat alasan panjang di
+        // express.static di atas). Jalur INI yang melayani seluruh deep-link —
+        // /berita/..., /halaman/..., /admin — sehingga justru di sinilah
+        // pengunjung paling sering menerima index.html. Melewatkannya berarti
+        // memperbaiki setengah masalah.
+        res.setHeader('Cache-Control', 'no-store, must-revalidate');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
         // `root` + nama file relatif — BUKAN jalur absolut. Sebabnya: di Hostinger
         // aplikasi berjalan dari dalam `.builds/versions/<id>/nodejs/...`, dan
         // segmen `.builds` diawali titik. Bila jalur absolut dikirim, pustaka
@@ -290,8 +329,36 @@ if (env.isProduction) {
         // (/admin, /berita/..) gagal. Dengan `root`, cek dotfile hanya berlaku
         // pada bagian relatif ('index.html', bersih); `.builds` di atas root
         // diabaikan — persis cara express.static bekerja.
-        return res.sendFile('index.html', { root: dirDist }, (err) => {
-            if (err) next(err);
+        // BERKASNYA DIBACA DAN DIKIRIM SENDIRI, tidak lewat `res.sendFile`.
+        //
+        // Sebabnya bukan selera. `res.sendFile` MENIMPA pilihan etag yang
+        // diberikan pemanggilnya — di express/lib/response.js tertulis:
+        //
+        //     // wire application etag option to send
+        //     opts.etag = this.app.enabled('etag');
+        //
+        // sehingga `{ etag: false }` diabaikan diam-diam, dan balasannya tetap
+        // membawa ETag turunan mtime. Itu persis validator yang menyebabkan
+        // bug 7 Agustus 2026, dan pintu inilah yang melayani seluruh deep-link.
+        // Mematikannya lewat `app.set('etag', false)` memang bisa, tetapi ikut
+        // mencabut ETag dari seluruh balasan JSON API — harga yang tidak perlu
+        // dibayar untuk memperbaiki satu berkas.
+        //
+        // Membacanya sendiri sekaligus melenyapkan sebab dipakainya `root`:
+        // pemeriksaan "dotfile" milik pustaka `send` yang dahulu membalas 404
+        // untuk seluruh deep-link, sebab di Hostinger aplikasi berjalan dari
+        // dalam `.builds/versions/<id>/nodejs/...`. `fs` tidak mengenal aturan
+        // dotfile sama sekali, jadi persoalan itu tidak dapat terulang.
+        //
+        // Dibaca pada tiap permintaan, bukan disimpan di memori saat boot:
+        // berkasnya hanya ~2,5 KB dan sudah berada di tembolok halaman sistem
+        // berkas, sementara salinan memori justru menghidupkan kembali jenis
+        // kebasian yang sedang diperbaiki.
+        return fs.readFile(path.join(dirDist, 'index.html'), (err, isi) => {
+            if (err) return next(err);
+            // Badan tidak dikirim untuk HEAD — hanya tajuknya.
+            if (req.method === 'HEAD') return res.end();
+            return res.end(isi);
         });
     });
 }

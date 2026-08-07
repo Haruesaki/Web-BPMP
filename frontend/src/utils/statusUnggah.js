@@ -30,6 +30,43 @@ let pekerjaan = [];
 const pendengar = new Set();
 let urutan = 0;
 
+// -------------------------------------------------------- tenggang tampil
+//
+// Kartu yang sudah SELESAI tidak dibuang seketika. Sebelumnya pemberitahuan
+// "berhasil" muncul sebagai panel tersendiri di tengah layar, dan panel itu
+// menuntut perhatian sekaligus menutupi editor persis pada saat penyunting
+// hendak melanjutkan mengetik. Pemberitahuannya kini disatukan ke kartu yang
+// sama dengan kemajuannya — kartu itu tinggal berganti rupa — lalu pergi
+// sendiri.
+//
+// PUDARNYA DIAMBIL DARI DALAM TENGGANG, bukan ditambahkan sesudahnya. Dengan
+// begitu kartunya benar-benar sudah tidak ada pada detik ketujuh, bukan pada
+// detik ketujuh koma sekian.
+const TAHAN_SELESAI_MS = 7000;
+// Kegagalan diberi waktu lebih panjang: pesannya perlu dibaca, bukan sekadar
+// disadari.
+const TAHAN_GAGAL_MS = 8000;
+const DURASI_PUDAR_MS = 450;
+
+/**
+ * Menjadwalkan sebuah kartu untuk memudar lalu hilang.
+ *
+ * Ditandai `memudar` lebih dulu, tidak langsung dibuang — CSS perlu satu
+ * kesempatan merender keadaan "sedang pudar" agar animasinya sempat berjalan.
+ * Membuang barisnya seketika hanya menghasilkan kartu yang lenyap mendadak.
+ */
+const jadwalkanHilang = (id, tahan) => {
+  setTimeout(() => {
+    // Kartu yang sudah ditutup pengguna lebih awal tidak lagi ada di daftar,
+    // sehingga penandaan ini menjadi tanpa akibat — bukan galat. Id tidak
+    // pernah dipakai ulang (`urutan` hanya naik), jadi tidak ada kemungkinan
+    // penjadwalan lama mengenai pekerjaan baru.
+    pekerjaan = pekerjaan.map((p) => (p.id === id ? { ...p, memudar: true } : p));
+    siarkan();
+    setTimeout(() => sudahiUnggah(id), DURASI_PUDAR_MS);
+  }, Math.max(0, tahan - DURASI_PUDAR_MS));
+};
+
 // Cuplikan yang di-cache. `useSyncExternalStore` memanggil pembacanya berkali-
 // kali dan MEMBANDINGKAN hasilnya dengan Object.is; bila selalu mengembalikan
 // larik baru, React menganggap datanya berubah terus dan masuk gelung render
@@ -54,7 +91,10 @@ export const bacaUnggah = () => cuplikan;
  */
 export const mulaiUnggah = ({ judul, berkas = '', tahap = 'Menyiapkan…' }) => {
   const id = `unggah-${++urutan}`;
-  pekerjaan = [...pekerjaan, { id, judul, berkas, persen: 0, tahap, galat: '' }];
+  pekerjaan = [
+    ...pekerjaan,
+    { id, judul, berkas, persen: 0, tahap, galat: '', selesai: false, memudar: false },
+  ];
   siarkan();
   return id;
 };
@@ -77,9 +117,43 @@ export const majukanUnggah = (id, persen, tahap) => {
   siarkan();
 };
 
+/**
+ * Membuang pekerjaan SEKETIKA, tanpa pemberitahuan apa pun.
+ *
+ * Dipakai bagi unggahan yang hasilnya sudah kelihatan sendiri — gambar sisipan
+ * CKEditor langsung muncul di dalam naskah, sehingga kartu "berhasil" untuknya
+ * hanya menjadi kebisingan. Untuk unggahan yang hasilnya TIDAK kasatmata,
+ * pakai `selesaikanUnggah`.
+ */
 export const sudahiUnggah = (id) => {
   pekerjaan = pekerjaan.filter((p) => p.id !== id);
   siarkan();
+};
+
+/**
+ * Menandai pekerjaan BERHASIL, lalu membiarkan kartunya bertahan tujuh detik
+ * sebelum memudar dan hilang sendiri.
+ *
+ * Dipakai bagi unggahan yang hasilnya tidak langsung terlihat. Dokumen adalah
+ * contohnya: yang tersisip ke naskah hanya sebaris tautan bertuliskan nama
+ * berkas, sehingga tanpa pemberitahuan penyunting tidak punya cara membedakan
+ * "sudah selesai" dari "masih berjalan".
+ */
+export const selesaikanUnggah = (id, { judul, tahap } = {}) => {
+  pekerjaan = pekerjaan.map((p) =>
+    p.id === id
+      ? {
+          ...p,
+          selesai: true,
+          galat: '',
+          persen: 100,
+          judul: judul || p.judul,
+          tahap: tahap || '',
+        }
+      : p
+  );
+  siarkan();
+  jadwalkanHilang(id, TAHAN_SELESAI_MS);
 };
 
 /**
@@ -89,10 +163,13 @@ export const sudahiUnggah = (id) => {
  */
 export const gagalkanUnggah = (id, pesan) => {
   pekerjaan = pekerjaan.map((p) =>
-    p.id === id ? { ...p, galat: pesan || 'Gagal mengunggah.', tahap: '' } : p
+    p.id === id ? { ...p, galat: pesan || 'Gagal mengunggah.', selesai: false, tahap: '' } : p
   );
   siarkan();
-  setTimeout(() => sudahiUnggah(id), 8000);
+  // Memakai penjadwal yang sama dengan kartu "berhasil" — sebelumnya kartu
+  // gagal lenyap mendadak, dan dua perilaku berbeda pada komponen yang sama
+  // terbaca seperti kerusakan.
+  jadwalkanHilang(id, TAHAN_GAGAL_MS);
 };
 
 export const tutupUnggah = sudahiUnggah;

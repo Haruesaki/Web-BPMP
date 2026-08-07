@@ -184,64 +184,272 @@
         text-align: left;
     }
 
-    .default-description-container table {
-        display: block;
-        max-width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+    /* Tabel TIDAK lagi diatur di sini.
+       Aturan mobile yang dulu berdiri di tempat ini menyetel `display: block`
+       pada elemen <table> supaya ia bisa digulir sendiri. Itu memang membuatnya
+       tergulir, tetapi dengan ongkos yang menghapus tujuannya: sebuah <table>
+       yang dijadikan blok berhenti menjadi tabel bagi mesin tata letak, dan
+       kolom-kolomnya berhenti sejajar antar-baris.
 
-    .default-description-container .image-frame,
-    .default-description-container .image-frame--square,
-    .default-description-container .image-frame--portrait {
+       Penggantinya berlaku di SEMUA lebar layar — bukan hanya HP — sebab
+       tabel berkolom banyak juga meluber di kolom konten desktop. Lihat bagian
+       TABEL DARI EDITOR di bawah: yang digulir adalah <figure> pembungkusnya,
+       sehingga <table>-nya tetap utuh sebagai tabel. */
+
+    /* Di HP, batas 500px varian kotak dilepas: di layar selebar 390px batas itu
+       tidak pernah tercapai, tetapi melepasnya membuat gambar benar-benar
+       mengisi kolom alih-alih menyisakan ruang kosong di kiri-kanan.
+
+       Varian potret TIDAK diutak-atik di sini. Batas tingginya dinyatakan dalam
+       satuan layar (vh), jadi ia sudah menyesuaikan diri terhadap ukuran
+       perangkat dengan sendirinya. */
+    .default-description-container .image-frame--square {
         max-width: 100%;
-        aspect-ratio: auto;
-    }
-    .default-description-container .image-frame--square img,
-    .default-description-container .image-frame--portrait img {
-        height: auto;
-        max-height: 70vh;
     }
 }
 
 /* =========================================================================
-   4. ADAPTIVE CONTENT IMAGE FRAMES
+   4. WADAH GAMBAR ADAPTIF (kelas varian dipilih via JS di GambarKonten.jsx)
+   -------------------------------------------------------------------------
+   ATURAN POKOKNYA: gambar isi konten TIDAK DIPOTONG. Satu-satunya kekecualian
+   adalah gambar potret yang penyuntingnya sendiri menyalakan "Potong otomatis"
+   dari bilah alat gambar di editor.
+
+   MENGAPA ATURAN LAMA HARUS DIGANTI
+   ---------------------------------
+   Sebelumnya setiap varian memasang batas tinggi MUTLAK (`max-height: 500px`)
+   lalu membuang kelebihannya dengan `object-fit: cover`, sementara LEBARnya
+   mengikuti lebar kolom. Lebar kolom berubah mengikuti tingkat zoom peramban,
+   jadi banyak-sedikitnya potongan ikut berubah:
+
+     zoom diperkecil → kolom melebar → tinggi alami gambar melampaui 500px
+                       → potongan makin banyak
+     zoom diperbesar → kolom menyempit → tinggi alaminya belum sampai 500px
+                       → tidak terpotong sama sekali
+
+   Gambar yang sama tampil berbeda-beda bagi tiap pembaca, dan tidak seorang pun
+   dapat mengetahui mana yang "benar". Kuncinya: tinggi mutlak tidak boleh
+   dipasangkan dengan lebar yang lentur.
+
+   Karena itu tinggi kini dibiarkan mengikuti rasio asli gambar (`height: auto`),
+   dan pemotongan — bila memang diminta — dinyatakan sebagai RASIO KOTAK
+   (`aspect-ratio`), yang tidak berubah oleh zoom.
    ========================================================================= */
 .default-description-container .image-frame {
     width: 100%;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     display: block;
     margin-left: auto;
     margin-right: auto;
     position: relative;
 }
 
+/* Hiasan (sudut membulat + bayangan) menempel pada GAMBARNYA, bukan pada
+   wadahnya. Pada varian potret tanpa potong, gambar sengaja lebih sempit
+   daripada wadah; kalau hiasan tetap di wadah, bayangannya akan menggantung di
+   ruang kosong kiri-kanan gambar tanpa ada apa pun di sana. */
 .default-description-container .image-frame img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;        /* inilah yang meniadakan potongan */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Lanskap → penuh lebar kolom, tinggi mengikuti rasio aslinya. Gambar yang
+   lebih kecil dari kolom sengaja tetap dipaksa memenuhi lebar (boleh
+   ter-upscale) supaya alur bacaannya rapi. */
 .default-description-container .image-frame--landscape {
     max-width: none;
 }
-.default-description-container .image-frame--landscape img {
-    height: auto;
-    max-height: 500px;
-}
 
+/* Kotak → dibatasi 500px. Batas ini pada LEBAR, bukan tinggi, sehingga tidak
+   pernah memotong: gambar sekadar mengecil seluruhnya. */
 .default-description-container .image-frame--square {
     max-width: 500px;
-    aspect-ratio: 1 / 1;
 }
 
-.default-description-container .image-frame--portrait {
-    max-width: 400px;
-    aspect-ratio: 4 / 5;
-    max-height: 500px;
+/* Potret TANPA potong otomatis → dibatasi TINGGINYA, dan gambar menyesuaikan
+   lebarnya sendiri (`width: auto`). Perhatikan bedanya dengan aturan lama:
+   membatasi tinggi pada gambar yang lebarnya `auto` hanya MENGECILKAN gambar
+   secara utuh, sedangkan membatasi tinggi pada gambar selebar wadah akan
+   MEMOTONGnya.
+
+   70vh dipilih supaya satu gambar potret tidak pernah menghabiskan satu layar
+   penuh — masih ada teks yang terlihat di atas atau di bawahnya, sehingga
+   pembaca tahu ia sedang menggulir. Satuan vh dipakai (bukan piksel) karena
+   ukurannya relatif terhadap layar: pada zoom berapa pun, gambar menempati
+   bagian layar yang sama. */
+.default-description-container .image-frame--portrait img {
+    width: auto;
+    max-width: 100%;
+    max-height: 70vh;
+}
+
+/* Potret DENGAN potong otomatis → mengisi lebar kolom sebagai bidang mendatar.
+   Ini pilihan sadar penyunting: bagian atas dan bawah gambar memang dibuang,
+   ditukar dengan gambar yang jauh lebih lebar dan sejajar dengan gambar lanskap
+   di sekitarnya.
+
+   Rasio 4/3 menyamai sel galeri di bawah berkas ini, jadi gambar potret yang
+   dipotong tampak seragam dengan gambar yang berjajar dalam grid. Potongannya
+   diambil dari tengah — tempat pokok gambar lazim berada.
+
+   Varian ini SENGAJA hanya berlaku pada gambar potret. Penandanya dipasang apa
+   adanya oleh JS pada gambar mana pun yang ditandai penyunting, dan selektor
+   dua kelas inilah yang membatasi berlakunya. */
+.default-description-container .image-frame--portrait.image-frame--potong {
+    max-width: none;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.default-description-container .image-frame--portrait.image-frame--potong img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* =========================================================================
+   4b. TABEL DARI EDITOR
+   -------------------------------------------------------------------------
+   MENGAPA BAGIAN INI HARUS ADA
+   Tabel di dalam editor tampak bergaris rapi, tetapi garis itu BUKAN milik
+   konten yang tersimpan — melainkan milik berkas gaya CKEditor sendiri:
+
+     .ck-content figure.table > table { border-collapse: collapse;
+                                        border: 1px double #b3b3b3 }
+     .ck-content … > tr > td         { border: 1px solid #bfbfbf; padding: .4em }
+
+   Semuanya bersarang di bawah `.ck-content`, dan berkas itu hanya diimpor oleh
+   komponen editor. Halaman pengunjung tidak pernah memuatnya, sehingga tabel
+   yang sama tiba di sini tanpa garis sama sekali. Diperiksa pada konten
+   sungguhan: markah tersimpannya berupa `<figure class="table"><table
+   cellspacing="0">` — tanpa `style` sebaris pada sel, tanpa `<colgroup>`,
+   tanpa `ck-table-resized`. Benar-benar telanjang.
+
+   MENGAPA BUKAN SEKADAR MENGIMPOR BERKAS GAYA CKEditor
+   Berkas itu dirancang untuk latar TERANG berteks gelap, sedangkan kartu ini
+   biru tua berteks putih — garis #bfbfbf dan latar kepala rgba(0,0,0,.05) akan
+   salah tempat. Ia juga tidak menyentuh dua dari empat sebab keanehan di sini
+   (perataan kanan-kiri dan terpotongnya tabel), sementara jangkauannya meluas
+   ke heading, daftar, kutipan, dan gambar yang tampilannya sudah benar.
+   ========================================================================= */
+
+/* <figure> pembungkusnya yang menjadi wadah gulir, BUKAN <table>-nya.
+   Menggulirkan elemen <table> menuntut `display: block`, dan itu membuatnya
+   berhenti diperlakukan sebagai tabel — kolomnya tidak lagi sejajar antar-baris.
+
+   Berlaku di semua lebar layar. `.default-description-container` ber-
+   `overflow: hidden`, jadi tanpa wadah gulir ini tabel yang meluber bukan
+   sekadar terpotong, melainkan tidak terjangkau sama sekali. */
+.default-description-container figure.table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 24px 0;          /* menimpa margin bawaan <figure>: 1em 40px */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Cegah gulir mendatar "menular" ke halaman saat sudah mentok. */
+    overscroll-behavior-x: contain;
+}
+
+.default-description-container figure.table > table {
+    /* Kolom dibagi rata, tidak ditentukan panjang isinya. Tanpa ini lebar
+       kolom ditentukan kata terpanjang di dalamnya, dan hasilnya timpang —
+       satu kolom melar sementara tetangganya tergencet. */
+    table-layout: fixed;
+    width: 100%;
+    /* Batas bawah keterbacaan. Di kolom desktop (±724px) batas ini tidak
+       pernah tercapai sehingga tabel selalu pas tanpa gulir; di layar HP ia
+       mengambil alih dan wadah di atas mulai menggulir. */
+    min-width: 520px;
+    margin: 0;
+}
+
+.default-description-container table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.default-description-container th,
+.default-description-container td {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 12px;
+    /* Sedikit lebih kecil daripada teks lepas. Bukan gaya-gayaan: kolom tabel
+       jauh lebih sempit daripada lebar baca biasa — tabel empat kolom pada
+       konten 924px hanya menyisakan ±231px per kolom — dan pada lebar itu
+       ukuran teks badan menyisakan belasan huruf saja per baris.
+       Diterapkan pada SELNYA, bukan pada paragrafnya, supaya teks yang berdiri
+       langsung di dalam sel (baris kepala hasil salin-tempel, misalnya) ikut
+       menyesuaikan. */
+    font-size: 0.92em;
+    /* Isi menempel ke ATAS. Tanpa ini sel yang isinya sedikit akan
+       mengambang di tengah, sejajar dengan bagian tengah sel tetangganya yang
+       panjang — dan hubungan antar-kolom pada satu baris menjadi sukar dibaca. */
+    vertical-align: top;
+    text-align: left;
+}
+
+/* Baris kepala.
+   Tabel buatan editor memakai <thead><th>. Tabel hasil SALIN-TEMPEL — termasuk
+   yang dilaporkan — tidak: barisnya berupa <td><strong>. Karena itu keduanya
+   diliput.
+
+   `:has()` dipakai agar baris pertama hanya diperlakukan sebagai kepala bila
+   isinya memang ditebalkan; tanpa syarat itu, tabel yang baris pertamanya
+   berupa data biasa ikut salah diberi latar. Pada peramban lawas yang belum
+   mengenal `:has()` aturan ini sekadar diabaikan — selnya tetap bergaris dan
+   teksnya tetap tebal, hanya latarnya yang absen. */
+.default-description-container thead > tr > th,
+.default-description-container thead > tr > td,
+.default-description-container table > tbody > tr:first-child > th,
+.default-description-container table > tbody > tr:first-child > td:has(strong) {
+    background: rgba(255, 255, 255, 0.09);
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+/* Paragraf DI DALAM sel.
+   Inilah sumber "sungai" spasi yang terlihat pada tampilan lama: aturan dasar
+   `.default-description-container p` menyetel `text-align: justify`, dan
+   perataan kanan-kiri di kolom selebar ±230px memaksa peramban meregangkan
+   jarak antar-kata sampai menganga.
+
+   `font-size: 1em` MEMBATALKAN pengali 1,1 milik aturan dasar itu — bukan
+   mengecilkan teksnya. Tanpa ini sel mewarisi 1,1em DUA KALI pada halaman
+   berita: sekali dari `.berita-parsed-content` dan sekali lagi dari aturan
+   paragraf, sehingga teks di dalam sel justru lebih besar daripada teks
+   badannya sendiri. Pengecilan yang disengaja ada di aturan sel di atas. */
+.default-description-container td p,
+.default-description-container th p {
+    text-align: left;
+    font-size: 1em;
+    margin: 0 0 0.6em;
+}
+
+.default-description-container td p:last-child,
+.default-description-container th p:last-child {
+    margin-bottom: 0;
+}
+
+.default-description-container td p:first-child,
+.default-description-container th p:first-child {
+    margin-top: 0;
+}
+
+/* Keterangan tabel (fitur TableCaption di editor). */
+.default-description-container figure.table > figcaption {
+    padding: 8px 4px 0;
+    font-size: 0.92em;
+    color: #c8d0e6;
+    text-align: center;
 }
 
 /* =========================================================================
@@ -493,9 +701,16 @@
     max-height: none;
 }
 
+/* Batas ukuran varian dinolkan TEGAS di sini. Varian --portrait memasang
+   `max-height: 70vh` dan `width: auto` pada gambarnya agar gambar potret
+   tunggal tidak menjulang; di dalam sel grid keduanya justru merusak, sebab sel
+   di sini memang sudah berbentuk pasti dan gambar harus mengisinya penuh.
+   Ditulis apa adanya, tidak diandalkan pada urutan berkas. */
 .image-gallery-grid .image-frame img {
     width: 100%;
     height: 100%;
+    max-width: none;
+    max-height: none;
     object-fit: cover;
     border-radius: 8px;
 }

@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
 import CardContent from '../../../user/content-types/CardProfile/CardContent';
+import useSeretUrutan from '../../../../hooks/useSeretUrutan';
 import './PreviewProfilCard.css';
+
+// Lama tahan sebelum kartu boleh diseret. 280ms dipilih sebagai jalan tengah:
+// cukup panjang agar klik biasa — yang lazimnya di bawah 150ms — tidak pernah
+// tertukar menjadi seretan, tetapi belum terasa seperti menunggu.
+const TAHAN_MS = 280;
 
 const PreviewProfilCard = () => {
     const { menuId } = useParams();
@@ -53,6 +59,44 @@ const PreviewProfilCard = () => {
         navigate(`/admin/kelola-profil/tambah/${menuId}`);
     };
 
+    // --- PENGURUTAN: KLIK vs TAHAN ---
+    // Kartu ini mengemban dua perintah pada gerakan yang awalnya sama persis.
+    // Pembedanya waktu: lepas cepat = "buka editor", tahan = "angkat kartu".
+    // Hook-nya juga menahan `click` yang menyusul sesudah seretan — tanpa itu,
+    // setiap kali selesai menyusun ulang, halaman akan berpindah ke editor
+    // kartu yang barusan dijatuhkan.
+    const simpanUrutan = async (daftarBaru) => {
+        const sebelumnya = profiles;
+        setError('');
+        setProfiles(daftarBaru);
+
+        try {
+            // Endpoint pengurutan tersendiri, BUKAN penyimpanan profil biasa.
+            // Penyimpanan biasa menghapus lalu menyisipkan ulang seluruh baris,
+            // sehingga ID-nya berganti — dan ID itulah tujuan tautan edit pada
+            // tiap kartu di halaman ini.
+            await axiosInstance.put(`/api/profil-pegawai/urutan/${menuId}`, {
+                urutan: daftarBaru.map((p) => p.id),
+            });
+        } catch (err) {
+            setProfiles(sebelumnya);
+            const pesanPeladen = typeof err?.response?.data === 'object' ? err.response.data?.pesan : null;
+            setError(pesanPeladen || 'Gagal menyimpan urutan profil. Coba lagi.');
+            console.error('Gagal menyimpan urutan profil:', err);
+        }
+    };
+
+    const seret = useSeretUrutan({
+        daftar: profiles,
+        onUrutBaru: simpanUrutan,
+        tahanMs: TAHAN_MS,
+    });
+
+    const bukaEditor = (profileId) => {
+        if (seret.klikDitahan()) return; // klik sisa seretan → abaikan
+        navigate(`/admin/kelola-profil/edit/${menuId}/${profileId}`);
+    };
+
     if (loading) {
         return <main className="admin-content"><p>Memuat data profil...</p></main>;
     }
@@ -71,17 +115,31 @@ const PreviewProfilCard = () => {
 
             {error && <div className="lk-error">{error}</div>}
 
+            {profiles.length > 0 && (
+                <p className="ppc-seret-catatan">
+                    <i className="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+                    <span>
+                        <b>Klik</b> kartu untuk mengedit profilnya. <b>Tahan</b> lalu geser untuk
+                        menukar posisinya — urutan di halaman pengunjung ikut berubah.
+                    </span>
+                </p>
+            )}
+
             <section className="ppc-preview-grid">
-                {profiles.length > 0 ? (
-                    profiles.map(profile => (
-                        <div 
-                            key={profile.id || profile.nama_lengkap} 
-                            className="ppc-preview-card-wrapper"
-                            onClick={() => navigate(`/admin/kelola-profil/edit/${menuId}/${profile.id}`)}
-                            style={{ cursor: 'pointer', transition: 'transform 0.2s ease', position: 'relative' }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            title="Klik untuk mengedit profil ini"
+                {seret.daftarTampil.length > 0 ? (
+                    seret.daftarTampil.map(profile => (
+                        <div
+                            key={profile.id || profile.nama_lengkap}
+                            {...seret.propsWadah(profile.id)}
+                            className={`ppc-preview-card-wrapper${
+                                seret.idDiseret === String(profile.id) ? ' ppc-kartu-diseret' : ''
+                            }${seret.sedangMenyeret ? ' ppc-sedang-menyusun' : ''}`}
+                            onPointerDown={(e) => seret.padaTekan(e, profile.id)}
+                            onClick={() => bukaEditor(profile.id)}
+                            // Menu konteks pada tekan-lama di layar sentuh akan
+                            // memotong seretan tepat saat ia mulai.
+                            onContextMenu={(e) => e.preventDefault()}
+                            title="Klik untuk mengedit — tahan untuk memindahkan"
                         >
                             <CardContent name={profile.nama_lengkap} role={profile.jabatan} quote={profile.quotes} imageSrc={profile.url_foto} />
                         </div>

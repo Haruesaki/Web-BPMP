@@ -1,7 +1,6 @@
 import { ButtonView } from 'ckeditor5';
 import axiosInstance from '../api/axiosInstance';
-import { mulaiUnggah, majukanUnggah, sudahiUnggah, gagalkanUnggah } from './statusUnggah';
-import { bukaPratinjau } from './pratinjauDokumen';
+import { mulaiUnggah, majukanUnggah, selesaikanUnggah, gagalkanUnggah } from './statusUnggah';
 
 // Ikon dokumen sederhana (SVG inline) untuk tombol toolbar.
 const DOC_ICON =
@@ -27,7 +26,8 @@ const ACCEPT =
 // Kemajuannya kini dilaporkan ke `utils/statusUnggah`, yang ditampilkan
 // `OverlayUnggah`. Pemberitahuan galat juga dipindahkan ke sana — `window.alert`
 // menghentikan seluruh halaman dan memaksa pengguna menekan OK sebelum dapat
-// berbuat apa pun.
+// berbuat apa pun. Sejak 7 Agustus 2026 pemberitahuan BERHASIL ikut ke sana,
+// menggantikan panel pratinjau yang dahulu terbuka di tengah layar.
 export function InsertDocumentPlugin(endpoint = '/api/upload/dokumen') {
   return function (editor) {
     editor.ui.componentFactory.add('insertDocument', (locale) => {
@@ -89,14 +89,21 @@ export function InsertDocumentPlugin(endpoint = '/api/upload/dokumen') {
               editor.model.insertContent(linkText, editor.model.document.selection);
             });
 
-            sudahiUnggah(id);
-
-            // Apa yang tersisip ke naskah hanyalah tautan bertuliskan nama
-            // berkas — tidak ada cara memastikan isinya benar tanpa menyimpan
-            // tulisan lalu membuka halaman pengunjung. Panel pratinjau
-            // menampilkan dokumen yang BARU SAJA tersimpan di peladen, jadi
-            // sekaligus membuktikan unggahannya utuh, bukan sekadar terkirim.
-            bukaPratinjau({ url, nama: name });
+            // Pemberitahuan berhasil menempati KARTU YANG SAMA dengan bilah
+            // kemajuannya, bukan panel tersendiri di tengah layar.
+            //
+            // Sebelumnya di sini terbuka panel pratinjau: dokumennya ditarik
+            // ulang dari peladen lalu ditampilkan sebagai pembuktian bahwa
+            // unggahannya utuh. Maksudnya benar, tetapi ongkosnya tidak
+            // sebanding — panel itu menutupi editor tepat pada saat penyunting
+            // hendak melanjutkan mengetik, dan menuntut ditutup sendiri untuk
+            // sesuatu yang sebenarnya sudah berhasil. Pembuktian keutuhan
+            // berkas tetap dapat dilakukan lewat tautan yang tersisip, kapan
+            // pun penyunting memang memerlukannya.
+            selesaikanUnggah(id, {
+              judul: 'Dokumen berhasil diunggah',
+              tahap: 'Tautan sudah disisipkan di posisi kursor.',
+            });
           } catch (err) {
             console.error('Gagal mengunggah dokumen:', err);
             gagalkanUnggah(
