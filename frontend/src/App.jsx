@@ -54,6 +54,7 @@ const LenisProvider = () => {
     });
 
     lenisRef.current = lenis;
+    window.lenis = lenis; // Mendaftarkan ke objek global window agar komponen anak dapat memanggil auto-scroll
 
     let rafId;
     function raf(time) {
@@ -66,22 +67,22 @@ const LenisProvider = () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
+      window.lenis = null; // Bersihkan variabel global window.lenis saat unmount
       cleanupLenis();
     };
   }, [isAdmin, location.pathname]);
 
-  // Selalu mulai dari paling atas setiap kali pindah halaman (dan saat pertama
-  // dimuat). Tanpa ini, SPA mempertahankan posisi scroll halaman sebelumnya.
-  // Rute dengan hash (#section) sengaja dilewati agar lompatan ke anchor tetap
-  // berfungsi. Efek ini diletakkan SETELAH efek Lenis agar `lenisRef.current`
-  // sudah menunjuk instance Lenis yang baru saat dipanggil.
+  // Selalu mulai dari paling atas setiap kali pindah rute halaman baru (dan saat
+  // pertama dimuat). Tanpa ini, SPA mempertahankan posisi scroll halaman sebelumnya.
+  // Untuk rute dengan hash, kita tetap mereset ke atas terlebih dahulu agar tidak
+  // melorot ke footer akibat konten dinamis lambat termuat; gulir ke elemen target
+  // akan ditangani secara terarah oleh komponen tujuan setelah konten selesai dirender.
   useEffect(() => {
-    if (location.hash) return;
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true });
     }
     window.scrollTo(0, 0);
-  }, [location.pathname, location.hash]);
+  }, [location.pathname]);
 
   // Kita berikan lenisRef sebagai cloneElement prop jika dibutuhkan oleh children
   // (misalnya untuk Navbar), atau karena AppRoutes menerima lenisRef

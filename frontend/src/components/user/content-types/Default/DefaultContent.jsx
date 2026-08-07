@@ -24,15 +24,54 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
 
   useEffect(() => {
     const targetId = location.hash.substring(1);
-    if (targetId && content.length > 0) {
-      const element = document.getElementById(targetId);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
-      }
+    if (targetId && content.length > 0 && !loading) {
+      let attempts = 0;
+      const maxAttempts = 15; // Coba selama 1.5 detik
+      
+      const tryScroll = () => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          // Ambil tinggi header secara dinamis dari root CSS
+          const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 80;
+          const rect = element.getBoundingClientRect();
+          const targetOffset = rect.top + window.scrollY - headerHeight;
+          
+          if (window.lenis) {
+            // Paksa Lenis memperbarui dimensi halaman secara instan
+            window.lenis.resize();
+            window.lenis.scrollTo(element, { offset: -headerHeight, immediate: false });
+          } else {
+            // Fallback koordinat absolut jika Lenis tidak aktif
+            window.scrollTo({ top: targetOffset, behavior: 'smooth' });
+          }
+          
+          attempts++;
+          
+          // DETEKSI KEMACETAN: Jika setelah 2 kali percobaan (sekitar 300ms) posisi scroll masih tertahan di atas (0)
+          // padahal target berada di bawah (targetOffset > 50), paksa lompatan instan menggunakan browser native
+          // agar posisi scroll terjamin berpindah ke target konten.
+          if (attempts >= 2 && window.scrollY === 0 && targetOffset > 50) {
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+            return;
+          }
+
+          // Coba lagi beberapa kali secara berkala untuk menangani pergeseran layout akibat pemuatan gambar/dokumen
+          if (attempts < 5) {
+            setTimeout(tryScroll, 150);
+          }
+        } else {
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(tryScroll, 100);
+          }
+        }
+      };
+
+      // Jalankan pencarian awal setelah delay kecil agar render React selesai
+      const timer = setTimeout(tryScroll, 200);
+      return () => clearTimeout(timer);
     }
-  }, [location.hash, content]);
+  }, [location.hash, content, loading]);
 
   useEffect(() => {
     if (!menuId) return;
@@ -261,7 +300,7 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
           });
 
           return (
-            <div key={c.id} id={`content-${c.id}`} className="content-type-section default-content">
+            <div key={c.id} id={`content-konten-${c.id}`} className="content-type-section default-content">
               <div className="default-banner-wrapper">
                 <h1 className="default-banner-title">{c.judul}</h1>
                 <p className="post-date">
