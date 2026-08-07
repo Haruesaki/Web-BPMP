@@ -15,11 +15,21 @@ const Layout = ({ lenisRef }) => {
   const themeVars = useTema();
 
   return (
-    <div className="site-theme-scope" style={themeVars}>
+    <div 
+      className="site-theme-scope" 
+      style={{ 
+        ...themeVars, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh' 
+      }}
+    >
       <Navbar lenisRef={lenisRef} />
       <FloatingSocialBar />
-      {/* Outlet akan me-render komponen halaman yang cocok dengan rute */}
-      <Outlet />
+      {/* Outlet dibungkus dalam tag main dengan flex: 1 0 auto untuk mendorong footer ke bawah */}
+      <main style={{ flex: '1 0 auto', width: '100%' }}>
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );

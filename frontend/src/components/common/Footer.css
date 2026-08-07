@@ -10,6 +10,7 @@
        (relatif ke sini), jadi cukup ubah font-size ini SATU BARIS untuk
        memperbesar/memperkecil footer secara proporsional. */
     font-size: 16px;
+    flex-shrink: 0; /* Mencegah footer menciut saat ruang konten padat */
 }
 
 /* --- Area Utama Footer (3 Kolom) --- */
