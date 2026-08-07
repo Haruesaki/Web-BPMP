@@ -124,8 +124,8 @@
 
 /* Layer 1: Bintang sedang (1.5px/0.15em) tersebar acak di area kartu (34em x 43em) */
 .stars-layer-1 {
-  width: 0.2em;
-  height: 0.2em;
+  width: 0.21em;
+  height: 0.21em;
   box-shadow: 
     4em 10em rgba(255, 255, 255, 0.85),
     12em 6em rgba(255, 255, 255, 0.6),
@@ -145,8 +145,8 @@
 
 /* Layer 2: Bintang kecil (1px/0.1em) tersebar acak asinkron */
 .stars-layer-2 {
-  width: 0.12em;
-  height: 0.12em;
+  width: 0.26em;
+  height: 0.26em;
   box-shadow: 
     8em 4em rgba(255, 255, 255, 0.7),
     18em 8em rgba(255, 255, 255, 0.5),
