@@ -14,8 +14,23 @@ const ButtonSearch = () => {
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
 
+  const [isTapped, setIsTapped] = useState(false);
+  const tapTimeoutRef = useRef(null);
+
   const handleSearchToggle = (e) => {
     if (e) e.preventDefault();
+    
+    // Deteksi touchscreen untuk tap-feedback
+    const isTouchScreen = window.matchMedia("(hover: none)").matches;
+    if (isTouchScreen) {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+
+      setIsTapped(true);
+      tapTimeoutRef.current = setTimeout(() => {
+        setIsTapped(false);
+      }, 1000);
+    }
+
     setIsSearchActive(!isSearchActive);
     if (!isSearchActive && searchInputRef.current) {
       setTimeout(() => {
@@ -86,7 +101,10 @@ const ButtonSearch = () => {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
   }, []);
 
   const getHighlightedText = (text, highlight) => {
@@ -122,7 +140,11 @@ const ButtonSearch = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onClick={() => { if (searchQuery.trim().length > 0) setShowSuggestions(true); }}
         />
-        <button className="search-trigger" aria-label="Pencarian" onClick={handleSearchToggle}>
+         <button 
+          className={`search-trigger ${isTapped ? 'hover-active' : ''}`} 
+          aria-label="Pencarian" 
+          onClick={handleSearchToggle}
+        >
           <i className="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>

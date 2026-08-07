@@ -5,13 +5,35 @@ import './CardContent.css';
 import LazyLoadWrapper from './LazyLoadWrapper';
 import Pagination from './Pagination'; // Menggunakan komponen Pagination lokal
 
+const getItemsPerPage = (width, isVertical) => {
+  if (isVertical) return 8; // Default statis untuk layout vertikal satu kolom
+  if (width >= 1748) return 8; // 4 kolom x 2 baris (uji coba: wrap mulai terjadi pada 1747px)
+  if (width >= 1361) return 6; // 3 kolom x 2 baris (uji coba: wrap mulai terjadi pada 1378px)
+  if (width >= 768) return 4; // 2 kolom x 2 baris (uji coba: wrap mulai terjadi pada 991px)
+  return 4;                    // 1 kolom x 2 baris (mobile)
+};
+
 const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const isVertical = viewLayout === 'Vertikal';
+  const [itemsPerPage, setItemsPerPage] = useState(() => 
+    getItemsPerPage(window.innerWidth, isVertical)
+  );
 
-  // Konfigurasi untuk pagination
-  const ITEMS_PER_PAGE = 8;
+  // Menangani perubahan ukuran layar (resize) secara instan untuk sinkronisasi layout yang mulus
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerPage(getItemsPerPage(window.innerWidth, isVertical));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isVertical]);
   
   useEffect(() => {
     if (!menuId) return;
@@ -37,6 +59,16 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
   // Fungsi untuk mengubah halaman
   const handlePageChange = (page) => setCurrentPage(page);
 
+  // Hitung total halaman (dideklarasikan sebelum Hook dan early return)
+  const totalPages = Math.ceil(profiles.length / itemsPerPage);
+  
+  // Amankan halaman aktif jika jumlah halaman menyusut setelah resize (Harus ditaruh sebelum early return)
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [itemsPerPage, totalPages, currentPage]);
+
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat profil...</div>;
   }
@@ -45,12 +77,8 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Belum ada data profil untuk menu ini.</div>;
   }
 
-  const isVertical = viewLayout === 'Vertikal';
-  
-  // Logika untuk memotong data sesuai halaman saat ini
-  const totalPages = Math.ceil(profiles.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
   const currentProfiles = profiles.slice(startIndex, endIndex);
 
   return (

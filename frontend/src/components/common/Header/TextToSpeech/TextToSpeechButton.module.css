@@ -45,19 +45,56 @@
   pointer-events: none;
 }
 
-.btnVoice:hover::before {
+/* Efek hover tombol suara hanya aktif di perangkat non-layar sentuh */
+@media (hover: hover) {
+  .btnVoice:hover::before {
+    transform: translateX(200%) skewX(-30deg);
+  }
+
+  .btnVoice:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
+                inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
+    background: linear-gradient(
+      135deg,
+      rgba(42, 60, 105, 0.9) 0%,
+      rgba(30, 45, 85, 0.8) 100%
+    );
+  }
+
+  .active:hover {
+    background: linear-gradient(
+      135deg,
+      rgb(23, 82, 40) 0%,
+      rgba(1, 31, 9, 0.748) 100%
+    );
+  }
+}
+
+/* Pemicu animasi hover ketika tombol di-tap di perangkat layar sentuh */
+.hoverActive::before {
   transform: translateX(200%) skewX(-30deg);
 }
 
-/* Specific hover for non-active state */
-.btnVoice:hover {
+.hoverActive {
   transform: translateY(-2px);
   box-shadow: inset 5px 5px 5px -3px rgba(216, 216, 255, 0.515),
               inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
+}
+
+.hoverActive:not(.active) {
   background: linear-gradient(
     135deg,
     rgba(42, 60, 105, 0.9) 0%,
     rgba(30, 45, 85, 0.8) 100%
+  );
+}
+
+.hoverActive.active {
+  background: linear-gradient(
+    135deg,
+    rgb(23, 82, 40) 0%,
+    rgba(1, 31, 9, 0.748) 100%
   );
 }
 
@@ -66,15 +103,6 @@
     120deg,
     rgba(2, 192, 52, 0.858) 0%,
     rgba(5, 74, 22, 0.857) 70%
-  );
-}
-
-/* Specific hover for active state */
-.active:hover {
-  background: linear-gradient(
-    135deg,
-    rgb(23, 82, 40) 0%,
-    rgba(1, 31, 9, 0.748) 100%
   );
 }
 

@@ -3,7 +3,7 @@
   font-size: 9.5px;
   width: 34em;
   height: 43em;
-  background: rgb(2, 0, 41) ;
+  background: rgb(6, 2, 63) ;
   border-radius: 3.4em;
   position: relative;
   overflow: hidden;
@@ -19,9 +19,19 @@
   transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transform-style: preserve-3d;
   transform: perspective(400em) scale(1) rotateY(0deg) rotateX(0deg);
+  will-change: transform, box-shadow;
 }
 
-.card-profile:hover {
+/* Efek hover 3D hanya diaktifkan pada perangkat dengan pointer mouse/trackpad (non-layar sentuh) */
+@media (hover: hover) {
+  .card-profile:hover {
+    transform: perspective(100em) scale(1.06) rotateY(-5deg) rotateX(6deg);
+    box-shadow: 0 4em 7em -2em rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Pemicu tap interaktif untuk perangkat layar sentuh */
+.card-profile.hover-active {
   transform: perspective(100em) scale(1.06) rotateY(-5deg) rotateX(6deg);
   box-shadow: 0 4em 7em -2em rgba(0, 0, 0, 0.7);
 }
@@ -33,7 +43,8 @@
   width: 100%;
   height: 100%;
   
-  background-color: #02001e; 
+  /* Gradien linier vertikal (bawah gelap ke atas sedikit terang) */
+  background: linear-gradient(to top, #06023f 60%, #0d0761 100%); 
   
   z-index: 1;
   display: flex;
@@ -49,7 +60,121 @@
   mask-repeat: no-repeat;
   overflow: hidden;
 }
-.card-text{
+
+/* Base style untuk gelembung liquid - Dioptimalkan untuk kelap-kelip opacity */
+.liquid-bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  will-change: opacity;
+}
+
+/* Gelembung 1: Cyan-Biru (kiri bawah) */
+.liquid-bubble.bubble-1 {
+  width: 26em;
+  height: 26em;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.4) 0%, rgba(41, 109, 255, 0.15) 50%, rgba(41, 109, 255, 0) 75%);
+  bottom: -8em;
+  left: -8em;
+  animation: pulseOpacity 3s infinite ease-in-out;
+}
+
+/* Gelembung 2: Ungu-Indigo (kanan tengah) */
+.liquid-bubble.bubble-2 {
+  width: 24em;
+  height: 24em;
+  background: radial-gradient(circle, rgba(162, 0, 255, 0.35) 0%, rgba(255, 0, 128, 0.12) 50%, rgba(255, 0, 128, 0) 75%);
+  top: 14em;
+  right: -6em;
+  animation: pulseOpacity 5s infinite ease-in-out;
+  animation-delay: 2.5s;
+}
+
+/* Gelembung 3: Cyan terang (atas kanan) */
+.liquid-bubble.bubble-3 {
+  width: 18em;
+  height: 18em;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.35) 0%, rgba(41, 109, 255, 0.1) 50%, rgba(41, 109, 255, 0) 75%);
+  top: -4em;
+  right: -4em;
+  animation: pulseOpacity 4s infinite ease-in-out;
+  animation-delay: 5s;
+}
+
+/* Animasi kelap-kelip opasitas (sangat ringan diproses oleh GPU) */
+@keyframes pulseOpacity {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Efek Bintang Kelap-Kelip Ultra-Ringan (Memanfaatkan Box-Shadow Berlapis pada Elemen Tunggal) */
+.stars-layer-1,
+.stars-layer-2 {
+  position: absolute;
+  border-radius: 50%;
+  background: transparent;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Layer 1: Bintang sedang (1.5px/0.15em) tersebar acak di area kartu (34em x 43em) */
+.stars-layer-1 {
+  width: 0.2em;
+  height: 0.2em;
+  box-shadow: 
+    4em 10em rgba(255, 255, 255, 0.85),
+    12em 6em rgba(255, 255, 255, 0.6),
+    22em 12em rgba(255, 255, 255, 0.9),
+    7em 20em rgba(255, 255, 255, 0.5),
+    16em 24em rgba(255, 255, 255, 0.75),
+    26em 18em rgba(255, 255, 255, 0.8),
+    10em 30em rgba(255, 255, 255, 0.6),
+    20em 34em rgba(255, 255, 255, 0.7),
+    5em 38em rgba(255, 255, 255, 0.5),
+    28em 36em rgba(255, 255, 255, 0.85),
+    3em 16em rgba(0, 229, 255, 0.8),  /* Bintang kelap-kelip warna cyan tema */
+    24em 5em rgba(162, 0, 255, 0.8);  /* Bintang kelap-kelip warna ungu tema */
+  animation: pulseStars1 4s infinite ease-in-out;
+  will-change: opacity;
+}
+
+/* Layer 2: Bintang kecil (1px/0.1em) tersebar acak asinkron */
+.stars-layer-2 {
+  width: 0.12em;
+  height: 0.12em;
+  box-shadow: 
+    8em 4em rgba(255, 255, 255, 0.7),
+    18em 8em rgba(255, 255, 255, 0.5),
+    3em 26em rgba(255, 255, 255, 0.8),
+    13em 22em rgba(255, 255, 255, 0.6),
+    22em 28em rgba(255, 255, 255, 0.75),
+    17em 16em rgba(255, 255, 255, 0.65),
+    27em 26em rgba(255, 255, 255, 0.8),
+    14em 36em rgba(255, 255, 255, 0.5),
+    25em 32em rgba(255, 255, 255, 0.7),
+    30em 10em rgba(0, 229, 255, 0.7),
+    2em 32em rgba(162, 0, 255, 0.7);
+  animation: pulseStars2 6s infinite ease-in-out;
+  animation-delay: 3s;
+  will-change: opacity;
+}
+
+@keyframes pulseStars1 {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.95; }
+}
+
+@keyframes pulseStars2 {
+  0%, 100% { opacity: 0.95; }
+  50% { opacity: 0.35; }
+}
+
+.card-text {
   position: absolute;
   bottom: 0;
   display: flex;
@@ -95,7 +220,7 @@
   margin-bottom: 0.5em;
   line-height: 1.4;
   /* Reserve space for 2 lines */
-  min-height: 3em;
+  min-height: 2.5em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -153,6 +278,8 @@
   drop-shadow(0.2em 0.2em 0.6em rgb(41, 109, 255))
   drop-shadow(-0.2em -0.1em 0.1em rgba(255, 255, 255, 0.841))
   drop-shadow(-0.5em -0.3em 0.2em rgba(101, 222, 255, 0.381));
+  will-change: filter;
+  transform: translateZ(0);
 }
 
 .card-light-sweep {
@@ -186,7 +313,15 @@
   filter: blur(3em);
 }
 
-.card-profile:hover .card-light-sweep::before {
+/* Animasi kilau menyapu hanya diaktifkan pada perangkat non-layar sentuh */
+@media (hover: hover) {
+  .card-profile:hover .card-light-sweep::before {
+    animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* Pemicu animasi kilau menyapu saat di-tap pada perangkat layar sentuh */
+.card-profile.hover-active .card-light-sweep::before {
   animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -195,10 +330,24 @@
   to { left: 150%; }
 }
 
+
+@media (max-width: 976px) {
+  .card-profile {
+   font-size: clamp(6px, 0.83vw, 9px);
+   
+  }
+}
+
+
 @media (max-width: 768px) {
   .card-profile {
-   font-size: 7px;
-   
+   font-size: clamp(5px, 1.5vw, 7px);
+  }
+}
+
+@media (max-width: 250px) {
+  .card-profile {
+   font-size: clamp(3px, 1.5vw, 5px);
   }
 }
 
@@ -208,7 +357,7 @@
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
-  padding: 4rem 2rem;
+  padding: 1rem 2rem;
 }
 
 /* Styling untuk judul halaman */
@@ -219,9 +368,8 @@
 }
 
 .page-content-header h1 {
-  /* Menggunakan variabel global jika ada, dengan fallback */
   color: var(--text-main, #1c1c1c);
-  font-size: clamp(28px, 3vw, 38px);
+  font-size: clamp(16px, 5.5vw, 40px) !important;
   font-weight: 700;
   margin: 0;
   letter-spacing: 0.5px;

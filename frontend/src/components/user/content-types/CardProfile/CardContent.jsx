@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from "react";
 import "./CardContent.css";
 import MediaKosong from "../../../common/MediaKosong";
 
@@ -7,8 +8,35 @@ const CardContent = ({
   quote = "“Programmer Full Stuck bukan Full Stack”",
   imageSrc = null,
 }) => {
+  const [isTapped, setIsTapped] = useState(false);
+  const tapTimeoutRef = useRef(null);
+
+  const handleTap = () => {
+    // Deteksi jika perangkat menggunakan layar sentuh
+    const isTouchScreen = window.matchMedia("(hover: none)").matches;
+    if (isTouchScreen) {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      
+      setIsTapped(true);
+      // Matikan status tap setelah 1000ms agar posisi hover kembali normal
+      tapTimeoutRef.current = setTimeout(() => {
+        setIsTapped(false);
+      }, 1000);
+    }
+  };
+
+  useEffect(() => {
+    // Membersihkan timer saat komponen di-unmount untuk mencegah kebocoran memori
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
+  }, []);
+
   return (
-    <div className="card-profile">
+    <div 
+      className={`card-profile ${isTapped ? "hover-active" : ""}`}
+      onClick={handleTap}
+    >
       {/* Elemen baru untuk efek kilau saat hover */}
       <div className="card-light-sweep"></div>
 
@@ -31,7 +59,13 @@ const CardContent = ({
 
       <div className="wave-shadow-wrapper">
         {/* Latar belakang solid dengan efek gelombang dari mask-image */}
-        <div className="wave-content-container"></div>
+        <div className="wave-content-container">
+          <div className="liquid-bubble bubble-1"></div>
+          <div className="liquid-bubble bubble-2"></div>
+          <div className="liquid-bubble bubble-3"></div>
+          <div className="stars-layer-1"></div>
+          <div className="stars-layer-2"></div>
+        </div>
       </div>
     </div>
   );

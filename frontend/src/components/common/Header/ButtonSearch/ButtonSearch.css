@@ -100,11 +100,23 @@
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
 }
-.search-trigger:hover {
+/* Efek hover tombol pencarian hanya aktif di perangkat non-layar sentuh */
+@media (hover: hover) {
+  .search-trigger:hover {
+    transform: scale(1);
+    background: linear-gradient( 155deg, rgba(var(--theme-highlight-rgb, 24, 63, 255), 0.751) 0%, rgba(var(--theme-highlight-deep-rgb, 12, 47, 174), 0.823) 80% );
+  }
+  .search-trigger:hover::before {
+    transform: translateX(200%) skewX(-30deg);
+  }
+}
+
+/* Pemicu animasi hover ketika tombol di-tap di perangkat layar sentuh */
+.search-trigger.hover-active {
   transform: scale(1);
   background: linear-gradient( 155deg, rgba(var(--theme-highlight-rgb, 24, 63, 255), 0.751) 0%, rgba(var(--theme-highlight-deep-rgb, 12, 47, 174), 0.823) 80% );
 }
-.search-trigger:hover::before {
+.search-trigger.hover-active::before {
   transform: translateX(200%) skewX(-30deg);
 }
 /* =========================================
