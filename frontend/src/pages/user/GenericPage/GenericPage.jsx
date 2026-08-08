@@ -66,7 +66,7 @@ const GenericPage = () => {
 
       {/* Placeholder untuk layout berita */}
       {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'berita-card' && (
-        <NewsCardContent menuId={menuData.id} viewLayout={menuData.tampilan} />
+        <NewsCardContent menuId={menuData.id} viewLayout={menuData.tampilan} menuName={menuData.nama_menu} />
       )}
     </div>
   );
