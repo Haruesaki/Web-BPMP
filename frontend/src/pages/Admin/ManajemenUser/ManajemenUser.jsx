@@ -5,6 +5,7 @@ import '../DashboardAdmin/dashboard-admin.css';
 import './ManajemenUser.css';
 import { useUsers } from '../../../hooks/useUsers';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 
 // =========================================================================
 //  DATA DUMMY
@@ -68,13 +69,9 @@ const ManajemenUser = () => {
 
   // Ambil data session admin saat ini
   const currentUser = useMemo(() => {
-    const session = sessionStorage.getItem('adminSession');
+    const session = bacaSesi();
     if (session) {
-      try {
-        return JSON.parse(session);
-      } catch (e) {
-        console.error("Gagal membaca session admin", e);
-      }
+      return session;
     }
     return null;
   }, []);
@@ -390,6 +387,11 @@ const ManajemenUser = () => {
 
           {/* ---------- TABLE CARD ---------- */}
           <section className="mu-table-card">
+            {/* Hanya TABEL yang dibungkus wadah scroll horizontal. Footer/
+                pagination sengaja di LUAR wadah ini agar tidak ikut tergeser
+                saat tabel di-scroll (pola sama seperti .activity-table-wrap di
+                dashboard). */}
+            <div className="mu-table-scroll">
             <table className="mu-table">
               <thead>
                 <tr>
@@ -470,6 +472,7 @@ const ManajemenUser = () => {
                 )}
               </tbody>
             </table>
+            </div>
 
             {/* ---------- FOOTER / PAGINATION ---------- */}
             <div className="mu-table-footer">

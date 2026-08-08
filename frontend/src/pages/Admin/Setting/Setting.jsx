@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
 import { getAuthHeaders } from '../../../api/userApi';
+import { bacaSesi, simpanSesi } from '../../../utils/sesiAdmin';
 import '../DashboardAdmin/dashboard-admin.css';
 import './Setting.css';
 
@@ -14,13 +15,7 @@ import './Setting.css';
 //  dari catch block (network error / 404), itu wajar untuk sementara.
 // =========================================================================
 
-const getSession = () => {
-  try {
-    return JSON.parse(sessionStorage.getItem('adminSession')) || {};
-  } catch {
-    return {};
-  }
-};
+const getSession = () => bacaSesi() || {};
 
 const EMPTY_PASSWORD_FORM = { oldPassword: '', newPassword: '', confirmPassword: '' };
 
@@ -72,7 +67,7 @@ const Setting = () => {
       // Perbarui sessionStorage supaya nama/email di header ikut ter-update
       // pada kunjungan berikutnya (header hanya baca session saat mount).
       const updatedSession = { ...session, nama, email };
-      sessionStorage.setItem('adminSession', JSON.stringify(updatedSession));
+      simpanSesi(updatedSession);
 
       setProfileMsg({ type: 'success', text: 'Profil berhasil diperbarui.' });
     } catch (error) {

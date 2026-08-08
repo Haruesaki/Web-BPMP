@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getLayoutEditor } from './layoutRegistry';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 
 // =========================================================================
 //  MENU CONTENT EDITOR (host editor konten menu — sisi ADMIN)
@@ -44,7 +45,7 @@ const MenuContentEditor = ({ layout: layoutProp }) => {
     }
     const fetchData = async () => {
       try {
-        const session = JSON.parse(sessionStorage.getItem('adminSession') || '{}');
+        const session = bacaSesi() || {};
         const token = session?.token;
         const headers = { 'Authorization': `Bearer ${token}` };
 
@@ -92,7 +93,7 @@ const MenuContentEditor = ({ layout: layoutProp }) => {
     }
 
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession') || '{}');
+      const session = bacaSesi() || {};
       const token = session?.token;
       
       if (layout === 'default') {

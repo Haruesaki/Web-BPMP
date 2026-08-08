@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import './PengaturanMenu.css';
 import TambahSubmenu from './TambahSubmenu';
 import EditMenu from './EditMenu';
@@ -43,6 +44,7 @@ const PengaturanMenu = () => {
 
   // State popup konfirmasi aktif/nonaktif
   const [confirm, setConfirm] = useState(null);
+  const [pesanAktif, setPesanAktif] = useState('');
 
   const fetchMenus = async () => {
     try {
@@ -101,7 +103,7 @@ const PengaturanMenu = () => {
         });
       });
 
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
 
       await axiosInstance.patch('/api/menus/reorder', { updates }, {
@@ -165,7 +167,7 @@ const PengaturanMenu = () => {
 
   const hapusMenuApi = async (id) => {
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
       await axiosInstance.delete(`/api/menus/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -181,7 +183,7 @@ const PengaturanMenu = () => {
     if (!convertName || !convertIcon) return;
     setIsConvertLoading(true);
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
       await axiosInstance.post('/api/menus/convert-to-submenu', {
         idMenuUtama: modalConvertOpen.menuId,
@@ -218,15 +220,54 @@ const PengaturanMenu = () => {
     setIsModalEditOpen(true);
   };
 
-  const toggleActive = (id) => setMenus((prev) => prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m)));
-  const toggleSubActive = (parentId, subId) =>
-    setMenus((prev) =>
-      prev.map((m) =>
-        m.id === parentId
-          ? { ...m, submenus: m.submenus.map((s) => (s.id === subId ? { ...s, active: !s.active } : s)) }
-          : m
-      )
-    );
+  // Pengaktifan/penonaktifan DISIMPAN ke peladen.
+  //
+  // Sebelumnya kedua fungsi ini hanya mengubah state React: tombolnya bergerak,
+  // tampak berhasil, lalu kembali seperti semula begitu halaman dimuat ulang —
+  // dan sisi pengunjung tidak pernah berubah sama sekali.
+  //
+  // Keadaannya diubah lebih dahulu supaya terasa seketika, lalu DIKEMBALIKAN
+  // bila peladen menolak. Tanpa pengembalian itu, tampilan admin akan
+  // menunjukkan keadaan yang sebenarnya tidak pernah tersimpan.
+  const simpanAktif = async (id, nilaiBaru, kembalikan) => {
+    setPesanAktif('');
+    try {
+      await axiosInstance.patch(`/api/menus/${id}`, { is_aktif: nilaiBaru });
+    } catch (err) {
+      kembalikan();
+      const pesanPeladen = typeof err?.response?.data === 'object' ? err.response.data?.pesan : null;
+      setPesanAktif(pesanPeladen || 'Gagal menyimpan status menu. Coba lagi.');
+      console.error('Gagal menyimpan status menu:', err);
+    }
+  };
+
+  const toggleActive = (id) => {
+    const menu = menus.find((m) => m.id === id);
+    if (!menu) return;
+    const nilaiBaru = !menu.active;
+    setMenus((prev) => prev.map((m) => (m.id === id ? { ...m, active: nilaiBaru } : m)));
+    simpanAktif(id, nilaiBaru, () =>
+      setMenus((prev) => prev.map((m) => (m.id === id ? { ...m, active: !nilaiBaru } : m))));
+  };
+
+  const toggleSubActive = (parentId, subId) => {
+    const induk = menus.find((m) => m.id === parentId);
+    const sub = induk?.submenus?.find((s) => s.id === subId);
+    if (!sub) return;
+    const nilaiBaru = !sub.active;
+    const pasang = (nilai) =>
+      setMenus((prev) =>
+        prev.map((m) =>
+          m.id === parentId
+            ? { ...m, submenus: m.submenus.map((s) => (s.id === subId ? { ...s, active: nilai } : s)) }
+            : m
+        )
+      );
+    pasang(nilaiBaru);
+    // Menonaktifkan submenu SENGAJA tidak menyentuh induknya sama sekali —
+    // hanya butir itu sendiri yang hilang dari navigasi.
+    simpanAktif(subId, nilaiBaru, () => pasang(!nilaiBaru));
+  };
 
   const askConfirm = (kind, id, willActivate, label, parentId = null) => setConfirm({ kind, id, willActivate, label, parentId });
   const cancelConfirm = () => setConfirm(null);
@@ -263,6 +304,16 @@ const PengaturanMenu = () => {
             </div>
           </div>
         </div>
+
+        {pesanAktif && (
+          <div className="pm-galat-aktif" role="alert">
+            <i className="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span>{pesanAktif}</span>
+            <button type="button" onClick={() => setPesanAktif('')} aria-label="Tutup pesan galat">
+              <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        )}
 
         <div className="pm-list">
           {menus.map((menu, index) => {
@@ -348,7 +399,26 @@ const PengaturanMenu = () => {
                       <div className="pm-label">
                         <i className={sub.ikon_menu} style={{ marginRight: '8px' }}></i>
                         <span>{sub.label}</span>
-                        <span className={`pm-dot ${sub.active ? 'pm-dot-active' : 'pm-dot-inactive'}`} title={sub.active ? 'Aktif' : 'Non-aktif'}></span>
+                        <span
+                          className={`pm-dot ${sub.active && menu.active ? 'pm-dot-active' : 'pm-dot-inactive'}`}
+                          title={
+                            !menu.active
+                              ? 'Tidak tampil — menu induknya sedang nonaktif'
+                              : sub.active ? 'Aktif' : 'Non-aktif'
+                          }
+                        ></span>
+                        {/* Submenu yang saklarnya sendiri masih hidup tetapi
+                            induknya mati diberi keterangan tegas. Tanpa ini,
+                            penyunting melihat submenu "aktif" yang nyatanya
+                            tidak tampil di sisi pengunjung — dan tidak ada
+                            satu pun petunjuk mengapa. Nilai saklarnya sendiri
+                            sengaja TIDAK diubah, supaya menyalakan kembali
+                            induknya memulihkan keadaan semula. */}
+                        {sub.active && !menu.active && (
+                          <span className="pm-ikut-nonaktif" title="Akan tampil kembali begitu menu induknya diaktifkan">
+                            ikut nonaktif
+                          </span>
+                        )}
                       </div>
 
                       <div className="pm-actions">

@@ -40,6 +40,27 @@ class HalamanKontenController {
       const oldCount = parseInt(oldContents?.cnt || 0, 10);
       const newCount = contents.length;
 
+      // `dibuat_oleh` menunjuk tabel `pengguna` lewat kunci asing. Token berlaku
+      // sehari penuh sehingga dapat bertahan melewati penghapusan penggunanya —
+      // atau melewati pemulihan basis data yang menomori ulang penggunanya,
+      // keadaan yang lazim saat data dipindahkan ke peladen production.
+      //
+      // Bila barisnya tidak ada, MySQL menolak SELURUH penyisipan. Karena
+      // seluruh konten menu sudah dihapus lebih dahulu di dalam transaksi yang
+      // sama, transaksinya memang dibatalkan dan datanya selamat — tetapi
+      // penyimpanan GAGAL TOTAL tanpa keterangan yang berguna. Di komputer
+      // sendiri hal ini tidak pernah terlihat sebab penggunanya memang ada.
+      //
+      // Nama pembuat yang hilang jauh lebih ringan akibatnya daripada konten
+      // yang tidak dapat disimpan sama sekali.
+      const idPembuat = req.user?.id || null;
+      const pembuatTerdaftar = idPembuat
+        ? await db('pengguna').where('id', idPembuat).first('id')
+        : null;
+      if (idPembuat && !pembuatTerdaftar) {
+        console.warn(`[halaman-konten] dibuat_oleh ${idPembuat} tidak ada di tabel pengguna — disimpan sebagai NULL.`);
+      }
+
       // Hapus konten lama lalu insert ulang seluruh list. Dibungkus TRANSACTION
       // agar atomik: bila ada dua permintaan simpan berbarengan, keduanya
       // di-serialisasikan sehingga delete+insert tidak bisa saling menyela
@@ -56,7 +77,7 @@ class HalamanKontenController {
               judul: c.judul || 'Tanpa Judul',
               deskripsi_kaya: c.konten || '',
               kunci_halaman: finalKunci,
-              dibuat_oleh: req.user?.id || null,
+              dibuat_oleh: pembuatTerdaftar ? idPembuat : null,
               status: c.status || 'terbit',
               urutan_tampil: index,
               url_foto: c.coverUrl || null,

@@ -7,6 +7,7 @@ import AdminHeader from './AdminHeader';
 import { useAuth } from '../../../hooks/useAuth';
 import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 
 import DashboardAdmin from '../../../pages/Admin/DashboardAdmin/dashboard-admin';
 import CustomizeBeranda from '../../../pages/Admin/CustomizeBeranda/CustomizeBeranda';
@@ -119,7 +120,7 @@ const AdminLayout = () => {
     }
 
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
 
       // POST data ke backend menggunakan axiosInstance

@@ -159,6 +159,14 @@
     overflow: hidden;
 }
 
+/* Wadah scroll horizontal HANYA untuk tabel — footer/pagination berada di luar
+   wadah ini (lihat JSX) sehingga tidak ikut tergeser saat tabel di-scroll.
+   Pola sama seperti .activity-table-wrap di dashboard. Di desktop tabel muat
+   penuh → tidak ada scroll (tanpa perubahan visual). */
+.admin-layout .mu-table-scroll {
+    overflow-x: auto;
+}
+
 .admin-layout .mu-table {
     width: 100%;
     border-collapse: collapse;
@@ -642,11 +650,9 @@
     .admin-layout .mu-search {
         max-width: none;
     }
-    /* Tabel user diberi lebar minimum lalu digulir horizontal (kartu tabel jadi
-       area scroll) supaya kolom tidak gepeng & tak terpotong. */
-    .admin-layout .mu-table-card {
-        overflow-x: auto;
-    }
+    /* Tabel user diberi lebar minimum lalu digulir horizontal di dalam
+       .mu-table-scroll (footer TIDAK ikut tergeser) supaya kolom tidak gepeng
+       & tak terpotong. */
     .admin-layout .mu-table {
         min-width: 600px;
     }

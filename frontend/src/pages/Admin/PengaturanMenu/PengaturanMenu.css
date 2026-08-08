@@ -522,3 +522,51 @@
         flex: 1 1 auto;
     }
 }
+/* =========================================================================
+   STATUS AKTIF MENU
+   -------------------------------------------------------------------------
+   Penonaktifan menu induk menyembunyikan seluruh submenunya di sisi
+   pengunjung, tetapi nilai saklar submenunya sendiri SENGAJA tidak diubah —
+   supaya menyalakan kembali induknya memulihkan keadaan semula tanpa
+   penyunting harus mengingat mana saja yang tadinya hidup.
+
+   Akibatnya ada keadaan yang tanpa keterangan akan membingungkan: submenu
+   yang saklarnya hidup tetapi nyatanya tidak tampil. Label di bawah yang
+   menerangkannya.
+   ========================================================================= */
+.pm-ikut-nonaktif {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 183, 3, 0.14);
+    border: 1px solid rgba(255, 183, 3, 0.42);
+    color: #ffb703;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    cursor: help;
+}
+
+.pm-galat-aktif {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 85, 85, 0.1);
+    border: 1px solid rgba(255, 85, 85, 0.4);
+    color: #ff8888;
+    font-size: 13px;
+}
+
+.pm-galat-aktif button {
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}

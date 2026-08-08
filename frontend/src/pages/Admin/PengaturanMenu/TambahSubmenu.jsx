@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import { LAYOUT_LABEL_TO_KEY } from '../../../components/admin/LayoutPost/layoutMeta';
 
 const TambahSubmenu = ({ isOpen, onClose, parentId, onSuccess }) => {
@@ -69,7 +70,7 @@ const TambahSubmenu = ({ isOpen, onClose, parentId, onSuccess }) => {
     }
 
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
 
       const res = await axiosInstance.post('/api/menus', {

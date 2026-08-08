@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import './AdminSidebar.css';
 
 // --- DATA: MENU STATIS BAGIAN ATAS ---
@@ -37,18 +38,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
     } catch { return []; }
   });
 
-  const currentUser = useMemo(() => {
-    const session = sessionStorage.getItem('adminSession');
-    if (session) {
-      try {
-        const parsed = JSON.parse(session);
-        return parsed || null;
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
-  }, []);
+  const currentUser = useMemo(() => bacaSesi(), []);
 
   const hasAccess = (label) => {
     if (!currentUser) return false;

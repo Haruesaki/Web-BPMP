@@ -79,6 +79,7 @@ import { TempelBersih } from '../../../utils/TempelBersihPlugin';
 // gambar potret yang terlalu menjulang. Lihat utils/AutoPotongGambarPlugin.js.
 import { AutoPotongGambarPlugin } from '../../../utils/AutoPotongGambarPlugin';
 import axiosInstance from '../../../api/axiosInstance';
+import { ambilToken } from '../../../utils/sesiAdmin';
 import OverlayUnggah from '../common/OverlayUnggah';
 import './CKEditorComponent.css';
 
@@ -185,14 +186,7 @@ const editorConfig = {
   placeholder: 'Tulis isi konten di sini...',
 };
 
-const getAuthToken = () => {
-  try {
-    const session = sessionStorage.getItem('adminSession');
-    return session ? JSON.parse(session)?.token || '' : '';
-  } catch {
-    return '';
-  }
-};
+const getAuthToken = () => ambilToken() || '';
 
 const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/upload/gambar`;
 

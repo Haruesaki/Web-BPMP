@@ -3,10 +3,37 @@ const jwt = require('jsonwebtoken');
 const AuthModel = require('../models/authModel');
 const env = require('../config/env');
 
+// =========================================================================
+//  MASA BERLAKU SESI
+//  -----------------------------------------------------------------------
+//  Peladen adalah pemegang keputusan masa berlaku; peramban hanya membaca
+//  klaim `exp` dari token yang dibuat di sini. Keduanya karenanya tidak akan
+//  pernah berbeda, walau nilai di bawah kelak diubah.
+//
+//  MASA_BIASA — tanpa "Ingat saya". Delapan jam menutup satu hari kerja penuh
+//  dan berakhir dengan sendirinya sesudah jam kerja, sehingga sesi tidak
+//  tertinggal hidup semalaman di komputer bersama. Sebelumnya 24 jam, yang
+//  berarti sesi kemarin sore masih terbuka pagi ini bagi siapa pun yang
+//  memakai komputer itu.
+//
+//  MASA_INGAT — dengan "Ingat saya", 7 hari, sesuai permintaan. Bersifat
+//  MUTLAK sejak login, bukan bergulir: lewat hari ketujuh wajib login ulang
+//  walau panel dipakai setiap hari. Inilah yang membatasi kerugian bila token
+//  tersalin, sebab tanpa batas mutlak sebuah token yang bocor dapat
+//  memperpanjang dirinya sendiri tanpa akhir.
+// =========================================================================
+const MASA_BIASA = '8h';
+const MASA_INGAT = '7d';
+
+// Hanya menerima nilai yang benar-benar berarti "ya". Badan permintaan JSON
+// dapat memuat boolean maupun teks, dan string "false" bernilai truthy bila
+// diuji langsung — itu akan membuat setiap login diam-diam bertahan 7 hari.
+const ingatSayaDiminta = (nilai) => nilai === true || nilai === 'true' || nilai === 1 || nilai === '1';
+
 class AuthController {
     static async login(req, res) {
         try {
-            const { email, password } = req.body;
+            const { email, password, ingatSaya } = req.body;
 
             // 1. Validasi input
             if (!email || !password) {
@@ -46,10 +73,11 @@ class AuthController {
             // Kunci berasal dari modul env (sudah divalidasi saat boot). Nilai
             // cadangan dihapus — lihat alasannya di config/env.js.
             const accessArray = typeof user.akses_menu === 'string' ? JSON.parse(user.akses_menu) : (user.akses_menu || []);
+            const masaBerlaku = ingatSayaDiminta(ingatSaya) ? MASA_INGAT : MASA_BIASA;
             const token = jwt.sign(
                 { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran, access: accessArray },
                 env.JWT_SECRET,
-                { expiresIn: '1d' }
+                { expiresIn: masaBerlaku }
             );
 
             // 6. Kirim respons sukses
@@ -303,11 +331,25 @@ class AuthController {
 
             // Langsung login-kan pengguna setelah reset password berhasil
             const user = await AuthModel.findUserByEmail(email);
-            const secretKey = process.env.JWT_SECRET || 'fallback_secret_key';
+
+            // DUA PERBAIKAN di jalur ini, keduanya berdiri sendiri dari
+            // perubahan masa berlaku tetapi terletak pada baris yang sama:
+            //
+            // 1. Kuncinya dahulu `process.env.JWT_SECRET || 'fallback_secret_key'`.
+            //    Nilai cadangan itu sudah sengaja dihapus di config/env.js —
+            //    kunci yang tertulis di kode sumber membuat token superadmin
+            //    dapat ditempa siapa pun yang membaca berkas ini. Jalur ini
+            //    terlewat saat pembersihan dahulu. Kini memakai env.JWT_SECRET,
+            //    sama seperti jalur login dan authMiddleware.
+            // 2. Klaim `access` dahulu tidak disertakan, sehingga pengguna yang
+            //    baru saja mengatur ulang kata sandinya masuk dengan daftar
+            //    akses menu KOSONG dan kehilangan menu yang seharusnya ia
+            //    miliki sampai ia keluar lalu login kembali.
+            const accessArray = typeof user.akses_menu === 'string' ? JSON.parse(user.akses_menu) : (user.akses_menu || []);
             const token = jwt.sign(
-                { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran },
-                secretKey,
-                { expiresIn: '1d' }
+                { id: user.id, nama: user.nama_pengguna, email: user.email, role: user.nama_peran, access: accessArray },
+                env.JWT_SECRET,
+                { expiresIn: MASA_BIASA }
             );
 
             return res.status(200).json({
@@ -318,7 +360,8 @@ class AuthController {
                         id: user.id,
                         nama: user.nama_pengguna,
                         email: user.email,
-                        role: user.nama_peran
+                        role: user.nama_peran,
+                        access: accessArray
                     },
                     token: token
                 }
