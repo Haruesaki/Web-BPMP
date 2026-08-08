@@ -17,10 +17,20 @@ class BeritaController {
           'pengguna.nama_pengguna as pembuat_nama'
         )
         .where('berita.menu_id', menu_id)
-        // `waktu_tayang` hanya terisi saat berita diaktifkan tayang di Beranda,
-        // sehingga bernilai NULL untuk berita biasa dan membuat urutannya tidak
-        // menentu. Pakai tanggal pembuatan sebagai cadangan agar berita terbaru
-        // tetap berada di urutan teratas.
+        // Urutan kini ditentukan admin lewat seret-lepas di panel, disimpan pada
+        // `urutan_tampil`. Kolom itu diisi mengikuti urutan yang berlaku
+        // sebelumnya saat migrasi, jadi peralihannya tidak mengubah tampilan
+        // apa pun sampai admin benar-benar menggesernya.
+        //
+        // Pengurutan waktu DIPERTAHANKAN sebagai pemutus seri. Baris yang belum
+        // pernah tersentuh pengurutan bernilai 0 semua, dan MySQL tidak
+        // menjamin urutan baris yang nilainya seri — tanpa pemutus ini,
+        // urutannya dapat berubah-ubah di antara dua permintaan yang sama.
+        //
+        // Dipakai OLEH SISI ADMIN DAN PENGUNJUNG SEKALIGUS (NewsCardContent
+        // memanggil endpoint yang sama), sehingga apa yang disusun admin
+        // persis itulah yang dilihat pembaca.
+        .orderBy('berita.urutan_tampil', 'asc')
         .orderByRaw('COALESCE(berita.waktu_tayang, berita.dibuat_pada) DESC');
       res.json(data);
     } catch (error) {
@@ -44,6 +54,18 @@ class BeritaController {
       const waktu = keWaktuDb(waktuTayang);
       if (!waktu.sah) return res.status(400).json({ pesan: 'Format waktu tayang tidak dikenali' });
 
+      // Berita baru diletakkan PALING ATAS, meneruskan perilaku sebelumnya —
+      // dahulu itu terjadi dengan sendirinya karena urutannya menurut waktu.
+      //
+      // Caranya mengambil nilai terkecil lalu menguranginya satu, bukan
+      // menggeser seluruh baris lain ke bawah. Menggeser berarti memperbarui
+      // setiap baris pada menu itu untuk satu penambahan, dan dua penambahan
+      // yang berbarengan dapat saling menimpa di tengah jalan. Nilai negatif
+      // sama sekali tidak menjadi soal: yang dibaca hanya urutan relatifnya,
+      // dan penomoran dirapikan kembali begitu admin menyeret sesuatu.
+      const terkecil = await db('berita').where('menu_id', menu_id).min('urutan_tampil as nilai').first();
+      const urutanBaru = terkecil && terkecil.nilai !== null ? Number(terkecil.nilai) - 1 : 0;
+
       // MySQL tidak mendukung RETURNING, jadi baris baru dibaca ulang lewat insertId.
       const [insertId] = await db('berita').insert({
         menu_id,
@@ -52,7 +74,8 @@ class BeritaController {
         deskripsi_kaya: deskripsi_kaya || '',
         url_foto: coverUrl || null,
         status,
-        waktu_tayang: waktu.nilai
+        waktu_tayang: waktu.nilai,
+        urutan_tampil: urutanBaru
       });
       const inserted = await db('berita').where({ id: insertId }).first();
 

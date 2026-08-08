@@ -30,7 +30,7 @@
   border-top-right-radius: 110px;
   position: relative;
   overflow: hidden;
-  background-color: #000a3a; /* Latar belakang putih untuk area gambar */
+  background-color: var(--theme-bg-deep, #000a3a); /* Latar belakang putih untuk area gambar */
   font-family: 'Poppins', sans-serif;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); 
 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.871);
@@ -145,7 +145,7 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   /* Background "mentahan" default: biru gelap khas kartu (#000a3a). Saat berita
      PUNYA gambar, gambar menutupinya (tak ada perubahan visual). Saat TIDAK ada
      gambar, area lengkung ini tampil biru default — bukan putih kosong. */
-  background-color: #000a3a;
+  background-color: var(--theme-bg-deep, #000a3a);
   position: absolute;
   top: 0px;
   display: flex;
@@ -173,7 +173,7 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   height: 50%;
   gap: 2px;
   padding: 20px 35px;
-  background-color: #01004361;
+  background-color: rgba(var(--theme-bg-deep-rgb, 1, 0, 67), 0.38);
   backdrop-filter: blur(20px);
   border-top: 1.3px solid rgb(255, 255, 255);
 }

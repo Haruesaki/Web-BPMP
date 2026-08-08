@@ -1,6 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
+import useSeretUrutan from '../../../../hooks/useSeretUrutan';
+import PeganganSeretBaris from '../PeganganSeretBaris';
 import '../default/PostDefault.css';
 import './PostBeritaCard.css';
 import PostDefault from '../default/PostDefault';
@@ -39,6 +41,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [highlightedRow, setHighlightedRow] = useState(null);
   const [pesanGalat, setPesanGalat] = useState('');
+  const bungkusRef = useRef(null);
 
   const highlightId = location.state?.highlightId;
   const highlightSumber = location.state?.highlightSumber;
@@ -70,16 +73,49 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
     fetchBerita();
   }, [menuId]);
 
+  // --- PENGURUTAN LEWAT SERET ---
+  // Dimatikan selama pencarian aktif: dengan sebagian baris tersembunyi,
+  // menjatuhkan baris "tepat di bawah" baris lain tidak bermakna — di antara
+  // keduanya bisa ada baris yang sedang disaring keluar.
+  const bolehDiurutkan = !search.trim();
+
+  const simpanUrutan = async (daftarBaru) => {
+    const sebelumnya = beritaList;
+    setPesanGalat('');
+    setBeritaList(daftarBaru);
+
+    if (!menuId) return;
+    try {
+      await axiosInstance.put(`/api/berita/urutan/${menuId}`, {
+        urutan: daftarBaru.map((b) => b.id),
+      });
+    } catch (err) {
+      setBeritaList(sebelumnya); // urutan yang tidak tersimpan tidak boleh tetap tampil
+      const pesanPeladen = typeof err?.response?.data === 'object' ? err.response.data?.pesan : null;
+      setPesanGalat(pesanPeladen || 'Gagal menyimpan urutan berita. Coba lagi.');
+      console.error('Gagal menyimpan urutan berita:', err);
+    }
+  };
+
+  const seret = useSeretUrutan({
+    daftar: beritaList,
+    onUrutBaru: simpanUrutan,
+    tahanMs: 0,
+    aktif: bolehDiurutkan,
+  });
+
+  // Disaring dari `seret.daftarTampil` agar barisnya bergeser mengikuti kursor
+  // selama seretan berlangsung.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return beritaList;
-    return beritaList.filter(
+    if (!q) return seret.daftarTampil;
+    return seret.daftarTampil.filter(
       (b) =>
         b.judul.toLowerCase().includes(q) ||
         (b.deskripsi || '').toLowerCase().includes(q) ||
         (b.pembuat || '').toLowerCase().includes(q)
     );
-  }, [beritaList, search]);
+  }, [seret.daftarTampil, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const page = Math.min(currentPage, totalPages);
@@ -233,6 +269,25 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
           </button>
         </div>
 
+        <p className="bc-seret-catatan">
+          <i className={`fa-solid ${bolehDiurutkan ? 'fa-grip-vertical' : 'fa-circle-info'}`} aria-hidden="true"></i>
+          {bolehDiurutkan
+            ? 'Seret pegangan di kiri nomor untuk mengubah urutan tampil di halaman pengunjung.'
+            : 'Pengurutan dinonaktifkan selama pencarian aktif — kosongkan kata kunci untuk menyusun ulang.'}
+        </p>
+
+        {/* Pembungkus ini SEMATA jangkar bagi lajur pegangan di sebelah kiri.
+            Ia tidak memasang overflow apa pun, sehingga lajurnya tidak
+            terpotong — berbeda dengan kartu dan wadah gulir di dalamnya. */}
+        <div className="bc-tabel-bungkus" ref={bungkusRef}>
+        <PeganganSeretBaris
+          bungkusRef={bungkusRef}
+          kunciUkur={`${page}-${pageSize}-${visible.map((b) => b.id).join(',')}`}
+          aktif={bolehDiurutkan}
+          idDiseret={seret.idDiseret}
+          padaTekan={seret.padaTekan}
+          judulPer={Object.fromEntries(visible.map((b) => [String(b.id), b.judul]))}
+        />
         <section className="bc-table-card">
           <div className="bc-table-scroll">
             <table className="bc-table">
@@ -253,10 +308,14 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
                   <tr><td colSpan={8} className="bc-empty-row">Tidak ada berita yang cocok dengan pencarian.</td></tr>
                 ) : (
                   visible.map((b, i) => (
-                    <tr 
-                      key={b.id} 
-                      id={`row-${b.id}`} 
-                      className={highlightedRow === String(b.id) ? 'row-blink' : ''}
+                    <tr
+                      key={b.id}
+                      id={`row-${b.id}`}
+                      {...seret.propsWadah(b.id)}
+                      className={[
+                        highlightedRow === String(b.id) ? 'row-blink' : '',
+                        seret.idDiseret === String(b.id) ? 'bc-baris-diseret' : '',
+                      ].filter(Boolean).join(' ')}
                     >
                       <td className="bc-col-no">{startIdx + i + 1}</td>
                       <td>
@@ -305,6 +364,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
             </div>
           </div>
         </section>
+        </div>
       </main>
       {deleteTarget && (
         <div className="bc-modal-overlay" onClick={() => setDeleteTarget(null)}>

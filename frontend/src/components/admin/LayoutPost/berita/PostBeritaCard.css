@@ -603,3 +603,105 @@
 .postdefault .bc-table tbody tr.row-blink td {
   animation: blink-blue 3s ease-in-out;
 }
+
+/* =========================================================================
+   PEGANGAN SERET (titik enam) — DI LUAR TABEL
+   -------------------------------------------------------------------------
+   Pegangannya BUKAN bagian dari tabel: ia berada di lajur tersendiri yang
+   menjadi saudara kartu tabel, diletakkan pada ruang padding milik
+   `.bc-content` (22px) di sebelah kiri kartu.
+
+   JANGAN mengembalikan cara lama — padding pada `.bc-table-scroll` untuk
+   menyediakan ruang. Padding itu menggeser seluruh tabel ke kanan DAN ikut
+   terhitung sebagai lebar isi wadah gulir, sehingga melampaui ambang
+   `min-width: 1104px` milik tabel dan memunculkan bilah gulir mendatar yang
+   sebelumnya tidak ada. Geometri tabel di berkas ini harus tetap utuh.
+   ========================================================================= */
+
+/* Jangkar lajur pegangan. Tidak memasang overflow apa pun — justru itulah
+   gunanya, agar lajur di kirinya tidak terpotong. */
+.postdefault .bc-tabel-bungkus {
+    position: relative;
+}
+
+.postdefault .bc-lajur-pegangan {
+    position: absolute;
+    top: 0;
+    left: -26px;
+    width: 22px;
+    /* Lajurnya sendiri tembus klik; hanya tombol di dalamnya yang menangkap
+       pointer, supaya area kosong di antara pegangan tidak menghalangi apa pun. */
+    pointer-events: none;
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan {
+    position: absolute;
+    left: 0;
+    /* `top` diisi dari JS hasil pengukuran baris; transform yang menaruh titik
+       ukur itu tepat di tengah pegangan. */
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-sub, #8892a6);
+    font-size: 13px;
+    cursor: grab;
+    opacity: 0.4;
+    pointer-events: auto;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    /* Gerakan sentuh di atas pegangan tidak boleh ditafsirkan sebagai gulir. */
+    touch-action: none;
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:hover,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:focus-visible,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan--aktif {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main, #f3f5fb);
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:active,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan--aktif {
+    cursor: grabbing;
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:disabled {
+    opacity: 0.14;
+    cursor: not-allowed;
+}
+
+/* Baris yang sedang diangkat. */
+.postdefault .bc-table tbody tr.bc-baris-diseret td {
+    background: rgba(91, 95, 232, 0.16);
+}
+
+/* Keterangan di atas tabel. */
+.postdefault .bc-seret-catatan {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    color: var(--text-sub, #8892a6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Di layar sempit ruang di kiri kartu habis, jadi lajurnya disembunyikan —
+   lebih baik tidak ada daripada menimpa isi tabel. */
+@media (max-width: 900px) {
+    .postdefault .bc-lajur-pegangan {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .postdefault .bc-lajur-pegangan .bc-seret-pegangan {
+        transition: none;
+    }
+}

@@ -53,11 +53,22 @@
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
+/* Gambar sampul mengidap cacat yang sama dengan gambar isi konten: batas tinggi
+   MUTLAK (500px) dipasangkan dengan lebar yang mengikuti kolom, lalu
+   kelebihannya dibuang `object-fit: cover`. Karena lebar kolom berubah mengikuti
+   zoom peramban, banyak-sedikitnya potongan ikut berubah — pembaca yang
+   memperkecil zoom melihat sampul terpotong jauh lebih banyak. Uraian lengkap
+   sebabnya ada di utils/rasioGambar.js.
+
+   `contain` menggantikan `cover`: sampul tidak pernah lagi kehilangan bagiannya.
+   Sampul lanskap — bentuk yang lazim dipakai — tinggi alaminya masih di bawah
+   batas, jadi tampilannya sama persis seperti sebelumnya. Sampul potret kini
+   mengecil seluruhnya alih-alih terpotong. */
 .berita-main-cover img {
   width: 100%;
   height: auto;
-  max-height: 500px;
-  object-fit: cover;
+  max-height: 70vh;
+  object-fit: contain;
   display: block;
 }
 

@@ -1,0 +1,30 @@
+/* =========================================================================
+   SERET-URUTKAN — gaya bersama
+   -------------------------------------------------------------------------
+   Diimpor langsung oleh hooks/useSeretUrutan.js, bukan oleh komponen
+   pemakainya. Alasannya: kelas `seret-urutan-aktif` dipasang hook itu pada
+   <body>, jadi aturannya harus ikut termuat di mana pun hook ini dipakai —
+   menyerahkannya kepada tiap pemakai berarti menunggu sampai ada satu yang
+   lupa mengimpor.
+
+   Ini SATU-SATUNYA berkas yang berhak memasang aturan pada <body> di proyek
+   ini, dan isinya memang hanya itu. Aturan global yang tersesat di berkas
+   komponen sudah pernah menimbulkan cacat di sini (lihat catatan pada
+   AdminSidebar.css).
+   ========================================================================= */
+
+/* Selama seretan berlangsung: kursor menggenggam di seluruh halaman, dan
+   penyorotan teks dimatikan. Tanpa mematikan penyorotan, menyeret melewati
+   baris lain akan menyorot teksnya dan menghasilkan blok biru yang mengikuti
+   gerakan. */
+body.seret-urutan-aktif {
+    cursor: grabbing;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Sentuhan: mencegah peramban menafsirkan gerakan sebagai gulir halaman saat
+   seretan sudah dimulai. */
+body.seret-urutan-aktif * {
+    touch-action: none;
+}

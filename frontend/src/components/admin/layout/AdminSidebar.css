@@ -200,7 +200,30 @@
     display: none;
 }
 
-.sidebar-backdrop {
+/* Namanya diberi awalan `admin-` DENGAN SENGAJA — jangan dikembalikan menjadi
+   `.sidebar-backdrop` saja.
+
+   Nama polos itu dipakai juga oleh menu mobile sisi pengunjung
+   (components/common/Header/MobileMenu/MobileMenu.css), dan keduanya sempat
+   saling merusak karena berkas gaya ini bukan berada di berkas gaya yang sama:
+   gaya MobileMenu ikut berkas gaya utama yang dimuat SEJAK BOOT pada setiap
+   rute, sedangkan berkas ini baru ditambahkan ketika rute admin dibuka.
+
+   Dua akibatnya, keduanya pernah benar-benar terjadi:
+
+     1. Latar gelap drawer admin TIDAK PERNAH TERLIHAT. Aturan `.is-open` di
+        bawah menyetel `display`, tetapi tidak menyetel `opacity` maupun
+        `visibility` — sementara aturan dasar milik MobileMenu sudah lebih dulu
+        menetapkannya `opacity: 0; visibility: hidden` bagi setiap elemen
+        ber-kelas itu.
+     2. Latar gelap menu mobile PENGUNJUNG mati begitu seseorang pernah membuka
+        panel admin pada tab yang sama. Berkas gaya ini menambahkan
+        `display: none`, dan kelas `.open` milik MobileMenu hanya mengubah
+        opacity — bukan `display`.
+
+   Kaidahnya: nama kelas untuk komponen yang berbeda tidak boleh bertabrakan,
+   sebab CSS tidak mengenal batas komponen. */
+.admin-sidebar-backdrop {
     display: none;
 }
 
@@ -261,12 +284,21 @@
         color: var(--text-main);
     }
 
-    /* Latar gelap penuh layar di belakang drawer. */
-    .sidebar-backdrop.is-open {
+    /* Latar gelap penuh layar di belakang drawer.
+
+       `opacity` dan `visibility` ditulis TEGAS, tidak dibiarkan mengandalkan
+       nilai bawaan. Keduanya sempat diwarisi dari aturan komponen lain yang
+       kebetulan bernama sama, dan akibatnya latar ini tidak pernah terlihat
+       walaupun `display: block` sudah benar. Menuliskannya di sini membuat
+       tampilannya tidak lagi bergantung pada berkas gaya mana pun di luar
+       berkas ini. */
+    .admin-sidebar-backdrop.is-open {
         display: block;
         position: fixed;
         inset: 0;
         z-index: 250;
+        opacity: 1;
+        visibility: visible;
         background: rgba(5, 8, 16, 0.6);
         -webkit-backdrop-filter: blur(1px);
         backdrop-filter: blur(1px);

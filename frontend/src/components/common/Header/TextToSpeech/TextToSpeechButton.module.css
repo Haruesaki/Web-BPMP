@@ -11,8 +11,8 @@
               inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
   background: linear-gradient(
     155deg,
-    rgba(105, 130, 255, 0.651) 0%,
-    rgba(6, 22, 80, 0.604) 80%
+    rgba(var(--theme-highlight-rgb, 105, 130, 255), 0.651) 0%,
+    rgba(var(--theme-highlight-deep-rgb, 6, 22, 80), 0.604) 80%
   );
   border-radius: 20px;
 
@@ -57,8 +57,8 @@
                 inset 2px 2px 1.5px -1px rgba(255, 255, 255, 0.946);
     background: linear-gradient(
       135deg,
-      rgba(42, 60, 105, 0.9) 0%,
-      rgba(30, 45, 85, 0.8) 100%
+      rgba(var(--theme-input-hover-rgb, 42, 60, 105), 0.9) 0%,
+      rgba(var(--theme-input-rgb, 30, 45, 85), 0.8) 100%
     );
   }
 
@@ -85,8 +85,8 @@
 .hoverActive:not(.active) {
   background: linear-gradient(
     135deg,
-    rgba(42, 60, 105, 0.9) 0%,
-    rgba(30, 45, 85, 0.8) 100%
+    rgba(var(--theme-input-hover-rgb, 42, 60, 105), 0.9) 0%,
+    rgba(var(--theme-input-rgb, 30, 45, 85), 0.8) 100%
   );
 }
 

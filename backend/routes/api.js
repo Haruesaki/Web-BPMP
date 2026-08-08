@@ -11,6 +11,9 @@ const StatistikPengunjungController = require('../controllers/statistikPengunjun
 const AktivitasAdminController = require('../controllers/aktivitasAdminController');
 const ProfilPegawaiController = require('../controllers/profilPegawaiController');
 const BeritaController = require('../controllers/beritaController');
+// Pengurutan isi konten dipakai bersama tiga tabel sekaligus — lihat
+// controllers/urutanKontenController.js.
+const UrutanKontenController = require('../controllers/urutanKontenController');
 const BerandaHeroController = require('../controllers/berandaHeroController');
 const BerandaHeaderController = require('../controllers/berandaHeaderController');
 const BerandaTemaController = require('../controllers/berandaTemaController');
@@ -145,14 +148,22 @@ router.delete('/menus/:id', authMiddleware, MenuController.deleteMenu);
 // ================= HALAMAN KONTEN ROUTES =================
 router.get('/halaman-konten/:menu_id', HalamanKontenController.getKonten);
 router.post('/halaman-konten/:menu_id', authMiddleware, HalamanKontenController.upsertKonten);
+router.put('/halaman-konten/urutan/:menu_id', authMiddleware, UrutanKontenController.urutanHalamanKonten);
 
 // ================= PROFIL PEGAWAI ROUTES =================
 router.get('/profil-pegawai/:menu_id', ProfilPegawaiController.getProfilByMenu);
 router.post('/profil-pegawai/:menu_id', authMiddleware, ProfilPegawaiController.upsertProfil);
+router.put('/profil-pegawai/urutan/:menu_id', authMiddleware, UrutanKontenController.urutanProfilPegawai);
 
 // ================= BERITA ROUTES =================
 router.get('/berita/:menu_id', BeritaController.getBeritaByMenu);
 router.post('/berita/:menu_id', authMiddleware, BeritaController.createBerita);
+// Rute pengurutan sengaja didaftarkan SEBELUM '/berita/:id'. Keduanya sama-sama
+// PUT, dan Express memakai pencocokan pertama yang berhasil — '/berita/:id'
+// hanya bertingkat dua sehingga tidak akan menjaring '/berita/urutan/:menu_id'
+// yang bertingkat tiga, tetapi urutan ini tetap ditegaskan agar penambahan rute
+// ber-wildcard di kemudian hari tidak diam-diam menelannya.
+router.put('/berita/urutan/:menu_id', authMiddleware, UrutanKontenController.urutanBerita);
 router.put('/berita/:id', authMiddleware, BeritaController.updateBerita);
 router.delete('/berita/:id', authMiddleware, BeritaController.deleteBerita);
 

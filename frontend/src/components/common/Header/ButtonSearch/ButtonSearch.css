@@ -204,8 +204,8 @@
   word-break: break-word;
 }
 .search-suggestion-title .highlighted-text {
-  color: #61e5ff;
-  text-shadow: 0px 0px 5px rgba(2, 28, 75, 0.766);
+  color: var(--theme-link-hover, #61e5ff);
+  text-shadow: 0px 0px 5px rgba(var(--theme-highlight-deep-rgb, 2, 28, 75), 0.766);
   background-color: transparent;
   font-weight: 800;
 }
@@ -240,7 +240,7 @@
   max-width: 200px;
 }
 .location-value.submenu {
-  background-color: rgba(61, 229, 255, 0.15);
+  background-color: rgba(var(--theme-highlight-rgb, 61, 229, 255), 0.15);
   color: #e0f8ff;
 }
 .search-suggestion-item:hover .location-value {
@@ -248,7 +248,7 @@
   color: #fff;
 }
 .search-suggestion-item:hover .location-value.submenu {
-  background-color: rgba(61, 229, 255, 0.25);
+  background-color: rgba(var(--theme-highlight-rgb, 61, 229, 255), 0.25);
   color: #fff;
 }
 @keyframes slideInFromLeft {
