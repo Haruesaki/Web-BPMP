@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axiosInstance from '../../../../api/axiosInstance';
 import CardContent from './CardContent';
 import './CardContent.css'; 
@@ -56,8 +56,8 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
     setCurrentPage(1);
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman
-  const handlePageChange = (page) => setCurrentPage(page);
+  // Fungsi untuk mengubah halaman (memoized callback)
+  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
 
   // Hitung total halaman (dideklarasikan sebelum Hook dan early return)
   const totalPages = Math.ceil(profiles.length / itemsPerPage);

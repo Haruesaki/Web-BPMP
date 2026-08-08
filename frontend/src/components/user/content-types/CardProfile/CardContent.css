@@ -61,118 +61,124 @@
   overflow: hidden;
 }
 
-/* Base style untuk gelembung liquid - Dioptimalkan untuk kelap-kelip opacity */
+/* Kontainer animasi terpisah (di luar drop-shadow untuk performa tinggi) */
+.wave-animation-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* Di atas wave-shadow-wrapper (z-index: 1), di bawah card-text (z-index: 99) */
+  pointer-events: none;
+  overflow: hidden;
+
+  /* Masking gelombang SVG yang sama persis agar isi animasi terpotong rapi */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 101%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Base style untuk gelembung liquid - Animasi ringan diproses GPU */
 .liquid-bubble {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.3;
-  will-change: opacity;
+  will-change: transform, opacity;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  filter: blur(0.2em);
+  opacity: 0.5;
 }
 
 /* Gelembung 1: Cyan-Biru (kiri bawah) */
 .liquid-bubble.bubble-1 {
-  width: 26em;
-  height: 26em;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.4) 0%, rgba(41, 109, 255, 0.15) 50%, rgba(41, 109, 255, 0) 75%);
-  bottom: -8em;
-  left: -8em;
-  animation: pulseOpacity 3s infinite ease-in-out;
+  width: 25em;
+  height: 40em;
+  background: radial-gradient(circle, rgb(89, 28, 255) 0%, rgba(85, 5, 232, 0) 60%);
+  bottom: -16em;
+  left: -10em;
+  animation-name: bubbleLiquid1;
+  animation-duration: 12s;
 }
 
-/* Gelembung 2: Ungu-Indigo (kanan tengah) */
+/* Gelembung 2: Ungu-Indigo (tengah bawah) */
 .liquid-bubble.bubble-2 {
-  width: 24em;
-  height: 24em;
-  background: radial-gradient(circle, rgba(162, 0, 255, 0.35) 0%, rgba(255, 0, 128, 0.12) 50%, rgba(255, 0, 128, 0) 75%);
-  top: 14em;
-  right: -6em;
-  animation: pulseOpacity 5s infinite ease-in-out;
-  animation-delay: 2.5s;
+  width: 30em;
+  height: 40em;
+  background: radial-gradient(circle, rgb(0, 102, 255) 0%, rgba(8, 0, 85, 0) 60%);
+  bottom: -17em;
+  left: 4em;
+  animation-name: bubbleLiquid2;
+  animation-duration: 10s;
+  animation-delay: -2s;
 }
 
-/* Gelembung 3: Cyan terang (atas kanan) */
+/* Gelembung 3: Cyan terang (kanan bawah) */
 .liquid-bubble.bubble-3 {
-  width: 18em;
-  height: 18em;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.35) 0%, rgba(41, 109, 255, 0.1) 50%, rgba(41, 109, 255, 0) 75%);
-  top: -4em;
-  right: -4em;
-  animation: pulseOpacity 4s infinite ease-in-out;
-  animation-delay: 5s;
+  width: 22em;
+  height: 25em;
+  background: radial-gradient(circle, rgba(0, 174, 255, 0.741) 0%, rgba(3, 71, 218, 0) 60%);
+  bottom: -9em;
+  right: -5em;
+  animation-name: bubbleLiquid3;
+  animation-duration: 13s;
+  animation-delay: -4s;
 }
 
-/* Animasi kelap-kelip opasitas (sangat ringan diproses oleh GPU) */
-@keyframes pulseOpacity {
-  0% {
-    opacity: 0.2;
+/* Animasi Aliran Cairan Unik untuk Gelembung 1 (Kiri Bawah) */
+@keyframes bubbleLiquid1 {
+  0% { 
+    transform: translate(0em, 0em) scale(1); 
   }
-  50% {
-    opacity: 1;
+  25% { 
+    transform: translate(2em, -5em) scale(1.1);  
+  }
+  50% { 
+    transform: translate(4em, -2em) scale(0.9);  
+  }
+  80% { 
+    transform: translate(3em, 3em) scale(1.4);  
+  }
+  100% { 
+    transform: translate(0em, 0em) scale(1);  
   }
 }
 
-/* Efek Bintang Kelap-Kelip Ultra-Ringan (Memanfaatkan Box-Shadow Berlapis pada Elemen Tunggal) */
-.stars-layer-1,
-.stars-layer-2 {
-  position: absolute;
-  border-radius: 50%;
-  background: transparent;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+/* Animasi Aliran Cairan Unik untuk Gelembung 2 (Tengah Bawah) */
+@keyframes bubbleLiquid2 {
+  0% { 
+    transform: translate(0em, 0em) scale(1); 
+  }
+  50% { 
+    transform: translate(-5em, 2em) scale(1);  
+  }
+  80% { 
+    transform: translate(2em, -3em) scale(1);  
+  }
+  100% { 
+    transform: translate(0em, 0em) scale(1);  
+  }
 }
 
-/* Layer 1: Bintang sedang (1.5px/0.15em) tersebar acak di area kartu (34em x 43em) */
-.stars-layer-1 {
-  width: 0.21em;
-  height: 0.21em;
-  box-shadow: 
-    4em 10em rgba(255, 255, 255, 0.85),
-    12em 6em rgba(255, 255, 255, 0.6),
-    22em 12em rgba(255, 255, 255, 0.9),
-    7em 20em rgba(255, 255, 255, 0.5),
-    16em 24em rgba(255, 255, 255, 0.75),
-    26em 18em rgba(255, 255, 255, 0.8),
-    10em 30em rgba(255, 255, 255, 0.6),
-    20em 34em rgba(255, 255, 255, 0.7),
-    5em 38em rgba(255, 255, 255, 0.5),
-    28em 36em rgba(255, 255, 255, 0.85),
-    3em 16em rgba(0, 229, 255, 0.8),  /* Bintang kelap-kelip warna cyan tema */
-    24em 5em rgba(162, 0, 255, 0.8);  /* Bintang kelap-kelip warna ungu tema */
-  animation: pulseStars1 4s infinite ease-in-out;
-  will-change: opacity;
+/* Animasi Aliran Cairan Unik untuk Gelembung 3 (Kanan Bawah) */
+@keyframes bubbleLiquid3 {
+  0% { 
+    transform: translate(5em, 0em) scale(1.4); 
+  }
+  25% { 
+    transform: translate(-1em, 0em) scale(1.5); 
+  }
+  50% { 
+    transform: translate(3em, -5em) scale(1.6); 
+  }
+  100% { 
+    transform: translate(5em, 0em) scale(1.4); 
+  }
 }
 
-/* Layer 2: Bintang kecil (1px/0.1em) tersebar acak asinkron */
-.stars-layer-2 {
-  width: 0.26em;
-  height: 0.26em;
-  box-shadow: 
-    8em 4em rgba(255, 255, 255, 0.7),
-    18em 8em rgba(255, 255, 255, 0.5),
-    3em 26em rgba(255, 255, 255, 0.8),
-    13em 22em rgba(255, 255, 255, 0.6),
-    22em 28em rgba(255, 255, 255, 0.75),
-    17em 16em rgba(255, 255, 255, 0.65),
-    27em 26em rgba(255, 255, 255, 0.8),
-    14em 36em rgba(255, 255, 255, 0.5),
-    25em 32em rgba(255, 255, 255, 0.7),
-    30em 10em rgba(0, 229, 255, 0.7),
-    2em 32em rgba(162, 0, 255, 0.7);
-  animation: pulseStars2 6s infinite ease-in-out;
-  animation-delay: 3s;
-  will-change: opacity;
-}
 
-@keyframes pulseStars1 {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.95; }
-}
-
-@keyframes pulseStars2 {
-  0%, 100% { opacity: 0.95; }
-  50% { opacity: 0.35; }
-}
 
 .card-text {
   position: absolute;
@@ -459,4 +465,14 @@
   font-size: 14px;
   align-self: flex-end;
   line-height: 2;
+}
+
+/* Aksesibilitas: Matikan animasi/transisi jika sistem operasi meminta pembatasan gerakan */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-bubble,
+  .card-profile {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
 }

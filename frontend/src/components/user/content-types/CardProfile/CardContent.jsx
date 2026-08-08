@@ -58,17 +58,18 @@ const CardContent = ({
       </div>
 
       <div className="wave-shadow-wrapper">
-        {/* Latar belakang solid dengan efek gelombang dari mask-image */}
-        <div className="wave-content-container">
-          <div className="liquid-bubble bubble-1"></div>
-          <div className="liquid-bubble bubble-2"></div>
-          <div className="liquid-bubble bubble-3"></div>
-          <div className="stars-layer-1"></div>
-          <div className="stars-layer-2"></div>
-        </div>
+        {/* Latar belakang solid statis dengan efek gelombang dari mask-image */}
+        <div className="wave-content-container static-bg"></div>
+      </div>
+
+      {/* Kontainer animasi terpisah (di luar drop-shadow untuk performa tinggi) */}
+      <div className="wave-animation-container">
+        <div className="liquid-bubble bubble-1"></div>
+        <div className="liquid-bubble bubble-2"></div>
+        <div className="liquid-bubble bubble-3"></div>
       </div>
     </div>
   );
 };
 
-export default CardContent;
+export default React.memo(CardContent);
