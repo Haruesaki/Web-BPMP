@@ -6,14 +6,27 @@ import axiosInstance from '../../../api/axiosInstance';
 import ProfileLayout from '../../../components/user/content-types/CardProfile/ProfileLayout';
 import NewsCardContent from '../../../components/user/content-types/CardBerita/NewsCardContent';
 import DefaultContent from '../../../components/user/content-types/Default/DefaultContent';
+import BeritaDetail from '../BeritaDetail/BeritaDetail';
 import "./GenericPage.css";
 
-const GenericPage = () => {
-  const { menuId } = useParams();
+const GenericPage = ({ lenisRef }) => {
+  const { menuId, id } = useParams();
   const [menuData, setMenuData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (id) {
+      // Jika ini rute berita detail, langsung set data layout semu tanpa fetch API menu
+      setMenuData({
+        jenis_menu: 'post',
+        slug_atau_tautan: 'berita-detail',
+        nama_menu: 'Detail Berita',
+        id: null
+      });
+      setLoading(false);
+      return;
+    }
+
     const fetchMenuType = async () => {
       setLoading(true);
       try {
@@ -38,7 +51,7 @@ const GenericPage = () => {
     } else {
       setLoading(false);
     }
-  }, [menuId]);
+  }, [menuId, id]);
 
   if (loading) {
     return (
@@ -72,6 +85,11 @@ const GenericPage = () => {
       {/* Placeholder untuk layout berita */}
       {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'berita-card' && (
         <NewsCardContent menuId={menuData.id} viewLayout={menuData.tampilan} menuName={menuData.nama_menu} />
+      )}
+
+      {/* Detail Berita */}
+      {menuData.jenis_menu === 'post' && menuData.slug_atau_tautan === 'berita-detail' && (
+        <BeritaDetail lenisRef={lenisRef} />
       )}
     </div>
   );

@@ -260,25 +260,29 @@ const BeritaDetail = ({ lenisRef }) => {
   })();
 
   return (
-    <div className="berita-detail-page generic-page-container">
-      <div className="content-type-section default-content" style={{ marginTop: '40px', marginBottom: '80px', maxWidth: '1000px' }}>
-
-        <div className="default-banner-wrapper">
-          <h1 className="default-banner-title">{newsDetail.judul}</h1>
-          <p className="post-date">
-            <i className="fa-solid fa-calendar-days" style={{ marginRight: '8px' }}></i>
-            {formattedDate}
-          </p>
-        </div>
-        
-        <div className="default-description-container">
-          {newsDetail.coverUrl && (
-             <div className="berita-main-cover">
-               <img src={newsDetail.coverUrl} alt="Cover Berita" />
-             </div>
-          )}
-          <div className="berita-parsed-content">
-            {parsedContent}
+    <div className="default-layout-wrapper berita-detail-page">
+      <div className="page-content-header">
+        <h1>Detail Berita</h1>
+      </div>
+      <div className="default-content-wrapper layout-vertical">
+        <div className="content-type-section default-content" style={{ marginBottom: '80px' }}>
+          <div className="default-banner-wrapper">
+            <h1 className="default-banner-title">{newsDetail.judul}</h1>
+            <p className="post-date">
+              <i className="fa-solid fa-calendar-days" style={{ marginRight: '8px' }}></i>
+              {formattedDate}
+            </p>
+          </div>
+          
+          <div className="default-description-container">
+            {newsDetail.coverUrl && (
+               <div className="berita-main-cover">
+                 <img src={newsDetail.coverUrl} alt="Cover Berita" />
+               </div>
+            )}
+            <div className="berita-parsed-content">
+              {parsedContent}
+            </div>
           </div>
         </div>
       </div>
