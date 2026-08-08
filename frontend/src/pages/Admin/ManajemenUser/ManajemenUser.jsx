@@ -390,6 +390,11 @@ const ManajemenUser = () => {
 
           {/* ---------- TABLE CARD ---------- */}
           <section className="mu-table-card">
+            {/* Hanya TABEL yang dibungkus wadah scroll horizontal. Footer/
+                pagination sengaja di LUAR wadah ini agar tidak ikut tergeser
+                saat tabel di-scroll (pola sama seperti .activity-table-wrap di
+                dashboard). */}
+            <div className="mu-table-scroll">
             <table className="mu-table">
               <thead>
                 <tr>
@@ -470,6 +475,7 @@ const ManajemenUser = () => {
                 )}
               </tbody>
             </table>
+            </div>
 
             {/* ---------- FOOTER / PAGINATION ---------- */}
             <div className="mu-table-footer">
