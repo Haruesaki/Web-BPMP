@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { ukurBaris } from '../../../utils/ukurBaris';
 
 // =========================================================================
-//  LAJUR PEGANGAN SERET — di LUAR tabel, bukan bagian darinya
+//  LAJUR PEGANGAN SERET — menempel pada pita barisnya, bukan pada tabelnya
 //  -----------------------------------------------------------------------
 //  MENGAPA TIDAK DITARUH DI DALAM SEL SAJA
 //  Percobaan pertama memasang pegangan di dalam sel "No." dengan posisi mutlak
@@ -16,60 +17,47 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 //
 //  Dan tetap tidak mencapai tujuannya: pegangan masih berada di dalam
 //  `.bc-table-scroll` (overflow-x: auto) dan `.bc-table-card` (overflow:
-//  hidden), jadi ia tetap terpotong di tepi kartu — masih "bagian dari tabel".
+//  hidden), jadi ia tetap terpotong di tepi kartu.
 //
 //  CARA YANG DIPAKAI SEKARANG
-//  Pegangan dipindahkan keluar sepenuhnya: sebuah lajur berposisi mutlak yang
-//  menjadi SAUDARA kartu tabel, bukan keturunannya. Dengan begitu tidak ada
-//  satu pun pemotong luapan di antaranya, dan geometri tabel sama sekali tidak
-//  tersentuh — tabelnya tetap persis di tempat dan selebar semula.
+//  Pegangan tetap berada DI LUAR tabel — sebuah lajur berposisi mutlak yang
+//  menjadi saudara kartu tabel — sehingga geometri tabel sama sekali tidak
+//  tersentuh. Yang berubah hanyalah TAMPILANNYA: tiap pegangan kini setinggi
+//  barisnya sendiri, berlatar dan berbingkai sama dengan tabel, serta menempel
+//  rapat pada tepi kiri kartu tanpa sela. Hasilnya terbaca sebagai satu pita
+//  yang bersambung dengan barisnya.
 //
-//  Ongkosnya: posisi tegak tiap pegangan tidak lagi diwariskan barisnya,
-//  sehingga harus DIUKUR — beserta satu koreksi zoom yang dijelaskan di dalam.
+//  Yang TIDAK ikut melebar: kepala tabel dan kaki tabel. Keduanya memang tidak
+//  punya pegangan, jadi lebarnya tetap seperti semula — persis seperti yang
+//  diminta.
+//
+//  Ongkosnya: posisi DAN tinggi tiap pegangan tidak diwariskan barisnya,
+//  sehingga harus diukur. Pengukurannya dipusatkan di utils/ukurBaris supaya
+//  angkanya tidak pernah berbeda dari yang dipakai penentuan sasaran seretan
+//  maupun animasi pergeseran.
 // =========================================================================
 
 const PeganganSeretBaris = ({ bungkusRef, kunciUkur, aktif, idDiseret, padaTekan, judulPer = {} }) => {
-  const [titik, setTitik] = useState([]);
+  const [pita, setPita] = useState([]);
 
   // Bergantung hanya pada objek ref yang jati dirinya tetap, jadi `ukur` sendiri
   // stabil lintas render dan aman dipakai langsung sebagai panggil-balik
   // pengamat — tanpa perlu disimpan di ref lagi.
   const ukur = useCallback(() => {
-    const bungkus = bungkusRef.current;
-    if (!bungkus) return;
-
-    const kotak = bungkus.getBoundingClientRect();
-
-    // `.bc-content` memasang `zoom: 1.2`, dan getBoundingClientRect
-    // MEMPERHITUNGKAN zoom itu sedangkan properti `top` yang kita tulis kembali
-    // ditafsirkan di dalam ruang yang SUDAH ter-zoom. Menuliskan hasil ukur apa
-    // adanya membuat tiap pegangan meleset sebesar faktor zoomnya — terukur
-    // sampai 19px pada tabel ini.
-    //
-    // Faktornya diturunkan dari perbandingan tinggi ter-zoom terhadap tinggi
-    // tata letak, bukan dari angka 1.2 yang ditulis tangan: nilai di berkas gaya
-    // dapat berubah, dan pembagi yang usang jauh lebih sukar dilacak daripada
-    // pembagi yang menghitung dirinya sendiri.
-    const skala = bungkus.offsetHeight > 0 ? kotak.height / bungkus.offsetHeight : 1;
-    const pembagi = skala > 0 ? skala : 1;
-
-    const baris = [...bungkus.querySelectorAll('tbody tr[data-seret-id]')];
-    const baru = baris.map((tr) => {
-      const k = tr.getBoundingClientRect();
-      return {
-        id: tr.getAttribute('data-seret-id'),
-        y: (k.top - kotak.top + k.height / 2) / pembagi,
-      };
-    });
+    const { baris, ada } = ukurBaris(bungkusRef.current);
+    const baru = ada ? baris.map(({ id, atas, tinggi }) => ({ id, atas, tinggi })) : [];
 
     // Hanya disetel bila benar-benar berubah. Efek di bawah berjalan sesudah
     // SETIAP render; tanpa penjaga ini setiap pengukuran memicu render baru
     // yang memicu pengukuran lagi — gelung tanpa akhir.
-    setTitik((lama) => {
-      if (lama.length === baru.length && lama.every((t, i) => t.id === baru[i].id && Math.abs(t.y - baru[i].y) < 0.5)) {
-        return lama;
-      }
-      return baru;
+    setPita((lama) => {
+      const sama =
+        lama.length === baru.length &&
+        lama.every((t, i) =>
+          t.id === baru[i].id &&
+          Math.abs(t.atas - baru[i].atas) < 0.5 &&
+          Math.abs(t.tinggi - baru[i].tinggi) < 0.5);
+      return sama ? lama : baru;
     });
   }, [bungkusRef]);
 
@@ -95,17 +83,17 @@ const PeganganSeretBaris = ({ bungkusRef, kunciUkur, aktif, idDiseret, padaTekan
     };
   }, [bungkusRef, kunciUkur, ukur]);
 
-  if (titik.length === 0) return null;
+  if (pita.length === 0) return null;
 
   return (
     <div className="bc-lajur-pegangan" aria-hidden={!aktif}>
-      {titik.map(({ id, y }) => (
+      {pita.map(({ id, atas, tinggi }) => (
         <button
           key={id}
           type="button"
           className={`bc-seret-pegangan${idDiseret === String(id) ? ' bc-seret-pegangan--aktif' : ''}`}
-          style={{ top: `${y}px` }}
-          title={aktif ? 'Seret untuk mengubah urutan' : 'Kosongkan pencarian untuk mengubah urutan'}
+          style={{ top: `${atas}px`, height: `${tinggi}px` }}
+          title={aktif ? 'Seret ke atas atau ke bawah untuk mengubah urutan' : 'Kosongkan pencarian untuk mengubah urutan'}
           aria-label={`Ubah urutan: ${judulPer[id] || id}`}
           disabled={!aktif}
           onPointerDown={(e) => padaTekan(e, id)}
