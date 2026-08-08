@@ -338,20 +338,22 @@
 
 
 @media (max-width: 976px) {
+  .profile-layout-grid,
   .card-profile {
-   font-size: clamp(6px, 0.83vw, 9px);
-   
+   font-size: clamp(6px, 4vw, 9px);
   }
 }
 
 
 @media (max-width: 768px) {
+  .profile-layout-grid,
   .card-profile {
-   font-size: clamp(5px, 1.9vw, 7.5px);
+   font-size: clamp(5px, 1.7vw, 7.5px);
   }
 }
 
 @media (max-width: 250px) {
+  .profile-layout-grid,
   .card-profile {
    font-size: clamp(3px, 1.5vw, 5px);
   }
@@ -383,13 +385,45 @@
 }
 
 .profile-layout-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  font-size: 9.5px; /* JANGKAR EM UTAMA (Samakan dengan basis kartu anak) */
   gap: 4rem;
-  justify-content: center;
+  justify-content: center; /* Memusatkan kelompok kolom grid */
+  justify-items: center;   /* Memusatkan kartu secara horizontal di dalam selnya */
   align-items: center;
-  /* Padding, max-width, dan margin dipindahkan ke .profile-content-wrapper */
   width: 100%;
+}
+
+/* ========================================= */
+/* CSS GRID TEMPLATE COLUMNS PER BREAKPOINT  */
+/* ========================================= */
+
+/* Desktop Lebar (4 Kolom) */
+@media (min-width: 1748px) {
+  .profile-layout-grid {
+    grid-template-columns: repeat(4, 34em); /* Menggunakan em agar ikut merapat saat font-size menyusut */
+  }
+}
+
+/* Desktop Standar (3 Kolom) */
+@media (min-width: 1361px) and (max-width: 1747px) {
+  .profile-layout-grid {
+    grid-template-columns: repeat(3, 34em);
+  }
+}
+
+/* Tablet / Layar Kecil (2 Kolom) */
+@media (max-width: 1360px) and (min-width: 768px) {
+  .profile-layout-grid {
+    grid-template-columns: repeat(2, 34em);
+  }
+}
+
+/* Mobile (1 Kolom) */
+@media (max-width: 767px) {
+  .profile-layout-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Pagination --- */

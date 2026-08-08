@@ -12,10 +12,10 @@
 }
 
 .news-layout-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 4rem; /* Disamakan dengan profil (64px) */
-  justify-content: center;
+  justify-content: center; /* Memusatkan kelompok kolom grid di layar */
+  justify-items: center;   /* Memusatkan kartu secara horizontal di dalam sel gridnya */
   align-items: center;
   width: 100%;
 }
@@ -24,72 +24,77 @@
 /* KONTAINER UTAMA KARTU BERITA              */
 /* ========================================= */
 .news-card {
-  width: 330px; /* Ramping dan proporsional untuk 3 kolom desktop horizontal */
-  height: 355px; /* Menjaga aspek rasio visual asli */
-  border-radius: 35px; /* Sesuai dengan sudut melengkung di gambar */
-  border-top-right-radius: 110px;
+  font-size: 9.5px; /* JANGKAR SKALA UTAMA (seperti profil) */
+  width: 34.7em; 
+  height: 37.4em; 
+  border-radius: 3.7em; 
+  border-top-right-radius: 11.6em;
   position: relative;
   overflow: hidden;
-  background-color: var(--theme-bg-deep, #000a3a); /* Latar belakang putih untuk area gambar */
+  background-color: var(--theme-bg-deep, #000a3a); 
   font-family: 'Poppins', sans-serif;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); 
-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.871);
-transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 1.6em 3.7em rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 2.6em 5.3em -1.3em rgba(0, 0, 0, 0.871);
+  transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transform-style: preserve-3d; /* Mengaktifkan konteks 3D */
-  /* Mengecilkan ukuran visual kartu menggunakan transform: scale() */
-  /* Nilai awal ditambahkan agar animasi hover tetap mulus dari kondisi awal */
-  transform: perspective(4000px) scale(1) rotateY(0deg) rotateX(0deg);
+  transform: perspective(420em) scale(1) rotateY(0deg) rotateX(0deg);
+  will-change: transform, box-shadow; /* Memberi tahu browser untuk mempersiapkan optimasi GPU */
 }
 
-/* --- PENAMBAHAN BARU: EFEK HOVER 3D --- */
-.news-card:hover {
-  transform: perspective(1000px) scale(1) rotateY(-5deg) rotateX(6deg); /* Skala diperbarui: 0.85 (skala dasar) * 1.05 (pembesaran hover) = 0.8925 */
-  box-shadow: 0 40px 70px -20px rgba(0, 0, 0, 0.7);
+/* Efek hover 3D hanya diaktifkan pada perangkat dengan pointer mouse/trackpad (non-layar sentuh) */
+@media (hover: hover) {
+  .news-card:hover {
+    transform: perspective(105em) scale(1.06) rotateY(-5deg) rotateX(6deg);
+    box-shadow: 0 4.2em 7.4em -2.1em rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Pemicu tap interaktif untuk perangkat layar sentuh */
+.news-card.hover-active {
+  transform: perspective(105em) scale(1.06) rotateY(-5deg) rotateX(6deg);
+  box-shadow: 0 4.2em 7.4em -2.1em rgba(0, 0, 0, 0.7);
 }
 
 .liquid {
-    height: 250px;
-    width: 250px;
+    height: 26.3em;
+    width: 26.3em;
     position: absolute;
+    opacity: 0.8;
     z-index: 2;
     border-radius: 100%;
-    /* --- PENAMBAHAN BARU: Properti dasar animasi --- */
     animation-name: liquidFlow;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
+    will-change: transform; /* GPU layer promotion untuk kelancaran rendering */
 }
 
 .L-1 {
     right: 0;
-    bottom: -90px;
+    bottom: -13em;
     background: #00def7;
-    /* --- PENAMBAHAN BARU: Durasi animasi unik --- */
     animation-duration: 12s;
 }
 
 .L-2 {
-    bottom: -90px;
-    right: 100px;
+    bottom: -13em;
+    right: 10.5em;
     background: #ffffff;
-    /* --- PENAMBAHAN BARU: Durasi & delay berbeda untuk gerakan acak --- */
     animation-duration: 10s;
     animation-delay: -4s; /* Mulai animasi dari titik yang berbeda */
 }
 
 .L-3 {
-    bottom: -90px;
+    bottom: -13em;
     left: 0;
     background: #1833ff;
-    /* --- PENAMBAHAN BARU: Durasi & delay berbeda --- */
     animation-duration: 13s;
     animation-delay: -2s;
 }
 
 .L-4 {
-    bottom: -90px;
-    left: 100px;
+    bottom: -13em;
+    left: 10.5em;
     background: #5d00cf;
-    /* --- PENAMBAHAN BARU: Durasi & delay berbeda --- */
     animation-duration: 9s;
     animation-delay: -5s;
 }
@@ -98,11 +103,11 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 /* KEYFRAME UNTUK ANIMASI LIQUID             */
 /* ========================================= */
 @keyframes liquidFlow {
-  0% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(15px, -25px) scale(1.05); }
-  50% { transform: translate(-20px, 10px) scale(0.95); }
-  75% { transform: translate(10px, -20px) scale(1.1); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  25% { transform: translate3d(1.6em, -2.6em, 0) scale(1.05); }
+  50% { transform: translate3d(-2.1em, 1.1em, 0) scale(0.95); }
+  75% { transform: translate3d(1.1em, -2.1em, 0) scale(1.1); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 /* ========================================= */
@@ -110,8 +115,8 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 /* ========================================= */
 .news-image-container,
 .news-image-container img {
-    position: absolute;
-    top: 0px;
+  position: absolute;
+  top: 0;
   width: 100%;
   height: 97%;
   object-fit: cover; /* Agar gambar tidak gepeng */
@@ -125,15 +130,13 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   top: 0;
   left: 0;
   width: 100%;
-  /* Dibuat cukup tinggi (75%) agar ujung kiri lengkungan bisa naik ke atas */
   height: 50%; 
   z-index: 2;
   
   /* Menghasilkan bayangan halus mengikuti bentuk potongan masking anak-nya */
   filter: 
-  drop-shadow(0px -7px 15px rgba(255, 255, 255, 0.6))
-  drop-shadow(-2px 2px 0px rgb(255, 255, 255));
-  
+    drop-shadow(0em -0.7em 1.6em rgba(255, 255, 255, 0.6))
+    drop-shadow(-0.2em 0.2em 0.1em rgb(255, 255, 255));
 }
 
 /* ========================================= */
@@ -142,18 +145,14 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 .news-content-container {
   width: 100%;
   height: 100%;
-  /* Background "mentahan" default: biru gelap khas kartu (#000a3a). Saat berita
-     PUNYA gambar, gambar menutupinya (tak ada perubahan visual). Saat TIDAK ada
-     gambar, area lengkung ini tampil biru default — bukan putih kosong. */
   background-color: var(--theme-bg-deep, #000a3a);
   position: absolute;
-  top: 0px;
+  top: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* Mendorong teks ke bawah */
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 567 284' preserveAspectRatio='none'%3E%3Cpath d='M0 0H567V265H226.8C101.542 265 0 163.458 0 38.2V0Z'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 567 284' preserveAspectRatio='none'%3E%3Cpath d='M0 0H567V265H226.8C101.542 265 0 163.458 0 38.2V0Z'/%3E%3C/svg%3E");
-  /* Memastikan mask meregang menutupi seluruh container tanpa berulang */
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
@@ -168,27 +167,28 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  bottom: 0px;
+  bottom: 0;
   z-index: 999999;
   height: 50%;
-  gap: 2px;
-  padding: 20px 35px;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 0.2em;
+  padding: 1em 2.6em;
   background-color: rgba(var(--theme-bg-deep-rgb, 1, 0, 67), 0.38);
-  backdrop-filter: blur(20px);
-  border-top: 1.3px solid rgb(255, 255, 255);
+  backdrop-filter: blur(2.1em);
+  border-top: 0.14em solid rgb(255, 255, 255);
 }
 
 .CardNewstitle {
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: 2em;
   font-weight: 700;
-  word-spacing: 3px;
+  word-spacing: 0.32em;
   line-height: 1.2;
+  max-height: 3em; /* Batas tinggi aman untuk 2 baris (2 x 2.2em x 1.2) */
   font-family: 'Poppins', sans-serif;
   margin: 0;
-  margin-bottom: 1px;
-  /* Batasi judul maksimal 2 baris; sisanya dipotong dengan elipsis (…) agar
-     tinggi kartu tetap proporsional di desktop maupun mobile. */
+  margin-bottom: 0.1em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -199,20 +199,21 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 
 .CardNewsdate {
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 1.2em;
   font-weight: 400;
-  margin: 0px;
-    padding-bottom: 5px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid white;
+  margin: 0;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  border-bottom: 0.1em solid white;
   font-family: 'Poppins', sans-serif;
 }
 
 .CardNewsexcerpt {
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 1.35em;
   font-weight: 300;
   line-height: 1.2;
+  max-height: 3.4em; /* Batas tinggi aman untuk 3 baris (3 x 1.35em x 1.2) */
   margin: 0;
   font-family: 'Poppins', sans-serif;
   
@@ -253,10 +254,18 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
     rgba(255, 255, 255, 0) 100%
   );
   transform: skewX(-25deg);
-  filter: blur(30px);
+  filter: blur(3.2em);
 }
 
-.news-card:hover .NewsCard-light-sweep::before {
+/* Animasi kilau menyapu hanya diaktifkan pada perangkat non-layar sentuh */
+@media (hover: hover) {
+  .news-card:hover .NewsCard-light-sweep::before {
+    animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* Pemicu animasi kilau menyapu saat di-tap pada perangkat layar sentuh */
+.news-card.hover-active .NewsCard-light-sweep::before {
   animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -269,51 +278,37 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
 }
 
 /* ========================================= */
-/* RESPONSIF MOBILE                          */
-/* Kartu lebar keras 400px terpotong di layar HP. Di ≤768px kartu dibuat     */
-/* mengisi lebar tersedia (maks 360px) dengan menjaga rasio 400/430, dan     */
-/* padding daftar dikecilkan agar tidak ada lagi bagian yang terpangkas.     */
+/* RESPONSIF & JANGKAR SKALA (FONT SIZE)     */
 /* ========================================= */
+@media (max-width: 1290px) {
+  .news-card {
+    font-size: clamp(2px, 1.6vw, 10px);
+  }
+    .news-layout-grid {
+    gap: clamp(10px, 3.8vw, 64px);
+  }
+}
+
 @media (max-width: 768px) {
   .news-content-wrapper {
     padding: 24px 12px;
   }
   .news-layout-grid {
-    gap: 20px;
+    gap: 50px;
   }
-
-  /* Seluruh anak .news-card ber-position:absolute sehingga kartu tidak punya
-     lebar intrinsik. Karena itu lebar HARUS berupa nilai pasti (bukan 100%,
-     yang akan mengecil jadi 0). Pakai lebar berbasis viewport, tinggi mengikuti
-     rasio desain asli 400/430. */
   .news-card {
-    width: min(360px, calc(100vw - 56px));
-    height: auto;
-    aspect-ratio: 400 / 430;
+    font-size: clamp(5px, 1.8vw, 10px);
   }
-
-  /* Orb "liquid" (250px) terlalu besar untuk kartu mobile yang lebih pendek:
-     saat beranimasi naik, puncaknya menyembul di atas panel blur teks dan
-     tampak sebagai lingkaran tajam. Dikecilkan agar tetap berada di dalam area
-     blur. HANYA ukuran yang diubah — posisi, warna, dan animasi tetap. */
-  .liquid {
-    height: 150px;
-    width: 150px;
+  /* Mengurangi radius blur kaca khusus di mobile untuk menghemat GPU low-end */
+  .CardNewstext {
+    backdrop-filter: blur(1.2em);
+    -webkit-backdrop-filter: blur(1.2em);
   }
+}
 
-  /* Ukuran font dikecilkan khusus mobile agar proporsional di kartu ±334px.
-     Patokan tipografi mobile: judul kartu ~17px, meta/tanggal ~11.5px,
-     ringkasan ~12px (min. nyaman-baca ±12px). */
-  .CardNewstitle {
-    font-size: 1.05rem; /* 20.8px → ~16.8px */
-  }
-
-  .CardNewsdate {
-    font-size: 0.72rem; /* 12.8px → ~11.5px */
-  }
-
-  .CardNewsexcerpt {
-    font-size: 0.75rem; /* 12.8px → ~12px */
+@media (max-width: 250px) {
+  .news-card {
+    font-size: clamp(3px, 1.5vw, 5px);
   }
 }
 
@@ -413,4 +408,48 @@ transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubi
   font-weight: 700;
   margin: 0;
   letter-spacing: 0.5px;
+}
+
+/* ========================================= */
+/* CSS GRID TEMPLATE COLUMNS PER BREAKPOINT (ALT A) */
+/* ========================================= */
+
+/* Desktop Lebar (4 Kolom) */
+@media (min-width: 1776px) {
+  .news-layout-grid {
+    grid-template-columns: repeat(4, 330px);
+  }
+}
+
+/* Desktop Standar (3 Kolom) */
+@media (min-width: 1400px) and (max-width: 1775px) {
+  .news-layout-grid {
+    grid-template-columns: repeat(3, 330px);
+  }
+}
+
+/* Tablet / Layar Kecil (2 Kolom) */
+@media (max-width: 1399px) and (min-width: 935px) {
+  .news-layout-grid {
+    grid-template-columns: repeat(2, 330px);
+  }
+}
+
+/* Mobile (1 Kolom) */
+@media (max-width: 935px) {
+  .news-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================= */
+/* AKSESIBILITAS: PREFERS-REDUCED-MOTION     */
+/* ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  .liquid,
+  .news-card {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
 }

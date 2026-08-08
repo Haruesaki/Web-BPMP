@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
 import "./NewsCardContent.css";
@@ -8,10 +8,10 @@ import Pagination from "../CardProfile/Pagination";
 
 const getItemsPerPage = (width, isVertical) => {
   if (isVertical) return 8;    // Default statis untuk layout vertikal 1 kolom
-  if (width >= 1775) return 8; // Desktop lebar: 4 kolom x 2 baris = 8 card (baris pertama 4 card, baris kedua 4 card)
-  if (width >= 1385) return 6; // Desktop standar: 1 baris 3 card = 3 card
-  if (width >= 768) return 4;  // Tablet: 1 baris 2 card = 2 card
-  return 4;                    // Mobile: 1 baris 1 card = 1 card
+  if (width >= 1776) return 8; // 4 kolom x 2 baris (butuh min 1576px lebar bersih)
+  if (width >= 1400) return 6; // 3 kolom x 2 baris (butuh min 1182px lebar bersih)
+  if (width >= 768) return 4;  // 2 kolom x 2 baris (butuh min 788px lebar bersih)
+  return 4;                    // 1 kolom x 4 baris (mobile)
 };
 
 const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
@@ -40,11 +40,12 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
   // Fungsi untuk hitung total halaman
   const totalPages = Math.ceil(berita.length / itemsPerPage);
 
-  // Otomatis reset ke halaman 1 setiap kali kapasitas per halaman (itemsPerPage)
-  // berubah akibat resize layar agar susunan kartu kembali segar dari awal.
+  // Amankan halaman aktif jika jumlah halaman menyusut setelah resize (sama seperti ProfileLayout)
   useEffect(() => {
-    setCurrentPage(1);
-  }, [itemsPerPage]);
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [itemsPerPage, totalPages, currentPage]);
 
   // Handler perpindahan halaman otomatis jika target hash berada di halaman ke-2, ke-3, dst.
   useEffect(() => {
@@ -148,8 +149,8 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
     setCurrentPage(1); // Reset ke halaman 1 setiap kali kategori menu berubah
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman
-  const handlePageChange = (page) => setCurrentPage(page);
+  // Fungsi untuk mengubah halaman (memoized callback)
+  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
 
   if (loading) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat berita...</div>;
   
@@ -184,9 +185,7 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
             : '';
           
           // Ekstrak text polos dari HTML untuk excerpt secara aman tanpa memicu rendering DOM memori
-          const plainText = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
-          let excerpt = plainText;
-          if (excerpt.length > 100) excerpt = excerpt.substring(0, 100) + '...';
+          const excerpt = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
 
           return (
             <LazyLoadWrapper 
