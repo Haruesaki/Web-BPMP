@@ -188,12 +188,15 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
           const excerpt = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
 
           return (
-            <LazyLoadWrapper 
+            <div 
               key={b.id || index}
-              placeholderHeight="408.5px"
-              placeholderWidth="323px"
+              id={`content-berita-${b.id}`} 
+              style={{ width: isVertical ? '100%' : 'auto', display: 'flex', justifyContent: 'center' }}
             >
-              <div id={`content-berita-${b.id}`} style={{ width: isVertical ? '100%' : 'auto', display: 'flex', justifyContent: 'center' }}>
+              <LazyLoadWrapper 
+                placeholderHeight="408.5px"
+                placeholderWidth="323px"
+              >
                 <CardBerita 
                   title={b.judul} 
                   date={date} 
@@ -201,8 +204,8 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
                   imageSrc={b.url_foto || null}
                   link={`/berita/berita-${b.id}`}
                 />
-              </div>
-            </LazyLoadWrapper>
+              </LazyLoadWrapper>
+            </div>
           );
         })}
       </div>
