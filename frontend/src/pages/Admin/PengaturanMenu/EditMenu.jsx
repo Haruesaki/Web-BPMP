@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import { LAYOUT_LABEL_TO_KEY } from '../../../components/admin/LayoutPost/layoutMeta';
 
 const EditMenu = ({ isOpen, onClose, menuData, onSuccess }) => {
@@ -84,7 +85,7 @@ const EditMenu = ({ isOpen, onClose, menuData, onSuccess }) => {
     }
 
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
 
       const res = await axiosInstance.patch(`/api/menus/${menuData.id}`, {

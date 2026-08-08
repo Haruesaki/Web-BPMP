@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import '../default/PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
 import './PostProfileCard.css';
 import axiosInstance from '../../../../api/axiosInstance';
+import { bacaSesi } from '../../../../utils/sesiAdmin';
 import { uploadImageToServer } from '../uploadImage';
 
 // =========================================================================
@@ -50,7 +51,7 @@ const PostProfileCard = () => {
         return;
       }
       try {
-        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const session = bacaSesi();
         const token = session?.token;
 
         const menuRes = await axiosInstance.get('/api/menus');
@@ -181,7 +182,7 @@ const PostProfileCard = () => {
   const handleSimpan = async () => {
     setSaveError(''); // Reset error
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
       
       let finalProfiles = cards.map(c => ({

@@ -22,15 +22,37 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    const result = await login(email, password);
+    // Penjaga terhadap kiriman ganda: menekan Enter berulang kali sebelum
+    // jawaban peladen tiba akan mengirim beberapa permintaan login sekaligus.
+    if (loading) return;
+    const result = await login(email, password, rememberMe);
     if (result.success) {
       navigate('/admin');
     }
   };
 
+  // PINTASAN ENTER
+  // Ditangani di tingkat <form> supaya Enter berlaku dari mana pun di dalam
+  // formulir — termasuk saat fokus berada di kotak centang "Ingat saya", yang
+  // TIDAK ikut memicu pengiriman otomatis bawaan peramban (perilaku bawaan itu
+  // hanya berlaku pada kolom teks, dan tidak seragam antar peramban).
+  //
+  // `preventDefault` dipanggil lebih dahulu justru agar pengiriman bawaan
+  // peramban tidak ikut berjalan; tanpa itu Enter di kolom teks akan memanggil
+  // handleSubmit DUA KALI.
+  const tanganiEnter = (e) => {
+    if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+    // Tautan "Lupa password?" dan tombol mata harus tetap menjalankan
+    // fungsinya sendiri saat ditekan Enter, bukan mengirim formulir.
+    const tag = e.target?.tagName;
+    if (tag === 'A' || tag === 'BUTTON' || tag === 'TEXTAREA') return;
+    e.preventDefault();
+    handleSubmit();
+  };
+
   return (
     <div className="auth-layout">
-      <form className="auth-card" onSubmit={handleSubmit}>
+      <form className="auth-card" onSubmit={handleSubmit} onKeyDown={tanganiEnter}>
         <h1 className="auth-title">
           Login <span className="auth-title-accent">CMS</span>
         </h1>
@@ -94,7 +116,10 @@ const Login = () => {
 
         {/* OPSI: INGAT SAYA + LUPA PASSWORD */}
         <div className="auth-options">
-          <label className="auth-remember">
+          <label
+            className="auth-remember"
+            title="Sesi bertahan 7 hari di peramban ini. Tanpa dicentang, sesi berakhir dalam 8 jam."
+          >
             <input
               type="checkbox"
               checked={rememberMe}

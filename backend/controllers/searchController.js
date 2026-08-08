@@ -1,9 +1,18 @@
 const db = require('../config/database');
+const { saringMenuTampil } = require('../utils/menuTampil');
 
 // --- HELPER: Mengambil dan memetakan hierarki menu untuk pencarian cepat ---
+//
+// Dahulu penyaringnya hanya `is_aktif` pada baris menunya sendiri. Itu
+// menyisakan lubang: submenu yang aktif tetapi INDUKNYA dinonaktifkan tetap
+// muncul di hasil pencarian, padahal ia sudah hilang dari bilah navigasi —
+// halaman yang sengaja disembunyikan tetap dapat ditemukan dan dibuka.
+//
+// Aturannya kini diambil dari utils/menuTampil, sama persis dengan yang dipakai
+// daftar menu publik, supaya keduanya tidak dapat menyimpang.
 const getMenuHierarchy = async () => {
-  const allMenus = await db('menu').where('is_aktif', true);
-  const menuMap = new Map(allMenus.map(m => [m.id, m]));
+  const semua = await db('menu');
+  const menuMap = new Map(saringMenuTampil(semua).map(m => [m.id, m]));
   return menuMap;
 };
 
@@ -74,9 +83,12 @@ class SearchController {
       const menuMap = await getMenuHierarchy();
 
       // 1. Cari di nama menu (induk atau submenu)
-      const menus = await db.from('menu')
-        .whereRaw('LOWER(nama_menu) LIKE ?', [keyword])
-        .andWhere('is_aktif', true);
+      //
+      // Penyaringnya `menuMap`, BUKAN `is_aktif` pada barisnya sendiri.
+      // `is_aktif` saja meloloskan submenu aktif yang induknya dinonaktifkan —
+      // dan submenu itu sudah tidak punya jalan masuk dari navigasi.
+      const menus = (await db.from('menu').whereRaw('LOWER(nama_menu) LIKE ?', [keyword]))
+        .filter((m) => menuMap.has(m.id));
 
       for (let m of menus) {
         const location = getMenuLocation(m.id, menuMap);

@@ -37,8 +37,15 @@ const Navbar = () => {
     };
     const fetchMenus = async () => {
       try {
-        const response = await axiosInstance.get('/api/menus', { signal });
+        // `?publik=1` — peladen sudah menyaring menu nonaktif BESERTA seluruh
+        // submenu yang induknya nonaktif. Sebelumnya seluruh menu dikirim ke
+        // sini lalu disaring di peramban; itu tetap membocorkan nama menu
+        // tersembunyi kepada setiap pengunjung.
+        const response = await axiosInstance.get('/api/menus', { params: { publik: 1 }, signal });
         const rawMenus = response.data || [];
+        // Penyaringan `is_aktif` di bawah DIPERTAHANKAN sebagai lapis kedua:
+        // ia tidak merugikan, dan menjaga tampilan tetap benar seandainya
+        // endpointnya kelak dipanggil tanpa parameter itu.
         const mainMenus = rawMenus.filter(m => !m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
         const subMenus = rawMenus.filter(m => m.induk_id && m.is_aktif).sort((a, b) => a.urutan_tampil - b.urutan_tampil);
         

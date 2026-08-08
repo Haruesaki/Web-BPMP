@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import './AdminHeader.css';
 
 // =========================================================================
@@ -61,14 +62,8 @@ const AdminHeader = ({
   const [session, setSession] = useState({ nama: 'Admin BPMP', role: 'admin', email: '' });
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('adminSession');
-    if (saved) {
-      try {
-        setSession(JSON.parse(saved));
-      } catch (e) {
-        console.error("Gagal memuat session", e);
-      }
-    }
+    const tersimpan = bacaSesi();
+    if (tersimpan) setSession(tersimpan);
   }, []);
 
   const userName = session.nama;

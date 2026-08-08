@@ -1,12 +1,28 @@
 const MenuModel = require('../models/menuModel');
 const { logActivityInternal } = require('./aktivitasAdminController');
+const { saringMenuTampil } = require('../utils/menuTampil');
 
 class MenuController {
-  // GET /api/menus
+  // GET /api/menus            → seluruh menu (dipakai panel admin)
+  // GET /api/menus?publik=1   → hanya yang tampil bagi pengunjung
+  //
+  // Dua bentuk pada satu rute, bukan dua rute terpisah, sebab keduanya
+  // mengembalikan bentuk data yang sama persis — yang berbeda hanya
+  // penyaringnya.
+  //
+  // Panel admin WAJIB tetap menerima seluruhnya: tanpa itu, menu yang
+  // dinonaktifkan akan lenyap dari halaman pengaturan dan tidak akan pernah
+  // dapat dinyalakan kembali.
+  //
+  // Sebaliknya sisi pengunjung menerima yang tersaring dari PELADEN, bukan
+  // menyaringnya sendiri di peramban. Penyaringan di peramban tetap
+  // mengirimkan nama seluruh menu tersembunyi ke setiap pengunjung, dan
+  // halaman yang disembunyikan masih dapat dibuka lewat URL langsung.
   static async getMenus(req, res) {
     try {
       const menus = await MenuModel.getAll();
-      res.json(menus);
+      const hanyaPublik = req.query.publik === '1' || req.query.publik === 'true';
+      res.json(hanyaPublik ? saringMenuTampil(menus) : menus);
     } catch (error) {
       console.error('Error getMenus:', error);
       res.status(500).json({ pesan: 'Gagal mengambil data menu' });

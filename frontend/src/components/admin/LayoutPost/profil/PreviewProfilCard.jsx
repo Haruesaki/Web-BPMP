@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
+import { bacaSesi } from '../../../../utils/sesiAdmin';
 import CardContent from '../../../user/content-types/CardProfile/CardContent';
 import useSeretUrutan from '../../../../hooks/useSeretUrutan';
 import './PreviewProfilCard.css';
@@ -29,7 +30,7 @@ const PreviewProfilCard = () => {
                 setLoading(true);
                 setError('');
 
-                const session = JSON.parse(sessionStorage.getItem('adminSession'));
+                const session = bacaSesi();
                 const token = session?.token;
 
                 const menuRes = await axiosInstance.get('/api/menus');

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
+import { bacaSesi } from '../../../utils/sesiAdmin';
 import '../../../pages/Admin/DashboardAdmin/dashboard-admin.css';
 import './Link.css';
 import LinkPreviewCard from './LinkPreviewCard';
@@ -118,7 +119,7 @@ const Link = () => {
       setPreviewError('');
       setPreviewData(null);
       try {
-        const session = JSON.parse(sessionStorage.getItem('adminSession'));
+        const session = bacaSesi();
         const token = session?.token;
 
         if (!token) {
@@ -164,7 +165,7 @@ const Link = () => {
     }
     setSaving(true);
     try {
-      const session = JSON.parse(sessionStorage.getItem('adminSession'));
+      const session = bacaSesi();
       const token = session?.token;
 
       // Endpoint PATCH /api/menus/:id sudah tersedia di backend, kirim

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import './LupaPassword.css';
 import { requestOtpApi, verifyOtpApi, resetPasswordApi } from '../../../api/authApi';
+import { simpanSesi } from '../../../utils/sesiAdmin';
 
 const OTP_LENGTH = 6;
 
@@ -157,15 +158,19 @@ const LupaPassword = () => {
         sessionStorage.removeItem('otpEmail');
         localStorage.removeItem('otpCooldownExpires');
 
-        // Simpan sesi login baru yang dikembalikan oleh backend
+        // Simpan sesi login baru yang dikembalikan oleh backend.
+        // `access` kini ikut dikirim peladen — sebelumnya klaim itu tidak
+        // disertakan pada jalur atur-ulang kata sandi, sehingga pengguna masuk
+        // dengan daftar akses menu kosong sampai ia keluar lalu login kembali.
         const sessionData = {
           id: result.data.user.id,
           nama: result.data.user.nama,
           role: result.data.user.role,
           email: result.data.user.email,
+          access: result.data.user.access,
           token: result.data.token
         };
-        sessionStorage.setItem('adminSession', JSON.stringify(sessionData));
+        simpanSesi(sessionData);
         
         // Langsung arahkan ke Dashboard
         navigate('/admin');

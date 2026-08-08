@@ -48,6 +48,15 @@ const PostDefault = ({
   const [formError, setFormError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Cadangan lokal untuk status simpan. `saveStatus`/`setSaveStatus` adalah
+  // prop OPSIONAL, dan PostBeritaCard tidak pernah mengirimkannya — akibatnya
+  // kotak pesan galat di bawah tombol Simpan mustahil muncul pada editor
+  // berita, berapa kali pun penyimpanan gagal. Dengan cadangan ini setiap
+  // pemakai PostDefault memperoleh laporan galat tanpa harus mengubah apa pun.
+  const [statusLokal, setStatusLokal] = useState({ error: false, message: '' });
+  const status = saveStatus ?? statusLokal;
+  const setStatus = setSaveStatus ?? setStatusLokal;
+
   // Guard anti klik-ganda. Pakai ref (bukan hanya state) karena ref berubah
   // SINKRON — klik kedua di tick yang sama langsung tertahan sebelum sempat
   // mengirim request kedua (biang data ganda di DB).
@@ -57,9 +66,7 @@ const PostDefault = ({
     if (savingRef.current) return; // sudah ada proses simpan berjalan → abaikan
 
     setFormError('');
-    if (setSaveStatus) {
-      setSaveStatus({ error: false, message: '' });
-    }
+    setStatus({ error: false, message: '' });
 
     if (!judul.trim()) {
       setFormError('Judul wajib diisi.');
@@ -76,9 +83,7 @@ const PostDefault = ({
     };
 
     if (!currentContent.judul && !currentContent.konten) {
-      if (setSaveStatus) {
-        setSaveStatus({ error: true, message: 'Form harus diisi minimal 1 konten untuk bisa menyimpan ke database.' });
-      }
+      setStatus({ error: true, message: 'Form harus diisi minimal 1 konten untuk bisa menyimpan ke database.' });
       return;
     }
 
@@ -94,6 +99,26 @@ const PostDefault = ({
     setIsSaving(true);
     try {
       await onSave(data);
+    } catch (err) {
+      // TANPA blok ini, kegagalan menyimpan sama sekali tidak terlihat:
+      // `finally` mengembalikan tombol ke keadaan semula, penolakan janjinya
+      // menguap sebagai unhandled rejection, dan penyunting menyimpulkan
+      // tulisannya sudah tersimpan padahal tidak. Itulah yang terjadi ketika
+      // penambahan berita di production berbalas 500 tanpa satu pun pesan.
+      //
+      // Isi editor sengaja TIDAK dibersihkan dan halaman tidak berpindah,
+      // supaya tulisan yang belum tersimpan tidak ikut hilang.
+      const pesanPeladen =
+        err?.response?.data?.pesan ||
+        err?.response?.data?.message ||
+        err?.message;
+      const sebab = (pesanPeladen || 'peladen tidak dapat dihubungi').replace(/\.*$/, '');
+      setStatus({
+        error: true,
+        message: `Gagal menyimpan — ${sebab}. ` +
+          'Tulisan Anda masih ada di formulir ini, jangan menutup halaman sebelum berhasil disimpan.',
+      });
+      console.error('Gagal menyimpan konten:', err);
     } finally {
       savingRef.current = false;
       setIsSaving(false);
@@ -160,17 +185,17 @@ const PostDefault = ({
           {formError && <p className="pd-error">{formError}</p>}
 
           {/* RENDER saveStatus DI BAWAH BUTTON */}
-          {saveStatus?.message && (
+          {status?.message && (
             <div style={{
               marginTop: '20px',
               padding: '12px 16px',
-              backgroundColor: saveStatus.error ? '#441111' : '#114411',
-              color: saveStatus.error ? '#ff5555' : '#55ff55',
-              border: `1px solid ${saveStatus.error ? '#ff5555' : '#55ff55'}`,
+              backgroundColor: status.error ? '#441111' : '#114411',
+              color: status.error ? '#ff5555' : '#55ff55',
+              border: `1px solid ${status.error ? '#ff5555' : '#55ff55'}`,
               borderRadius: '6px',
               fontWeight: '500'
             }}>
-              {saveStatus.message}
+              {status.message}
             </div>
           )}
         </section>

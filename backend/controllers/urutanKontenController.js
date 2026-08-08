@@ -37,6 +37,8 @@ const { logActivityInternal } = require('./aktivitasAdminController');
 // =========================================================================
 
 // Nama yang dipakai pada catatan aktivitas admin.
+const { adaKolom } = require('../utils/skema');
+
 const SEBUTAN = {
   halaman_konten: 'isi konten',
   berita: 'berita',
@@ -65,6 +67,19 @@ const buatPengubahUrutan = (tabel) =>
     }
 
     try {
+      // Tanpa kolomnya, penyusunan ulang mustahil dilakukan. Yang penting di
+      // sini adalah MENGATAKANNYA: seandainya dibiarkan, admin hanya melihat
+      // urutan yang melompat kembali ke semula tanpa keterangan apa pun,
+      // dan tidak akan pernah menduga penyebabnya ada di basis data.
+      if (!(await adaKolom(tabel, 'urutan_tampil'))) {
+        return res.status(503).json({
+          pesan:
+            `Pengurutan ${SEBUTAN[tabel] || tabel} belum aktif di peladen ini karena ` +
+            'struktur basis datanya belum diperbarui. Jalankan migrasi (npm run migrasi) ' +
+            'atau tempelkan .deploy_plan/query.txt di phpMyAdmin, lalu coba lagi.',
+        });
+      }
+
       const idTersimpan = await db(tabel).where('menu_id', menu_id).pluck('id');
       const himpunanTersimpan = new Set(idTersimpan.map(Number));
 

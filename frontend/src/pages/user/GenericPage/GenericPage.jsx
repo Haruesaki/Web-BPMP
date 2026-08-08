@@ -17,7 +17,12 @@ const GenericPage = () => {
     const fetchMenuType = async () => {
       setLoading(true);
       try {
-        const res = await axiosInstance.get('/api/menus');
+        // `?publik=1` sekaligus menjadi penjaga URL langsung: menu yang
+        // dinonaktifkan — atau yang induknya dinonaktifkan — tidak ada di
+        // daftar ini, sehingga pencariannya gagal dan halaman "tidak
+        // ditemukan" di bawah yang tampil. Tanpa itu, menu tersembunyi masih
+        // dapat dibuka siapa pun yang mengetahui atau menebak alamatnya.
+        const res = await axiosInstance.get('/api/menus', { params: { publik: 1 } });
         // Cari menu yang sesuai dengan ID di parameter URL
         const foundMenu = res.data.find(m => m.id === parseInt(menuId));
         setMenuData(foundMenu);

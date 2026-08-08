@@ -24,6 +24,16 @@ const port = env.PORT;
 app.listen(port, () => {
     console.log(`Backend berjalan di port ${port} (mode ${env.NODE_ENV})`);
 
+    // Peringatan migrasi tertunda — DI KEDUA MODE, tanpa perlu dinyalakan.
+    // Justru di production-lah ia paling dibutuhkan: di sanalah struktur basis
+    // data paling mudah tertinggal dari kodenya, sebab penempatan kode dan
+    // pembaruan basis data terjadi pada dua langkah yang terpisah. Hanya
+    // membaca, tidak mengubah apa pun, dan kegagalannya tidak menjatuhkan
+    // peladen. Lihat utils/periksaMigrasi.js.
+    require('./utils/periksaMigrasi')
+        .periksaMigrasi()
+        .catch((e) => console.warn('[migrasi] Pemeriksaan gagal dijalankan:', e.message));
+
     // Diagnosis sambungan basis data atas permintaan, lewat variabel
     // DIAGNOSA_DB. Dijalankan SETELAH peladen menyala supaya situs tidak
     // tertunda menunggu pemeriksaan, dan kegagalannya sengaja hanya dicatat —

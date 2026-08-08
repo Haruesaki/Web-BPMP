@@ -177,9 +177,20 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
     navigate(`${currentPath}/edit/${id}`, { state: location.state });
   };
 
+  // Galat di sini sengaja DILEMPARKAN KEMBALI, bukan ditelan. PostDefault
+  // menunggu janji ini dan menampilkan pesannya di bawah tombol Simpan.
+  //
+  // Sebelumnya fungsi ini tidak mempunyai penanganan galat sama sekali:
+  // ketika penambahan berita di production berbalas 500, janjinya ditolak,
+  // `fetchBerita()` dan `navigate(-1)` tidak pernah berjalan, dan penyunting
+  // hanya melihat halaman diam tanpa satu pun keterangan — lalu menyimpulkan
+  // beritanya sudah tersimpan. Naskah yang baru ditulis pun hilang.
+  //
+  // Perpindahan halaman HANYA terjadi sesudah seluruh permintaan berhasil,
+  // supaya naskah yang belum tersimpan tidak ikut ditinggalkan.
   const handleEditorSave = async ({ contents = [] }) => {
     if (!contents.length) return;
-    
+
     if (isAddMode) {
       for (const c of contents) {
         await axiosInstance.post(`/api/berita/${menuId}`, { judul: c.judul, deskripsi_kaya: c.konten, coverUrl: c.coverUrl || null, statusTayang: false });
@@ -191,7 +202,7 @@ const PostBeritaCard = ({ menuName = '', menuId: propMenuId, routeAction = '' })
         await axiosInstance.post(`/api/berita/${menuId}`, { judul: contents[i].judul, deskripsi_kaya: contents[i].konten, coverUrl: contents[i].coverUrl || null, statusTayang: false });
       }
     }
-    
+
     fetchBerita();
     navigate(-1);
   };

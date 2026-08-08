@@ -1,19 +1,7 @@
 import axiosInstance from './axiosInstance';
+import { headerOtorisasi } from '../utils/sesiAdmin';
 
-export const getAuthHeaders = () => {
-    const session = sessionStorage.getItem('adminSession');
-    if (session) {
-        try {
-            const parsed = JSON.parse(session);
-            if (parsed.token) {
-                return { Authorization: `Bearer ${parsed.token}` };
-            }
-        } catch (e) {
-            console.error("Gagal parsing token session", e);
-        }
-    }
-    return {};
-};
+export const getAuthHeaders = () => headerOtorisasi();
 
 export const getAllUsers = async () => {
     try {

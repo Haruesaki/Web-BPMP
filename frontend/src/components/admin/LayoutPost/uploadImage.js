@@ -18,19 +18,13 @@
 // =========================================================================
 
 import { mulaiUnggah, majukanUnggah, sudahiUnggah, gagalkanUnggah } from '../../../utils/statusUnggah';
+import { ambilToken } from '../../../utils/sesiAdmin';
 
 // URL titik akhir unggah (samakan dengan konfigurasi CKEditor di PostDefault).
 export const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/upload/gambar`;
 
 // Ambil token dari sesi admin; titik akhir unggah dijaga authMiddleware.
-const getAuthToken = () => {
-  try {
-    const session = sessionStorage.getItem('adminSession');
-    return session ? JSON.parse(session)?.token || '' : '';
-  } catch {
-    return '';
-  }
-};
+const getAuthToken = () => ambilToken() || '';
 
 /**
  * Unggah `file` → mengembalikan URL gambar. Melempar Error bila gagal.
