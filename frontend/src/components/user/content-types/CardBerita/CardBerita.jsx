@@ -69,7 +69,16 @@ const CardBerita = ({ title, date, excerpt, imageSrc, link, index = 0 }) => {
         <div className="liquid L-4"></div>
         <div className="CardNewstext">
           <h2 className="CardNewstitle">{title}</h2>
-          <p className="CardNewsdate">{date}</p>
+          <div className="CardNewsdate">
+            {typeof date === 'string' && date.includes('\n') ? (
+              <>
+                <span className="CardNewsdate-tanggal">{date.split('\n')[0]}</span>
+                <span className="CardNewsdate-waktu">{date.split('\n')[1]}</span>
+              </>
+            ) : (
+              date
+            )}
+          </div>
           <p className="CardNewsexcerpt">{excerpt}</p>
         </div>
       </div>

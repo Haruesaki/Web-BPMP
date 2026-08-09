@@ -118,6 +118,7 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
               role={profile.jabatan}
               quote={profile.quotes}
               imageSrc={profile.url_foto}
+              index={index}
             />
           </LazyLoadWrapper>
         ))}

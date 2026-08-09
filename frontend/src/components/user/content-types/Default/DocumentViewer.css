@@ -67,13 +67,42 @@
     }
 }
 
-/* Di layar penuh, pembungkusnya adalah layar itu sendiri. Batas tinggi dan
-   sudut membulat justru menyisakan pinggiran hitam yang tidak ada gunanya. */
+/* Di layar penuh (Fullscreen Mode):
+   Bingkai mengisi 100% layar komputer/HP.
+   Halaman A4 dikunci agar 100% muat setinggi layar pada Desktop & HP Miring,
+   atau pas selebar layar pada HP Tegak, menyisakan latar gelap netral yang rapi. */
 .docv-bingkai:fullscreen {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     border: 0;
     border-radius: 0;
+    background: #111422; /* Latar belakang gelap netral premium */
+}
+
+/* Memosisikan panggung & slot halaman A4 di tengah layar saat Fullscreen */
+.docv-bingkai:fullscreen .docv-panggung {
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: calc(var(--docv-ruang-alat) + 16px);
+}
+
+.docv-bingkai:fullscreen .docv-page-slot {
+    /* Batas tinggi maksimal adalah tinggi viewport minus ruang toolbar */
+    max-height: calc(100vh - var(--docv-ruang-alat) - 24px) !important;
+    
+    /* Lebar maksimal adalah yang terkecil antara:
+       1) Lebar rasio A4 dari tinggi layar (Desktop / HP Miring) -> Kiri-Kanan Kosong
+       2) Lebar layar HP Tegak minus padding (HP Tegak) -> Pas Selebar HP */
+    max-width: min(
+        calc((100vh - var(--docv-ruang-alat) - 24px) * (210 / 297)),
+        calc(100vw - 20px)
+    ) !important;
+
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 210 / 297;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65);
 }
 
 /* Wadah gulir. Mengisi penuh bingkai lewat posisi mutlak, supaya tinggi

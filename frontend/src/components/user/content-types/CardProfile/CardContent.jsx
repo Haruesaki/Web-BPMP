@@ -7,6 +7,7 @@ const CardContent = ({
   role = "UI/UX Desain",
   quote = "“Programmer Full Stuck bukan Full Stack”",
   imageSrc = null,
+  index = 0,
 }) => {
   const [isTapped, setIsTapped] = useState(false);
   const tapTimeoutRef = useRef(null);
@@ -32,6 +33,10 @@ const CardContent = ({
   return (
     <div 
       className={`card-profile ${isTapped ? "hover-active" : ""}`}
+      style={{
+        opacity: 0,
+        animation: `fadeSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.1}s forwards`
+      }}
       onClick={handleTap}
     >
       <div className="card-light-sweep"></div>

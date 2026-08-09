@@ -193,9 +193,13 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
           // sehingga berita biasa bernilai null. Tanpa cadangan, `new Date(null)`
           // akan jatuh ke epoch dan tertulis "1 Januari 1970" pada kartu.
           const sumberTanggal = b.waktu_tayang || b.dibuat_pada;
-          const date = sumberTanggal
-            ? new Date(sumberTanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            : '';
+          let date = '';
+          if (sumberTanggal) {
+            const d = new Date(sumberTanggal);
+            const tgl = d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const wkt = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            date = `${tgl}\n${wkt} WIB`;
+          }
           
           // Ekstrak text polos dari HTML untuk excerpt secara aman tanpa memicu rendering DOM memori
           const excerpt = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
