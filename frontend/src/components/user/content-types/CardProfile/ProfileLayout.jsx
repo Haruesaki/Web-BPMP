@@ -56,8 +56,17 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
     setCurrentPage(1);
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman (memoized callback)
-  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    const element = document.querySelector('.profile-content-wrapper');
+    if (element) {
+      if (window.lenis) {
+        window.lenis.scrollTo(element, { offset: -80 });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
 
   // Hitung total halaman (dideklarasikan sebelum Hook dan early return)
   const totalPages = Math.ceil(profiles.length / itemsPerPage);

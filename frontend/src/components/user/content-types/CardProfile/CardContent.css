@@ -19,8 +19,6 @@
   border-top-right-radius: 4em;
   border-bottom-right-radius: 4.5em;
   transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  transform-style: preserve-3d;
-  transform: perspective(400em) scale(1) rotateY(0deg) rotateX(0deg);
   will-change: transform, box-shadow;
 }
 
@@ -220,6 +218,8 @@
   object-fit: cover;
   width: 100%;
   height: 100%;
+  aspect-ratio: 1 / 1;
+  content-visibility: auto;
 }
 
 /* ========================================= */

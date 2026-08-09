@@ -38,7 +38,18 @@ const CardContent = ({
 
       <div className="profile-frame">
         {imageSrc ? (
-          <img src={imageSrc} alt={`Profil ${name}`} loading="lazy" decoding="async" />
+          <img 
+            src={imageSrc} 
+            alt={`Profil ${name}`} 
+            loading="lazy" 
+            decoding="async" 
+            width="170"
+            height="170"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.style.display = 'none';
+            }}
+          />
         ) : (
           <MediaKosong fill label={`Foto profil ${name} belum tersedia`} />
         )}
