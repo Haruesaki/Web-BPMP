@@ -41,6 +41,7 @@
   will-change: transform, box-shadow; /* Memberi tahu browser untuk mempersiapkan optimasi GPU */
 }
 
+
 /* Efek hover 3D hanya diaktifkan pada perangkat dengan pointer mouse/trackpad (non-layar sentuh) */
 @media (hover: hover) {
   .news-card:hover {
@@ -70,7 +71,7 @@
 
 .L-1 {
     right: 0;
-    bottom: -13em;
+    bottom: -14em;
     background: #00def7;
     animation-duration: 12s;
 }
