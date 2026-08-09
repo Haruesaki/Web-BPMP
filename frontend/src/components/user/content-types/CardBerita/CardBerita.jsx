@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import MediaKosong from '../../../common/MediaKosong';
 
-const CardBerita = ({ title, date, excerpt, imageSrc, link }) => {
+const CardBerita = ({ title, date, excerpt, imageSrc, link, index = 0 }) => {
   const [isTapped, setIsTapped] = useState(false);
   const tapTimeoutRef = useRef(null);
 
@@ -28,7 +28,16 @@ const CardBerita = ({ title, date, excerpt, imageSrc, link }) => {
   }, []);
 
   return (
-    <Link to={link} style={{ textDecoration: 'none', display: 'block' }} onClick={handleTap}>
+    <Link 
+      to={link} 
+      style={{ 
+        textDecoration: 'none', 
+        display: 'block',
+        opacity: 0,
+        animation: `fadeSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.1}s forwards`
+      }} 
+      onClick={handleTap}
+    >
       <div className={`news-card ${isTapped ? "hover-active" : ""}`}>
         <div className="NewsCard-light-sweep"></div>
         <div className="news-shadow-wrapper">

@@ -216,6 +216,7 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
                   excerpt={excerpt} 
                   imageSrc={b.url_foto || null}
                   link={`/berita/berita-${b.id}`}
+                  index={index}
                 />
               </LazyLoadWrapper>
             </div>

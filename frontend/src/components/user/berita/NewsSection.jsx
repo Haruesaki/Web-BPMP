@@ -14,6 +14,7 @@ const NewsSection = ({ previewData }) => {
     const [paginatedNews, setPaginatedNews] = useState([]);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const intervalRef = useRef(null);
+    const sectionRef = useRef(null);
 
     const totalPages = Math.max(1, Math.ceil(allNewsData.length / ITEMS_PER_PAGE));
 
@@ -105,11 +106,28 @@ const NewsSection = ({ previewData }) => {
         return () => stopAutoSlide();
     }, [currentPage, allNewsData, stopAutoSlide]);
 
-    // Efek untuk memulai/menghentikan auto-slide saat data berubah
+    // Efek cerdas: memulai auto-slide HANYA ketika elemen masuk viewport pengguna
     useEffect(() => {
-        startAutoSlide();
-        return () => stopAutoSlide();
-    }, [paginatedNews, startAutoSlide]);
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    startAutoSlide(); // Nyalakan JS loop saat terlihat
+                } else {
+                    stopAutoSlide(); // Matikan total JS loop saat terlewat
+                }
+            },
+            { threshold: 0.1 } // Aktif jika setidaknya 10% area kartu terlihat
+        );
+
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current);
+        }
+
+        return () => {
+            stopAutoSlide();
+            observer.disconnect();
+        };
+    }, [paginatedNews, startAutoSlide, stopAutoSlide]);
 
     // Fungsi untuk mengubah pratinjau utama saat di-hover secara manual
     const handleSetFeatured = (newsItem) => {
@@ -127,6 +145,19 @@ const NewsSection = ({ previewData }) => {
     const handlePageChange = (pageNumber) => {
         if (pageNumber < 1 || pageNumber > totalPages) return;
         setCurrentPage(pageNumber);
+        
+        const element = document.querySelector('.container-news-section');
+        if (element) {
+            const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 90;
+            const offsetPos = -(headerHeight + 40);
+            
+            if (window.lenis) {
+                window.lenis.scrollTo(element, { offset: offsetPos });
+            } else {
+                const targetTop = element.getBoundingClientRect().top + window.scrollY + offsetPos;
+                window.scrollTo({ top: targetTop, behavior: 'smooth' });
+            }
+        }
     };
 
     // Daftar nomor halaman ringkas (pakai "…") agar tidak meluber saat
@@ -146,7 +177,7 @@ const NewsSection = ({ previewData }) => {
     };
 
     return (
-        <section className="container-news-section"> 
+        <section className="container-news-section" ref={sectionRef}> 
         <section className="news-section">
             <div className="news-header-bar">
                 <h2>BERITA TERKINI</h2>
@@ -169,7 +200,17 @@ const NewsSection = ({ previewData }) => {
                                         style={{ transform: `translateX(${(index - featuredIndex) * 100}%)`, cursor: 'pointer' }}
                                         onClick={() => news.menuId && navigate(`/halaman/${news.menuId}#content-${news.id}`)}
                                     >
-                                        <img src={news.image} alt={news.title} className="featured-img" loading="lazy" decoding="async" />
+                                        <img 
+                                            src={news.image} 
+                                            alt={news.title} 
+                                            className="featured-img" 
+                                            loading="lazy" 
+                                            decoding="async" 
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
                                         <div className="featured-overlay">
                                             {/* title: judul utuh saat hover, karena teks dipotong "…" */}
                                             <h3 title={news.title}>{news.title}</h3>
@@ -201,6 +242,10 @@ const NewsSection = ({ previewData }) => {
                                         className="thumb-img"
                                         loading="lazy"
                                         decoding="async"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.style.display = 'none';
+                                        }}
                                     />
                                 </div>
                             ))}
@@ -214,7 +259,7 @@ const NewsSection = ({ previewData }) => {
                     <h3 className="right-title">INFORMASI TERKINI</h3>
 
                     <div className="news-list">
-                        {paginatedNews.map(news => (
+                        {paginatedNews.map((news, index) => (
                             <NewsCard
                                 key={news.id}
                                 title={news.title}
@@ -222,6 +267,7 @@ const NewsSection = ({ previewData }) => {
                                 link={news.menuId ? `/halaman/${news.menuId}#content-${news.id}` : '#'}
                                 onMouseEnter={() => handleSetFeatured(news)}
                                 onFocus={() => handleSetFeatured(news)} // Prop onFocus untuk aksesibilitas
+                                index={index}
                             />
                         ))}
                     </div>
