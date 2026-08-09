@@ -149,8 +149,17 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
     setCurrentPage(1); // Reset ke halaman 1 setiap kali kategori menu berubah
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman (memoized callback)
-  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    const element = document.querySelector('.news-content-wrapper');
+    if (element) {
+      if (window.lenis) {
+        window.lenis.scrollTo(element, { offset: -80 });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
 
   if (loading) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat berita...</div>;
   

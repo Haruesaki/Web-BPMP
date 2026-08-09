@@ -35,7 +35,18 @@ const CardBerita = ({ title, date, excerpt, imageSrc, link }) => {
           <div className="news-content-container">
             <div className="news-image-container">
               {imageSrc ? (
-                <img src={imageSrc} alt="News Thumbnail" loading="lazy" decoding="async" />
+                <img 
+                  src={imageSrc} 
+                  alt="News Thumbnail" 
+                  loading="lazy" 
+                  decoding="async" 
+                  width="347"
+                  height="180"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                  }}
+                />
               ) : (
                 <MediaKosong fill label="Gambar berita belum tersedia" />
               )}

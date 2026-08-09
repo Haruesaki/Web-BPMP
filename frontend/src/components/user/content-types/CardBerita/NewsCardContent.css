@@ -36,8 +36,6 @@
   box-shadow: 0 1.6em 3.7em rgba(0, 0, 0, 0.1); 
   box-shadow: 0 2.6em 5.3em -1.3em rgba(0, 0, 0, 0.871);
   transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  transform-style: preserve-3d; /* Mengaktifkan konteks 3D */
-  transform: perspective(420em) scale(1) rotateY(0deg) rotateX(0deg);
   will-change: transform, box-shadow; /* Memberi tahu browser untuk mempersiapkan optimasi GPU */
 }
 
