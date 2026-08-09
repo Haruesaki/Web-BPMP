@@ -12,13 +12,11 @@ const CardContent = ({
   const tapTimeoutRef = useRef(null);
 
   const handleTap = () => {
-    // Deteksi jika perangkat menggunakan layar sentuh
     const isTouchScreen = window.matchMedia("(hover: none)").matches;
     if (isTouchScreen) {
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
       
       setIsTapped(true);
-      // Matikan status tap setelah 1000ms agar posisi hover kembali normal
       tapTimeoutRef.current = setTimeout(() => {
         setIsTapped(false);
       }, 1000);
@@ -26,7 +24,6 @@ const CardContent = ({
   };
 
   useEffect(() => {
-    // Membersihkan timer saat komponen di-unmount untuk mencegah kebocoran memori
     return () => {
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
     };
@@ -37,7 +34,6 @@ const CardContent = ({
       className={`card-profile ${isTapped ? "hover-active" : ""}`}
       onClick={handleTap}
     >
-      {/* Elemen baru untuk efek kilau saat hover */}
       <div className="card-light-sweep"></div>
 
       <div className="profile-frame">
@@ -58,16 +54,13 @@ const CardContent = ({
       </div>
 
       <div className="wave-shadow-wrapper">
-        {/* Latar belakang solid statis dengan efek gelombang dari mask-image */}
         <div className="wave-content-container static-bg"></div>
       </div>
 
-      {/* Kontainer animasi terpisah (di luar drop-shadow untuk performa tinggi) */}
-      <div className="wave-animation-container">
-        <div className="liquid-bubble bubble-1"></div>
-        <div className="liquid-bubble bubble-2"></div>
-        <div className="liquid-bubble bubble-3"></div>
-      </div>
+      <div className="liquid-bubble bubble-4"></div>
+      <div className="liquid-bubble bubble-1"></div>
+      <div className="liquid-bubble bubble-2"></div>
+      <div className="liquid-bubble bubble-3"></div>
     </div>
   );
 };

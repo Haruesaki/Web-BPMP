@@ -1,9 +1,11 @@
+/* ========================================= */
+/* 1. KONTAINER UTAMA KARTU PROFIL           */
+/* ========================================= */
 .card-profile {
-  /* Set a local root font size for rem units within the card */
   font-size: 9.5px;
   width: 34em;
   height: 43em;
-  background: var(--theme-bg-deep, #06023f) ;
+  background: var(--theme-bg-deep, #06023f);
   border-radius: 3.4em;
   position: relative;
   overflow: hidden;
@@ -22,7 +24,6 @@
   will-change: transform, box-shadow;
 }
 
-/* Efek hover 3D hanya diaktifkan pada perangkat dengan pointer mouse/trackpad (non-layar sentuh) */
 @media (hover: hover) {
   .card-profile:hover {
     transform: perspective(100em) scale(1.06) rotateY(-5deg) rotateX(6deg);
@@ -30,156 +31,105 @@
   }
 }
 
-/* Pemicu tap interaktif untuk perangkat layar sentuh */
 .card-profile.hover-active {
   transform: perspective(100em) scale(1.06) rotateY(-5deg) rotateX(6deg);
   box-shadow: 0 4em 7em -2em rgba(0, 0, 0, 0.7);
 }
 
-.wave-content-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  
-  /* Gradien linier vertikal (bawah gelap ke atas sedikit terang) */
-  background: linear-gradient(to top, var(--theme-bg-deep, #06023f) 60%, var(--theme-secondary, #0d0761) 100%);
-  
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 101%;
-  
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  overflow: hidden;
-}
-
-/* Kontainer animasi terpisah (di luar drop-shadow untuk performa tinggi) */
-.wave-animation-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2; /* Di atas wave-shadow-wrapper (z-index: 1), di bawah card-text (z-index: 99) */
-  pointer-events: none;
-  overflow: hidden;
-
-  /* Masking gelombang SVG yang sama persis agar isi animasi terpotong rapi */
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 101%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-}
-
-/* Base style untuk gelembung liquid - Animasi ringan diproses GPU */
+/* ========================================= */
+/* 2. ELEMEN ANIMASI LIQUID (GELEMBUNG)      */
+/* ========================================= */
 .liquid-bubble {
   position: absolute;
   border-radius: 50%;
-  will-change: transform, opacity;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-  filter: blur(0.2em);
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
-/* Gelembung 1: Cyan-Biru (kiri bawah) */
 .liquid-bubble.bubble-1 {
-  width: 25em;
-  height: 40em;
-  background: radial-gradient(circle, rgb(89, 28, 255) 0%, rgba(85, 5, 232, 0) 60%);
-  bottom: -16em;
-  left: -10em;
+  width: 22em;
+  height: 22em;
+  background: #591cff;
+  bottom: -10em;
+  left: -8em;
   animation-name: bubbleLiquid1;
   animation-duration: 12s;
 }
 
-/* Gelembung 2: Ungu-Indigo (tengah bawah) */
 .liquid-bubble.bubble-2 {
-  width: 30em;
-  height: 40em;
-  background: radial-gradient(circle, rgb(0, 102, 255) 0%, rgba(8, 0, 85, 0) 60%);
-  bottom: -17em;
+  width: 24em;
+  height: 24em;
+  background: #0066ff;
+  bottom: -11em;
   left: 4em;
   animation-name: bubbleLiquid2;
   animation-duration: 10s;
   animation-delay: -2s;
 }
 
-/* Gelembung 3: Cyan terang (kanan bawah) */
 .liquid-bubble.bubble-3 {
-  width: 22em;
-  height: 25em;
-  background: radial-gradient(circle, rgba(0, 174, 255, 0.741) 0%, rgba(3, 71, 218, 0) 60%);
-  bottom: -9em;
-  right: -5em;
+  width: 20em;
+  height: 20em;
+  background: #00aeff;
+  bottom: -8em;
+  right: -4em;
   animation-name: bubbleLiquid3;
   animation-duration: 13s;
   animation-delay: -4s;
 }
 
-/* Animasi Aliran Cairan Unik untuk Gelembung 1 (Kiri Bawah) */
+.liquid-bubble.bubble-4 {
+  width: 24em;
+  height: 24em;
+  background: #ffffff;
+  bottom: -10em;
+  left: 8em;
+  opacity: 0.55;
+  z-index: 1;
+  animation-name: bubbleLiquid4;
+  animation-duration: 9s;
+  animation-delay: -10s;
+}
+
+/* ========================================= */
+/* 3. KEYFRAMES ANIMASI GELEMBUNG            */
+/* ========================================= */
 @keyframes bubbleLiquid1 {
-  0% { 
-    transform: translate(0em, 0em) scale(1); 
-  }
-  25% { 
-    transform: translate(2em, -5em) scale(1.1);  
-  }
-  50% { 
-    transform: translate(4em, -2em) scale(0.9);  
-  }
-  80% { 
-    transform: translate(3em, 3em) scale(1.4);  
-  }
-  100% { 
-    transform: translate(0em, 0em) scale(1);  
-  }
+  0% { transform: translate(0em, 0em) scale(1); }
+  25% { transform: translate(1.5em, -2.5em) scale(1.05); }
+  50% { transform: translate(3em, -1em) scale(0.95); }
+  80% { transform: translate(2em, 1.5em) scale(1.2); }
+  100% { transform: translate(0em, 0em) scale(1); }
 }
 
-/* Animasi Aliran Cairan Unik untuk Gelembung 2 (Tengah Bawah) */
 @keyframes bubbleLiquid2 {
-  0% { 
-    transform: translate(0em, 0em) scale(1); 
-  }
-  50% { 
-    transform: translate(-5em, 2em) scale(1);  
-  }
-  80% { 
-    transform: translate(2em, -3em) scale(1);  
-  }
-  100% { 
-    transform: translate(0em, 0em) scale(1);  
-  }
+  0% { transform: translate(0em, 0em) scale(1); }
+  50% { transform: translate(-3em, 1.5em) scale(1); }
+  80% { transform: translate(1.5em, -2em) scale(1); }
+  100% { transform: translate(0em, 0em) scale(1); }
 }
 
-/* Animasi Aliran Cairan Unik untuk Gelembung 3 (Kanan Bawah) */
 @keyframes bubbleLiquid3 {
-  0% { 
-    transform: translate(5em, 0em) scale(1.4); 
-  }
-  25% { 
-    transform: translate(-1em, 0em) scale(1.5); 
-  }
-  50% { 
-    transform: translate(3em, -5em) scale(1.6); 
-  }
-  100% { 
-    transform: translate(5em, 0em) scale(1.4); 
-  }
+  0% { transform: translate(3em, 0em) scale(1.2); }
+  25% { transform: translate(-1em, 0em) scale(1.3); }
+  50% { transform: translate(2em, -2.5em) scale(1.4); }
+  100% { transform: translate(3em, 0em) scale(1.2); }
 }
 
+@keyframes bubbleLiquid4 {
+  0% { transform: translate(0em, 0em) scale(1); }
+  33% { transform: translate(-4em, -3em) scale(1.1); }
+  66% { transform: translate(1.5em, -1em) scale(0.95); }
+  100% { transform: translate(0em, 0em) scale(1); }
+}
 
-
+/* ========================================= */
+/* 4. AREA TEKS & GLASSMORPHISM (LAPIS DEPAN)*/
+/* ========================================= */
 .card-text {
   position: absolute;
   bottom: 0;
@@ -188,27 +138,27 @@
   text-align: center;
   z-index: 99;
   margin: 0;
-  padding: 0;
-  height: 57%;
+  height: 53%;
   width: 100%;
   padding: 0 2.4em;
   align-items: center;
   justify-content: center;
-
+  box-sizing: border-box;
+  background-color: rgba(var(--theme-bg-deep-rgb, 6, 2, 63), 0.38);
+  backdrop-filter: blur(2.1em);
+  -webkit-backdrop-filter: blur(2.1em);
 }
+
 .name {
-  /* Ini sekarang menjadi wadah flex untuk meratakan teks ke bawah */
   display: flex;
   align-items: flex-end;
   justify-content: center;
   margin: 0;
-  /* Memesan ruang untuk 2 baris agar tata letak tidak bergeser */
   min-height: 6em;
-  width: 100%; /* Memastikan wadah mengambil lebar penuh */
+  width: 100%;
 }
 
 .name span {
-  /* Gaya teks dan line-clamp dipindahkan ke sini */
   font-size: 2.4em;
   font-weight: 700;
   line-height: 1.4;
@@ -225,7 +175,6 @@
   font-weight: 600;
   margin-bottom: 0.5em;
   line-height: 1.4;
-  /* Reserve space for 2 lines */
   min-height: 2.5em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -245,17 +194,19 @@
   margin-top: 0.5em;
   font-size: 1.4em;
   line-height: 1.2;
-  /* Reserve space for 3 lines */
   min-height: 3em;
   display: -webkit-box;
-  -webkit-line-clamp: 3 ;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+/* ========================================= */
+/* 5. BINGKAI FOTO PROFIL                    */
+/* ========================================= */
 .profile-frame {
   position: absolute;
-  filter: drop-shadow(0 0 0.7em  rgb(8, 8, 8));
+  box-shadow: 0 0 0.7em rgba(8, 8, 8, 0.8);
   border: 0.2em solid rgb(92, 107, 175);
   left: 10%;
   top: 1.5%;
@@ -263,8 +214,6 @@
   width: 17.9em;
   border-radius: 100%;
   overflow: hidden;
-  /* border: 1.5px solid rgb(255, 255, 255); */
-  /* animation: profileFloat 15s ease-in-out infinite; */
 }
 
 .profile-frame img {
@@ -273,6 +222,9 @@
   height: 100%;
 }
 
+/* ========================================= */
+/* 6. LATAR BELAKANG GELOMBANG (SVG MASK)    */
+/* ========================================= */
 .wave-shadow-wrapper {
   position: absolute;
   top: 0;
@@ -280,23 +232,42 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-  filter: 
-  drop-shadow(0.2em 0.2em 0.6em rgb(41, 109, 255))
-  drop-shadow(-0.2em -0.1em 0.1em rgba(255, 255, 255, 0.841))
-  drop-shadow(-0.5em -0.3em 0.2em rgba(101, 222, 255, 0.381));
-  will-change: filter;
+  filter: drop-shadow(0.2em 0.2em 0.5em rgba(41, 109, 255, 0.5));
   transform: translateZ(0);
 }
 
+.wave-content-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, var(--theme-bg-deep, #06023f) 60%, var(--theme-secondary, #0d0761) 100%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 620' preserveAspectRatio='none'%3E%3Cpath d='M460 0H255.649C375.022 118.317 298.961 265.158 194.378 284.173C89.7941 303.188 31.692 201.774 0 259.628V619.052H460V0Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 101%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* ========================================= */
+/* 7. EFEK KILAU MENYAPU (LIGHT SWEEP)       */
+/* ========================================= */
 .card-light-sweep {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: inherit; /* Ikuti radius parent */
+  border-radius: inherit;
   overflow: hidden;
-  z-index: 98;
+  z-index: 999;
   pointer-events: none;
 }
 
@@ -319,14 +290,12 @@
   filter: blur(3em);
 }
 
-/* Animasi kilau menyapu hanya diaktifkan pada perangkat non-layar sentuh */
 @media (hover: hover) {
   .card-profile:hover .card-light-sweep::before {
     animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
-/* Pemicu animasi kilau menyapu saat di-tap pada perangkat layar sentuh */
 .card-profile.hover-active .card-light-sweep::before {
   animation: lightSweepCard 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -336,40 +305,16 @@
   to { left: 150%; }
 }
 
-
-@media (max-width: 976px) {
-  .profile-layout-grid,
-  .card-profile {
-   font-size: clamp(6px, 4vw, 9px);
-  }
-}
-
-
-@media (max-width: 768px) {
-  .profile-layout-grid,
-  .card-profile {
-   font-size: clamp(5px, 1.7vw, 7.5px);
-  }
-}
-
-@media (max-width: 250px) {
-  .profile-layout-grid,
-  .card-profile {
-   font-size: clamp(3px, 1.5vw, 5px);
-  }
-}
-
-/* Kontainer pembungkus baru untuk layout profil */
+/* ========================================= */
+/* 8. GRID LAYOUT & PAGINASI                 */
+/* ========================================= */
 .profile-content-wrapper {
-  /* Mengambil alih properti lebar dan posisi dari grid */
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
   padding: 1rem 2rem;
-
 }
 
-/* Styling untuk judul halaman */
 .page-content-header {
   margin-bottom: 3rem;
   padding-bottom: 1.5rem;
@@ -386,48 +331,38 @@
 
 .profile-layout-grid {
   display: grid;
-  font-size: 9.5px; /* JANGKAR EM UTAMA (Samakan dengan basis kartu anak) */
+  font-size: 9.5px;
   gap: 4rem;
-  justify-content: center; /* Memusatkan kelompok kolom grid */
-  justify-items: center;   /* Memusatkan kartu secara horizontal di dalam selnya */
+  justify-content: center;
+  justify-items: center;
   align-items: center;
   width: 100%;
 }
 
-/* ========================================= */
-/* CSS GRID TEMPLATE COLUMNS PER BREAKPOINT  */
-/* ========================================= */
-
-/* Desktop Lebar (4 Kolom) */
 @media (min-width: 1748px) {
   .profile-layout-grid {
-    grid-template-columns: repeat(4, 34em); /* Menggunakan em agar ikut merapat saat font-size menyusut */
+    grid-template-columns: repeat(4, 34em);
   }
 }
 
-/* Desktop Standar (3 Kolom) */
 @media (min-width: 1361px) and (max-width: 1747px) {
   .profile-layout-grid {
     grid-template-columns: repeat(3, 34em);
   }
 }
 
-/* Tablet / Layar Kecil (2 Kolom) */
 @media (max-width: 1360px) and (min-width: 768px) {
   .profile-layout-grid {
     grid-template-columns: repeat(2, 34em);
   }
 }
 
-/* Mobile (1 Kolom) */
 @media (max-width: 767px) {
   .profile-layout-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* --- Pagination --- */
-/* Kontainer untuk pagination agar bisa diberi margin */
 .pagination-container {
   margin-top: 4rem;
 }
@@ -501,7 +436,35 @@
   line-height: 2;
 }
 
-/* Aksesibilitas: Matikan animasi/transisi jika sistem operasi meminta pembatasan gerakan */
+/* ========================================= */
+/* 9. RESPONSIF MOBILE & AKSESIBILITAS       */
+/* ========================================= */
+@media (max-width: 976px) {
+  .profile-layout-grid,
+  .card-profile {
+    font-size: clamp(6px, 4vw, 9px);
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-layout-grid,
+  .card-profile {
+    font-size: clamp(5px, 1.7vw, 7.5px);
+  }
+
+  .card-text {
+    backdrop-filter: blur(1.2em);
+    -webkit-backdrop-filter: blur(1.2em);
+  }
+}
+
+@media (max-width: 250px) {
+  .profile-layout-grid,
+  .card-profile {
+    font-size: clamp(3px, 1.5vw, 5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .liquid-bubble,
   .card-profile {

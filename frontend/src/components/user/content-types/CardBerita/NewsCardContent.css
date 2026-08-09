@@ -235,7 +235,7 @@
   height: 100%;
   border-radius: inherit; /* Ikuti radius parent */
   overflow: hidden; /* Pastikan kilau tidak bocor */
-  z-index: 98; /* Di bawah teks (99), di atas segalanya */
+  z-index: 9999999; /* Berada di atas area teks agar menyapu seluruh kartu */
   pointer-events: none; /* Agar tidak mengganggu klik */
 }
 
