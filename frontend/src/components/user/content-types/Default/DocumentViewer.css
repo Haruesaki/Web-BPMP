@@ -37,12 +37,34 @@
    ------------------------------------------------------------------------- */
 .docv-bingkai {
     position: relative;
+    
+    /* 1. Kunci Rasio Kertas A4 Portrait (210mm x 297mm) */
+    aspect-ratio: 210 / 297;
+    
+    /* 2. Lebar dasar mengikuti pembungkusnya */
     width: 100%;
-    height: clamp(320px, 80vh, 860px);
+    
+    /* 3. Batasan Ukuran Proporsional (Tingkat Ketinggian & Lebar Maksimal):
+       - Tinggi dijepit maksimal 65% layar ATAU maksimal 620px (agar tidak terlalu besar di desktop).
+       - Lebar otomatis menyesuaikan presisi rasio A4 dari tinggi maksimal tersebut. */
+    max-height: min(65vh, 690px);
+    max-width: calc(min(65vh, 690px) * (210 / 297));
+    
+    margin: 0 auto; /* Otomatis ke tengah saat lebar dibatasi */
+    
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
     background: #525659; /* abu gelap khas latar viewer PDF */
+}
+
+/* Tahap Kedua: Penyesuaian Tampilan Mobile
+   Mengecilkan lebar wadah dokumen di HP (menjadi 90%) agar menyisakan ruang 
+   kosong di sisi kanan & kiri untuk kemudahan pengguliran (scrolling) ibu jari. */
+@media (max-width: 768px) {
+    .docv-bingkai {
+        width: 85%; /* Menyisakan 5% ruang di kiri dan 5% di kanan */
+    }
 }
 
 /* Di layar penuh, pembungkusnya adalah layar itu sendiri. Batas tinggi dan
@@ -146,42 +168,40 @@
 /* =========================================================================
    BILAH KENDALI MENGAMBANG
    -------------------------------------------------------------------------
-   Menempel pada BINGKAI, bukan pada wadah gulir — sehingga tetap di tempatnya
-   selagi dokumennya bergerak. Isinya sengaja terbatas pada hal yang tidak dapat
-   dikerjakan gulir biasa: mengetahui sedang di halaman berapa, melompat ke
-   halaman tertentu, mengatur perbesaran, dan membuka layar penuh.
+   Arsitektur Skala Em (Relative Scaling):
+   Seluruh dimensi elemen (tombol, input, padding, gap) menggunakan satuan `em`.
+   Cukup dengan mengatur `font-size` pada .docv-alat sebagai jangkar tunggal,
+   seluruh isi bilah alat akan membesar & mengecil secara proporsional sempurna.
    ========================================================================= */
 .docv-alat,
 .docv-alat * {
-    /* Alasannya sama seperti pada .docv-panggung: reset universal proyek ini
-       tidak dijamin termuat di setiap rute yang memakai viewer. */
     box-sizing: border-box;
 }
 
 .docv-alat {
     position: absolute;
     left: 50%;
-    bottom: 14px;
+    bottom: 1.1em;
     transform: translateX(-50%);
     z-index: 3;
 
     display: flex;
     align-items: center;
-    gap: 2px;
-    max-width: calc(100% - 20px);
-    padding: 5px;
-    border-radius: 12px;
+    gap: 0.2em;
+    max-width: calc(100% - 1.2em);
+    padding: 0.4em;
+    border-radius: 0.9em;
 
     background: rgba(16, 20, 38, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 0.8em 2.2em rgba(0, 0, 0, 0.45);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 
     color: #eef1fa;
-    font-size: 12.5px;
+    /* JANGKAR UTAMA: Cukup atur font-size ini, seluruh komponen otomatis berskala */
+    font-size: clamp(3px, min(2.2vw, 1.3vh), 13px);
     line-height: 1;
-    /* Menyeret di atas bilah tidak boleh menyorot teksnya seperti dokumen. */
     user-select: none;
     animation: docv-alat-masuk 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -194,21 +214,22 @@
 .docv-alat-grup {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 0.2em;
 }
 
 .docv-alat-tombol {
-    min-width: 30px;
-    height: 30px;
-    padding: 0 8px;
+    /* Dimensi tombol relatif terhadap jangkar em */
+    min-width: 2.4em;
+    height: 2.4em;
+    padding: 0 0.6em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 0;
-    border-radius: 8px;
+    border-radius: 0.5em;
     background: none;
     color: #eef1fa;
-    font-size: 12px;
+    font-size: 0.95em;
     font-weight: 600;
     cursor: pointer;
     transition: background 140ms ease;
@@ -223,25 +244,24 @@
     cursor: default;
 }
 
-/* Tombol persentase: lebarnya dipatok supaya bilah tidak bergoyang setiap kali
-   angkanya berganti dari 75% ke 100% ke 125%. */
+/* Tombol persentase */
 .docv-alat-tombol--lebar {
-    min-width: 52px;
+    min-width: 4.1em;
     font-variant-numeric: tabular-nums;
 }
 
 .docv-pisah {
     width: 1px;
-    height: 18px;
-    margin: 0 4px;
+    height: 1.4em;
+    margin: 0 0.3em;
     background: rgba(255, 255, 255, 0.16);
 }
 
 .docv-alat-halaman {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 0 2px;
+    gap: 0.4em;
+    padding: 0 0.2em;
     white-space: nowrap;
 }
 
@@ -251,15 +271,16 @@
 }
 
 .docv-alat-input {
-    width: 38px;
-    height: 26px;
-    padding: 0 4px;
+    width: 3em;
+    height: 2.1em;
+    padding: 0 0.3em;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 6px;
+    border-radius: 0.5em;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
     font: inherit;
+    font-size: 0.95em;
     font-variant-numeric: tabular-nums;
 }
 
@@ -271,11 +292,11 @@
 
 /* Layar sempit: kata "Halaman" dibuang lebih dulu. Angkanya yang penting, dan
    konteksnya sudah jelas dari kotak beserta pembagi "/ 5" di sebelahnya. */
-@media (max-width: 560px) {
+/* @media (max-width: 560px) {
     .docv-alat-label { display: none; }
     .docv-alat { gap: 0; padding: 4px; }
     .docv-pisah { margin: 0 2px; }
-}
+} */
 
 /* ------------------------------------------------------ keadaan memuat */
 .docv-muat {
