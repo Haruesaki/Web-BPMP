@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { indeksSisipDariY } from '../utils/ukurBaris';
 import '../styles/seretUrutan.css';
 
 // =========================================================================
@@ -22,10 +23,20 @@ import '../styles/seretUrutan.css';
 //    tahanMs > 0   → jari/tetikus harus DITAHAN dulu. Dipakai kartu profil,
 //                    yang klik singkatnya sudah bermakna "buka editor".
 //
-//  Sasaran ditentukan lewat `document.elementFromPoint`, bukan dengan menghitung
-//  kotak tiap elemen sendiri. Cara ini otomatis benar walaupun daftarnya
-//  digulir, tingginya berbeda-beda, atau tersusun sebagai kisi berbilah banyak
-//  — persis keadaan kartu profil.
+//  DUA CARA MENENTUKAN SASARAN
+//
+//    wadahRef TIDAK diisi → `document.elementFromPoint`. Sasarannya elemen yang
+//      benar-benar berada di bawah kursor, jadi kedudukan MENDATAR ikut
+//      menentukan. Inilah yang dibutuhkan kartu profil: susunannya kisi
+//      berbilah banyak, sehingga bergerak ke kanan memang harus berpindah
+//      kartu.
+//
+//    wadahRef diisi → hanya kedudukan TEGAK yang menentukan. Dipakai tabel isi
+//      konten: barisnya melintang penuh, jadi menuntut kursor tepat berada di
+//      atas sebuah baris hanya menyulitkan tanpa guna — apalagi ketika kursor
+//      melintasi sela antar-baris atau keluar dari lebar tabel, yang membuat
+//      seretan seolah "lepas". Dengan cara ini kursor boleh berada di mana pun
+//      secara mendatar; naik-turunnya saja sudah cukup.
 // =========================================================================
 
 // Gerakan sejauh ini (piksel) sebelum penghitung tahan berbunyi dianggap
@@ -38,11 +49,15 @@ const TOLERANSI_GESER = 8;
 const TEPI_GULIR = 90;
 const LAJU_GULIR = 12;
 
-export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }) => {
+export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true, wadahRef = null }) => {
   // Daftar sementara selama seretan berlangsung. `null` berarti tidak sedang
   // menyeret, dan yang ditampilkan adalah `daftar` asli dari pemanggil.
   const [urutanSementara, setUrutanSementara] = useState(null);
   const [idDiseret, setIdDiseret] = useState(null);
+  // Kedudukan kursor, dipakai bayangan konten yang mengikuti seretan. Disimpan
+  // sebagai state (bukan hanya ref) justru supaya bayangannya ikut dirender
+  // ulang setiap kursor bergerak.
+  const [posisi, setPosisi] = useState(null);
 
   const ref = useRef({
     penghitung: null,   // penghitung waktu tahan
@@ -99,6 +114,7 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
     hentikanGulirOtomatis();
     document.body.classList.remove('seret-urutan-aktif');
     setIdDiseret(null);
+    setPosisi(null);
   }, [hentikanGulirOtomatis]);
 
   // Menyusun ulang daftar: memindahkan `idSumber` ke posisi `idSasaran`.
@@ -108,6 +124,31 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
       const dari = kini.findIndex((x) => String(x.id) === String(idSumber));
       const ke = kini.findIndex((x) => String(x.id) === String(idSasaran));
       if (dari === -1 || ke === -1 || dari === ke) return sebelumnya || kini;
+      const salinan = [...kini];
+      const [terangkat] = salinan.splice(dari, 1);
+      salinan.splice(ke, 0, terangkat);
+      return salinan;
+    });
+  }, []);
+
+  // Memindahkan `idSumber` ke INDEKS SISIP tertentu (0..n) pada daftar yang
+  // sedang tampil. Dipakai mode tegak.
+  //
+  // Indeks sisipnya dihitung pada daftar yang MASIH memuat sumbernya. Sesudah
+  // sumber diangkat keluar, seluruh indeks di bawahnya bergeser satu ke atas —
+  // itulah sebab pengurangan di bawah. Tanpa itu, menyeret ke bawah selalu
+  // meleset satu baris.
+  const pindahKeIndeks = useCallback((idSumber, indeksSisip) => {
+    setUrutanSementara((sebelumnya) => {
+      const kini = sebelumnya || ref.current.daftarKini;
+      const dari = kini.findIndex((x) => String(x.id) === String(idSumber));
+      if (dari === -1) return sebelumnya || kini;
+
+      let ke = indeksSisip;
+      if (dari < ke) ke -= 1;
+      ke = Math.max(0, Math.min(ke, kini.length - 1));
+      if (ke === dari) return sebelumnya || kini;
+
       const salinan = [...kini];
       const [terangkat] = salinan.splice(dari, 1);
       salinan.splice(ke, 0, terangkat);
@@ -137,6 +178,16 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
       // Mencegah teks tersorot mengikuti gerakan seretan.
       e.preventDefault();
 
+      setPosisi({ x: e.clientX, y: e.clientY });
+
+      // ---- MODE TEGAK: mendatar diabaikan sepenuhnya ----
+      if (wadahRef && wadahRef.current) {
+        const indeks = indeksSisipDariY(wadahRef.current, e.clientY);
+        if (indeks >= 0) pindahKeIndeks(s.idSumber, indeks);
+        return;
+      }
+
+      // ---- MODE KISI: sasaran ditentukan elemen di bawah kursor ----
       const dibawah = document.elementFromPoint(e.clientX, e.clientY);
       const wadah = dibawah && dibawah.closest ? dibawah.closest('[data-seret-id]') : null;
       if (!wadah) return;
@@ -175,7 +226,7 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
       window.removeEventListener('pointerup', padaLepas);
       window.removeEventListener('pointercancel', padaLepas);
     };
-  }, [aktif, tahanMs, bersihkan, pindahkan]);
+  }, [aktif, tahanMs, bersihkan, pindahkan, pindahKeIndeks, wadahRef]);
 
   // Dibersihkan saat komponen dilepas, supaya penghitung tahan dan kelas pada
   // <body> tidak tertinggal bila pengguna berpindah halaman di tengah seretan.
@@ -200,6 +251,7 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
     ref.current.aktifkanPada = { x: e.clientX, y: e.clientY, id };
     ref.current.idSumber = id;
     ref.current.posisiY = e.clientY;
+    setPosisi({ x: e.clientX, y: e.clientY });
 
     if (tahanMs > 0) {
       ref.current.penghitung = setTimeout(() => mulaiMenyeret(id), tahanMs);
@@ -215,6 +267,8 @@ export const useSeretUrutan = ({ daftar, onUrutBaru, tahanMs = 0, aktif = true }
     /** Id yang sedang diangkat, untuk penanda tampilan. */
     idDiseret,
     sedangMenyeret: Boolean(idDiseret),
+    /** Kedudukan kursor saat menyeret — untuk bayangan yang mengikutinya. */
+    posisi,
     padaTekan,
     /** Props hit-test untuk tiap baris/kartu. */
     propsWadah: (id) => ({ 'data-seret-id': String(id) }),

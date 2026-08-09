@@ -605,30 +605,42 @@
 }
 
 /* =========================================================================
-   PEGANGAN SERET (titik enam) — DI LUAR TABEL
+   PEGANGAN SERET (titik enam) — MENYATU DENGAN PITA BARISNYA
    -------------------------------------------------------------------------
-   Pegangannya BUKAN bagian dari tabel: ia berada di lajur tersendiri yang
-   menjadi saudara kartu tabel, diletakkan pada ruang padding milik
-   `.bc-content` (22px) di sebelah kiri kartu.
+   Pegangannya secara STRUKTUR tetap di luar tabel: ia berada di lajur
+   tersendiri yang menjadi saudara kartu tabel. Itu disengaja dan tidak boleh
+   diubah — lihat catatan di PeganganSeretBaris.jsx.
 
    JANGAN mengembalikan cara lama — padding pada `.bc-table-scroll` untuk
    menyediakan ruang. Padding itu menggeser seluruh tabel ke kanan DAN ikut
    terhitung sebagai lebar isi wadah gulir, sehingga melampaui ambang
    `min-width: 1104px` milik tabel dan memunculkan bilah gulir mendatar yang
    sebelumnya tidak ada. Geometri tabel di berkas ini harus tetap utuh.
+
+   Yang berubah di sini semata TAMPILAN. Tiap pegangan dibuat setinggi
+   barisnya, berlatar dan berbingkai sama dengan tabel, lalu ditempelkan rapat
+   ke tepi kiri kartu (tanpa sela, tanpa bingkai kanan) sehingga terbaca
+   sebagai perpanjangan barisnya sendiri.
+
+   KEPALA DAN KAKI TABEL SENGAJA TIDAK IKUT MELEBAR. Keduanya tidak punya
+   pegangan, jadi lebarnya tetap seperti semula — hanya pita barisnya yang
+   menjorok ke kiri.
    ========================================================================= */
 
-/* Jangkar lajur pegangan. Tidak memasang overflow apa pun — justru itulah
-   gunanya, agar lajur di kirinya tidak terpotong. */
 .postdefault .bc-tabel-bungkus {
+    /* Jangkar lajur pegangan. Tidak memasang overflow apa pun — justru itulah
+       gunanya, agar lajur di kirinya tidak terpotong. */
     position: relative;
+    --lebar-pegangan: 26px;
 }
 
 .postdefault .bc-lajur-pegangan {
     position: absolute;
     top: 0;
-    left: -26px;
-    width: 22px;
+    /* Menempel RAPAT pada tepi kartu. Bingkai kartu 1px ditumpangi supaya tidak
+       muncul garis ganda di pertemuan pegangan dan tabel. */
+    left: calc(-1 * var(--lebar-pegangan) + 1px);
+    width: var(--lebar-pegangan);
     /* Lajurnya sendiri tembus klik; hanya tombol di dalamnya yang menangkap
        pointer, supaya area kosong di antara pegangan tidak menghalangi apa pun. */
     pointer-events: none;
@@ -637,33 +649,54 @@
 .postdefault .bc-lajur-pegangan .bc-seret-pegangan {
     position: absolute;
     left: 0;
-    /* `top` diisi dari JS hasil pengukuran baris; transform yang menaruh titik
-       ukur itu tepat di tengah pegangan. */
-    transform: translateY(-50%);
+    /* `top` dan `height` diisi dari JS hasil pengukuran baris, sehingga tiap
+       pegangan sejajar persis dengan pita barisnya. */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 30px;
+    width: 100%;
     padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
+    /* Berlatar dan berbingkai sama dengan kartu tabel — inilah yang membuatnya
+       terbaca menyatu. Bingkai KANAN sengaja tidak ada: di sanalah ia bertemu
+       tabel. */
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-right: none;
+    /* Sudut kiri dilengkungkan kembali sesuai permintaan pengguna agar tidak sepenuhnya kotak.
+       Ujung kanan tetap rata (0) agar menyatu dengan tabel. */
+    border-radius: 6px 0 0 6px;
     color: var(--text-sub, #8892a6);
     font-size: 13px;
     cursor: grab;
-    opacity: 0.4;
+    opacity: 1;
     pointer-events: auto;
-    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     /* Gerakan sentuh di atas pegangan tidak boleh ditafsirkan sebagai gulir. */
     touch-action: none;
 }
 
-.postdefault .bc-lajur-pegangan .bc-seret-pegangan:hover,
-.postdefault .bc-lajur-pegangan .bc-seret-pegangan:focus-visible,
-.postdefault .bc-lajur-pegangan .bc-seret-pegangan--aktif {
+/* Titik-enamnya sendiri yang diredupkan, bukan seluruh pitanya — pita yang
+   ikut transparan akan memperlihatkan latar halaman dan merusak kesan
+   menyatu. */
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan > i {
+    opacity: 0.45;
+    transition: opacity 0.15s ease;
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:hover > i,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:focus-visible > i,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan--aktif > i {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.08);
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:hover,
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:focus-visible {
+    background: var(--bg-card-soft, rgba(255, 255, 255, 0.04));
+    color: var(--text-main, #f3f5fb);
+}
+
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan--aktif {
+    background: rgba(91, 95, 232, 0.22);
     color: var(--text-main, #f3f5fb);
 }
 
@@ -673,13 +706,111 @@
 }
 
 .postdefault .bc-lajur-pegangan .bc-seret-pegangan:disabled {
-    opacity: 0.14;
+    opacity: 0.35;
     cursor: not-allowed;
 }
 
-/* Baris yang sedang diangkat. */
+/* Bingkai atas hanya pada pegangan PERTAMA. Pada pegangan berikutnya, garis
+   pemisahnya sudah disediakan bingkai bawah pegangan di atasnya — memasang
+   keduanya menghasilkan garis setebal dua kali yang tidak sejajar dengan
+   pemisah baris di dalam tabel. */
+.postdefault .bc-lajur-pegangan .bc-seret-pegangan:not(:first-child) {
+    border-top: none;
+}
+
+/* =========================================================================
+   BARIS YANG SEDANG DIANGKAT — menjadi tempat kosong, bukan salinan kedua
+   -------------------------------------------------------------------------
+   Isinya diredupkan kuat karena rupa sesungguhnya sudah dibawa bayangan yang
+   mengikuti kursor. Bila keduanya tampil penuh, penonton melihat dua salinan
+   dari satu berita dan bingung mana yang sedang dipindahkan.
+   ========================================================================= */
 .postdefault .bc-table tbody tr.bc-baris-diseret td {
-    background: rgba(91, 95, 232, 0.16);
+    background: rgba(91, 95, 232, 0.10);
+    opacity: 0.35;
+}
+
+.postdefault .bc-table tbody tr.bc-baris-diseret td:first-child {
+    box-shadow: inset 2px 0 0 var(--accent, #5b5fe8);
+}
+
+/* Selama menyeret, sorotan tetikus dimatikan. Tanpa ini setiap baris yang
+   dilewati ikut menyala dan menutupi petunjuk letak jatuhnya. */
+.postdefault .bc-tabel-bungkus.bc-sedang-menyeret .bc-table tbody tr:hover td {
+    background: transparent;
+}
+
+/* =========================================================================
+   BAYANGAN SERET — pratinjau yang mengikuti kursor
+   -------------------------------------------------------------------------
+   Dirender lewat portal ke <body>, jadi TIDAK boleh diberi awalan
+   `.postdefault`: di dalam <body> ia bukan keturunan elemen itu. Lihat
+   BayanganSeret.jsx untuk sebab portalnya.
+   ========================================================================= */
+.bc-bayangan-seret {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 380px;
+    padding: 9px 13px;
+    border: 1px solid rgba(91, 95, 232, 0.55);
+    border-radius: 10px;
+    background: #1b1f2e;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+    color: #f3f5fb;
+    font-size: 13px;
+    font-weight: 600;
+    /* WAJIB: tanpa ini bayangan berada tepat di bawah kursor dan menjadi
+       sasaran elementFromPoint, sehingga menutupi baris yang hendak dituju. */
+    pointer-events: none;
+    /* Sedikit dimiringkan supaya terasa "terangkat", bukan sekadar menempel. */
+    rotate: -1.4deg;
+}
+
+.bc-bayangan-nomor {
+    flex: none;
+    min-width: 20px;
+    color: #8892a6;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.bc-bayangan-gambar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #8892a6;
+    font-size: 13px;
+}
+
+.bc-bayangan-gambar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bc-bayangan-judul {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.bc-bayangan-grip {
+    flex: none;
+    margin-left: 2px;
+    color: #5b5fe8;
+    font-size: 12px;
 }
 
 /* Keterangan di atas tabel. */
@@ -701,7 +832,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .postdefault .bc-lajur-pegangan .bc-seret-pegangan {
+    .postdefault .bc-lajur-pegangan .bc-seret-pegangan,
+    .postdefault .bc-lajur-pegangan .bc-seret-pegangan > i {
         transition: none;
     }
+
+    /* Bayangan tetap ditampilkan — ia PETUNJUK, bukan hiasan; tanpa itu tidak
+       ada tanda apa pun tentang apa yang sedang dipindahkan. Yang dilepas
+       hanya kemiringannya. */
+    .bc-bayangan-seret {
+        rotate: none;
+    }
+
+    /* Pergeseran baris dianimasikan dari JavaScript (useAnimasiUrutan), jadi
+       aturan di sini tidak dapat mematikannya — hook itu membaca sendiri
+       preferensi ini lewat matchMedia. */
 }

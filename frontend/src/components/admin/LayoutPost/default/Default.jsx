@@ -2,7 +2,9 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
 import useSeretUrutan from '../../../../hooks/useSeretUrutan';
+import useAnimasiUrutan from '../../../../hooks/useAnimasiUrutan';
 import PeganganSeretBaris from '../PeganganSeretBaris';
+import BayanganSeret from '../BayanganSeret';
 import '../default/PostDefault.css';
 import '../berita/PostBeritaCard.css';
 import PostDefault from '../default/PostDefault';
@@ -88,7 +90,13 @@ const Default = ({ menuId, menuName = '', routeAction = '', initialContents = EM
     onUrutBaru: simpanUrutan,
     tahanMs: 0, // pegangan titik-enam → langsung menyeret, tanpa perlu ditahan
     aktif: bolehDiurutkan,
+    // Barisnya melintang penuh, jadi hanya naik-turun kursor yang menentukan
+    // sasarannya; kedudukan mendatar diabaikan sepenuhnya.
+    wadahRef: bungkusRef,
   });
+
+  // Menganimasikan baris yang bergeser setiap urutannya berubah.
+  useAnimasiUrutan(bungkusRef, bolehDiurutkan);
 
   // --- Filter + pagination ---
   // Sumbernya `seret.daftarTampil`, BUKAN `kontenList`: selama seretan
@@ -277,7 +285,10 @@ const Default = ({ menuId, menuName = '', routeAction = '', initialContents = EM
         {/* Pembungkus ini SEMATA jangkar bagi lajur pegangan di sebelah kiri.
             Ia tidak memasang overflow apa pun, sehingga lajurnya tidak
             terpotong — berbeda dengan kartu dan wadah gulir di dalamnya. */}
-        <div className="bc-tabel-bungkus" ref={bungkusRef}>
+        <div
+          className={`bc-tabel-bungkus${seret.sedangMenyeret ? ' bc-sedang-menyeret' : ''}`}
+          ref={bungkusRef}
+        >
         <PeganganSeretBaris
           bungkusRef={bungkusRef}
           kunciUkur={`${page}-${pageSize}-${visible.map((b) => b.id).join(',')}`}
@@ -418,6 +429,22 @@ const Default = ({ menuId, menuName = '', routeAction = '', initialContents = EM
         </section>
         </div>
       </main>
+
+      {/* Pratinjau yang mengikuti kursor selama seretan. Dirender lewat portal
+          ke <body> — lihat BayanganSeret.jsx untuk sebabnya. */}
+      {seret.sedangMenyeret && (() => {
+        const diangkat = kontenList.find((b) => String(b.id) === String(seret.idDiseret));
+        if (!diangkat) return null;
+        const urutan = visible.findIndex((b) => String(b.id) === String(seret.idDiseret));
+        return (
+          <BayanganSeret
+            posisi={seret.posisi}
+            judul={diangkat.judul}
+            urlGambar={null}
+            nomor={urutan >= 0 ? startIdx + urutan + 1 : null}
+          />
+        );
+      })()}
 
       {deleteTarget && (
         <div className="bc-modal-overlay" onClick={() => setDeleteTarget(null)}>
