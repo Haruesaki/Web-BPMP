@@ -153,10 +153,14 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
     setCurrentPage(page);
     const element = document.querySelector('.news-content-wrapper');
     if (element) {
+      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 90;
+      const offsetPos = -(headerHeight + 40);
+      
       if (window.lenis) {
-        window.lenis.scrollTo(element, { offset: -80 });
+        window.lenis.scrollTo(element, { offset: offsetPos });
       } else {
-        element.scrollIntoView({ behavior: 'smooth' });
+        const targetTop = element.getBoundingClientRect().top + window.scrollY + offsetPos;
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
       }
     }
   }, []);
