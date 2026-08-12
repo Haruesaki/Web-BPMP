@@ -19,7 +19,12 @@
   border-top-right-radius: 4em;
   border-bottom-right-radius: 4.5em;
   transition: transform 0.8s cubic-bezier(0, 0.8, 0.2, 1.55), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, box-shadow;
+  /* Sengaja TANPA `will-change: transform`. Hint itu mempromosikan kartu ke
+     layer komposit; pada sebagian versi Chrome, elemen ber-`border-radius` +
+     `overflow: hidden` yang dikomposit membuat `backdrop-filter` anaknya
+     (glassmorphism .card-text) GAGAL dirender — inilah sebab blur hilang di
+     deploy tapi ada di lokal (beda versi Chrome). Animasi hover tetap mulus
+     lewat `transition` di atas. Jangan kembalikan will-change di sini. */
 }
 
 @media (hover: hover) {

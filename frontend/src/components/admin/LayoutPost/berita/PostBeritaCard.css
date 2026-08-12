@@ -762,6 +762,10 @@
     background: #1b1f2e;
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
     color: #f3f5fb;
+    /* Dirender lewat portal ke <body> yang tak punya font-family sendiri, jadi
+       tanpa deklarasi ini teksnya jatuh ke serif default browser (Times New
+       Roman). Samakan dengan font utama admin. */
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 600;
     /* WAJIB: tanpa ini bayangan berada tepat di bawah kursor dan menjadi

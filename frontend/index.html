@@ -35,8 +35,15 @@
     <!-- Font Awesome memuat file font dari ka-f.fontawesome.com; preconnect
          mempercepat pembukaan koneksi (LCP lebih cepat di mobile). -->
     <link rel="preconnect" href="https://ka-f.fontawesome.com" crossorigin>
-    <!-- Poly dibuang (tak dipakai); Poppins dipangkas ke bobot yang benar-benar dipakai (200–800) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <!-- Poly dibuang (tak dipakai); Poppins dipangkas ke bobot yang benar-benar dipakai (200–800).
+         Stylesheet dimuat NON-RENDER-BLOCKING lewat trik media="print" → onload swap ke "all":
+         permintaan CSS ini tidak lagi menahan paint pertama (~300ms lebih cepat di mobile).
+         Aman karena teks tetap tampil seketika memakai 'Poppins-fallback' (metrik Arial di
+         index.css) lalu mulus berganti ke Poppins saat font tiba — tanpa pergeseran (CLS).
+         <noscript> menjaga font tetap termuat bila JavaScript mati. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"></noscript>
   </head>
   <body>
     <div id="root"></div>
