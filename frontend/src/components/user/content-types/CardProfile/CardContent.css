@@ -148,8 +148,12 @@
   justify-content: center;
   box-sizing: border-box;
   background-color: rgba(var(--theme-bg-deep-rgb, 6, 2, 63), 0.38);
-  backdrop-filter: blur(2.1em);
+  /* `-webkit-` DITULIS LEBIH DULU, properti standar TERAKHIR. Minifier esbuild
+     memperlakukan keduanya sebagai properti setara dan menyimpan yang terakhir;
+     bila standar ditaruh belakangan ia yang bertahan (Chrome/Firefox butuh versi
+     standar). Jangan dibalik. */
   -webkit-backdrop-filter: blur(2.1em);
+  backdrop-filter: blur(2.1em);
 }
 
 .name {
@@ -458,8 +462,10 @@
   }
 
   .card-text {
-    backdrop-filter: blur(1.2em);
+    /* Sama seperti aturan utama: `-webkit-` dulu, standar terakhir agar versi
+       standar bertahan setelah minifikasi esbuild. */
     -webkit-backdrop-filter: blur(1.2em);
+    backdrop-filter: blur(1.2em);
   }
 }
 

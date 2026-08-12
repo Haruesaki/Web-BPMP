@@ -21,8 +21,8 @@
   padding-right: 0px;
   border: none;
   gap: 15px;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   
   /* Combined transition */
   transition:

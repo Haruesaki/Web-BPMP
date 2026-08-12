@@ -145,8 +145,8 @@
   display: block;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(25px);
   border-radius: 12px;
   padding: 0;
   z-index: 9999;
