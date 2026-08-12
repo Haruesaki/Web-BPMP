@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import "./DefaultContent.css";
 import axiosInstance from "../../../../api/axiosInstance";
@@ -9,6 +9,10 @@ import { kelompokkanGambarBerurutan } from "../../../../utils/kelompokGambar";
 import { sanitizeHTML } from "../../../../utils/sanitizeHtml";
 import { autoPotongDinyalakan } from "../../../../utils/rasioGambar";
 import { siapkanTabelKonten } from "../../../../utils/tabelKonten";
+
+// Ekspresi reguler ekstensi dokumen yang didukung (didefinisikan di luar komponen
+// agar tidak dibuat ulang dari nol pada setiap render React).
+const DOC_EXT = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|rtf|txt|csv)(\?.*)?$/i;
 
 // Pembungkus gambar (dulu `ContentImage` beserta `classifyRatio` di berkas ini)
 // kini tinggal di GambarKonten.jsx + utils/rasioGambar.js, dipakai bersama
@@ -268,6 +272,30 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
     return node;
   };
 
+  // Memoisasi penguraian HTML: Penguraian teks kaya dan penyiapan AST
+  // HANYA dijalankan ulang bila data `content` dari API memang berubah.
+  const parsedContents = useMemo(() => {
+    return content.map((c) => {
+      const sanitized = sanitizeHTML(c.deskripsi_kaya || '');
+      const wrappedHtml = `<div class="ck-content-root">${sanitized}</div>`;
+      const parsedContent = parse(wrappedHtml, {
+        replace: (node) => {
+          if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
+            node.children = kelompokkanGambarBerurutan(node.children);
+            return;
+          }
+          return transformNode(node);
+        },
+      });
+
+      return {
+        ...c,
+        parsedContent,
+        formattedDate: formatTanggal(c.dibuat_pada),
+      };
+    });
+  }, [content]);
+
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat konten...</div>;
   }
@@ -286,30 +314,18 @@ const DefaultContent = ({ menuId, viewLayout, menuName }) => {
         </div>
       )}
       <div className={`default-content-wrapper ${isVertical ? 'layout-vertical' : 'layout-horizontal'}`}>
-        {content.map(c => {
-          const sanitized = sanitizeHTML(c.deskripsi_kaya || '');
-          const wrappedHtml = `<div class="ck-content-root">${sanitized}</div>`;
-          const parsedContent = parse(wrappedHtml, {
-            replace: (node) => {
-              if (node.type === "tag" && node.attribs?.class === "ck-content-root") {
-                node.children = kelompokkanGambarBerurutan(node.children);
-                return;
-              }
-              return transformNode(node);
-            },
-          });
-
+        {parsedContents.map((c) => {
           return (
             <div key={c.id} id={`content-konten-${c.id}`} className="content-type-section default-content">
               <div className="default-banner-wrapper">
                 <h1 className="default-banner-title">{c.judul}</h1>
                 <p className="post-date">
                   <i className="fa-solid fa-calendar-days" style={{ marginRight: '8px' }}></i>
-                  {formatTanggal(c.dibuat_pada)}
+                  {c.formattedDate}
                 </p>
               </div>
               <div className="default-description-container">
-                {parsedContent}
+                {c.parsedContent}
               </div>
             </div>
           );

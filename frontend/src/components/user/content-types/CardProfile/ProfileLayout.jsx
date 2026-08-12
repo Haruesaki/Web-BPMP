@@ -56,8 +56,21 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
     setCurrentPage(1);
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman (memoized callback)
-  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    const element = document.querySelector('.profile-content-wrapper');
+    if (element) {
+      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 90;
+      const offsetPos = -(headerHeight + 40);
+      
+      if (window.lenis) {
+        window.lenis.scrollTo(element, { offset: offsetPos });
+      } else {
+        const targetTop = element.getBoundingClientRect().top + window.scrollY + offsetPos;
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      }
+    }
+  }, []);
 
   // Hitung total halaman (dideklarasikan sebelum Hook dan early return)
   const totalPages = Math.ceil(profiles.length / itemsPerPage);
@@ -105,6 +118,7 @@ const ProfileLayout = ({ menuId, viewLayout, menuName = "Profil Pegawai" }) => {
               role={profile.jabatan}
               quote={profile.quotes}
               imageSrc={profile.url_foto}
+              index={index}
             />
           </LazyLoadWrapper>
         ))}

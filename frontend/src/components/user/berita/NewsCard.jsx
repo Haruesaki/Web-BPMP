@@ -2,13 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './NewsCard.css';
 
-const NewsCard = ({ title, date, link = "#", onMouseEnter, onFocus }) => {
+const NewsCard = ({ title, date, link = "#", onMouseEnter, onFocus, index = 0 }) => {
   return (
     <Link
       to={link}
       className="news-item"
       onMouseEnter={onMouseEnter}
       onFocus={onFocus}
+      style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="news-item-inner">
         <div className="white-curve"></div>

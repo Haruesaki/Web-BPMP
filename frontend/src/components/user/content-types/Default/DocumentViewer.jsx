@@ -156,24 +156,47 @@ const ambilDenganProgres = async (url, laporkan) => {
  * sehingga fungsi ini tidak perlu tahu-menahu soal keadaan komponen dan dapat
  * dipanggil ulang apa adanya setiap kali perbesaran berubah.
  */
-const gambarHalaman = (slot) => {
-  const lebar = parseFloat(slot.el.style.width) || slot.asli.width;
-  const viewport = slot.page.getViewport({
-    scale: Math.min(MAKS_KERAPATAN, lebar / slot.asli.width),
-  });
+const gambarHalaman = async (slot) => {
+  if (slot.done) return;
+  slot.done = true;
 
-  const canvas = document.createElement('canvas');
-  canvas.className = 'docv-page';
-  canvas.width = Math.max(1, Math.floor(viewport.width));
-  canvas.height = Math.max(1, Math.floor(viewport.height));
-  slot.el.replaceChildren(canvas);
+  try {
+    // Ambil objek page dari PDF.js secara on-demand jika belum dimuat
+    if (!slot.page && slot.pdfDoc) {
+      slot.page = await slot.pdfDoc.getPage(slot.pageNum);
+      const realAsli = slot.page.getViewport({ scale: 1 });
+      if (realAsli.width !== slot.asli.width || realAsli.height !== slot.asli.height) {
+        slot.asli = realAsli;
+        slot.el.style.aspectRatio = `${realAsli.width} / ${realAsli.height}`;
+      }
+    }
 
-  const tugas = slot.page.render({ canvasContext: canvas.getContext('2d'), viewport });
-  slot.tugas = tugas;
-  // Penolakan WAJIB ditangkap: menggambar ulang atau melepas komponen
-  // membatalkan tugas ini, dan pembatalan menolak janjinya. Tanpa penangkap,
-  // setiap perubahan perbesaran meninggalkan unhandled rejection di konsol.
-  tugas.promise.catch(() => {});
+    if (!slot.page) {
+      slot.done = false;
+      return;
+    }
+
+    const lebar = parseFloat(slot.el.style.width) || slot.asli.width;
+    const viewport = slot.page.getViewport({
+      scale: Math.min(MAKS_KERAPATAN, lebar / slot.asli.width),
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'docv-page';
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    slot.el.replaceChildren(canvas);
+
+    const tugas = slot.page.render({ canvasContext: canvas.getContext('2d'), viewport });
+    slot.tugas = tugas;
+    // Penolakan WAJIB ditangkap: menggambar ulang atau melepas komponen
+    // membatalkan tugas ini, dan pembatalan menolak janjinya. Tanpa penangkap,
+    // setiap perubahan perbesaran meninggalkan unhandled rejection di konsol.
+    tugas.promise.catch(() => {});
+  } catch (err) {
+    console.error(`Gagal menggambar halaman PDF ${slot.pageNum}:`, err);
+    slot.done = false;
+  }
 };
 
 const batalkanTugas = (slot) => {
@@ -184,6 +207,13 @@ const batalkanTugas = (slot) => {
     /* tugas sudah selesai — tidak ada yang perlu dibatalkan */
   }
   slot.tugas = null;
+};
+
+// Membebaskan kanvas dari memori VRAM GPU ketika halaman PDF keluar jauh dari viewport
+const bersihkanHalaman = (slot) => {
+  batalkanTugas(slot);
+  slot.el.replaceChildren();
+  slot.done = false;
 };
 
 const DocumentViewer = ({ href, label, ext }) => {
@@ -320,38 +350,54 @@ const DocumentViewer = ({ href, label, ext }) => {
       const dasar = gulir.clientWidth || 700;
       lebarDasarRef.current = dasar;
 
-      // Bangun "slot" berukuran tepat tiap halaman (agar scrollbar akurat),
-      // tapi belum menggambar canvas. Canvas digambar lewat IntersectionObserver.
+      // Ambil halaman pertama lebih dahulu untuk mendapatkan rasio default
+      // secara instan tanpa perlu await sekuensial berulang puluhan kali.
+      const page1 = await pdfDoc.getPage(1);
+      if (cancelled) return;
+      const defaultAsli = page1.getViewport({ scale: 1 });
+
       const slots = [];
       for (let i = 1; i <= pdfDoc.numPages; i++) {
-        const page = await pdfDoc.getPage(i);
-        if (cancelled) return;
-
-        const asli = page.getViewport({ scale: 1 });
-
         const el = document.createElement('div');
         el.className = 'docv-page-slot';
         el.style.width = `${dasar}px`;
         // Tinggi diturunkan dari rasio, bukan dipatok piksel: saat lebarnya
         // berubah karena perbesaran atau layar mengecil, tingginya ikut sendiri
         // dan halaman tidak pernah menjadi gepeng.
-        el.style.aspectRatio = `${asli.width} / ${asli.height}`;
+        el.style.aspectRatio = `${defaultAsli.width} / ${defaultAsli.height}`;
         panggung.appendChild(el);
-        slots.push({ el, page, asli, tugas: null, done: false });
+
+        slots.push({
+          el,
+          pageNum: i,
+          page: i === 1 ? page1 : null,
+          pdfDoc,
+          asli: defaultAsli,
+          tugas: null,
+          done: false,
+        });
       }
 
       observerRef.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
             const slot = slots.find((s) => s.el === entry.target);
-            if (!slot || slot.done) return;
-            slot.done = true;
-            observerRef.current.unobserve(slot.el);
-            gambarHalaman(slot);
+            if (!slot) return;
+
+            if (entry.isIntersecting) {
+              if (!slot.done) {
+                gambarHalaman(slot);
+              }
+            } else {
+              // Jika slot keluar jauh dari viewport (melampaui rootMargin 600px),
+              // bersihkan kanvasnya dari memori VRAM GPU untuk mencegah kebocoran memori.
+              if (slot.done) {
+                bersihkanHalaman(slot);
+              }
+            }
           });
         },
-        { root: gulir, rootMargin: '400px 0px' }
+        { root: gulir, rootMargin: '600px 0px' }
       );
 
       slots.forEach((s) => observerRef.current.observe(s.el));

@@ -149,8 +149,21 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
     setCurrentPage(1); // Reset ke halaman 1 setiap kali kategori menu berubah
   }, [menuId]);
 
-  // Fungsi untuk mengubah halaman (memoized callback)
-  const handlePageChange = useCallback((page) => setCurrentPage(page), []);
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    const element = document.querySelector('.news-content-wrapper');
+    if (element) {
+      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 90;
+      const offsetPos = -(headerHeight + 40);
+      
+      if (window.lenis) {
+        window.lenis.scrollTo(element, { offset: offsetPos });
+      } else {
+        const targetTop = element.getBoundingClientRect().top + window.scrollY + offsetPos;
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      }
+    }
+  }, []);
 
   if (loading) return <div style={{ padding: '100px 40px', textAlign: 'center', color: 'var(--text-main)' }}>Memuat berita...</div>;
   
@@ -180,9 +193,13 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
           // sehingga berita biasa bernilai null. Tanpa cadangan, `new Date(null)`
           // akan jatuh ke epoch dan tertulis "1 Januari 1970" pada kartu.
           const sumberTanggal = b.waktu_tayang || b.dibuat_pada;
-          const date = sumberTanggal
-            ? new Date(sumberTanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            : '';
+          let date = '';
+          if (sumberTanggal) {
+            const d = new Date(sumberTanggal);
+            const tgl = d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const wkt = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            date = `${tgl}\n${wkt} WIB`;
+          }
           
           // Ekstrak text polos dari HTML untuk excerpt secara aman tanpa memicu rendering DOM memori
           const excerpt = (b.deskripsi_kaya || '').replace(/<[^>]*>/g, '');
@@ -203,6 +220,7 @@ const NewsCardContent = ({ menuId, viewLayout, menuName }) => {
                   excerpt={excerpt} 
                   imageSrc={b.url_foto || null}
                   link={`/berita/berita-${b.id}`}
+                  index={index}
                 />
               </LazyLoadWrapper>
             </div>
