@@ -63,7 +63,7 @@
   align-items: center;
   width: 100%;
   padding: 0 6vw;
-  gap: 10rem;
+  gap: clamp(2.5rem, 5vw, 5rem);
   box-sizing: border-box;
   transition:
     padding 0.4s ease-in-out,
@@ -72,7 +72,7 @@
 
 .hero-flex-container > :only-child {
   margin-right: auto;
-  flex-basis: 55%;
+  flex-basis: 60%;
 }
 
 .hero-left-content {
@@ -80,8 +80,8 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  max-width: 40%;
-  flex-basis: 44%;
+  max-width: 54%;
+  flex-basis: 52%;
   gap: 0.3rem;
   color: #ffffff;
   z-index: 222;
@@ -102,9 +102,11 @@
 .main-title {
   font-family: "Poppins", "Poppins-fallback", serif;
   font-size: clamp(2.2rem, min(2.5vw, 4.5vh), 2.8rem);
-  line-height: 1.2;
+  line-height: 1.25;
   margin: 0;
+  white-space: pre-line;
   overflow-wrap: break-word;
+  word-break: break-word;
   min-width: 0;
   max-width: 100%;
 }
@@ -120,8 +122,11 @@
   font-family: "Poppins", "Poppins-fallback", sans-serif;
   font-size: clamp(0.9rem, min(1.1vw, 2vh), 1.1rem);
   font-weight: 400;
+  line-height: 1.45;
   margin: 0;
+  white-space: pre-line;
   overflow-wrap: break-word;
+  word-break: break-word;
   min-width: 0;
   max-width: 100%;
 }
@@ -176,50 +181,13 @@
   width: 100%;
   height: 100%;
   z-index: 5;
-  opacity: 0;
-  transform: translateY(150px);
-  animation:
-    buildingSlideUp 3s cubic-bezier(0.25, 0.8, 0.38, 1) 0.3s forwards,
-    smoothFloat 11s ease-in-out 3.09s infinite alternate;
+  opacity: 1;
+  transform: none;
+  animation: none;
   border-radius: 15%;
   display: flex;
   position: relative;
   overflow: hidden;
-}
-
-@keyframes buildingSlideUp {
-  0% {
-    opacity: 1;
-    transform: translateY(60vh) translateX(15vw) scale(0.8);
-    rotate: -5deg;
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0) translateX(0) scale(1);
-    rotate: 1deg;
-  }
-}
-
-@keyframes smoothFloat {
-  0% {
-    transform: translateY(0px);
-    rotate: 1deg;
-  }
-
-  35% {
-    transform: translateY(25px);
-    rotate: -2deg;
-  }
-
-  75% {
-    rotate: 1deg;
-  }
-
-  100% {
-    transform: translateY(-10px);
-    rotate: -1deg;
-  }
 }
 
 .bingkai-gambar-cms {
@@ -230,7 +198,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   position: relative;
   z-index: 3;
-  border: 1.5px solid rgba(var(--theme-highlight-rgb, 135, 163, 255), 0.35);
+  border: none;
 }
 
 .cms-dynamic-image {
@@ -349,21 +317,19 @@ progresif menyempurnakan tampilan untuk layar yang LEBIH BESAR.
   }
 } */
 @media (max-width: 1040px) {
-  /* 48rem = 768px */
-
-  /* Di layar tinggi/portrait (mis. HP mode "Situs Desktop" atau tablet), memusatkan
-     konten secara vertikal (align-items: center bawaan) menyisakan jarak sangat lebar
-     antara navbar dan judul. Rata-atas + padding-atas proporsional membuat judul
-     duduk dekat navbar tanpa mengubah struktur layout. */
+  /* Memusatkan konten secara vertikal dan horizontal di layar tablet/mobile */
   .hero-section {
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-flex-container {
     flex-direction: column;
-    padding-top: clamp(2rem, 6vh, 5rem);
-    padding-bottom: clamp(2rem, 8vh, 4rem);
-    gap: clamp(1rem, 5.3vh, 10rem);
+    justify-content: center;
+    align-items: center;
+    padding-top: clamp(1.5rem, 4vh, 3rem);
+    padding-bottom: clamp(1.5rem, 4vh, 3rem);
+    gap: clamp(1.5rem, 3.5vh, 2.5rem);
   }
 
   .hero-left-content {
