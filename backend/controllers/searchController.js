@@ -129,18 +129,30 @@ class SearchController {
         });
       }
 
-      // 3. Cari di berita
+      // 3. Cari di berita (Seluruh Berita di Website / Card Berita)
       const beritaList = await db('berita')
+        .leftJoin('menu', 'berita.menu_id', 'menu.id')
         .where(function() {
           this.whereRaw('LOWER(berita.judul) LIKE ?', [keyword])
               .orWhereRaw('LOWER(berita.deskripsi_kaya) LIKE ?', [keyword]);
         })
-        .andWhere('berita.status', 'terbit') // Berita memiliki filter status rilis aktif di CMS
-        .select('id', 'judul', 'menu_id'); // Menyeleksi kolom 'id' berita untuk merakit URL detail yang sah
+        .select(
+          'berita.id',
+          'berita.judul',
+          'berita.menu_id',
+          'menu.nama_menu as menu_nama'
+        );
 
       for (let b of beritaList) {
-        if (!menuDapatDijangkau(b.menu_id, menuMap)) continue;
-        const location = getMenuLocation(b.menu_id, menuMap);
+        // Tentukan metadata lokasi menu: jika menu_id terikat dan dijangkau, gunakan lokasi hierarkinya;
+        // jika null atau menu tidak dijangkau, gunakan nama menu asal atau fallback 'Berita'.
+        let location = { menu_location: 'Berita', submenu_location: null };
+        if (b.menu_id && menuMap.has(b.menu_id)) {
+          location = getMenuLocation(b.menu_id, menuMap);
+        } else if (b.menu_nama) {
+          location = { menu_location: b.menu_nama, submenu_location: null };
+        }
+
         results.push({
           title: b.judul,
           type: 'Berita',
