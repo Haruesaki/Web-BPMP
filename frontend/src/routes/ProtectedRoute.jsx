@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { bacaSesi, pantauSesi } from '../utils/sesiAdmin';
+import { JALUR_MASUK } from '../config/jalurAdmin';
 
 // =========================================================================
 //  PENJAGA RUTE ADMIN
@@ -25,7 +26,7 @@ const ProtectedRoute = () => {
   useEffect(() => pantauSesi(setSesi), []);
 
   if (!sesi) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to={JALUR_MASUK} replace />;
   }
 
   return <Outlet />;

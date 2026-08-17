@@ -8,6 +8,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { LAYOUT_LABEL_TO_KEY } from '../LayoutPost/layoutMeta';
 import axiosInstance from '../../../api/axiosInstance';
 import { bacaSesi } from '../../../utils/sesiAdmin';
+import { JALUR_MASUK } from '../../../config/jalurAdmin';
 
 import DashboardAdmin from '../../../pages/Admin/DashboardAdmin/dashboard-admin';
 import CustomizeBeranda from '../../../pages/Admin/CustomizeBeranda/CustomizeBeranda';
@@ -174,7 +175,7 @@ const AdminLayout = () => {
           onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
           onLogout={() => {
             logout();
-            navigate('/admin/login');
+            navigate(JALUR_MASUK);
           }} />
         <div key={location.pathname}>
           <Outlet />

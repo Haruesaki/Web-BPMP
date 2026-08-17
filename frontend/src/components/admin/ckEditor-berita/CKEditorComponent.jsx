@@ -190,6 +190,57 @@ const getAuthToken = () => ambilToken() || '';
 
 const UPLOAD_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/upload/gambar`;
 
+// =========================================================================
+//  THUMBNAIL DI DALAM ISI BERITA
+//  -----------------------------------------------------------------------
+//  Sebelumnya halaman detail berita SELALU menempelkan thumbnail di atas isi
+//  kontennya, tanpa satu pun cara mematikannya — padahal thumbnail itu
+//  sebetulnya sampul untuk kartu daftar berita, bukan bagian naskahnya.
+//
+//  Sekarang penyertaannya menjadi keputusan penyunting, dan caranya sengaja
+//  BUKAN penanda tersendiri di basis data melainkan GAMBAR SUNGGUHAN yang
+//  disisipkan ke dalam isi konten. Sebabnya ada tiga:
+//    1. Permintaannya menuntut gambar itu dapat dipindah ke baris mana saja.
+//       Sebagai gambar biasa di dalam editor, ia langsung memperoleh seluruh
+//       kemampuan bawaan CKEditor — diseret, dipotong-tempel, diberi
+//       keterangan, diatur perataan — tanpa satu baris kode pun untuk itu.
+//       Penanda di basis data hanya mampu menyimpan "ya/tidak"; posisinya
+//       akan menuntut kolom kedua, dan pemindahannya menuntut antarmuka
+//       seret tersendiri yang menirukan milik editor.
+//    2. Halaman pengunjung tidak perlu diubah sedikit pun untuk memuatnya:
+//       gambarnya menempuh jalur yang sama dengan gambar isi konten lain,
+//       termasuk pengelompokan mendatar dan saklar potong otomatis.
+//    3. Keadaan saklarnya DITURUNKAN dari isi konten, bukan disimpan
+//       terpisah. Dengan begitu keduanya mustahil berselisih: menghapus
+//       gambarnya di editor mematikan saklarnya sendiri, dan Ctrl+Z
+//       memulangkan keduanya sekaligus.
+//
+//  Tidak ada perubahan skema basis data — jadi tidak ada pula yang perlu
+//  dijalankan di phpMyAdmin production sebelum penempatan ulang.
+// =========================================================================
+
+const lolosRegex = (teks) => String(teks).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Dibaca dari untai HTML (bukan dari model editor) supaya keadaan saklarnya
+// ikut menyesuaikan diri pada setiap penyuntingan — termasuk saat gambarnya
+// dihapus lewat tombol Delete atau dipulangkan lewat Ctrl+Z.
+const thumbnailAdaDiKonten = (html, url) => {
+  if (!html || !url) return false;
+  return new RegExp(`src=["']${lolosRegex(url)}["']`).test(html);
+};
+
+const kumpulkanGambarBersumber = (editor, url) => {
+  if (!editor || !url) return [];
+  const akar = editor.model.document.getRoot();
+  if (!akar) return [];
+  const hasil = [];
+  for (const { item } of editor.model.createRangeIn(akar)) {
+    const gambar = item.is('element', 'imageBlock') || item.is('element', 'imageInline');
+    if (gambar && item.getAttribute('src') === url) hasil.push(item);
+  }
+  return hasil;
+};
+
 const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) => {
   const editorRef = useRef(null);
   const [thumbUploading, setThumbUploading] = useState(false);
@@ -201,6 +252,70 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
   const [thumbPersen, setThumbPersen] = useState(0);
   const [thumbTahap, setThumbTahap] = useState('');
   const thumbInputRef = useRef(null);
+
+  // Saklar "Tampilkan juga ke detail berita" hanya dapat bekerja lewat model
+  // editor, jadi ia ditahan sampai instance CKEditor benar-benar siap. Tanpa
+  // ini kliknya diam-diam tidak berbuat apa pun pada detik-detik pertama
+  // sesudah halaman terbuka.
+  const [editorSiap, setEditorSiap] = useState(false);
+
+  // Nilai thumbnail sebelumnya. Dipakai untuk mencari gambar sisipan yang
+  // masih memakai URL lama ketika penyunting menekan "Ganti Gambar" atau
+  // "Hapus" — tanpa ini gambar lama tertinggal di dalam naskah sebagai
+  // rujukan ke berkas yang sudah tidak dipakai lagi.
+  const urlThumbSebelumnya = useRef(thumbnailUrl || '');
+
+  const thumbnailIkutKeDetail = thumbnailAdaDiKonten(data, thumbnailUrl);
+
+  const alihkanThumbnailKeDetail = () => {
+    const editor = editorRef.current;
+    if (!editor || !thumbnailUrl) return;
+
+    const sudahAda = kumpulkanGambarBersumber(editor, thumbnailUrl);
+
+    if (sudahAda.length) {
+      editor.model.change((writer) => {
+        sudahAda.forEach((gambar) => writer.remove(gambar));
+      });
+      return;
+    }
+
+    // `insertObject` dipakai alih-alih perintah `insertImage`: perintah itu
+    // menyisipkan pada posisi terpilih dan memilih sendiri antara gambar blok
+    // atau sebaris, sedangkan di sini posisinya harus pasti — baris pertama
+    // dokumen — dan bentuknya harus blok agar melintang penuh seperti sampul.
+    editor.model.change((writer) => {
+      const akar = editor.model.document.getRoot();
+      const gambar = writer.createElement('imageBlock', { src: thumbnailUrl });
+      editor.model.insertObject(gambar, writer.createPositionAt(akar, 0), null, {
+        setSelection: 'on',
+      });
+    });
+  };
+
+  // Menjaga gambar sisipan tetap sejalan dengan thumbnail yang berlaku.
+  // Dipisahkan dari penangan tombol karena URL-nya dapat berubah dari mana
+  // saja — unggahan baru, penghapusan, atau pemuatan ulang data konten.
+  useEffect(() => {
+    const lama = urlThumbSebelumnya.current;
+    const baru = thumbnailUrl || '';
+    if (lama === baru) return;
+    urlThumbSebelumnya.current = baru;
+
+    const editor = editorRef.current;
+    if (!editor || !lama) return;
+
+    const sisipan = kumpulkanGambarBersumber(editor, lama);
+    if (!sisipan.length) return;
+
+    editor.model.change((writer) => {
+      // Thumbnail dihapus → sisipannya ikut hilang. Bila hanya diganti,
+      // sumbernya yang ditukar sehingga POSISI, keterangan, perataan, dan
+      // ukuran yang sudah disetel penyunting tetap utuh.
+      if (!baru) sisipan.forEach((gambar) => writer.remove(gambar));
+      else sisipan.forEach((gambar) => writer.setAttribute('src', baru, gambar));
+    });
+  }, [thumbnailUrl]);
 
   const handleThumbnailPick = () => {
     if (thumbInputRef.current) thumbInputRef.current.click();
@@ -352,6 +467,7 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
 
   const handleEditorReady = (editor) => {
     editorRef.current = editor;
+    setEditorSiap(true);
 
     const markLenisPrevent = () =>
       document
@@ -404,6 +520,29 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
               <button type="button" className="pd-thumbnail-btn pd-thumbnail-btn-danger" onClick={handleThumbnailRemove} disabled={thumbUploading}>
                 Hapus
               </button>
+
+              {/* Bawaannya MATI: kolom `url_foto` yang sudah terisi pada
+                  seluruh berita lama tidak lagi membawa gambarnya masuk ke
+                  halaman detail dengan sendirinya. Yang menyalakannya hanya
+                  tindakan penyunting di sini. */}
+              <button
+                type="button"
+                className={`pd-thumb-sisip${thumbnailIkutKeDetail ? ' pd-thumb-sisip--nyala' : ''}`}
+                onClick={alihkanThumbnailKeDetail}
+                disabled={thumbUploading || !editorSiap}
+                aria-pressed={thumbnailIkutKeDetail}
+                title={
+                  thumbnailIkutKeDetail
+                    ? 'Klik untuk mengeluarkan gambar ini dari isi berita'
+                    : 'Klik untuk menyisipkan gambar ini ke baris pertama isi berita'
+                }
+              >
+                <i
+                  className={`fa-solid ${thumbnailIkutKeDetail ? 'fa-toggle-on' : 'fa-toggle-off'}`}
+                  aria-hidden="true"
+                ></i>
+                <span>Tampilkan juga ke detail berita</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -428,6 +567,14 @@ const CKEditorComponent = ({ data, onChange, thumbnailUrl, onThumbnailChange }) 
               />
             </div>
           </div>
+        )}
+
+        {thumbnailUrl && thumbnailIkutKeDetail && (
+          <p className="pd-thumb-sisip-catatan">
+            <i className="fa-solid fa-arrows-up-down-left-right" aria-hidden="true"></i>
+            Gambar thumbnail kini menjadi baris pertama isi berita di bawah. Seret gambarnya
+            di dalam editor untuk memindahkannya ke baris mana pun.
+          </p>
         )}
 
         {thumbError && <p className="pd-thumbnail-error">{thumbError}</p>}

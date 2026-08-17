@@ -233,6 +233,32 @@ const BeritaDetail = ({ lenisRef }) => {
     );
   }
 
+  // =====================================================================
+  //  SAMPUL TIDAK LAGI DITEMPELKAN SENDIRI DI ATAS ISI BERITA
+  //  ---------------------------------------------------------------------
+  //  Thumbnail sebetulnya sampul untuk KARTU di daftar berita, bukan bagian
+  //  naskahnya. Sebelum ini halaman detail selalu memasangnya di atas isi
+  //  konten, dan penyunting tidak mempunyai satu pun cara mematikannya.
+  //
+  //  Sekarang penyertaannya menjadi keputusan penyunting lewat saklar
+  //  "Tampilkan juga ke detail berita" pada penyunting berita. Saklar itu
+  //  menyisipkan thumbnail sebagai GAMBAR di dalam isi kontennya, sehingga
+  //  gambarnya tiba di sini melewati jalur yang sama dengan gambar isi konten
+  //  lain — dan posisinya dapat dipindah ke baris mana pun. Karena itu tidak
+  //  ada penanda tambahan yang perlu dibaca di sini: cukup berhenti
+  //  menempelkannya sendiri.
+  //
+  //  'konten' (halaman_konten) DIBIARKAN seperti semula. `url_foto`-nya tidak
+  //  pernah berasal dari penyunting halaman itu — melainkan disetel di
+  //  Customize Beranda semata-mata agar kartunya di beranda punya gambar —
+  //  jadi tidak ada saklar yang mengaturnya. Ikut mematikannya di sini hanya
+  //  akan menghilangkan gambar dari halaman yang tidak diminta berubah.
+  //
+  //  Sumbernya dibaca dari parameter alamat ('berita-12' / 'konten-5'), bentuk
+  //  yang sama dengan yang dipakai getBeritaDetail di peladen.
+  // =====================================================================
+  const tampilkanSampulOtomatis = String(id || '').split('-')[0] !== 'berita';
+
   // Lakukan parsing dan integrasi logika grouping gambar seperti di DefaultContent
   const sanitized = sanitizeHTML(newsDetail.konten || '');
   const wrappedHtml = `<div class="ck-content-root">${sanitized}</div>`;
@@ -275,7 +301,7 @@ const BeritaDetail = ({ lenisRef }) => {
           </div>
           
           <div className="default-description-container">
-            {newsDetail.coverUrl && (
+            {tampilkanSampulOtomatis && newsDetail.coverUrl && (
                <div className="berita-main-cover">
                  <img src={newsDetail.coverUrl} alt="Cover Berita" />
                </div>

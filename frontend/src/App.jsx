@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
+import { diDalamAdmin } from './config/jalurAdmin';
 
 const LENIS_CLASSES = ['lenis', 'lenis-smooth', 'lenis-stopped', 'lenis-scrolling'];
 
@@ -17,7 +18,10 @@ if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
 
 const LenisProvider = () => {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
+  // Menentukan apakah Lenis (gulir halus) dimatikan. Panel admin memakai gulir
+  // bawaan peramban. `diDalamAdmin` dipakai, bukan `startsWith` apa adanya,
+  // supaya alamat yang hanya BERAWALAN sama tidak ikut terhitung panel.
+  const isAdmin = diDalamAdmin(location.pathname);
   const lenisRef = useRef(null);
   
   useEffect(() => {

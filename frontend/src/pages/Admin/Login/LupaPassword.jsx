@@ -4,6 +4,7 @@ import './Login.css';
 import './LupaPassword.css';
 import { requestOtpApi, verifyOtpApi, resetPasswordApi } from '../../../api/authApi';
 import { simpanSesi } from '../../../utils/sesiAdmin';
+import { AKAR_ADMIN, JALUR_MASUK } from '../../../config/jalurAdmin';
 
 const OTP_LENGTH = 6;
 
@@ -173,7 +174,7 @@ const LupaPassword = () => {
         simpanSesi(sessionData);
         
         // Langsung arahkan ke Dashboard
-        navigate('/admin');
+        navigate(AKAR_ADMIN);
       }
     } catch (err) {
       setError(err.message || 'Gagal mengubah kata sandi.');
@@ -410,7 +411,7 @@ const LupaPassword = () => {
         )}
 
         {/* KEMBALI KE LOGIN */}
-        <Link to="/admin/login" className="auth-back-link" onClick={() => {
+        <Link to={JALUR_MASUK} className="auth-back-link" onClick={() => {
           // Bersihkan session flow jika kembali ke login
           sessionStorage.removeItem('otpStep');
           sessionStorage.removeItem('otpEmail');

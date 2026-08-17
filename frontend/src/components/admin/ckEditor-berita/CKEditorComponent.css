@@ -309,6 +309,79 @@
     color: #ff5555;
 }
 
+/* -------------------------------------------------------------------------
+   SAKLAR "Tampilkan juga ke detail berita"
+   -------------------------------------------------------------------------
+   Sengaja TIDAK memakai `.pd-thumbnail-btn`: dua tombol di atasnya adalah
+   perintah sekali jalan (ganti / hapus), sedangkan yang ini menyatakan sebuah
+   KEADAAN yang sedang berlaku. Bentuk saklarnya beserta warna nyala membuat
+   perbedaan itu terbaca tanpa harus dicoba dulu.
+   ------------------------------------------------------------------------- */
+.pd-thumb-sisip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-align: left;
+    color: #c7c4d8;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.pd-thumb-sisip i {
+    font-size: 15px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.pd-thumb-sisip:hover:not(:disabled) {
+    color: #f3f5fb;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pd-thumb-sisip:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.pd-thumb-sisip--nyala {
+    color: #d6d8ff;
+    background: rgba(91, 95, 232, 0.16);
+    border-color: rgba(91, 95, 232, 0.55);
+}
+
+.pd-thumb-sisip--nyala:hover:not(:disabled) {
+    background: rgba(91, 95, 232, 0.24);
+}
+
+.pd-thumb-sisip-catatan {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #9aa3b8;
+}
+
+.pd-thumb-sisip-catatan i {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Pada layar sempit, gambar 140px + kolom tombol berlabel panjang tidak lagi
+   cukup dalam satu baris; dibiarkan turun alih-alih meluber keluar kartu. */
+@media (max-width: 640px) {
+    .pd-thumbnail-preview {
+        flex-wrap: wrap;
+    }
+}
+
 /* =========================================================================
    TOOLBAR MENGAMBANG (STICKY) — perbaikan interaksi dengan zoom:0.7 layout.
    -------------------------------------------------------------------------

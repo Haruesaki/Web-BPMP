@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import { useAuth } from '../../../hooks/useAuth';
+import { AKAR_ADMIN, JALUR_LUPA_SANDI } from '../../../config/jalurAdmin';
 
 // =========================================================================
 //  HALAMAN LOGIN CMS — Web BPMP Lampung
 //  -----------------------------------------------------------------------
 //  Scope CSS: seluruh isi dibungkus <div className="auth-layout"> agar
 //  variabel warna & style tidak bocor ke halaman lain (Beranda/Dashboard).
-//  Link "Lupa password?" mengarah ke /admin/lupa-password.
+//  Link "Lupa password?" mengarah ke <akar-admin>/lupa-password. Akar alamat
+//  panel ditetapkan di config/jalurAdmin.js — tidak ditulis tangan di sini.
 // =========================================================================
 
 const Login = () => {
@@ -27,7 +29,7 @@ const Login = () => {
     if (loading) return;
     const result = await login(email, password, rememberMe);
     if (result.success) {
-      navigate('/admin');
+      navigate(AKAR_ADMIN);
     }
   };
 
@@ -127,7 +129,7 @@ const Login = () => {
             />
             <span>Ingat saya</span>
           </label>
-          <Link to="/admin/lupa-password" className="auth-link">
+          <Link to={JALUR_LUPA_SANDI} className="auth-link">
             Lupa password?
           </Link>
         </div>

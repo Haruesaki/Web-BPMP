@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
+import { jAdmin } from '../../../config/jalurAdmin';
 import ThemeAlert from '../ThemeAlert';
 import NewsSection from '../../user/berita/NewsSection';
 import './BeritaSectionForm.css';
@@ -47,11 +48,11 @@ const BeritaSectionForm = () => {
     const actualId = b.id.split('-').pop();
     
     if (layoutType === 'profile-card') {
-      navigate(`/admin/kelola-profil/${b.menu_id}`, {
+      navigate(jAdmin(`kelola-profil/${b.menu_id}`), {
         state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id }
       });
     } else {
-      navigate(`/admin/post/${layoutType}/${b.menu_id}`, { 
+      navigate(jAdmin(`post/${layoutType}/${b.menu_id}`), {
         state: { highlightId: actualId, highlightSumber: b.sumber, menuId: b.menu_id } 
       });
     }

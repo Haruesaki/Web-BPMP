@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ambilToken, hapusSesi } from '../utils/sesiAdmin';
+import { JALUR_MASUK } from '../config/jalurAdmin';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5000',
@@ -26,7 +27,7 @@ axiosInstance.interceptors.response.use(
         const isLoginRequest = error.config && error.config.url && error.config.url.includes('/api/auth/login');
         if (error.response && error.response.status === 401 && !isLoginRequest) {
             hapusSesi();
-            window.location.href = '/admin/login';
+            window.location.href = JALUR_MASUK;
         }
         return Promise.reject(error);
     }

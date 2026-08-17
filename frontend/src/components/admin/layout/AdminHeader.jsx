@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import { bacaSesi } from '../../../utils/sesiAdmin';
+import { AKAR_ADMIN, jAdmin } from '../../../config/jalurAdmin';
 import './AdminHeader.css';
 
 // =========================================================================
@@ -25,19 +26,19 @@ import './AdminHeader.css';
 // Menu statis sidebar (selaras dengan AdminSidebar). 'always' = selalu bisa
 // diakses tanpa cek hak akses (Beranda & Setting).
 const STATIC_MENU_ITEMS = [
-  { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin', always: true },
-  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square', path: '/admin/customize-beranda' },
-  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: '/admin/pengaturan-menu' },
-  { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: '/admin/manajemen-user' },
-  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: '/admin/setting', always: true },
+  { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: AKAR_ADMIN, always: true },
+  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square', path: jAdmin('customize-beranda') },
+  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: jAdmin('pengaturan-menu') },
+  { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: jAdmin('manajemen-user') },
+  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: jAdmin('setting'), always: true },
 ];
 
 // Bentuk path tujuan menu dinamis — selaras dengan generatePath di AdminSidebar.
 const buildMenuPath = (item) => {
-  if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
+  if (item.jenis_menu === 'link') return jAdmin(`link/${item.id}`);
   if (item.jenis_menu === 'post') {
-    if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
-    return `/admin/post/${item.slug_atau_tautan || 'default'}/${item.id}`;
+    if (item.slug_atau_tautan === 'profile-card') return jAdmin(`kelola-profil/${item.id}`);
+    return jAdmin(`post/${item.slug_atau_tautan || 'default'}/${item.id}`);
   }
   return item.slug_atau_tautan || '#';
 };

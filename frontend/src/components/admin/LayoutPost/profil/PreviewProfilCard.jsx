@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../../api/axiosInstance';
 import { bacaSesi } from '../../../../utils/sesiAdmin';
+import { jAdmin } from '../../../../config/jalurAdmin';
 import CardContent from '../../../user/content-types/CardProfile/CardContent';
 import useSeretUrutan from '../../../../hooks/useSeretUrutan';
 import './PreviewProfilCard.css';
@@ -57,7 +58,7 @@ const PreviewProfilCard = () => {
     }, [menuId]);
 
     const handleAddProfile = () => {
-        navigate(`/admin/kelola-profil/tambah/${menuId}`);
+        navigate(jAdmin(`kelola-profil/tambah/${menuId}`));
     };
 
     // --- PENGURUTAN: KLIK vs TAHAN ---
@@ -95,7 +96,7 @@ const PreviewProfilCard = () => {
 
     const bukaEditor = (profileId) => {
         if (seret.klikDitahan()) return; // klik sisa seretan → abaikan
-        navigate(`/admin/kelola-profil/edit/${menuId}/${profileId}`);
+        navigate(jAdmin(`kelola-profil/edit/${menuId}/${profileId}`));
     };
 
     if (loading) {

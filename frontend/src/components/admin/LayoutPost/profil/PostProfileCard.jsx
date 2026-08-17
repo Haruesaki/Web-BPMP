@@ -4,6 +4,7 @@ import '../default/PostDefault.css'; // pakai ulang palet + kelas dasar (.pd-*)
 import './PostProfileCard.css';
 import axiosInstance from '../../../../api/axiosInstance';
 import { bacaSesi } from '../../../../utils/sesiAdmin';
+import { jAdmin } from '../../../../config/jalurAdmin';
 import { uploadImageToServer } from '../uploadImage';
 
 // =========================================================================
@@ -214,7 +215,7 @@ const PostProfileCard = () => {
       await axiosInstance.post(`/api/profil-pegawai/${menuId}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      navigate(`/admin/kelola-profil/${menuId}`);
+      navigate(jAdmin(`kelola-profil/${menuId}`));
     } catch (error) {
       console.error('Gagal menyimpan data profil:', error);
       const resData = error.response?.data || {};
@@ -225,7 +226,7 @@ const PostProfileCard = () => {
   };
 
   const handleBatal = () => {
-    navigate(`/admin/kelola-profil/${menuId}`);
+    navigate(jAdmin(`kelola-profil/${menuId}`));
   };
 
   if (isPageLoading) return <div className="postdefault"><main className="pd-content"><p>Memuat editor...</p></main></div>;

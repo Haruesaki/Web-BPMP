@@ -2,20 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../../api/axiosInstance';
 import { bacaSesi } from '../../../utils/sesiAdmin';
+import { AKAR_ADMIN, jAdmin } from '../../../config/jalurAdmin';
 import './AdminSidebar.css';
 
 // --- DATA: MENU STATIS BAGIAN ATAS ---
 const adminMenuItems1 = [
-  { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: '/admin' },
-  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square', path: '/admin/customize-beranda' },
-  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: '/admin/pengaturan-menu' },
+  { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-table-cells-large', path: AKAR_ADMIN },
+  { id: 'customize', label: 'Customize Beranda', icon: 'fa-solid fa-pen-to-square', path: jAdmin('customize-beranda') },
+  { id: 'pengaturan-menu', label: 'Pengaturan Menu', icon: 'fa-solid fa-sliders', path: jAdmin('pengaturan-menu') },
 ];
 
 // --- DATA: MENU STATIS BAGIAN BAWAH ---
 const adminMenuItems2 = [
-  { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: '/admin/manajemen-user' },
-  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: '/admin/setting' },
+  { id: 'manajemen', label: 'Manajemen User', icon: 'fa-solid fa-users', path: jAdmin('manajemen-user') },
+  { id: 'setting', label: 'Setting', icon: 'fa-solid fa-gear', path: jAdmin('setting') },
 ];
+
+// Awalan editor konten, dipakai dua kali di bawah.
+const AWALAN_POST = jAdmin('post/');
 
 const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose }) => {
   const navigate = useNavigate();
@@ -47,12 +51,15 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
   };
 
   // Peta route statis yang memang punya satu halaman tujuan jelas.
+  // Kuncinya disusun dari jAdmin(), BUKAN ditulis tangan. Peta yang tertinggal
+  // tidak menimbulkan galat apa pun — hanya menu sidebar yang berhenti menyala
+  // pada halaman yang sedang dibuka, gejala yang sukar dilacak ke sini.
   const staticRouteMap = {
-    '/admin': 'beranda',
-    '/admin/customize-beranda': 'customize',
-    '/admin/pengaturan-menu': 'pengaturan-menu',
-    '/admin/manajemen-user': 'manajemen',
-    '/admin/setting': 'setting',
+    [AKAR_ADMIN]: 'beranda',
+    [jAdmin('customize-beranda')]: 'customize',
+    [jAdmin('pengaturan-menu')]: 'pengaturan-menu',
+    [jAdmin('manajemen-user')]: 'manajemen',
+    [jAdmin('setting')]: 'setting',
   };
 
   // Helper kecil untuk menjaga state aktif tetap sinkron dengan URL saat ini.
@@ -93,9 +100,9 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
       return exactMatches[0].id;
     }
 
-    // 4. Jika pathname adalah prefix editor (misal /admin/post/...) tapi belum exact match
-    if (pathname.startsWith('/admin/post/')) {
-       const postMatches = flatMenus.filter(item => item.path?.startsWith('/admin/post/'));
+    // 4. Jika pathname adalah prefix editor (misal <akar-admin>/post/...) tapi belum exact match
+    if (pathname.startsWith(AWALAN_POST)) {
+       const postMatches = flatMenus.filter(item => item.path?.startsWith(AWALAN_POST));
        if (postMatches.length > 0) {
          const persistedId = sessionStorage.getItem('adminSidebarSelectedId');
          const matchPersisted = postMatches.find(item => item.id === persistedId);
@@ -120,10 +127,10 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
 
         const tree = parentMenus.map(p => {
           const generatePath = (item) => {
-            if (item.jenis_menu === 'link') return `/admin/link/${item.id}`;
+            if (item.jenis_menu === 'link') return jAdmin(`link/${item.id}`);
             if (item.jenis_menu === 'post') {
-              if (item.slug_atau_tautan === 'profile-card') return `/admin/kelola-profil/${item.id}`;
-              return `/admin/post/${item.slug_atau_tautan || 'default'}/${item.id}`;
+              if (item.slug_atau_tautan === 'profile-card') return jAdmin(`kelola-profil/${item.id}`);
+              return jAdmin(`post/${item.slug_atau_tautan || 'default'}/${item.id}`);
             }
             return item.slug_atau_tautan || '#';
           };
@@ -185,7 +192,7 @@ const AdminSidebar = ({ onTambahMenu, refreshTrigger, isOpen = false, onClose })
 
       if (matchedLabel && !hasAccess(matchedLabel)) {
         // Akses ditolak karena URL diketik manual, lemparkan kembali ke Beranda!
-        navigate('/admin', { replace: true });
+        navigate(AKAR_ADMIN, { replace: true });
         return;
       }
     }
