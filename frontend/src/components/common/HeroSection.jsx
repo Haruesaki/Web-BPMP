@@ -22,6 +22,14 @@ const pseudoRandom = (seed) => {
     return value - Math.floor(value);
 };
 
+const bersihkanTeks = (teks) => {
+    if (!teks) return '';
+    return teks
+        .replace(/[ \t]+/g, ' ')      // Mengubah spasi/tab berurut menjadi 1 spasi saja
+        .replace(/\n{3,}/g, '\n\n')   // Membatasi Enter beruntun maksimal 2 baris baru
+        .trim();
+};
+
 const HeroSection = () => {
     const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
     const [typedText, setTypedText] = useState('');
@@ -40,8 +48,8 @@ const HeroSection = () => {
     const landingWrapperRef = useRef(null); // Ref untuk wrapper utama
     const heroRightCmsRef = useRef(null); // Ref untuk wadah kanan (bingkai + gambar)
     const heroLeftContentRef = useRef(null); // 1. Tambahkan ref baru untuk konten kiri
-    const fullText = heroContent.judul || DEFAULT_HERO.judul;
-    const subtitle = heroContent.subjudul || DEFAULT_HERO.subjudul;
+    const fullText = useMemo(() => bersihkanTeks(heroContent.judul || DEFAULT_HERO.judul), [heroContent.judul]);
+    const subtitle = useMemo(() => bersihkanTeks(heroContent.subjudul || DEFAULT_HERO.subjudul), [heroContent.subjudul]);
     const heroImage = heroContent.url_gambar || null;
     // logo_1/logo_2 berisi URL gambar upload. Hanya render bila benar URL/path
     // (kosong / data lama berupa nama = tidak menampilkan logo apa pun).

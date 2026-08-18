@@ -141,7 +141,13 @@ const EditMenu = ({ isOpen, onClose, menuData, onSuccess }) => {
               placeholder="Masukkan nama..."
               value={menuName}
               onChange={(e) => setMenuName(e.target.value)}
+              maxLength={30}
             />
+            {menuName.length >= 30 && (
+              <p style={{ margin: '6px 0 0', color: '#f0b445', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <i className="fa-solid fa-circle-info"></i> Nama {menuData.induk_id ? 'submenu' : 'menu'} maksimal 30 karakter.
+              </p>
+            )}
           </div>
 
           <div className="form-group" ref={iconDropdownRef}>

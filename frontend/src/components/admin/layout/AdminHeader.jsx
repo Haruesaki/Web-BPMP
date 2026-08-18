@@ -168,6 +168,25 @@ const AdminHeader = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- EFFECT: Pintasan papan ketik Ctrl/Cmd + K untuk membuka & fokus
+  //     pencarian (sesuai label "Ctrl + K" di kotak pencarian). Escape menutup. ---
+  useEffect(() => {
+    const handleShortcut = (event) => {
+      if ((event.ctrlKey || event.metaKey) && (event.key === 'k' || event.key === 'K')) {
+        // Cegah pintasan bawaan peramban (mis. fokus address bar di sebagian
+        // peramban) agar fokus benar-benar jatuh ke kotak pencarian ini.
+        event.preventDefault();
+        setIsSearchActive(true);
+        searchInputRef.current?.focus();
+      } else if (event.key === 'Escape' && isSearchActive) {
+        setIsSearchActive(false);
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, [isSearchActive]);
+
   return (
     <header className="admin-topbar">
       {/* Tombol hamburger — hanya tampil di HP (CSS). Membuka/menutup drawer

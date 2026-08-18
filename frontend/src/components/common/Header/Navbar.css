@@ -114,8 +114,8 @@ body.body-no-scroll {
   width: 45px;
   height: 45px;
   background: rgba(var(--theme-input-rgb, 30, 45, 85), 0.4);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-radius: 50px;
   transition:
     width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
@@ -220,8 +220,8 @@ body.body-no-scroll {
   right: 0;
   margin-top: 10px;
   background: rgba(var(--theme-panel-rgb, 15, 25, 55), 0.98);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);

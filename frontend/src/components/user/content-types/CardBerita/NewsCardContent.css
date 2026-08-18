@@ -313,8 +313,8 @@
   }
   /* Mengurangi radius blur kaca khusus di mobile untuk menghemat GPU low-end */
   .CardNewstext {
-    backdrop-filter: blur(1.2em);
     -webkit-backdrop-filter: blur(1.2em);
+    backdrop-filter: blur(1.2em);
   }
 }
 

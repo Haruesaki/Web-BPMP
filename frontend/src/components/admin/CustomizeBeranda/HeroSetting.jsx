@@ -29,19 +29,23 @@ const HeroSetting = ({
         <span>Landing Page</span>
       </div>
 
-      <label className="cb-field-label">Judul Beranda</label>
-      <input
-        type="text"
-        className="cb-input"
-        placeholder="Masukan Teks"
+      <label className="cb-field-label">
+        Judul Beranda <span style={{ fontSize: '0.75rem', fontWeight: 'normal', opacity: 0.7, marginLeft: '6px' }}>(Tekan Enter untuk baris baru)</span>
+      </label>
+      <textarea
+        className="cb-textarea"
+        placeholder="Masukan Teks Judul (Gunakan Enter jika ingin pindah baris)"
+        rows={2}
         value={judulBeranda}
         onChange={(e) => setJudulBeranda(e.target.value)}
       />
 
-      <label className="cb-field-label">Deskripsi</label>
+      <label className="cb-field-label">
+        Deskripsi <span style={{ fontSize: '0.75rem', fontWeight: 'normal', opacity: 0.7, marginLeft: '6px' }}>(Tekan Enter untuk baris baru)</span>
+      </label>
       <textarea
         className="cb-textarea"
-        placeholder="Masukan Teks"
+        placeholder="Masukan Teks Deskripsi (Gunakan Enter jika ingin pindah baris)"
         rows={3}
         value={deskripsi}
         onChange={(e) => setDeskripsi(e.target.value)}

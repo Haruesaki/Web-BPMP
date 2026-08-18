@@ -94,12 +94,22 @@
     background: var(--bg-card);
     border: 1px solid var(--border-soft);
     border-radius: 12px;
-    overflow: hidden;
+    /* Batasi tinggi agar tidak melampaui layar; sisanya bisa di-scroll saat
+       kursor berada di atas dropdown. */
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain; /* scroll terkurung di dropdown, tak merembet */
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
     z-index: 50;
 }
 
 .admin-layout .search-dropdown-header {
+    /* Tetap terlihat (pinned) saat daftar hasil di-scroll. */
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+    z-index: 1;
     padding: 14px 18px 8px;
     font-size: 11px;
     letter-spacing: 0.06em;
